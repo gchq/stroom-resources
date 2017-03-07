@@ -1,0 +1,99 @@
+version: '2'
+
+services: 
+
+  mysql:
+    image: mysql:5.6
+    container_name: stroom-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_USER=stroomuser
+      - MYSQL_PASSWORD=stroompassword1
+      - MYSQL_DATABASE=stroom
+
+  zookeeper:
+    container_name: zookeeper
+    build: 
+        context: ./zookeeper
+        args: 
+           - http_proxy
+           - https_proxy
+           - no_proxy
+    image: stroom-stats/zookeeper
+    ports:
+      - "2181:2181"
+
+  zkloader:
+    container_name: zkloader
+    build: ./zkloader
+    image: stroom-stats/zkloader
+    depends_on:
+      - zookeeper
+    entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]
+    command: ["--", "./entry_point.sh", "zookeeper:2181"]
+
+  kafka:
+    container_name: kafka
+    build: ./kafka
+    image: stroom-stats/kafka
+    hostname: stroom.kafka
+    entrypoint: ["./wait-for-it.sh", "zookeeper:2181"]
+    command: ["--", "/start.sh"]
+    ports:
+      - 9092:9092
+
+  hbase:
+    container_name: hbase
+    build: ./hbase
+    image: stroom-stats/hbase
+    hostname: stroom.hbase
+    entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]
+    command: ["--", "/entrypoint.sh"]
+    environment:
+      - HBASE_MANAGES_ZK:false
+    ports:
+      #- 8080:8080
+      #- 8085:8085
+      #- 9090:9090
+      #- 9095:9095
+      - 16000:16000
+      - 16010:16010
+      - 16201:16201
+      - 16301:16301
+      - 60000:60000
+      - 60010:60010
+      - 60020:60020
+      - 60030:60030
+
+  stroom:
+    container_name: stroom
+    image: gchq/stroom:latest
+    environment:
+      - STROOM_JDBC_DRIVER_URL=jdbc:mysql://stroom-db/stroom?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_JDBC_DRIVER_USERNAME=stroomuser
+      - STROOM_JDBC_DRIVER_PASSWORD=stroompassword1
+    ports:
+      - 8080:8080
+
+#  stroom-auth:
+#    container_name: stroom-auth
+#    # This docker image builds it from scratch and runs using the Jetty mvn plugin.
+#    # It also doesn't use the alpine java image. It's not very good.
+#    # If we want to use Mitre OpenId Connect we should roll our own.
+#    image: ghchinoy/mitreid-connect
+#    ports:
+#      - 8081:8081
+#    volumes:
+#    - ./stroom-auth/server-config.xml:/opt/mitreidc/openid-connect-server-webapp/src/main/webapp/WEB-INF/server-config.xml
+#      #- stroom-auth/server-config.xml:/opt/mitreidc/openid-connect-server-webapp/src/main/webapp/WEB-INF/server-config.xml
+
+#  stroom-auth:
+#    container_name: stroom-auth
+#    build: ./stroom-auth
+#    ports:
+#      - 8081:8080
+
+volumes:
+  stroom-auth-config:

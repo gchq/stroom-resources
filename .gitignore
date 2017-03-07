@@ -1,0 +1,23 @@
+.gradle
+classes
+build/
+classes/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+
+
+
+# IntelliJ
+# Note: Deciding what IntelliJ files should be ignored is over-complicated and boring.
+# Here we ignore everything and create exceptions for what we want to share.
+/out/
+/.idea/*
+!/.idea/runConfigurations
