@@ -1,5 +1,6 @@
 # docker-compose 
-alias bounce='docker-compose down && docker-compose up --build'
+alias bounceStats='docker-compose -f stats.yml down && docker-compose -f stats.yml up --build'
+alias bounceStroom='docker-compose -f stroom.yml down && docker-compose -f stroom.yml up --build'
 
 # Kafka aliases
 # We need to unset the JMX_PORT because these scripts share a script with the Kafka start script. The shared script uses the JMX_PORT, so no more than one of these scripts can be run from the same address
