@@ -13,7 +13,12 @@ alias kafkabash='docker exec -i -t kafka bash'
 alias zkbash='docker exec -i -t zookeeper bash'
 alias hbasebash='docker exec -i -t hbase bash'
 alias stroomdbbash='docker exec -it stroom-db bash'
-# ZK
-alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
 
+# ZK CLI
+alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
+#
+#HBase CLI
+alias hbasecli='docker exec -i -t hbase hbase/bin/hbase shell'
+
+#MySQL CLI
 alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3306" -u"stroomuser" -p"stroompassword1" stroom'
