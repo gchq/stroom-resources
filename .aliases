@@ -21,4 +21,5 @@ alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
 alias hbasecli='docker exec -i -t hbase hbase/bin/hbase shell'
 
 #MySQL CLI
-alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3306" -u"stroomuser" -p"stroompassword1" stroom'
+alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'
+alias statsdb='docker exec -it stroom-stats-db mysql -h"localhost" -P"3308" -u"stroomuser" -p"stroompassword1" stroom'
