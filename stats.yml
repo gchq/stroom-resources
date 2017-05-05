@@ -25,14 +25,16 @@ services:
     ports:
       - "2181:2181"
 
-  zkloader:
-    container_name: zkloader
-    build: ./zkloader
-    image: stroom-stats/zkloader
-    depends_on:
-      - zookeeper
-    entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]
-    command: ["--", "./entry_point.sh", "zookeeper:2181"]
+#Not currently using zkloader so no point spinning it up
+#leaving it here in case we have a need for it again
+  #zkloader:
+    #container_name: zkloader
+    #build: ./zkloader
+    #image: stroom-stats/zkloader
+    #depends_on:
+      #- zookeeper
+    #entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]
+    #command: ["--", "./entry_point.sh", "zookeeper:2181"]
 
   kafka:
     container_name: kafka
