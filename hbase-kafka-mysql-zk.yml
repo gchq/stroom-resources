@@ -1,0 +1,62 @@
+version: '2'
+
+services: 
+
+  mysql-stroom:
+      extends:
+          file: stroom-dbs.yml
+          service: mysql-stroom
+
+  mysql-stroom:
+      extends:
+          file: stroom-dbs.yml
+          service: mysql-stats
+
+  zookeeper:
+      extends:
+          file: zookeeper.yml
+          service: zookeeper
+
+#Not currently using zkloader so no point spinning it up
+#leaving it here in case we have a need for it again
+  #zkloader:
+    #container_name: zkloader
+    #build: ./zkloader
+    #image: stroom-stats/zkloader
+    #depends_on:
+      #- zookeeper
+    #entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]
+    #command: ["--", "./entry_point.sh", "zookeeper:2181"]
+
+  kafka:
+      extends:
+          file: kafka.yml
+          service: kafka
+
+  hbase:
+      extends:
+          file: hbase.yml
+          service: hbase
+
+#  stroom-auth:
+#    container_name: stroom-auth
+#    # This docker image builds it from scratch and runs using the Jetty mvn plugin.
+#    # It also doesn't use the alpine java image. It's not very good.
+#    # If we want to use Mitre OpenId Connect we should roll our own.
+#    image: ghchinoy/mitreid-connect
+#    ports:
+#      - 8081:8081
+#    volumes:
+#    - ./stroom-auth/server-config.xml:/opt/mitreidc/openid-connect-server-webapp/src/main/webapp/WEB-INF/server-config.xml
+#      #- stroom-auth/server-config.xml:/opt/mitreidc/openid-connect-server-webapp/src/main/webapp/WEB-INF/server-config.xml
+
+#  stroom-auth:
+#    container_name: stroom-auth
+#    build: ./stroom-auth
+#    ports:
+#      - 8081:8080
+
+
+  # TODO: add stroom-stats
+#volumes:
+  #stroom-auth-config:

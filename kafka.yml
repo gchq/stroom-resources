@@ -1,0 +1,27 @@
+version: '2'
+
+services: 
+
+  zookeeper:
+      extends:
+          file: zookeeper.yml
+          service: zookeeper
+
+  kafka:
+    container_name: kafka
+    #build: ./kafka
+    #image: stroom-stats/kafka
+    image: wurstmeister/kafka:0.10.0.1-2
+    hostname: stroom.kafka
+    #entrypoint: ["./wait-for-it.sh", "zookeeper:2181"]
+    #command: ["--", "/start.sh"]
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: stroom.kafka
+      KAFKA_ADVERTISED_PORT: 9092
+      #topicName:partitionCnt:replicaCnt
+      KAFKA_CREATE_TOPICS: "sourceTopic:10:1,destTopic:1:1,badStatisticEvents-Count:10:1,badStatisticEvents-Value:10:1,statisticEvents-Count:10:1,statisticEvents-Value:10:1,statisticRollupPerms-Count-s:10:1,statisticRollupPerms-Count-m:10:1,statisticRollupPerms-Count-h:10:1,statisticRollupPerms-Count-d:10:1,statisticRollupPerms-Value-s:10:1,statisticRollupPerms-Value-m:10:1,statisticRollupPerms-Value-h:10:1,statisticRollupPerms-Value-d:10:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

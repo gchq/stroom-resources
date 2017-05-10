@@ -1,6 +1,7 @@
 # docker-compose 
-alias bounceStats='docker-compose -f stats.yml down && docker-compose -f stats.yml up --build'
-alias bounceStroom='docker-compose -f stroom.yml down && docker-compose -f stroom.yml up --build'
+alias bounceStats='./bounceIt.sh hbase-kafka-mysql-stroom-zk.yml'
+alias bounceStroom='./bounceIt.sh hbase-kafka-mysql-zk.yml'
+alias bounceStroomNoStats='./bounceIt.sh mysql-zk.yml'
 
 # Kafka aliases
 # We need to unset the JMX_PORT because these scripts share a script with the Kafka start script. The shared script uses the JMX_PORT, so no more than one of these scripts can be run from the same address
@@ -22,3 +23,4 @@ alias hbasecli='docker exec -i -t hbase hbase/bin/hbase shell'
 
 #MySQL CLI
 alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3306" -u"stroomuser" -p"stroompassword1" stroom'
+alias stroomstatsdb='docker exec -it stroom-stats-db mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" statistics'
