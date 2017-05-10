@@ -1,4 +1,4 @@
-#Intended for using Stroom in an IDE against just its databases and zookeeper for service discovery
+#Runs stroom build 5.0-beta.21 from dockerhub along with its databases and zookeeper
 version: '2'
 
 services: 
@@ -18,3 +18,10 @@ services:
           file: zookeeper.yml
           service: zookeeper
 
+  stroom:
+      extends:
+          file: stroom.yml
+          service: stroom
+      image: gchq/stroom:5.0-beta.21
+
+#TODO add stroom-stats, kafka and hbase

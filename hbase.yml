@@ -1,3 +1,4 @@
+#Runs an HBase instance with its required zookeeper
 version: '2'
 
 services: 

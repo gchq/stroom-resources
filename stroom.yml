@@ -1,16 +1,18 @@
+#Runs the latest build of stroom from dockerhub 
 version: '2'
 
 services: 
 
-stroom:
-    container_name: stroom
-    image: gchq/stroom:latest
-    environment:
-        - STROOM_JDBC_DRIVER_URL=jdbc:mysql://stroom-db:3306/stroom?useUnicode=yes&characterEncoding=UTF-8
-      - STROOM_JDBC_DRIVER_USERNAME=stroomuser
-      - STROOM_JDBC_DRIVER_PASSWORD=stroompassword1
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://stroom-stats-db:3307/stroom?useUnicode=yes&characterEncoding=UTF-8
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=stroomuser
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=stroompassword1
-    ports:
-        - 8080:8080
+    stroom:
+        container_name: stroom
+        image: gchq/stroom:latest
+        environment:
+            - STROOM_JDBC_DRIVER_URL=jdbc:mysql://stroom-db/stroom?useUnicode=yes&characterEncoding=UTF-8
+            - STROOM_JDBC_DRIVER_USERNAME=stroomuser
+            - STROOM_JDBC_DRIVER_PASSWORD=stroompassword1
+            - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://stroom-stats-db/statistics?useUnicode=yes&characterEncoding=UTF-8
+            - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=stroomuser
+            - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=stroompassword1
+        ports:
+            - 8080:8080
+

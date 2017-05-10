@@ -1,3 +1,5 @@
+#For use when running stroom-stats in the IDE, providing all services it needs.
+#Stroom only runs to build the database tables it needs
 version: '2'
 
 services: 
@@ -7,7 +9,7 @@ services:
           file: stroom-dbs.yml
           service: mysql-stroom
 
-  mysql-stroom:
+  mysql-stats:
       extends:
           file: stroom-dbs.yml
           service: mysql-stats

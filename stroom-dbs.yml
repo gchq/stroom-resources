@@ -1,4 +1,4 @@
-
+#Runs the two MySQL datbases required by stroom (and for the moment stroom-stats)
 version: '2'
 
 services: 

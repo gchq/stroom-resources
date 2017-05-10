@@ -1,3 +1,5 @@
+#Runs a kafka broker with precreated topics requried for stroom-stats/stroom
+#Also runs a zookeeper instance for kafka
 version: '2'
 
 services: 
