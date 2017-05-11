@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Updates the IP addresses in the stroom.conf file based on running docker containers
+#Assume you are using IPs rather than localhost
+
 configFile=~/.stroom/stroom.conf
 
 updateIp() {
