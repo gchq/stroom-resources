@@ -1,0 +1,20 @@
+#Intended for using Stroom in an IDE against just its databases and zookeeper for service discovery
+version: '2'
+
+services: 
+
+  mysql-stroom:
+      extends:
+          file: stroom-dbs.yml
+          service: mysql-stroom
+
+  mysql-stats:
+      extends:
+          file: stroom-dbs.yml
+          service: mysql-stats
+
+  zookeeper:
+      extends:
+          file: zookeeper.yml
+          service: zookeeper
+

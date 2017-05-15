@@ -1,0 +1,26 @@
+#Runs the latest build of stroom from dockerhub along with all the resources it needs
+#TODO add in stroom-stats docker once it is up on dockerhub along with kafka and hbase
+version: '2'
+
+services: 
+
+  mysql-stroom:
+      extends:
+          file: stroom-dbs.yml
+          service: mysql-stroom
+
+  mysql-stats:
+      extends:
+          file: stroom-dbs.yml
+          service: mysql-stats
+
+  zookeeper:
+      extends:
+          file: zookeeper.yml
+          service: zookeeper
+
+  stroom:
+      extends:
+          file: stroom.yml
+          service: stroom
+

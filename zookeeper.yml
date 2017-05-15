@@ -1,0 +1,15 @@
+version: '2'
+
+services: 
+
+  zookeeper:
+    container_name: zookeeper
+    build: 
+        context: ./zookeeper
+        args: 
+           - http_proxy
+           - https_proxy
+           - no_proxy
+    image: stroom-stats/zookeeper
+    ports:
+      - "2181:2181"

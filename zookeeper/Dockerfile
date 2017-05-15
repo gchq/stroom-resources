@@ -4,13 +4,16 @@
 
 FROM openjdk:8-jre-alpine
 
-ARG MIRROR=http://apache.mirrors.pair.com
-ARG VERSION=3.4.6
+#Older versions get relegated to the archive mirror, currently the mirror only goes as far back as 3.4.6
+ARG MIRROR=http://archive.apache.org/dist
+#ARG MIRROR=http://apache.mirrors.pair.com
+ARG VERSION=3.4.5
 
 LABEL name="zookeeper" version=$VERSION
 
 RUN echo "http_proxy: $http_proxy" \
     && echo "https_proxy: $https_proxy" \
+    && echo "Building $VERSION from $MIRROR" \
     && apk add --no-cache wget bash \
     && mkdir /opt \
     && wget -q -O - $MIRROR/zookeeper/zookeeper-$VERSION/zookeeper-$VERSION.tar.gz | tar -xzf - -C /opt \

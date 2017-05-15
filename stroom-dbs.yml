@@ -1,0 +1,27 @@
+#Runs the two MySQL datbases required by stroom (and for the moment stroom-stats)
+version: '2'
+
+services: 
+
+  mysql-stroom:
+    image: mysql:5.6
+    container_name: stroom-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_USER=stroomuser
+      - MYSQL_PASSWORD=stroompassword1
+      - MYSQL_DATABASE=stroom
+
+  mysql-stats:
+    image: mysql:5.6
+    container_name: stroom-stats-db
+    ports:
+        #expose mysql on 3307 to the host so as not to conflict with stroom-db
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_USER=stroomuser
+      - MYSQL_PASSWORD=stroompassword1
+      - MYSQL_DATABASE=statistics
