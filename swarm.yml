@@ -16,6 +16,12 @@ services:
         #
         # The environment variables are transposed into the Dropwizard config file (stroom-stats-service/config.yml).
         # See that file for other settable environment variables.
+        #
+        # TODO: The below would benefit from variable substitution. However, using .env files doesn't seem to work with
+        # swarm. Options:
+        #     1: Ignore until it's supported by Swarm
+        #     2: Replace with tokens and script some sed.
+        #     3: Just do it manually                            <-- This one for now
         environment:
             - STATS_DB_USER=stroomuser
             - STATS_DB_PASSWORD=stroompassword1
