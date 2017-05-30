@@ -1,0 +1,42 @@
+version: '3'
+
+services: 
+
+    stroom-proxy:
+        image: gchq/stroom-proxy:latest
+        ports:
+            - 8085:8085
+
+    stroom-stats:
+        image: gchq/stroom-stats:latest
+        # Stroom-stats in a container is configured by setting environment variables.
+        # What's shown below is the minimum configuration for production. Everything else has sensible defaults.
+        #
+        # Probably the only environment variables that will need setting for development are STATS_DB_URL and STATS_ZK_QUORUM.
+        #
+        # The environment variables are transposed into the Dropwizard config file (stroom-stats-service/config.yml).
+        # See that file for other settable environment variables.
+        environment:
+            - STATS_DB_USER=stroomuser
+            - STATS_DB_PASSWORD=stroompassword1
+            - STATS_DB_URL=jdbc:mysql://192.168.1.7:3307/stroom?useUnicode=yes&characterEncoding=UTF-8
+            - STATS_JWT_SECRET=CHANGE_ME
+            - STATS_ZK_QUORUM=192.168.1.7:2181
+            # The below two values change the default properties - they don't actually set them in ZK!
+            # That is, once these have been set changing the below won't change them. You'd need to do that directly
+             # on zk, using the CLI or some GUI.
+            - STATS_KAFKA_BOOTSTRAP=192.168.1.7:9092
+            - STATS_HBASE_ZK_QUORUM=192.168.1.7:2181
+        ports:
+            - 8086:8086 # app
+            - 8087:8087 # admin
+        # This adds these to /etc/hosts
+        extra_hosts:
+            - "stroom.hbase:192.168.1.7"
+            - "stroom.kafka:192.168.1.7"
+
+
+
+
+
+
