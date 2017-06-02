@@ -5,7 +5,7 @@ services:
   zookeeper:
     container_name: zookeeper
     build: 
-        context: ./zookeeper
+        context: ../../dev/images/zookeeper
         args: 
            - http_proxy
            - https_proxy

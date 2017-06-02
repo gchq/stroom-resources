@@ -23,7 +23,7 @@ services:
 #leaving it here in case we have a need for it again
   #zkloader:
     #container_name: zkloader
-    #build: ./zkloader
+    #build: ../images/zkloader
     #image: stroom-stats/zkloader
     #depends_on:
       #- zookeeper
