@@ -25,14 +25,14 @@ services:
         environment:
             - STATS_DB_USER=stroomuser
             - STATS_DB_PASSWORD=stroompassword1
-            - STATS_DB_URL=jdbc:mysql://192.168.1.7:3307/stroom?useUnicode=yes&characterEncoding=UTF-8
+            - STATS_DB_URL=jdbc:mysql://<STATS_DB_IP>:3307/stroom?useUnicode=yes&characterEncoding=UTF-8
             - STATS_JWT_SECRET=CHANGE_ME
-            - STATS_ZK_QUORUM=192.168.1.7:2181
+            - STATS_ZK_QUORUM=<STATS_ZK_IP>:2181
             # The below two values change the default properties - they don't actually set them in ZK!
             # That is, once these have been set changing the below won't change them. You'd need to do that directly
              # on zk, using the CLI or some GUI.
-            - STATS_KAFKA_BOOTSTRAP=192.168.1.7:9092
-            - STATS_HBASE_ZK_QUORUM=192.168.1.7:2181
+            - STATS_KAFKA_BOOTSTRAP=<KAFKA_IP>:9092
+            - STATS_HBASE_ZK_QUORUM=<HBASE_ZK_IP>:2181
         ports:
             - 8086:8086 # app
             - 8087:8087 # admin

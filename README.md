@@ -1,11 +1,21 @@
 # Stroom resources
 
-## Swarm
-Some Stroom applications can be run using Docker Swarm, fronted with an NGINX reverse proxy. The `./swarm` directory contains this setup. If you want to run these applications using Swarm you must update the IP addresses in `./swarm/swarm.yml` and in `./swarm/nginx/nginx.conf`. 
+## Deploy
+`stroom-stats` and `stroom-proxy` can be run using Docker Swarm, fronted with an NGINX reverse proxy. The `./deploy` directory contains this setup. 
 
-See `./swarm/nginx/nginx.confg` for routes, e.g. `http://localhost/stats` is mapped to `stroom-stats`. 
+### Running in dev
+1. Start Zookeeper, Kafka, HBase, and Stroom databases by running the `runDevResources.sh` script in `./bin`. 
+2. Run the deploy script `runDeploy.sh` in `./bin`. 
 
-## Dev
+### Configuring the deployment
+The `runDeploy.sh` script configures the deployment. 
+
+The dev resources all publish their ports to the local machine. NGINX and the Swarm of Stroom applications need this IP address. `localhost` won't do because they run in Docker containers and `localhost` means the container itself. This IP address is injected as part of the `runDeploy.sh` script in `./bin`. This is needed in `nginx/nginx.conf` and in `swarm.yml`.
+
+### Extending
+See `./deploy/templates/nginx.confg` for routes, e.g. `http://localhost/stats` is mapped to `stroom-stats`. 
+
+## Dev-resources
 Runs Stroom's dependencies in Docker containers. Suitable for development but not production.
 
 To use the docker-compose.yml you need to add the some entries to `/etc/hosts` on the host machine:
