@@ -1,5 +1,5 @@
 # docker-compose 
-alias bounceAll='./bounceIt.sh hbase-kafka-mysql-zk.yml'
+alias bounceAll='./bounceIt.sh compose/hbase-kafka-mysql-zk.yml'
 
 # Kafka aliases
 # We need to unset the JMX_PORT because these scripts share a script with the Kafka start script. The shared script uses the JMX_PORT, so no more than one of these scripts can be run from the same address
