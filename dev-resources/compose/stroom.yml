@@ -5,7 +5,7 @@ services:
 
     stroom:
         container_name: stroom
-        image: gchq/stroom:latest
+        image: gchq/stroom:v6.0.0-170611-DAILY
         environment:
             - STROOM_JDBC_DRIVER_URL=jdbc:mysql://stroom-db/stroom?useUnicode=yes&characterEncoding=UTF-8
             - STROOM_JDBC_DRIVER_USERNAME=stroomuser

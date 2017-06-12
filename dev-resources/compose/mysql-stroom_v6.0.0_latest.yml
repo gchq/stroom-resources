@@ -23,4 +23,5 @@ services:
       extends:
           file: stroom.yml
           service: stroom
+      image: gchq/stroom:v6.0.0-SNAPSHOT
 
