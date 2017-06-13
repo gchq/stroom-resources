@@ -7,6 +7,7 @@ services:
         container_name: stroom
         image: gchq/stroom:v6.0.0-170611-DAILY
         environment:
+            - STROOM_JPA_DIALECT=org.hibernate.dialect.MySQLInnoDBDialect
             - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
             - STROOM_JDBC_DRIVER_URL=jdbc:mysql://stroom-db/stroom?useUnicode=yes&characterEncoding=UTF-8
             - STROOM_JDBC_DRIVER_USERNAME=stroomuser
