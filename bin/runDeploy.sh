@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+docker stack rm ss
 
 # Creates config files from template - adding in the correct IP address
 
@@ -14,7 +14,8 @@ sed -e 's/<STATS_DB_IP>/'$ip'/g' $deployRoot/template/swarm.yml > $deployRoot/sw
 sed -i 's/<STATS_ZK_IP>/'$ip'/g' $deployRoot/swarm.yml
 sed -i 's/<KAFKA_IP>/'$ip'/g' $deployRoot/swarm.yml
 sed -i 's/<HBASE_ZK_IP>/'$ip'/g' $deployRoot/swarm.yml
+sed -i 's/<USER_DB_IP>/'$ip'/g' $deployRoot/swarm.yml
 
 
-docker-compose -f $deployRoot/nginx.yml up -d
+docker-compose -f $deployRoot/nginx.yml up -d --build
 docker stack deploy --compose-file $deployRoot/swarm.yml ss

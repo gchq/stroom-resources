@@ -17,11 +17,7 @@ services:
         # The environment variables are transposed into the Dropwizard config file (stroom-stats-service/config.yml).
         # See that file for other settable environment variables.
         #
-        # TODO: The below would benefit from variable substitution. However, using .env files doesn't seem to work with
-        # swarm. Options:
-        #     1: Ignore until it's supported by Swarm
-        #     2: Replace with tokens and script some sed.
-        #     3: Just do it manually                            <-- This one for now
+        # The ../../bin/runDeploy.sh script replaces the <TOKENS> with actual values.
         environment:
             - STATS_DB_USER=stroomuser
             - STATS_DB_PASSWORD=stroompassword1
@@ -33,14 +29,27 @@ services:
              # on zk, using the CLI or some GUI.
             - STATS_KAFKA_BOOTSTRAP=<KAFKA_IP>:9092
             - STATS_HBASE_ZK_QUORUM=<HBASE_ZK_IP>:2181
+            - ADMIN_CONTEXT_PATH=/stats/admin
+
         ports:
             - 8086:8086 # app
             - 8087:8087 # admin
         # This adds these to /etc/hosts
         extra_hosts:
-            - "stroom.hbase:192.168.1.7"
-            - "stroom.kafka:192.168.1.7"
+            - "stroom.hbase:<HBASE_ZK_IP>"
+            - "stroom.kafka:<KAFKA_IP>"
 
+    stroom-auth-service:
+      image: gchq/stroom-auth-service:latest
+      environment:
+        - DB_USER=stroomuser
+        - DB_PASSWORD=stroompassword1
+        - DB_URL=jdbc:mysql://<USER_DB_IP>:3307/stroom?useUnicode=yes&characterEncoding=UTF-8
+        - JWS_SECRET=CHANGE_ME
+        - ADMIN_CONTEXT_PATH=/auth/admin
+      ports:
+        - 8096:8096
+        - 8097:8097
 
 
 
