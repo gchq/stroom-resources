@@ -13,7 +13,7 @@ services:
     container_name: kafka
     #build: ./kafka
     #image: stroom-stats/kafka
-    image: wurstmeister/kafka:0.10.1.1
+    image: wurstmeister/kafka:0.10.0.1-2
     hostname: stroom.kafka
     #entrypoint: ["./wait-for-it.sh", "zookeeper:2181"]
     #command: ["--", "/start.sh"]
