@@ -8,6 +8,7 @@ deployRoot="../deploy"
 
 echo "Creating nginx/nginx.conf using $ip"
 sed -e 's/<SWARM_IP>/'$ip'/g' $deployRoot/template/nginx.conf > $deployRoot/nginx/nginx.conf
+sed -i 's/<STROOM_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
 
 echo "Creating swarm.yml using $ip"
 sed -e 's/<STATS_DB_IP>/'$ip'/g' $deployRoot/template/swarm.yml > $deployRoot/swarm.yml
