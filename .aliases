@@ -11,6 +11,7 @@ alias consume='docker exec -i -t kafka bash -c "unset JMX_PORT; bin/kafka-consol
 alias kafkabash='docker exec -i -t kafka bash'
 alias zkbash='docker exec -i -t zookeeper bash'
 alias hbasebash='docker exec -i -t hbase bash'
+alias stroombash='docker exec -it --user stroom stroom bash'
 alias stroomdbbash='docker exec -it stroom-db bash'
 
 # ZK CLI
