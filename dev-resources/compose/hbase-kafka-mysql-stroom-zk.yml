@@ -33,3 +33,8 @@ services:
       extends:
           file: stroom.yml
           service: stroom
+      depends_on:
+        - "mysql-stroom"
+        - "mysql-stats"
+        - "zookeeper"
+        - "kafka"
