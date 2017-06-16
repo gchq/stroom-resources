@@ -5,7 +5,7 @@ services:
 
     stroom:
         container_name: stroom
-        image: gchq/stroom:v6.0.0-170611-DAILY
+        image: gchq/stroom:v6.0.0-SNAPSHOT
         environment:
             - STROOM_NODE=node1a
             - STROOM_RACK=rack

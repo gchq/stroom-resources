@@ -1,0 +1,54 @@
+#Runs the whole stroom estate
+version: '2'
+
+services: 
+
+  mysql-stroom:
+      extends:
+          file: stroom-dbs.yml
+          service: mysql-stroom
+
+  mysql-stats:
+      extends:
+          file: stroom-dbs.yml
+          service: mysql-stats
+
+  zookeeper:
+      extends:
+          file: zookeeper.yml
+          service: zookeeper
+
+  kafka:
+      extends:
+          file: kafka.yml
+          service: kafka
+
+  hbase:
+      extends:
+          file: hbase.yml
+          service: hbase
+
+  stroom-stats:
+      extends:
+          file: stroom-stats.yml
+          service: stroom-stats
+      depends_on:
+        - "mysql-stroom"
+        - "zookeeper"
+        - "kafka"
+        - "hbase"
+
+  stroom:
+      extends:
+          file: stroom-proxy.yml
+          service: stroom-proxy
+
+  stroom:
+      extends:
+          file: stroom.yml
+          service: stroom
+      depends_on:
+        - "mysql-stroom"
+        - "mysql-stats"
+        - "zookeeper"
+        - "kafka"

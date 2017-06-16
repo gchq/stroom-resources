@@ -1,0 +1,11 @@
+#Runs the latest build of stroom from dockerhub 
+version: '2'
+
+services: 
+
+    stroom-proxy:
+        container_name: stroom-proxy
+        image: gchq/stroom-proxy:5.1-beta.5
+        ports:
+            - 8085:8085
+
