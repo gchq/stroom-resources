@@ -7,6 +7,7 @@ alias createStatisticsTopic='docker exec -i -t kafka bash -c "unset JMX_PORT; bi
 alias kproduce='docker exec -i -t kafka bash -c "unset JMX_PORT; bin/kafka-console-producer.sh --broker-list localhost:9092 --topic statistics"'
 #consume from all topics
 alias kconsume='echo "Consuming from all topics..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --blacklist noSuchTopic --from-beginning --zookeeper zookeeper:2181"'
+alias kconsumeevents='echo "Consuming from topics statisticEvents-Count & statisticEvents-Value ..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --zookeeper zookeeper:2181 --whitelist statisticEvents-Count,statisticEvents-Value"'
 alias ktopics='docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181"'
 
 # For running bash in the containers
