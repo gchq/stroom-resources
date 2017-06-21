@@ -38,10 +38,10 @@ services:
         - "kafka"
         - "hbase"
 
-  stroom:
-      extends:
-          file: stroom-proxy.yml
-          service: stroom-proxy
+  #stroom-proxy:
+      #extends:
+          #file: stroom-proxy.yml
+          #service: stroom-proxy
 
   stroom:
       extends:
