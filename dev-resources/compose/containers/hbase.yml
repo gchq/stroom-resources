@@ -3,14 +3,9 @@ version: '2'
 
 services: 
 
-  zookeeper:
-      extends:
-          file: zookeeper.yml
-          service: zookeeper
-
   hbase:
     container_name: hbase
-    build: ../../dev-resources/images/hbase
+    build: ../../../dev-resources/images/hbase
     image: stroom-stats/hbase
     hostname: stroom.hbase
     entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]

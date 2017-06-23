@@ -3,52 +3,64 @@ version: '2'
 
 services: 
 
-  mysql-stroom:
-      extends:
-          file: stroom-dbs.yml
-          service: mysql-stroom
-
-  mysql-stats:
-      extends:
-          file: stroom-dbs.yml
-          service: mysql-stats
-
   zookeeper:
       extends:
-          file: zookeeper.yml
+          file: ./containers/zookeeper.yml
           service: zookeeper
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
+  stroom-auth-service-db:
+      extends:
+          file: ./containers/stroomAuthDb.yml
+          service: stroom-auth-service-db
 
   kafka:
       extends:
-          file: kafka.yml
+          file: ./containers/kafka.yml
           service: kafka
+      environment:
+          #override the edvertised hostname as stroom is inside docker
+          KAFKA_ADVERTISED_HOST_NAME: kafka 
+      depends_on:
+        - "zookeeper"
 
   hbase:
       extends:
-          file: hbase.yml
+          file: ./containers/hbase.yml
           service: hbase
+      #override the hostname as stroom-stats will access it from inside the docker network
+      hostname: hbase
 
   stroom-stats:
       extends:
-          file: stroom-stats.yml
+          file: ./containers/stroomStats.yml
           service: stroom-stats
       depends_on:
-        - "mysql-stroom"
+        - "stroom-db"
         - "zookeeper"
         - "kafka"
         - "hbase"
 
   #stroom-proxy:
       #extends:
-          #file: stroom-proxy.yml
+          #file: ./containers/stroomProxy.yml
           #service: stroom-proxy
 
   stroom:
       extends:
-          file: stroom.yml
+          file: ./containers/stroom.yml
           service: stroom
       depends_on:
-        - "mysql-stroom"
-        - "mysql-stats"
+        - "stroom-db"
+        - "stroom-stats-db"
         - "zookeeper"
         - "kafka"
