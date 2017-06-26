@@ -1,19 +1,27 @@
+#config file for tmuxinator to open a tmux pane for each stroom-stats topic consumer
+#
 name: stroom
 root: ~/git_work/stroom/
 pre_window: source ~/git_work/stroom-resources/.aliases
 
 windows:
   - shell:
-      layout: main-vertical
+      layout: tiled
       panes:
-        - 
-        - cd ~/git_work/stroom-resources && bounceStroom
-        - cd ~/git_work/stroom-resources
-  - VI: vim build.gradle ./*/build.gradle
-  - MySql: 
-      layout: even-vertical 
-      panes:
-        - sleep 20 && stroomdb
-        - sleep 20 && stroomdbbash
-  - Chrome: /usr/bin/google-chrome-stable http://localhost:8888/ &
-
+        - kconsume statisticEvents-Count
+        - kconsume statisticEvents-Value
+        - kconsume badStatisticEvents-Count
+        - kconsume badStatisticEvents-Value
+        - kconsume statisticRollupPerms-Count-s
+        - kconsume statisticRollupPerms-Count-m
+        - kconsume statisticRollupPerms-Count-d
+        - kconsume statisticRollupPerms-Count-h
+        - kconsume statisticRollupPerms-Value-s
+        - kconsume statisticRollupPerms-Value-m
+        - kconsume statisticRollupPerms-Value-d
+        - kconsume statisticRollupPerms-Value-h
+        # the following 4  shells are empty to give us a row with xml msgs, a row of count perms and a row of value perms
+        -
+        -
+        -
+        -
