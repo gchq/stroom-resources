@@ -7,7 +7,8 @@ services:
     container_name: hbase
     build: ../../../dev-resources/images/hbase
     image: stroom-stats/hbase
-    hostname: stroom.hbase
+    #hostname: stroom.hbase
+    hostname: hbase
     entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]
     command: ["--", "/entrypoint.sh"]
     environment:
