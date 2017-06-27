@@ -9,17 +9,17 @@ windows:
       layout: tiled
       panes:
         - kconsume statisticEvents-Count
-        - kconsume statisticEvents-Value
         - kconsume badStatisticEvents-Count
+        - kconsume statisticEvents-Value
         - kconsume badStatisticEvents-Value
         - kconsume statisticRollupPerms-Count-s
         - kconsume statisticRollupPerms-Count-m
-        - kconsume statisticRollupPerms-Count-d
         - kconsume statisticRollupPerms-Count-h
+        - kconsume statisticRollupPerms-Count-d
         - kconsume statisticRollupPerms-Value-s
         - kconsume statisticRollupPerms-Value-m
-        - kconsume statisticRollupPerms-Value-d
         - kconsume statisticRollupPerms-Value-h
+        - kconsume statisticRollupPerms-Value-d
         # the following 4  shells are empty to give us a row with xml msgs, a row of count perms and a row of value perms
         -
         -
