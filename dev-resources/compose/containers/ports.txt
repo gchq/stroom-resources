@@ -1,7 +1,7 @@
  2181 - zookeeper
  3307 - stroom-db
  3308 - stroom-stats-db
- 3309 - stroom-auth-service-db
+ 3309 - stroom-auth-db
  8080 - stroom-stats (app & admin)
  8086 - stroom-stats (app)
  8087 - stroom-stats (admin)

@@ -31,8 +31,8 @@ services:
       - 8086:8086
       - 8087:8087
     extra_hosts:
-      - stroom.hbase:<HBASE_ZK_IP>
-      - stroom.kafka:<KAFKA_IP>
+      - hbase:<HBASE_ZK_IP>
+      - kafka:<KAFKA_IP>
 
   stroom-auth-service:
     image: gchq/stroom-auth-service:latest

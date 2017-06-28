@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+
+  stroom-auth-service:
+    container_name: stroom-auth-service
+    image: gchq/stroom-auth-service:latest
+    environment:
+      - DB_USER=stroomuser
+      - DB_PASSWORD=stroompassword1
+      - DB_URL=jdbc:mariadb://stroom-auth-db/auth
+      - JWS_SECRET=CHANGE_ME
+      - ADMIN_CONTEXT_PATH=/auth/admin
+    ports:
+      - 8099:8099
+      - 8100:8100

@@ -18,10 +18,20 @@ services:
           file: ./containers/stroomStatsDb.yml
           service: stroom-stats-db
 
-  stroom-auth-service-db:
+  stroom-auth-db:
       extends:
           file: ./containers/stroomAuthDb.yml
-          service: stroom-auth-service-db
+          service: stroom-auth-db
+
+  stroom-auth-service:
+      extends:
+          file: ./containers/stroomAuthService.yml
+          service: stroom-auth-service
+
+  stroom-auth-ui:
+      extends:
+          file: ./containers/stroomAuthUi.yml
+          service: stroom-auth-ui
 
   kafka:
       extends:

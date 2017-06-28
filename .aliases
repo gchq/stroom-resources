@@ -32,7 +32,7 @@ alias hbasecli='docker exec -i -t hbase hbase/bin/hbase shell'
 #MySQL CLI
 alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'
 alias stroomstatsdb='docker exec -it stroom-stats-db mysql -h"localhost" -P"3308" -u"stroomuser" -p"stroompassword1" statistics'
-alias stroomauthdb='docker exec -it stroom-auth-service-db mysql -h"localhost" -P"3309" -u"stroomuser" -p"stroompassword1" auth'
+alias stroomauthdb='docker exec -it stroom-auth-db mysql -h"localhost" -P"3309" -u"stroomuser" -p"stroompassword1" auth'
 
 # docker status
 alias ds='echo -e "\e[96mSummary\e[0m" && docker system df && echo && echo -e "\e[96mImages\e[0m" && docker images && echo "" && echo -e "\e[96mAll containers\e[0m" && docker ps -a -s && echo "" && echo -e "\e[96mRunning containers\e[0m" && docker ps && echo ""'
