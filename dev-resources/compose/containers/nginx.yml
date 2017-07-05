@@ -1,0 +1,7 @@
+version: '2'
+services:
+    nginx:
+        container_name: nginx
+        build: ../../../deploy/nginx
+        ports:
+            - "80:80"
