@@ -33,6 +33,11 @@ services:
           file: ./containers/stroomAuthUi.yml
           service: stroom-auth-ui
 
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
+
   kafka:
       extends:
           file: ./containers/kafka.yml
