@@ -10,7 +10,7 @@ services:
       - DB_PASSWORD=stroompassword1
       - DB_URL=jdbc:mariadb://stroom-auth-db/auth
       - JWS_SECRET=CHANGE_ME
-      - ADMIN_CONTEXT_PATH=/auth/admin
+      - ADMIN_CONTEXT_PATH=/authentication/admin
     ports:
       - 8099:8099
       - 8100:8100
