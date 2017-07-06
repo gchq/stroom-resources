@@ -1,10 +1,5 @@
 #!/bin/bash
 
-#TODO use 'git rev-parse --is-inside-work-tree' to check if inside a git repo
-#TODO add stroom-resources to the list of repos to pull down.  If inside stroom-resources repo
-#drop down two levels and run else run where you are, then the script can be run from 
-#curlign down from github.
-
 GIT_PREFIX="https://github.com/"
 REPO_USER="gchq"
 GIT_BRANCH_STATUS_SCRIPT="stroom-resources/bin/git-branch-status.sh"
@@ -94,7 +89,7 @@ elif [[ $isInsideGitRepo ]] && [[ ! $repoName = "stroom-resources" ]]; then
 fi
 
 while true; do
-    echo "This will clone or pull all Stroom related repos from "
+    echo "This will clone or check all Stroom related repos from "
     echo "  ${GIT_PREFIX}${REPO_USER}" 
     echo "into $(pwd)"
     read -p "Are you sure you want to do this? [y/n]" yn
