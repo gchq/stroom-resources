@@ -31,6 +31,6 @@ To use the docker-compose.yml you need to add the some entries to `/etc/hosts` o
 
 ```bash
 sudo bash -c 'echo "# For stroom resources" >> /etc/hosts'
-sudo bash -c 'echo "127.0.0.1 stroom.kafka" >> /etc/hosts'
-sudo bash -c 'echo "127.0.0.1 stroom.hbase" >> /etc/hosts'
+sudo bash -c 'echo "127.0.0.1 kafka" >> /etc/hosts'
+sudo bash -c 'echo "127.0.0.1 hbase" >> /etc/hosts'
 ```

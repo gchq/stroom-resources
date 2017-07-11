@@ -1,3 +1,4 @@
 #!/bin/sh
 
-./bounceIt.sh ../dev-resources/compose/hbase-kafka-mysql-zk.yml
+./bounceIt.sh compose/hbase-kafka-stroomDb-stroomStatsDb-zk.yml
+

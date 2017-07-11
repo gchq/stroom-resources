@@ -7,5 +7,5 @@ services:
         container_name: stroom-proxy
         image: gchq/stroom-proxy:5.1-beta.5
         ports:
-            - 8085:8085
+            - 8090:8085
 

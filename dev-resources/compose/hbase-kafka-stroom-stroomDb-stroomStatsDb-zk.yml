@@ -1,4 +1,6 @@
-#Runs the whole stroom estate
+#For use when running stroom-stats in the IDE, providing all services it needs.
+#'stroom' only runs to build the database tables it needs
+#'stroom-stats-db' only needed so 'stroom' doesn't complain about its absence
 version: '2'
 
 services: 
@@ -18,18 +20,10 @@ services:
           file: ./containers/stroomStatsDb.yml
           service: stroom-stats-db
 
-  stroom-auth-service-db:
-      extends:
-          file: ./containers/stroomAuthDb.yml
-          service: stroom-auth-service-db
-
   kafka:
       extends:
           file: ./containers/kafka.yml
           service: kafka
-      #environment:
-          #override the edvertised hostname as stroom is inside docker
-          #KAFKA_ADVERTISED_HOST_NAME: kafka 
       depends_on:
         - "zookeeper"
 
@@ -37,25 +31,8 @@ services:
       extends:
           file: ./containers/hbase.yml
           service: hbase
-      #override the hostname as stroom-stats will access it from inside the docker network
-      #hostname: hbase
       depends_on:
         - "zookeeper"
-
-  stroom-stats:
-      extends:
-          file: ./containers/stroomStats.yml
-          service: stroom-stats
-      depends_on:
-        - "stroom-db"
-        - "zookeeper"
-        - "kafka"
-        - "hbase"
-
-  #stroom-proxy:
-      #extends:
-          #file: ./containers/stroomProxy.yml
-          #service: stroom-proxy
 
   stroom:
       extends:
@@ -66,3 +43,5 @@ services:
         - "stroom-stats-db"
         - "zookeeper"
         - "kafka"
+
+

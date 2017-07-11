@@ -1,0 +1,14 @@
+#Intended for running stroom v5.x against its databases
+version: '2'
+
+services: 
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db

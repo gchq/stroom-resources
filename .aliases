@@ -12,8 +12,8 @@ alias createStatisticsTopic='docker exec -i -t kafka bash -c "unset JMX_PORT; bi
 alias kproduce='docker exec -i -t kafka bash -c "unset JMX_PORT; bin/kafka-console-producer.sh --broker-list localhost:9092 --topic statistics"'
 alias kconsume='kConsumeTopic'
 #consume from all topics
-alias kconsumeAll='echo "Consuming from all topics..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --blacklist noSuchTopic --from-beginning --zookeeper zookeeper:2181"'
-alias kconsumeEvents='echo "Consuming from topics statisticEvents-Count & statisticEvents-Value ..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --zookeeper zookeeper:2181 --whitelist statisticEvents-Count,statisticEvents-Value"'
+alias kconsumeAll='echo "Consuming from all topics..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --blacklist noSuchTopic --from-beginning --zookeeper zookeeper:2181"'
+alias kconsumeEvents='echo "Consuming from topics statisticEvents-Count & statisticEvents-Value ..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --zookeeper zookeeper:2181 --whitelist statisticEvents-Count,statisticEvents-Value"'
 alias ktopics='docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181"'
 
 # For running bash in the containers
@@ -28,6 +28,14 @@ alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
 #
 #HBase CLI
 alias hbasecli='docker exec -i -t hbase hbase/bin/hbase shell'
+
+hbaseTableCount() {
+    tableName=$1
+    echo "Getting count of table $tableName"
+    cmd="count '"${tableName}"'"
+    docker exec -i -t hbase bash -c "echo \"${cmd}\" | hbase/bin/hbase shell"
+}
+alias hbasecount='hbaseTableCount'
 
 #MySQL CLI
 alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'

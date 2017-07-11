@@ -1,0 +1,37 @@
+#For use when running Stroom in an IDE with all services/resources it needs e.g. service discovery,
+#kafka, etc.
+version: '2'
+
+services: 
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      depends_on:
+        - "zookeeper"
+
+  hbase:
+      extends:
+          file: ./containers/hbase.yml
+          service: hbase
+      #override the hostname as stroom-stats will access it from inside the docker network
+      #hostname: hbase
+      depends_on:
+        - "zookeeper"
+

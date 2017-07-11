@@ -1,0 +1,27 @@
+#Runs the latest stroom 5.0.x build from dockerhub along with its databases 
+version: '2'
+
+services: 
+
+  stroom:
+      extends:
+          file: ./containers/stroom.yml
+          service: stroom
+      #TODO we need a tag in docker to represent the latest release of 5.0.x
+      image: gchq/stroom:5.0-beta.34
+      depends_on:
+        - "stroom-db"
+        - "stroom-stats-db"
+        - "zookeeper"
+        - "kafka"
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+

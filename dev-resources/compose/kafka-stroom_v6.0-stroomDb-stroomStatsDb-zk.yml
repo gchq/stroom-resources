@@ -1,0 +1,42 @@
+#Runs the latest build of stroom v6.0.x from dockerhub along with all the resources it needs
+version: '2'
+
+services: 
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      #environment:
+          #override the edvertised hostname as stroom is inside docker
+          #KAFKA_ADVERTISED_HOST_NAME: kafka 
+      depends_on:
+        - "zookeeper"
+
+  stroom:
+      extends:
+          file: ./containers/stroom.yml
+          service: stroom
+      #TODO change this to a tag that reflects the latest v6.0.x build
+      image: gchq/stroom:6.0.0-SNAPSHOT
+      depends_on:
+        - "stroom-db"
+        - "stroom-stats-db"
+        - "zookeeper"
+        - "kafka"
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+

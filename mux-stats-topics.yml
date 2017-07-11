@@ -1,0 +1,29 @@
+#config file for tmuxinator to open a tmux pane for each stroom-stats topic consumer
+#
+name: stroom
+root: ~/git_work/stroom-resources/
+pre_window: source ~/git_work/stroom-resources/.aliases
+
+windows:
+  - shell:
+      layout: tiled
+      panes:
+        - kconsume statisticEvents-Count #count stat events input
+        - kconsume badStatisticEvents-Count #invalid count events
+        - kconsume statisticEvents-Value #value stat events input
+        - kconsume badStatisticEvents-Value #invalid value events
+          #one perm topic for each granularity of count events
+        - kconsume statisticRollupPerms-Count-s
+        - kconsume statisticRollupPerms-Count-m
+        - kconsume statisticRollupPerms-Count-h
+        - kconsume statisticRollupPerms-Count-d
+          #one perm topic for each granularity of count events
+        - kconsume statisticRollupPerms-Value-s
+        - kconsume statisticRollupPerms-Value-m
+        - kconsume statisticRollupPerms-Value-h
+        - kconsume statisticRollupPerms-Value-d
+          #get table counts for each granularity
+        - watch -n20 "bash -c 'source .aliases; hbaseTableCount ses'"
+        - watch -n20 "bash -c 'source .aliases; hbaseTableCount mes'"
+        - watch -n20 "bash -c 'source .aliases; hbaseTableCount hes'"
+        - watch -n20 "bash -c 'source .aliases; hbaseTableCount des'"

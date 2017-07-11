@@ -1,0 +1,14 @@
+version: '2'
+
+services: 
+
+  stroom-db:
+    image: mysql:5.6
+    container_name: stroom-db
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_USER=stroomuser
+      - MYSQL_PASSWORD=stroompassword1
+      - MYSQL_DATABASE=stroom
