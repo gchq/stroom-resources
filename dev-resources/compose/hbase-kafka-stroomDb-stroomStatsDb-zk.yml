@@ -23,7 +23,6 @@ services:
       extends:
           file: ./containers/kafka.yml
           service: kafka
-      environment:
       depends_on:
         - "zookeeper"
 

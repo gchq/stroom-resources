@@ -29,6 +29,14 @@ alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
 #HBase CLI
 alias hbasecli='docker exec -i -t hbase hbase/bin/hbase shell'
 
+hbaseTableCount() {
+    tableName=$1
+    echo "Getting count of table $tableName"
+    cmd="count '"${tableName}"'"
+    docker exec -i -t hbase bash -c "echo \"${cmd}\" | hbase/bin/hbase shell"
+}
+alias hbasecount='hbaseTableCount'
+
 #MySQL CLI
 alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'
 alias stroomstatsdb='docker exec -it stroom-stats-db mysql -h"localhost" -P"3308" -u"stroomuser" -p"stroompassword1" statistics'

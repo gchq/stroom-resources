@@ -1,5 +1,14 @@
 # Stroom resources
 
+## Setting up a development environment
+If you want to clone all the git repositories that make up the Stroom ecosystem then run the following command from the directory where you want all the repositories cloned in to:
+
+`bash <(curl https://raw.githubusercontent.com/gchq/stroom-resources/master/bin/cloneOrCheckStroomRepos.sh)`
+
+Once this has been run you can run that script again to check the status of all of the branches in those repositories.
+
+`stroom-resources/bin/cloneOrCheckStroomRepos.sh`
+
 ## Deploy
 `stroom-stats` and `stroom-proxy` can be run using Docker Swarm, fronted with an NGINX reverse proxy. The `./deploy` directory contains this setup. 
 
@@ -22,6 +31,6 @@ To use the docker-compose.yml you need to add the some entries to `/etc/hosts` o
 
 ```bash
 sudo bash -c 'echo "# For stroom resources" >> /etc/hosts'
-sudo bash -c 'echo "127.0.0.1 stroom.kafka" >> /etc/hosts'
-sudo bash -c 'echo "127.0.0.1 stroom.hbase" >> /etc/hosts'
+sudo bash -c 'echo "127.0.0.1 kafka" >> /etc/hosts'
+sudo bash -c 'echo "127.0.0.1 hbase" >> /etc/hosts'
 ```
