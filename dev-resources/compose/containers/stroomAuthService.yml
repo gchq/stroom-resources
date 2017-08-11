@@ -11,7 +11,7 @@ services:
       - DB_URL=jdbc:mariadb://stroom-auth-db/auth
       - JWS_SECRET=CHANGE_ME
       - ADMIN_CONTEXT_PATH=/authentication/admin
-      - AUTH_UI=http:/localhost/auth
+      - AUTH_UI=http://localhost/auth/login
     ports:
       - 8099:8099
       - 8100:8100
