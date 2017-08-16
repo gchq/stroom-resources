@@ -11,6 +11,11 @@ fi
 ymlFile=$1
 projectName=`basename $ymlFile | sed 's/\.yml$//'`
 
+if [ $(grep -l "SNAPSHOT" compose/kafka-stroom_dev-stroomDb-stroomStatsDb-zk.yml | wc -l) -eq 1 ]; then
+    echo "Checking for latest stroom SNAPSHOT image"
+    docker-compose -f $ymlFile pull stroom
+fi
+
 echo "Bouncing project $projectName with using $ymlFile"
 
 #pass any additional arguments after the yml filename direct to docker-compose
