@@ -19,6 +19,9 @@ services:
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=stroompassword1
             - STROOM_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
             - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=zookeeper:2181
+            - STROOM_AUTH_JWT_SECRET=CHANGE_ME
+            - STROOM_AUTH_JWT_ISSUER=stroom
+            - STROOM_DEVELOPMENT_MODE=true
         ports:
             - 8080:8080
 

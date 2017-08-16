@@ -18,6 +18,8 @@ services:
           file: ./containers/stroom.yml
           service: stroom
       image: gchq/stroom:master-SNAPSHOT
+      environment:
+        - STROOM_DEVELOPMENT_MODE=false
       depends_on:
         - "stroom-db"
         - "stroom-stats-db"
