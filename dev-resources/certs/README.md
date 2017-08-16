@@ -3,7 +3,12 @@ These certs may be used to test SSL termination in NGINX.
 
 ## Using HTTPie to test
 
-When using self-signed certificates, like we are here, HTTPie needs to be passed `--verify=no`, otherwise it'll fail.
+When using self-signed certificates, like we are here, HTTPie needs to be passed `--verify=no`, otherwise it'll fail. For example:
+
+```
+http --cert=client.pem.crt --cert-key=client.unencrypted.key https://localhost/login --verify=no
+
+```
 
 Conversely, if NGINX doesn't specify `ssl_verify_client on;`, then it won't extract the DN from the client's certificate.
 
