@@ -5,3 +5,4 @@ services:
         build: ../../../deploy/nginx
         ports:
             - "80:80"
+            - "443:443"

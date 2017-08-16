@@ -67,6 +67,11 @@ services:
         - "kafka"
         - "hbase"
 
+  fake-smtp:
+      extends:
+          file: ./containers/fakeSmtp.yml
+          service: fake-smtp
+
   #stroom-proxy:
       #extends:
           #file: ./containers/stroomProxy.yml
