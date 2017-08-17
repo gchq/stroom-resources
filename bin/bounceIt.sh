@@ -11,6 +11,13 @@ fi
 ymlFile=$1
 projectName=`basename $ymlFile | sed 's/\.yml$//'`
 
+#Ensure we have the latest image of stroom from dockerhub
+#Needed for floating tags like *-SNAPSHOT or v6
+if [ $(grep -l "stroom:" $ymlFile | wc -l) -eq 1 ]; then
+    echo "Checking for latest stroom image"
+    docker-compose -f $ymlFile pull stroom
+fi
+
 echo "Bouncing project $projectName with using $ymlFile"
 
 #pass any additional arguments after the yml filename direct to docker-compose
