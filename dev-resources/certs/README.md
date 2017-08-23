@@ -10,7 +10,7 @@ http --cert=client.pem.crt --cert-key=client.unencrypted.key https://localhost/l
 
 ```
 
-Conversely, if NGINX doesn't specify `ssl_verify_client on;`, then it won't extract the DN from the client's certificate.
+Conversely, if NGINX doesn't specify `ssl_verify_client on;`, then it won't extract the DN from the client's certificate. Stroom and friends need the DN to identify the user.
 
 ## References
 
