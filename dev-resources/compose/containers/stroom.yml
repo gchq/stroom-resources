@@ -18,7 +18,7 @@ services:
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=stroomuser
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=stroompassword1
             - STROOM_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-            - STROOM_SECURITY_LOGIN_URL=http://localhost:5000
+            - STROOM_SECURITY_LOGIN_URL=http://localhost/login
             - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=zookeeper:2181
         ports:
             - 8080:8080
