@@ -17,7 +17,7 @@ services:
              # on zk, using the CLI or some GUI.
             - STATS_KAFKA_BOOTSTRAP=kafka:9092
             - STATS_HBASE_ZK_QUORUM=zookeeper:2181
-            - ADMIN_CONTEXT_PATH=/stats/admin
+            - ADMIN_CONTEXT_PATH=/statsAdmin
         ports:
             - 8086:8086 # app
             - 8087:8087 # admin

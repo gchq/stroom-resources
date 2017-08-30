@@ -5,7 +5,7 @@ services:
 
     stroom:
         container_name: stroom
-        image: gchq/stroom:auth
+        image: gchq/stroom:auth_v0.1.1-alpha
         environment:
             - STROOM_NODE=node1a
             - STROOM_RACK=rack
@@ -21,6 +21,8 @@ services:
             - STROOM_SECURITY_LOGIN_URL=http://localhost/authenticationService/v1/checkCertificate
             - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=zookeeper:2181
             - STROOM_AUTH_JWT_SECRET=CHANGE_ME
+            - ADMIN_CONTEXT_PATH=/stroomAdmin
         ports:
             - 8080:8080
+            - 8081:8081
 
