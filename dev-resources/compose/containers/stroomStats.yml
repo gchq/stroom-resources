@@ -5,7 +5,7 @@ services:
 
     stroom-stats:
         container_name: stroom-stats
-        image: gchq/stroom-stats:v1.0.0-SNAPSHOT
+        image: gchq/stroom-stats:auth_v0.1.1-alpha
         environment:
             - STATS_DB_USER=stroomuser
             - STATS_DB_PASSWORD=stroompassword1
