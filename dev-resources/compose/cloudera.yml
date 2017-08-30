@@ -1,0 +1,27 @@
+version: '2'
+
+services: 
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      #environment:
+          #override the edvertised hostname as stroom is inside docker
+          #KAFKA_ADVERTISED_HOST_NAME: kafka 
+      depends_on:
+        - "zookeeper"
+
+  hbase:
+      extends:
+          file: ./containers/hbase.yml
+          service: hbase
+      #override the hostname as stroom-stats will access it from inside the docker network
+      #hostname: hbase
+      depends_on:
+        - "zookeeper"
