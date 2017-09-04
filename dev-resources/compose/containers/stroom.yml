@@ -21,7 +21,9 @@ services:
             - STROOM_SECURITY_LOGIN_URL=http://localhost/authenticationService/v1/checkCertificate
             - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=zookeeper:2181
             - STROOM_AUTH_JWT_SECRET=CHANGE_ME
+            - STROOM_AUTH_JWT_ISSUER=stroom
             - ADMIN_CONTEXT_PATH=/stroomAdmin
+            - STROOM_LOGGING_LEVEL=DEBUG
         ports:
             - 8080:8080
             - 8081:8081
