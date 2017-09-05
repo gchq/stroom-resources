@@ -25,6 +25,6 @@ services:
       KAFKA_ADVERTISED_PORT: 9092
       #topicName:partitionCnt:replicaCnt
       KAFKA_CREATE_TOPICS: "sourceTopic:10:1,destTopic:1:1,badStatisticEvents-Count:10:1,badStatisticEvents-Value:10:1,statisticEvents-Count:10:1,statisticEvents-Value:10:1,statisticRollupPerms-Count-s:10:1,statisticRollupPerms-Count-m:10:1,statisticRollupPerms-Count-h:10:1,statisticRollupPerms-Count-d:10:1,statisticRollupPerms-Value-s:10:1,statisticRollupPerms-Value-m:10:1,statisticRollupPerms-Value-h:10:1,statisticRollupPerms-Value-d:10:1"
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/kafka
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

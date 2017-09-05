@@ -1,5 +1,10 @@
 <configuration>
     <property>
+        <name>zookeeper.znode.parent</name>
+        <!-- The path in zookeeper for hbase to use as its root-->
+        <value>/hbase</value>
+    </property>
+    <property>
         <name>hbase.zookeeper.quorum</name>
         <!-- this is the container name accessible over the internal docker network-->
         <value>zookeeper</value>
