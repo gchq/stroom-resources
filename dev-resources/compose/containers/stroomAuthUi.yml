@@ -12,6 +12,7 @@ services:
       - REACT_APP_AUTHENTICATION_URL=http://localhost/authenticationService/v1
       - REACT_APP_AUTHORISATION_URL=http://localhost/authorisationService/v1
       - REACT_APP_USER_URL=http://localhost/userService/v1
+      - REACT_APP_TOKEN_URL=http://localhost/tokenService/v1
       - REACT_APP_STROOM_URL=http://localhost/stroom
       - REACT_APP_ROOT_PATH=
     ports:
