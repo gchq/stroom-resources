@@ -11,7 +11,7 @@ services:
       - DB_URL=jdbc:mariadb://stroom-auth-db/auth
       - JWS_SECRET=CHANGE_ME
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
-      - AUTH_UI=http://localhost/auth/login
+      - AUTH_UI=http://${STROOM_RESOURCES_ADVERTISED_HOST}/auth/login
       - AUTHORISATION_SERVICE_URL=http://stroom:8080/api/authorisation/v1
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
@@ -21,3 +21,4 @@ services:
     ports:
       - 8099:8099
       - 8100:8100
+    entrypoint: ./wait-for-it_busybox.sh stroom-auth-db:3306 -- java -jar stroom-auth-service-all.jar server config.yml
