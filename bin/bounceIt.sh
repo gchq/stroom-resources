@@ -13,9 +13,11 @@ projectName=`basename $ymlFile | sed 's/\.yml$//'`
 
 echo "Bouncing project $projectName with using $ymlFile"
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Creates config files from template - adding in the correct IP address
 ip=`ip route get 1 | awk '{print $NF;exit}'`
-deployRoot="../deploy"
+deployRoot=$DIR/"../deploy"
 echo "Creating nginx/nginx.conf using $ip"
 sed -e 's/<SWARM_IP>/'$ip'/g' $deployRoot/template/nginx.conf > $deployRoot/nginx/nginx.conf
 sed -i 's/<STROOM_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
