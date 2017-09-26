@@ -20,8 +20,7 @@ services:
             - STROOM_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
             - STROOM_SECURITY_LOGIN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1/checkCertificate
             - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=zookeeper:2181
-            - STROOM_AUTH_JWT_SECRET=CHANGE_ME
-            - STROOM_AUTH_JWT_ISSUER=stroom
+            - STROOM_AUTHENTICATION_SERVICE_URL=http://localhost/authenticationService/v1
             - ADMIN_CONTEXT_PATH=/stroomAdmin
             - STROOM_LOGGING_LEVEL=DEBUG
         ports:
