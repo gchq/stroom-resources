@@ -6,7 +6,7 @@ services:
     container_name: stroom-auth-ui
     image: gchq/stroom-auth-ui:v0.1.1-alpha
     environment:
-      - REACT_APP_STROOM_AUTH_SERVICE_URL=http:/${STROOM_RESOURCES_ADVERTISED_HOST}:8096
+      - REACT_APP_STROOM_AUTH_SERVICE_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8096
       - REACT_APP_STROOM_UI_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8080
       - REACT_APP_LOGIN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1/login
       - REACT_APP_AUTHENTICATION_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1
