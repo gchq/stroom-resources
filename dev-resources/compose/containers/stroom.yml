@@ -17,12 +17,15 @@ services:
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://stroom-stats-db/statistics?useUnicode=yes&characterEncoding=UTF-8
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=stroomuser
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=stroompassword1
-            - STROOM_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
             - STROOM_SECURITY_LOGIN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1/checkCertificate
-            - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=zookeeper:2181
             - STROOM_AUTHENTICATION_SERVICE_URL=http://localhost/authenticationService/v1
             - ADMIN_CONTEXT_PATH=/stroomAdmin
             - STROOM_LOGGING_LEVEL=DEBUG
+            - STROOM_PLUGINS_LIB_DIR=/stroom/plugins
+            - STROOM_CONNECTORS_KAFKA_DEFAULT_BOOTSTRAP_SERVERS=kafka:9092
+            - STROOM_CONNECTORS_KAFKA_DEFAULT_CONNECTOR_VERSION=0.10.0.1
+            - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=zookeeper:2181
+            - STROOM_DEVELOPMENT_MODE=true
         ports:
             - 8080:8080
             - 8081:8081

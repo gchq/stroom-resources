@@ -17,8 +17,7 @@ services:
       extends:
           file: ./containers/stroom.yml
           service: stroom
-      #TODO change this to a tag that reflects the latest v6.0.x build
-      image: gchq/stroom:6.0.0-SNAPSHOT
+      image: "gchq/stroom:${STROOM_TAG}"
       environment:
         - STROOM_DEVELOPMENT_MODE=false
       depends_on:
