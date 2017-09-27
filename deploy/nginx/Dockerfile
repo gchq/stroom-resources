@@ -1,5 +1,7 @@
 FROM nginx:alpine
 
+RUN apk add --no-cache bash 
+
 COPY index.html /usr/share/nginx/html/index.html
 COPY nginx.conf /etc/nginx/nginx.conf
 
