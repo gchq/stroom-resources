@@ -29,6 +29,8 @@ services:
       extends:
           file: ./containers/stroomAuthService.yml
           service: stroom-auth-service
+      environment:
+        - AUTHORISATION_SERVICE_URL=http://localhost:8080/api/authorisation/v1
 
   stroom-auth-ui:
       extends:
