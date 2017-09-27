@@ -22,6 +22,7 @@ alias zkbash='docker exec -i -t zookeeper bash'
 alias hbasebash='docker exec -i -t hbase bash'
 alias stroombash='docker exec -it --user stroom stroom bash'
 alias stroomdbbash='docker exec -it stroom-db bash'
+alias nginxbash='docker exec -it nginx bash'
 
 # ZK CLI
 alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
