@@ -1,3 +1,4 @@
 #!/bin/sh
 
-docker stats --all --format "table {{.ID}}\t{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
+#See https://docs.docker.com/engine/reference/commandline/stats/#formatting
+docker stats --all --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"
