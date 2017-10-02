@@ -27,8 +27,8 @@ DEFAULT_TAGS_FILE="${HOME}/.stroom/docker.tags"
 
 #These are the default values for each docker tag variable 
 #IMAGE SPECIFIC CODE
-DEFAULT_TAGS=" \
-#comment lines are supported like this
+DEFAULT_TAGS="\
+#comment lines are supported like this (no space before or after '#')
 STROOM_TAG=master-SNAPSHOT
 STROOM_STATS_TAG=master-SNAPSHOT"
 
@@ -45,11 +45,40 @@ NC='\033[0m' # No Color
 DOCKER_TAGS_URL_PREFIX="from ${BLUE}https://hub.docker.com/r/gchq/"
 DOCKER_TAGS_URL_SUFFIX="/tags/${NC}"
 
+#Ensure we have a docker.tags file
+if [ ! -f ${DEFAULT_TAGS_FILE} ]; then
+    echo -e "Default docker tags file (${BLUE}${DEFAULT_TAGS_FILE}${NC}) doesn't exist so have created it"
+    touch "${DEFAULT_TAGS_FILE}"
+    echo -e "$DEFAULT_TAGS" > $DEFAULT_TAGS_FILE
+    echo
+else
+    #File exists, make sure all required tags are defined
+    for entry in $(echo -e "${DEFAULT_TAGS}") ; do
+        #echo "entry is [$entry]"
+        #if $(echo "${entry}" | grep -q "${TAG_VARIABLE_REGEX}") ; then 
+        if [[ "${entry}" =~ "_TAG=" ]]; then
+            #extract the tag name from the default tags entry e.g. "    STROOM_TAG=master-SNAPSHOT   " => "STROOM_TAG"
+            tagName="$(echo "${entry}" | grep -oP "[A-Z0-9_]*_TAG(?=\=)")"
+            #echo "tagName is $tagName"
+            #check if tagName doesn't exist in the file and if not add it
+            #commented lines are supported using negative lookbehind
+            if ! grep -qP "(?<!#)${tagName}" "${DEFAULT_TAGS_FILE}"; then
+                #un-commented tagName doesn't exist in DEFAULT_TAGS_FILE so add it
+                echo -e "Adding ${GREEN}${entry}${NC} to file ${BLUE}${DEFAULT_TAGS_FILE}${NC}"
+                echo "${entry}" >> "${DEFAULT_TAGS_FILE}"
+            fi
+        fi
+    done
+fi
+
 #Check script arguments
 if [ "$#" -eq 0 ] || ! [ -f "$1" ]; then
-  echo -e "${RED}Usage: $0 dockerComposeYmlFile optionalExtraArgsForDocker${NC}" >&2
+  echo -e "${RED}ERROR - Invalid arguments${NC}" >&2
+  echo -e "${GREEN}Usage: $0 dockerComposeYmlFile optionalExtraArgsForDocker${NC}" >&2
   echo "E.g: $0 compose/everything.yml" >&2
   echo "E.g: $0 compose/everything.yml --build" >&2
+  echo
+  echo -e "Custom docker tags can be defined in ${BLUE}${DEFAULT_TAGS_FILE}${NC}"
   echo 
   echo -e "${BLUE}Possible compose files:${NC}" >&2
   ls -1 ./compose/*.yml
@@ -75,30 +104,6 @@ if [ $isHostMissing ]; then
     exit 1
 fi
 
-#Ensure we have a docker.tags file
-if [ ! -f ${DEFAULT_TAGS_FILE} ]; then
-    echo -e "Default docker tags file (${BLUE}${DEFAULT_TAGS_FILE}${NC}) doesn't exist so will create it"
-    touch "${DEFAULT_TAGS_FILE}"
-    echo -e "$DEFAULT_TAGS" > $DEFAULT_TAGS_FILE
-else
-    #File exists, make sure all required tags are defined
-    for entry in $(echo -e "${DEFAULT_TAGS}") ; do
-        #echo "entry is [$entry]"
-        #if $(echo "${entry}" | grep -q "${TAG_VARIABLE_REGEX}") ; then 
-        if [[ "${entry}" =~ "_TAG=" ]]; then
-            #extract the tag name from the default tags entry e.g. "    STROOM_TAG=master-SNAPSHOT   " => "STROOM_TAG"
-            tagName="$(echo "${entry}" | grep -oP "[A-Z0-9_]*_TAG(?=\=)")"
-            #echo "tagName is $tagName"
-            #check if tagName doesn't exist in the file and if not add it
-            #commented lines are supported using negative lookbehind
-            if ! grep -qP "(?<!#)${tagName}" "${DEFAULT_TAGS_FILE}"; then
-                #un-commented tagName doesn't exist in DEFAULT_TAGS_FILE so add it
-                echo -e "Adding ${GREEN}${entry}${NC} to file ${BLUE}${DEFAULT_TAGS_FILE}${NC}"
-                echo "${entry}" >> "${DEFAULT_TAGS_FILE}"
-            fi
-        fi
-    done
-fi
 
 #Read in the docker tag variables, either defaulted or as provided by the user
 source "${DEFAULT_TAGS_FILE}"
@@ -130,16 +135,6 @@ if grep -q "${TAG_VARIABLE_REGEX}" $ymlFile; then
         elif [ "$tag" = "STROOM_STATS_TAG" ]; then
             setDockerTagValue "stroom-stats" "STROOM_STATS_TAG" "${STROOM_STATS_TAG}"
         fi
-
-        #if [ "$tag" = "STROOM_TAG" ]; then
-            #url="${DOCKER_TAGS_URL_PREFIX}stroom${DOCKER_TAGS_URL_SUFFIX}"
-            #echo -e "Using STROOM_TAG =       ${GREEN}${STROOM_TAG:=${DEFAULT_STROOM_TAG}}${NC}\t$url"
-            #export STROOM_TAG
-        #elif [ "$tag" = "STROOM_STATS_TAG" ]; then
-            #url="${DOCKER_TAGS_URL_PREFIX}stroom-stats${DOCKER_TAGS_URL_SUFFIX}"
-            #echo -e "Using STROOM_STATS_TAG = ${GREEN}${STROOM_STATS_TAG:=${DEFAULT_STROOM_STATS_TAG}}${NC}\t$url"
-            #export STROOM_STATS_TAG
-        #fi
     done
 
     echo
@@ -167,6 +162,7 @@ projectName=$(basename $ymlFile | sed 's/\.yml$//')
 pullLatestImageIfNeeded() {
     repoName=$1
     tagName=$2
+    tagValue=$3
     #see if the repo name is in the compose file
     if grep -q "${repoName}:" $ymlFile ; then
         if grep -qP "${tagName}=.*LOCAL.*" "$DEFAULT_TAGS_FILE" ; then
@@ -174,22 +170,15 @@ pullLatestImageIfNeeded() {
             echo -e "Compose file contains ${GREEN}${repoName}${NC} but is using a locally built image, dockerhub will not be checked for a new version"
         else
             echo
-            echo -e "Compose file contains ${GREEN}${repoName}${NC}, checking for any updates to the ${GREEN}${repoName}${NC} image on dockerhub"
+            echo -e "Compose file contains ${GREEN}${repoName}${NC}, checking for any updates to the ${GREEN}${repoName}:${tagValue}${NC} image on dockerhub"
             docker-compose -f "$ymlFile" -p "$projectName" pull ${repoName}
         fi
     fi
 }
+
 #IMAGE SPECIFIC CODE
-pullLatestImageIfNeeded "stroom" "STROOM_TAG"
-pullLatestImageIfNeeded "stroom-stats" "STROOM_STATS_TAG"
-#if grep -q "stroom:" $ymlFile && ! grep -qP "STROOM_TAG=.*LOCAL.*" "$DEFAULT_TAGS_FILE" ; then
-    #echo "Compose file contains stroom, checking for any updates to the stroom image on dockerhub"
-    #docker-compose -f "$ymlFile" -p "$projectName" pull stroom
-#fi
-#if grep -q "stroom-stats:" $ymlFile && ! grep -qP "STROOM_STATS_TAG=.*LOCAL.*" "$DEFAULT_TAGS_FILE"  ; then
-    #echo "Compose file contains stroom-stats, checking for any updates to the stroom-stats image on dockerhub"
-    #docker-compose -f $ymlFile -p "$projectName" pull stroom-stats
-#fi
+pullLatestImageIfNeeded "stroom" "STROOM_TAG" ${STROOM_TAG}
+pullLatestImageIfNeeded "stroom-stats" "STROOM_STATS_TAG" ${STROOM_STATS_TAG}
 
 echo 
 echo "Bouncing project $projectName with using $ymlFile with additional arguments for 'docker-compose up' [${extraDockerArgs}]"
@@ -197,6 +186,5 @@ echo "This will restart any existing containers (preserving their state), or cre
 echo "If you want to rebuild images from your own dockerfiles pass the '--build' argument"
 echo 
 
-exit 0
 #pass any additional arguments after the yml filename direct to docker-compose
 docker-compose -f $ymlFile -p $projectName stop && docker-compose -f $ymlFile -p $projectName up $extraDockerArgs
