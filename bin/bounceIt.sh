@@ -185,6 +185,10 @@ echo "Bouncing project $projectName with using $ymlFile with additional argument
 echo "This will restart any existing containers (preserving their state), or create any containers that do not exist."
 echo "If you want to rebuild images from your own dockerfiles pass the '--build' argument"
 echo 
-
+echo "Using the following docker images:"
+for image in $(docker-compose -f $ymlFile config | grep "image:" | sed 's/.*image: //'); do
+    echo -e "  ${GREEN}${image}${NC}"
+done
+echo
 #pass any additional arguments after the yml filename direct to docker-compose
 docker-compose -f $ymlFile -p $projectName stop && docker-compose -f $ymlFile -p $projectName up $extraDockerArgs
