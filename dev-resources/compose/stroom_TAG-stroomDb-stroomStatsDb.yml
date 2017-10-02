@@ -17,6 +17,7 @@ services:
       extends:
           file: ./containers/stroom.yml
           service: stroom
+      image: "gchq/stroom:${STROOM_TAG}"
       depends_on:
         - "stroom-db"
         - "stroom-stats-db"
