@@ -1,0 +1,25 @@
+#Runs the annotations service
+version: '2'
+
+services: 
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
+
+  stroom-annotations-db:
+    extends:
+          file: ./containers/stroomAnnotationsDb.yml
+          service: stroom-annotations-db
+
+  stroom-annotations-service:
+      extends:
+          file: ./containers/stroomAnnotationsService.yml
+          service: stroom-annotations-service
+
+  stroom-annotations-ui:
+      extends:
+          file: ./containers/stroomAnnotationsUi.yml
+          service: stroom-annotations-ui
+

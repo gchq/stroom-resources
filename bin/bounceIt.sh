@@ -54,11 +54,31 @@ if [ $(grep -l "stroom:" $ymlFile | wc -l) -eq 1 ]; then
     docker-compose -f $ymlFile -p $projectName pull stroom
 fi
 
+# This is used by the docker-compose YML files, so they can tell a browser where to go
+echo "Using the following IP as the advertised host: $ip"
+export STROOM_RESOURCES_ADVERTISED_HOST=$ip
+
 echo 
 echo "Bouncing project $projectName with using $ymlFile with additional arguments for 'docker-compose up' [${extraDockerArgs}]"
 echo "This will restart any existing containers (preserving their state), or create any containers that do not exist."
 echo "If you want to rebuild images from your own dockerfiles pass the '--build' argument"
 echo 
+
+# We need to know where we're running this from
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# We need the IP to transpose into our config
+ip=`ip route get 1 | awk '{print $NF;exit}'`
+
+# This is used by the docker-compose YML files, so they can tell a browser where to go
+echo "Using the following IP as the advertised host: $ip"
+export STROOM_RESOURCES_ADVERTISED_HOST=$ip
+
+# NGINX: creates config files from templates, adding in the correct IP address
+deployRoot=$DIR/"../deploy"
+echo "Creating nginx/nginx.conf using $ip"
+sed -e 's/<SWARM_IP>/'$ip'/g' $deployRoot/template/nginx.conf > $deployRoot/nginx/nginx.conf
+sed -i 's/<STROOM_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
+sed -i 's/<AUTH_UI_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
 
 #pass any additional arguments after the yml filename direct to docker-compose
 docker-compose -f $ymlFile -p $projectName stop && docker-compose -f $ymlFile -p $projectName up $extraDockerArgs
