@@ -7,9 +7,6 @@ services:
       extends:
           file: ./containers/kafka.yml
           service: kafka
-      #environment:
-          #override the edvertised hostname as stroom is inside docker
-          #KAFKA_ADVERTISED_HOST_NAME: kafka 
       depends_on:
         - "zookeeper"
 
@@ -26,6 +23,17 @@ services:
         - "zookeeper"
         - "kafka"
 
+  stroom-stats:
+      extends:
+          file: ./containers/stroomStats.yml
+          service: stroom-stats
+      image: "gchq/stroom-stats:${STROOM_STATS_TAG}"
+      depends_on:
+        - "stroom-db"
+        - "zookeeper"
+        - "kafka"
+        - "hbase"
+
   stroom-db:
       extends:
           file: ./containers/stroomDb.yml
@@ -41,3 +49,9 @@ services:
           file: ./containers/zookeeper.yml
           service: zookeeper
 
+  hbase:
+      extends:
+          file: ./containers/hbase.yml
+          service: hbase
+      depends_on:
+        - "zookeeper"
