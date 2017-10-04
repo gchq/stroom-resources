@@ -1,7 +1,12 @@
 #Runs the whole stroom estate
 version: '2'
 
-services: 
+services:
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
 
   zookeeper:
       extends:
@@ -17,6 +22,21 @@ services:
       extends:
           file: ./containers/stroomStatsDb.yml
           service: stroom-stats-db
+
+  stroom-annotations-db:
+    extends:
+          file: ./containers/stroomAnnotationsDb.yml
+          service: stroom-annotations-db
+
+  stroom-annotations-service:
+      extends:
+          file: ./containers/stroomAnnotationsService.yml
+          service: stroom-annotations-service
+
+  stroom-annotations-ui:
+      extends:
+          file: ./containers/stroomAnnotationsUi.yml
+          service: stroom-annotations-ui
 
   stroom-auth-service-db:
       extends:
@@ -52,10 +72,10 @@ services:
         - "kafka"
         - "hbase"
 
-  #stroom-proxy:
-      #extends:
-          #file: ./containers/stroomProxy.yml
-          #service: stroom-proxy
+#  stroom-proxy:
+#      extends:
+#          file: ./containers/stroomProxy.yml
+#          service: stroom-proxy
 
   stroom:
       extends:
