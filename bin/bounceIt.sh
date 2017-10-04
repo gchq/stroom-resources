@@ -151,7 +151,6 @@ if grep -q "${TAG_VARIABLE_REGEX}" $ymlFile; then
     fi
 fi
 
-
 #args from 2 onwards are extra docker args
 extraDockerArgs="${*:2}"
 
