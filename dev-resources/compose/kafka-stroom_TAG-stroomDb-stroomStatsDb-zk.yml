@@ -19,6 +19,8 @@ services:
       image: "gchq/stroom:${STROOM_TAG}"
       environment:
         - STROOM_DEVELOPMENT_MODE=false
+          #TODO remove this line below once the kafka plugin code has reached master
+        - STROOM_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       depends_on:
         - "stroom-db"
         - "stroom-stats-db"
