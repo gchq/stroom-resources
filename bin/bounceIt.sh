@@ -181,7 +181,7 @@ pullLatestImageIfNeeded "stroom" "STROOM_TAG" ${STROOM_TAG}
 pullLatestImageIfNeeded "stroom-stats" "STROOM_STATS_TAG" ${STROOM_STATS_TAG}
 
 echo 
-echo "Bouncing project $projectName with using $ymlFile with additional arguments for 'docker-compose up' [${extraDockerArgs}]"
+echo -e "Bouncing project $projectName with using $ymlFile with additional arguments for 'docker-compose up' [${GREEN}${extraDockerArgs}${NC}]"
 echo "This will restart any existing containers (preserving their state), or create any containers that do not exist."
 echo "If you want to rebuild images from your own dockerfiles pass the '--build' argument"
 echo 
@@ -198,15 +198,17 @@ else
 fi
 
 # This is used by the docker-compose YML files, so they can tell a browser where to go
-echo "Using the following IP as the advertised host: $ip"
+echo -e "Using the following IP as the advertised host: ${GREEN}$ip${NC}"
 export STROOM_RESOURCES_ADVERTISED_HOST=$ip
 
 # NGINX: creates config files from templates, adding in the correct IP address
 deployRoot=$DIR/"../deploy"
-echo "Creating nginx/nginx.conf using $ip"
-cat $deployRoot/template/nginx.conf | sed 's/<SWARM_IP>/'$ip'/g' | sed 's/<STROOM_URL>/'$ip'/g' | sed 's/<AUTH_UI_URL>/'$ip'/g' > $deployRoot/nginx/nginx.conf
+echo -e "Creating nginx/nginx.conf using ${GREEN}$ip${NC}"
+cat $deployRoot/template/nginx.conf | sed "s/<SWARM_IP>/$ip/g" | sed "s/<STROOM_URL>/$ip/g" | sed "s/<AUTH_UI_URL>/$ip/g" > $deployRoot/nginx/nginx.conf
+echo
 
 echo "Using the following docker images:"
+echo
 for image in $(docker-compose -f $ymlFile config | grep "image:" | sed 's/.*image: //'); do
     echo -e "  ${GREEN}${image}${NC}"
 done
