@@ -58,7 +58,7 @@ else
         #if $(echo "${entry}" | grep -q "${TAG_VARIABLE_REGEX}") ; then 
         if [[ "${entry}" =~ "_TAG=" ]]; then
             #extract the tag name from the default tags entry e.g. "    STROOM_TAG=master-SNAPSHOT   " => "STROOM_TAG"
-            tagName="$(echo "${entry}" | grep -oP "[A-Z0-9_]*_TAG(?=\=)")"
+            tagName="$(echo "${entry}" | grep -o "[A-Z0-9_]*_TAG")"
             #echo "tagName is $tagName"
             #check if tagName doesn't exist in the file and if not add it
             #commented lines are supported using negative lookbehind
@@ -87,7 +87,7 @@ fi
 
 isHostMissing=""
 
-#Some of the docker containers required entires in your local hosts file to
+#Some of the docker containers required entries in your local hosts file to
 #work correctly. This code checks they are all there
 for host in $LOCAL_HOST_NAMES; do
     if [ $(cat /etc/hosts | grep -e "127\.0\.0\.1\s*$host" | wc -l) -eq 0 ]; then 
@@ -189,7 +189,13 @@ echo
 # We need to know where we're running this from
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # We need the IP to transpose into our config
-ip=`ip route get 1 | awk '{print $NF;exit}'`
+
+# Code required to find IP address is different in MacOS
+if [ "$(uname)" == "Darwin" ]; then
+  ip=`ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`
+else
+  ip=`ip route get 1 | awk '{print $NF;exit}'`
+fi
 
 # This is used by the docker-compose YML files, so they can tell a browser where to go
 echo "Using the following IP as the advertised host: $ip"
@@ -199,8 +205,8 @@ export STROOM_RESOURCES_ADVERTISED_HOST=$ip
 deployRoot=$DIR/"../deploy"
 echo "Creating nginx/nginx.conf using $ip"
 sed -e 's/<SWARM_IP>/'$ip'/g' $deployRoot/template/nginx.conf > $deployRoot/nginx/nginx.conf
-sed -i 's/<STROOM_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
-sed -i 's/<AUTH_UI_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
+sed -i '' 's/<STROOM_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
+sed -i '' 's/<AUTH_UI_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
 
 echo "Using the following docker images:"
 for image in $(docker-compose -f $ymlFile config | grep "image:" | sed 's/.*image: //'); do
