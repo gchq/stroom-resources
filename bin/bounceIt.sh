@@ -30,6 +30,10 @@ DEFAULT_TAGS_FILE="${HOME}/.stroom/docker.tags"
 DEFAULT_TAGS="\
 #comment lines are supported like this (no space before or after '#')
 STROOM_TAG=master-SNAPSHOT
+STROOM_AUTH_SERVICE_TAG=master-SNAPSHOT
+STROOM_AUTH_UI_TAG=master-SNAPSHOT
+STROOM_ANNOTATIONS_SERVICE_TAG=master-SNAPSHOT
+STROOM_ANNOTATIONS_UI_TAG=master-SNAPSHOT
 STROOM_STATS_TAG=master-SNAPSHOT"
 
 #regex used to locate a docker tag variable in a docker-compose .yml file
