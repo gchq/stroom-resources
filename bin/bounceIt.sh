@@ -45,6 +45,8 @@ NC='\033[0m' # No Color
 DOCKER_TAGS_URL_PREFIX="from ${BLUE}https://hub.docker.com/r/gchq/"
 DOCKER_TAGS_URL_SUFFIX="/tags/${NC}"
 
+echo
+
 #Ensure we have a docker.tags file
 if [ ! -f ${DEFAULT_TAGS_FILE} ]; then
     echo -e "Default docker tags file (${BLUE}${DEFAULT_TAGS_FILE}${NC}) doesn't exist so have created it"
@@ -55,16 +57,15 @@ else
     #File exists, make sure all required tags are defined
     for entry in $(echo -e "${DEFAULT_TAGS}") ; do
         #echo "entry is [$entry]"
-        #if $(echo "${entry}" | grep -q "${TAG_VARIABLE_REGEX}") ; then 
         if [[ "${entry}" =~ "_TAG=" ]]; then
             #extract the tag name from the default tags entry e.g. "    STROOM_TAG=master-SNAPSHOT   " => "STROOM_TAG"
             tagName="$(echo "${entry}" | grep -o "[A-Z0-9_]*_TAG")"
             #echo "tagName is $tagName"
-            #check if tagName doesn't exist in the file and if not add it
-            #commented lines are supported using negative lookbehind
+            #check if tagName doesn't exist in the file (in un-commented form) and if it doesn't exist, add it
             if ! grep -q "^${tagName}" "${DEFAULT_TAGS_FILE}"; then
                 #un-commented tagName doesn't exist in DEFAULT_TAGS_FILE so add it
                 echo -e "Adding ${GREEN}${entry}${NC} to file ${BLUE}${DEFAULT_TAGS_FILE}${NC}"
+                echo
                 echo "${entry}" >> "${DEFAULT_TAGS_FILE}"
             fi
         fi
@@ -123,8 +124,8 @@ setDockerTagValue() {
 
 #check if the yml file contains any Docker tag variables, i.e. ${xxxx_TAG}
 if grep -q "${TAG_VARIABLE_REGEX}" $ymlFile; then
-    echo
     echo "The following Docker tags will be used for this compose file:"
+    echo
     #scan the yml file for any docker tag variables and then display their current
     #value (or a default) to the user for confirmation
     for tag in $(grep -o "${TAG_VARIABLE_REGEX}" $ymlFile | sed -E 's/\$\{(.*)}/\1/g'); do 
