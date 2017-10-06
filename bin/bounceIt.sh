@@ -62,7 +62,7 @@ else
             #echo "tagName is $tagName"
             #check if tagName doesn't exist in the file and if not add it
             #commented lines are supported using negative lookbehind
-            if ! grep -qP "(?<!#)${tagName}" "${DEFAULT_TAGS_FILE}"; then
+            if ! grep -q "^${tagName}" "${DEFAULT_TAGS_FILE}"; then
                 #un-commented tagName doesn't exist in DEFAULT_TAGS_FILE so add it
                 echo -e "Adding ${GREEN}${entry}${NC} to file ${BLUE}${DEFAULT_TAGS_FILE}${NC}"
                 echo "${entry}" >> "${DEFAULT_TAGS_FILE}"
@@ -165,9 +165,9 @@ pullLatestImageIfNeeded() {
     tagValue=$3
     #see if the repo name is in the compose file
     if grep -q "${repoName}:" $ymlFile ; then
-        if grep -qP "${tagName}=.*LOCAL.*" "$DEFAULT_TAGS_FILE" ; then
+        if grep -q "${tagName}=.*LOCAL.*" "$DEFAULT_TAGS_FILE" ; then
             echo
-            echo -e "Compose file contains ${GREEN}${repoName}${NC} but is using a locally built image, dockerhub will not be checked for a new version"
+            echo -e "Compose file contains ${GREEN}${repoName}${NC} but is using a locally built image, DockerHub will not be checked for a new version"
         else
             echo
             echo -e "Compose file contains ${GREEN}${repoName}${NC}, checking for any updates to the ${GREEN}${repoName}:${tagValue}${NC} image on dockerhub"
@@ -204,9 +204,7 @@ export STROOM_RESOURCES_ADVERTISED_HOST=$ip
 # NGINX: creates config files from templates, adding in the correct IP address
 deployRoot=$DIR/"../deploy"
 echo "Creating nginx/nginx.conf using $ip"
-sed -e 's/<SWARM_IP>/'$ip'/g' $deployRoot/template/nginx.conf > $deployRoot/nginx/nginx.conf
-sed -i '' 's/<STROOM_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
-sed -i '' 's/<AUTH_UI_URL>/'$ip'/g' $deployRoot/nginx/nginx.conf
+cat $deployRoot/template/nginx.conf | sed 's/<SWARM_IP>/'$ip'/g' | sed 's/<STROOM_URL>/'$ip'/g' | sed 's/<AUTH_UI_URL>/'$ip'/g' > $deployRoot/nginx/nginx.conf
 
 echo "Using the following docker images:"
 for image in $(docker-compose -f $ymlFile config | grep "image:" | sed 's/.*image: //'); do
