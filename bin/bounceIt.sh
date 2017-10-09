@@ -192,6 +192,10 @@ pullLatestImageIfNeeded() {
 #IMAGE SPECIFIC CODE
 pullLatestImageIfNeeded "stroom" "STROOM_TAG" ${STROOM_TAG}
 pullLatestImageIfNeeded "stroom-stats" "STROOM_STATS_TAG" ${STROOM_STATS_TAG}
+pullLatestImageIfNeeded "stroom-annotations-service" "STROOM_ANNOTATIONS_SERVICE_TAG" ${STROOM_ANNOTATIONS_SERVICE_TAG}
+pullLatestImageIfNeeded "stroom-annotations-ui" "STROOM_ANNOTATIONS_UI_TAG" ${STROOM_ANNOTATIONS_UI_TAG}
+pullLatestImageIfNeeded "stroom-auth-service" "STROOM_AUTH_SERVICE_TAG" ${STROOM_AUTH_SERVICE_TAG}
+pullLatestImageIfNeeded "stroom-auth-ui" "STROOM_AUTH_UI_TAG" ${STROOM_AUTH_UI_TAG}
 
 echo 
 echo -e "Bouncing project $projectName with using $ymlFile with additional arguments for 'docker-compose up' [${GREEN}${extraDockerArgs}${NC}]"
