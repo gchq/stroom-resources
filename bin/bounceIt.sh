@@ -5,7 +5,7 @@
 # Script to start up a docker compose yml configuration. The script will
 # look for any variables of the form '${xxxxx_TAG}' in the compose file 
 # and set the value of those variables according to the values found in 
-# DEFAULT_TAGS_FILE
+# TAGS_FILE
 #
 # This allows you to run the various stroom-* containers with any combination
 # of image versions that you chose.
@@ -24,10 +24,10 @@ set -e
 LOCAL_HOST_NAMES="kafka hbase"
 
 #Location of the file used to define the docker tag variable values
-DEFAULT_TAGS_FILE="${HOME}/.stroom/docker.tags"
+TAGS_FILE="${HOME}/.stroom/docker.tags"
 
 #These are the default values for each docker tag variable
-#This string is used to create the DEFAULT_TAGS_FILE if it doesn't exist
+#This string is used to create the TAGS_FILE if it doesn't exist
 #and as the definitive list of all tags to check for
 #Tag name must match [A-Z0-9_]+
 #IMAGE SPECIFIC CODE
@@ -57,10 +57,10 @@ DOCKER_TAGS_URL_SUFFIX="/tags/${NC}"
 echo
 
 #Ensure we have a docker.tags file, if not create one using the content of the DEFAULT_TAGS string
-if [ ! -f ${DEFAULT_TAGS_FILE} ]; then
-    echo -e "Default docker tags file (${BLUE}${DEFAULT_TAGS_FILE}${NC}) doesn't exist so have created it"
-    touch "${DEFAULT_TAGS_FILE}"
-    echo -e "$DEFAULT_TAGS" > $DEFAULT_TAGS_FILE
+if [ ! -f ${TAGS_FILE} ]; then
+    echo -e "Default docker tags file (${BLUE}${TAGS_FILE}${NC}) doesn't exist so have created it"
+    touch "${TAGS_FILE}"
+    echo -e "$DEFAULT_TAGS" > $TAGS_FILE
     echo
 else
     #File exists, make sure all required tags are defined
@@ -73,11 +73,11 @@ else
             tagName="$(echo "${entry}" | grep -o "[A-Z0-9_]*_TAG")"
             #echo "tagName is $tagName"
             #check if tagName doesn't exist in the file (in un-commented form) and if it doesn't exist, add it
-            if ! grep -q "^\s*${tagName}" "${DEFAULT_TAGS_FILE}"; then
-                #un-commented tagName doesn't exist in DEFAULT_TAGS_FILE so add it
-                echo -e "Adding ${GREEN}${entry}${NC} to file ${BLUE}${DEFAULT_TAGS_FILE}${NC}"
+            if ! grep -q "^\s*${tagName}" "${TAGS_FILE}"; then
+                #un-commented tagName doesn't exist in TAGS_FILE so add it
+                echo -e "Adding ${GREEN}${entry}${NC} to file ${BLUE}${TAGS_FILE}${NC}"
                 echo
-                echo "${entry}" >> "${DEFAULT_TAGS_FILE}"
+                echo "${entry}" >> "${TAGS_FILE}"
             fi
         fi
     done
@@ -90,7 +90,7 @@ if [ "$#" -eq 0 ] || ! [ -f "$1" ]; then
   echo "E.g: $0 compose/everything.yml" >&2
   echo "E.g: $0 compose/everything.yml --build" >&2
   echo
-  echo -e "Custom docker tags can be defined in ${BLUE}${DEFAULT_TAGS_FILE}${NC}"
+  echo -e "Custom docker tags can be defined in ${BLUE}${TAGS_FILE}${NC}"
   echo 
   echo -e "${BLUE}Possible compose files:${NC}" >&2
   ls -1 ./compose/*.yml
@@ -118,7 +118,7 @@ fi
 
 
 #Read in the docker tag variables, either defaulted or as provided by the user
-source "${DEFAULT_TAGS_FILE}"
+source "${TAGS_FILE}"
 
 ymlFile=$1
 
@@ -150,7 +150,7 @@ if grep -q "${TAG_VARIABLE_REGEX}" $ymlFile; then
     done
 
     echo
-    echo -e "Docker tags can be changed in the file ${BLUE}${DEFAULT_TAGS_FILE}${NC} in the form:"
+    echo -e "Docker tags can be changed in the file ${BLUE}${TAGS_FILE}${NC} in the form:"
     echo -e "  ${YELLOW}xxxxxxx_TAG=master-SNAPSHOT${NC}"
     echo
     read -rsp $'Press space to continue, or ctrl-c to exit...\n' -n1 keyPressed
@@ -179,7 +179,7 @@ pullLatestImageIfNeeded() {
     tagValue=$3
     #see if the repo name is in the compose file
     if grep -q "${repoName}:" $ymlFile ; then
-        if grep -q "${tagName}=.*LOCAL.*" "$DEFAULT_TAGS_FILE" ; then
+        if grep -q "${tagName}=.*LOCAL.*" "$TAGS_FILE" ; then
             echo
             echo -e "Compose file contains ${GREEN}${repoName}${NC} but is using a locally built image, DockerHub will not be checked for a new version"
         else
