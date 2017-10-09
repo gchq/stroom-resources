@@ -7,9 +7,14 @@
 # and set the value of those variables according to the values found in 
 # DEFAULT_TAGS_FILE
 #
+# This allows you to run the various stroom-* containers with any combination
+# of image versions that you chose.
+#
 # If you want to add a new docker imaage that supports custom tags then
 # you need to add code in here in three places, search below for 
 # 'IMAGE SPECIFIC CODE'
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 #exit the script on any error
@@ -18,14 +23,13 @@ set -e
 #List of hostnames that need to be added to /etc/hosts to resolve to 127.0.0.1
 LOCAL_HOST_NAMES="kafka hbase"
 
-#Default docker tags if xxxx_TAG not set in environment variables
-#DEFAULT_STROOM_TAG="master-SNAPSHOT"
-#DEFAULT_STROOM_STATS_TAG="master-SNAPSHOT"
-
 #Location of the file used to define the docker tag variable values
 DEFAULT_TAGS_FILE="${HOME}/.stroom/docker.tags"
 
-#These are the default values for each docker tag variable 
+#These are the default values for each docker tag variable
+#This string is used to create the DEFAULT_TAGS_FILE if it doesn't exist
+#and as the definitive list of all tags to check for
+#Tag name must match [A-Z0-9_]+
 #IMAGE SPECIFIC CODE
 DEFAULT_TAGS="\
 #comment lines are supported like this (no space before or after '#')
@@ -46,12 +50,13 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
+#Constants for the dockerhub URL
 DOCKER_TAGS_URL_PREFIX="from ${BLUE}https://hub.docker.com/r/gchq/"
 DOCKER_TAGS_URL_SUFFIX="/tags/${NC}"
 
 echo
 
-#Ensure we have a docker.tags file
+#Ensure we have a docker.tags file, if not create one using the content of the DEFAULT_TAGS string
 if [ ! -f ${DEFAULT_TAGS_FILE} ]; then
     echo -e "Default docker tags file (${BLUE}${DEFAULT_TAGS_FILE}${NC}) doesn't exist so have created it"
     touch "${DEFAULT_TAGS_FILE}"
@@ -59,14 +64,16 @@ if [ ! -f ${DEFAULT_TAGS_FILE} ]; then
     echo
 else
     #File exists, make sure all required tags are defined
-    for entry in $(echo -e "${DEFAULT_TAGS}") ; do
+    #Loop round all entries in DEFAULT_TAGS, ignoreing the top comment line
+    #assumes no spaces in 'tag_name=version'
+    for entry in $(echo -e "${DEFAULT_TAGS}" | egrep -v "^#.*\n") ; do
         #echo "entry is [$entry]"
         if [[ "${entry}" =~ "_TAG=" ]]; then
             #extract the tag name from the default tags entry e.g. "    STROOM_TAG=master-SNAPSHOT   " => "STROOM_TAG"
             tagName="$(echo "${entry}" | grep -o "[A-Z0-9_]*_TAG")"
             #echo "tagName is $tagName"
             #check if tagName doesn't exist in the file (in un-commented form) and if it doesn't exist, add it
-            if ! grep -q "^${tagName}" "${DEFAULT_TAGS_FILE}"; then
+            if ! grep -q "^\s*${tagName}" "${DEFAULT_TAGS_FILE}"; then
                 #un-commented tagName doesn't exist in DEFAULT_TAGS_FILE so add it
                 echo -e "Adding ${GREEN}${entry}${NC} to file ${BLUE}${DEFAULT_TAGS_FILE}${NC}"
                 echo
@@ -164,6 +171,8 @@ projectName=$(basename $ymlFile | sed 's/\.yml$//')
 #Ensure we have the latest image of stroom from dockerhub, unless our TAG contains LOCAL
 #Needed for floating tags like *-SNAPSHOT or v6
 
+#method to pull updated image files from dockerhub if required
+#This is to support -SNAPSHOT tags that are floating
 pullLatestImageIfNeeded() {
     repoName=$1
     tagName=$2
@@ -174,9 +183,22 @@ pullLatestImageIfNeeded() {
             echo
             echo -e "Compose file contains ${GREEN}${repoName}${NC} but is using a locally built image, DockerHub will not be checked for a new version"
         else
-            echo
-            echo -e "Compose file contains ${GREEN}${repoName}${NC}, checking for any updates to the ${GREEN}${repoName}:${tagValue}${NC} image on dockerhub"
-            docker-compose -f "$ymlFile" -p "$projectName" pull ${repoName}
+            #use 'docker-compose ps' to establish if we already have a container for this service
+            #if we do then we won't do a docker-compose pull as that would trash any local state
+            #if a user wants refreshed images from dockerhub then they should delete their containers first
+            #using the dockerTidyUp script or similar
+            existingContainerId=$(docker-compose -f "$ymlFile" -p "$projectName" ps -q ${repoName})
+            if [ "x" = "${existingContainerId}x" ]; then
+                #no existing container so do a pull to check for updates
+                #If the image has a fixed tag version e.g. master-20171008-DAILY, then no change will be
+                #detected
+                echo
+                echo -e "Compose file contains ${GREEN}${repoName}${NC}, checking for any updates to the ${GREEN}${repoName}:${tagValue}${NC} image on dockerhub"
+                docker-compose -f "$ymlFile" -p "$projectName" pull ${repoName}
+            else
+                echo
+                echo -e "Compose file contains ${GREEN}${repoName}${NC} but you already have a container with ID ${existingContainerId}, won't check dockerhub for updates"
+            fi
         fi
     fi
 }
@@ -220,4 +242,5 @@ done
 echo
 
 #pass any additional arguments after the yml filename direct to docker-compose
+#This will create containers as required and then start up the new or existing containers
 docker-compose -f $ymlFile -p $projectName stop && docker-compose -f $ymlFile -p $projectName up $extraDockerArgs
