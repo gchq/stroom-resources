@@ -10,6 +10,7 @@ services:
       - DB_PASSWORD=stroompassword1
       - DB_URL=jdbc:mariadb://stroom-auth-db/auth
       - JWS_SECRET=CHANGE_ME
+      - JWS_ISSUER=stroom
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - AUTH_UI=http://${STROOM_RESOURCES_ADVERTISED_HOST}/auth/login
       - AUTHORISATION_SERVICE_URL=http://stroom:8080/api/authorisation/v1
