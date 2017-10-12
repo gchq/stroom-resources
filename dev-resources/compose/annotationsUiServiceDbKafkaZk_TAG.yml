@@ -1,7 +1,7 @@
-#Runs the annotations service
+#Runs the aspects of the annotations service required for integration testing
 version: '2'
 
-services: 
+services:
 
   nginx:
       extends:
@@ -24,4 +24,16 @@ services:
           file: ./containers/stroomAnnotationsUi.yml
           service: stroom-annotations-ui
       image: "gchq/stroom-annotations-ui:${STROOM_ANNOTATIONS_UI_TAG}"
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      depends_on:
+        - "zookeeper"
 
