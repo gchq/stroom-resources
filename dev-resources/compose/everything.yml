@@ -47,9 +47,6 @@ services:
       extends:
           file: ./containers/kafka.yml
           service: kafka
-      #environment:
-          #override the edvertised hostname as stroom is inside docker
-          #KAFKA_ADVERTISED_HOST_NAME: kafka 
       depends_on:
         - "zookeeper"
 
