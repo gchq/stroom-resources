@@ -4,7 +4,7 @@ services:
 
   stroom-annotations-service:
     container_name: stroom-annotations-service
-    image: gchq/stroom-annotations-service:v0.0.2-alpha
+    image: gchq/stroom-annotations-service:v0.1.4-alpha
     environment:
       - DB_USER=stroomuser
       - DB_PASSWORD=stroompassword1

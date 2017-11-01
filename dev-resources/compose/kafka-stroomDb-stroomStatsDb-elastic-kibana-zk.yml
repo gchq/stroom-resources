@@ -18,6 +18,11 @@ services:
           file: ./containers/stroomDb.yml
           service: stroom-db
 
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
   kafka:
       extends:
           file: ./containers/kafka.yml
