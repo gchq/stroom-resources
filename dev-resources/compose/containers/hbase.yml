@@ -12,7 +12,7 @@ services:
     entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]
     command: ["--", "/entrypoint.sh"]
     environment:
-      - HBASE_MANAGES_ZK:false
+      - HBASE_MANAGES_ZK=false
     ports:
       #- 8080:8080
       #- 8085:8085
