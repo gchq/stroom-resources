@@ -49,9 +49,21 @@ services:
           service: kafka
       #environment:
           #override the edvertised hostname as stroom is inside docker
-          #KAFKA_ADVERTISED_HOST_NAME: kafka 
+          #KAFKA_ADVERTISED_HOST_NAME: kafka
       depends_on:
-        - "zookeeper"
+        - zookeeper
+
+  elasticsearch:
+    extends:
+      file: ./containers/elasticsearch.yml
+      service: elasticsearch
+
+  kibana:
+    extends:
+      file: ./containers/kibana.yml
+      service: kibana
+    depends_on:
+      - elasticsearch
 
   hbase:
       extends:
@@ -60,17 +72,17 @@ services:
       #override the hostname as stroom-stats will access it from inside the docker network
       #hostname: hbase
       depends_on:
-        - "zookeeper"
+        - zookeeper
 
   stroom-stats:
       extends:
           file: ./containers/stroomStats.yml
           service: stroom-stats
       depends_on:
-        - "stroom-db"
-        - "zookeeper"
-        - "kafka"
-        - "hbase"
+        - stroom-db
+        - zookeeper
+        - kafka
+        - hbase
 
 #  stroom-proxy:
 #      extends:
@@ -82,7 +94,7 @@ services:
           file: ./containers/stroom.yml
           service: stroom
       depends_on:
-        - "stroom-db"
-        - "stroom-stats-db"
-        - "zookeeper"
-        - "kafka"
+        - stroom-db
+        - stroom-stats-db
+        - zookeeper
+        - kafka
