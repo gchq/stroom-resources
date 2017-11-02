@@ -1,7 +1,12 @@
 #Runs the whole stroom estate
 version: '2'
 
-services: 
+services:
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
 
   zookeeper:
       extends:
@@ -18,7 +23,22 @@ services:
           file: ./containers/stroomStatsDb.yml
           service: stroom-stats-db
 
-  stroom-auth-db:
+  stroom-annotations-db:
+    extends:
+          file: ./containers/stroomAnnotationsDb.yml
+          service: stroom-annotations-db
+
+  stroom-annotations-service:
+      extends:
+          file: ./containers/stroomAnnotationsService.yml
+          service: stroom-annotations-service
+
+  stroom-annotations-ui:
+      extends:
+          file: ./containers/stroomAnnotationsUi.yml
+          service: stroom-annotations-ui
+
+  stroom-auth-service-db:
       extends:
           file: ./containers/stroomAuthDb.yml
           service: stroom-auth-db
@@ -42,11 +62,20 @@ services:
       extends:
           file: ./containers/kafka.yml
           service: kafka
-      #environment:
-          #override the edvertised hostname as stroom is inside docker
-          #KAFKA_ADVERTISED_HOST_NAME: kafka 
       depends_on:
-        - "zookeeper"
+        - zookeeper
+
+  elasticsearch:
+    extends:
+      file: ./containers/elasticsearch.yml
+      service: elasticsearch
+
+  kibana:
+    extends:
+      file: ./containers/kibana.yml
+      service: kibana
+    depends_on:
+      - elasticsearch
 
   hbase:
       extends:
@@ -55,17 +84,17 @@ services:
       #override the hostname as stroom-stats will access it from inside the docker network
       #hostname: hbase
       depends_on:
-        - "zookeeper"
+        - zookeeper
 
   stroom-stats:
       extends:
           file: ./containers/stroomStats.yml
           service: stroom-stats
       depends_on:
-        - "stroom-db"
-        - "zookeeper"
-        - "kafka"
-        - "hbase"
+        - stroom-db
+        - zookeeper
+        - kafka
+        - hbase
 
   fake-smtp:
       extends:
@@ -82,7 +111,7 @@ services:
           file: ./containers/stroom.yml
           service: stroom
       depends_on:
-        - "stroom-db"
-        - "stroom-stats-db"
-        - "zookeeper"
-        - "kafka"
+        - stroom-db
+        - stroom-stats-db
+        - zookeeper
+        - kafka

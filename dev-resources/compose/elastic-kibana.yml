@@ -1,0 +1,16 @@
+#Runs the whole stroom estate
+version: '2'
+
+services:
+
+  elasticsearch:
+    extends:
+      file: ./containers/elasticsearch.yml
+      service: elasticsearch
+
+  kibana:
+    extends:
+      file: ./containers/kibana.yml
+      service: kibana
+    depends_on:
+      - elasticsearch

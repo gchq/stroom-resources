@@ -21,6 +21,7 @@ alias kbash='docker exec -i -t kafka bash'
 alias zkbash='docker exec -i -t zookeeper bash'
 alias hbasebash='docker exec -i -t hbase bash'
 alias stroombash='docker exec -it --user stroom stroom bash'
+alias statsbash='docker exec -it --user stroomstats stroom-stats bash'
 alias stroomdbbash='docker exec -it stroom-db bash'
 alias nginxbash='docker exec -it nginx bash'
 

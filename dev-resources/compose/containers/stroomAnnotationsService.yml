@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+
+  stroom-annotations-service:
+    container_name: stroom-annotations-service
+    image: gchq/stroom-annotations-service:v0.1.4-alpha
+    environment:
+      - DB_USER=stroomuser
+      - DB_PASSWORD=stroompassword1
+      - DB_URL=jdbc:mariadb://stroom-annotations-db/annotations
+      - JWS_SECRET=CHANGE_ME
+      - ADMIN_CONTEXT_PATH=/annotationsServiceAdmin
+      - AUTH_UI=http://${STROOM_RESOURCES_ADVERTISED_HOST}/auth/login
+      - AUTHORISATION_SERVICE_URL=http://stroom:8080/api/authorisation/v1
+      - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
+      - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
+      - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
+      - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
+      - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes
+    ports:
+      - 8199:8199
+      - 8200:8200
+    entrypoint: ./wait-for-it_busybox.sh stroom-annotations-db:3306 -- java -jar stroom-annotations-service-all.jar server config.yml

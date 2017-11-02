@@ -38,4 +38,8 @@
         <name>hbase.master.ipc.address</name>
         <value>0.0.0.0</value>
     </property>
+    <property>
+        <name>zookeeper.session.timeout</name>
+        <value>60000</value>
+    </property>
 </configuration>
