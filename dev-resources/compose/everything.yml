@@ -111,7 +111,7 @@ services:
           file: ./containers/stroom.yml
           service: stroom
       depends_on:
-        - stroom-db
-        - stroom-stats-db
-        - zookeeper
-        - kafka
+        - "stroom-db"
+        - "stroom-stats-db"
+        - "zookeeper"
+        - "kafka"
