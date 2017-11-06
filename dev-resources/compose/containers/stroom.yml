@@ -17,8 +17,11 @@ services:
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://stroom-stats-db/statistics?useUnicode=yes&characterEncoding=UTF-8
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=stroomuser
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=stroompassword1
-            - STROOM_SECURITY_LOGIN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1/checkCertificate
-            - STROOM_SECURITY_AUTHENTICATION_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1
+            # - STROOM_SECURITY_LOGIN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1/checkCertificate
+            # - STROOM_SECURITY_AUTHENTICATION_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1
+            - STROOM_AUTH_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8099
+            - STROOM_AUTH_JWT_VERIFICATIONKEY=CHANGE_ME
+            - STROOM_AUTH_JWT_ISSUER=stroom
             # This needs to be an API token issued for a user, i.e. for the admin user. 
             # Without this Stroom won't be able to make calls to it's RemoteDataSources.
             - STROOM_SECURITY_APITOKEN=eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1Mzg2NDM1NTQsInN1YiI6ImFkbWluIiwiaXNzIjoic3Ryb29tIn0.J8dqtQf9gGXQlKU_rAye46lUKlJR8-vcyrYhOD0Rxoc
