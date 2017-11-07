@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+
+  stroom-query-elastic:
+    container_name: stroom-query-elastic
+    image: gchq/stroom-query-elastic:v0.0.1-alpha
+    environment:
+      - DB_USER=stroomuser
+      - DB_PASSWORD=stroompassword1
+      - DB_URL=jdbc:mysql://stroom-db/stroom?useUnicode=yes&characterEncoding=UTF-8
+    ports:
+      - 8299:8199
+      - 8300:8200
+    entrypoint: ./wait-for-it_busybox.sh stroom-db:3306 -- java -jar stroom-query-elastic-all.jar server config.yml
