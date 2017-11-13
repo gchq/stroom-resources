@@ -17,9 +17,6 @@ services:
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://stroom-stats-db/statistics?useUnicode=yes&characterEncoding=UTF-8
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=stroomuser
             - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=stroompassword1
-            - STROOM_POST_LOGOUT_REDIRECT_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8099/authentication/v1/logout
-            # - STROOM_SECURITY_LOGIN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1/checkCertificate
-            # - STROOM_SECURITY_AUTHENTICATION_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1
             # The browser is redirected to this URL so, like the AUTH UI URL, it needs to be the advertised host.
             - STROOM_AUTH_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8099
             - STROOM_AUTH_JWT_VERIFICATIONKEY=CHANGE_ME
