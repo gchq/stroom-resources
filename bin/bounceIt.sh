@@ -112,7 +112,7 @@ for host in $LOCAL_HOST_NAMES; do
 done
 
 if [ $isHostMissing ]; then
-    echo "Quting!"
+    echo "Quiting!"
     exit 1
 fi
 
