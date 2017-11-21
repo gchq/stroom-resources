@@ -1,0 +1,35 @@
+#Runs the whole stroom estate
+version: '2'
+
+services:
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
+
+  elasticsearch:
+      extends:
+          file: ./containers/elasticsearch.yml
+          service: elasticsearch
+
+  stroom-query-elastic-ui:
+      extends:
+          file: ./containers/stroomElasticQueryUi.yml
+          service: stroom-query-elastic-ui
+      depends_on:
+          - stroom-query-elastic-service
+
+  stroom-query-elastic-service:
+      extends:
+          file: ./containers/stroomElasticQueryService.yml
+          service: stroom-query-elastic-service
+      depends_on:
+          - elasticsearch
+
+  kibana:
+      extends:
+          file: ./containers/kibana.yml
+          service: kibana
+      depends_on:
+          - elasticsearch

@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+
+  stroom-query-elastic-service:
+    container_name: stroom-query-elastic-service
+    image: gchq/stroom-query-elastic-service:v0.0.1-alpha
+    environment:
+      - DOCKER_CLUSTER=docker-cluster
+      - DOCKER_HOSTS=elasticsearch:9300
+    ports:
+      - 8299:8299
+      - 8300:8300
+    entrypoint: ./wait-for-it_busybox.sh elasticsearch:9300 -- java -jar stroom-query-elastic-all.jar server config.yml

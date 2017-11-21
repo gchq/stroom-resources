@@ -38,6 +38,20 @@ services:
           file: ./containers/stroomAnnotationsUi.yml
           service: stroom-annotations-ui
 
+  stroom-query-elastic-ui:
+      extends:
+          file: ./containers/stroomElasticQueryUi.yml
+          service: stroom-query-elastic-ui
+      depends_on:
+          - stroom-query-elastic-service
+
+  stroom-query-elastic-service:
+      extends:
+          file: ./containers/stroomElasticQueryService.yml
+          service: stroom-query-elastic-service
+      depends_on:
+          - elasticsearch
+
   stroom-auth-service-db:
       extends:
           file: ./containers/stroomAuthDb.yml
@@ -51,16 +65,16 @@ services:
         - zookeeper
 
   elasticsearch:
-    extends:
-      file: ./containers/elasticsearch.yml
-      service: elasticsearch
+      extends:
+          file: ./containers/elasticsearch.yml
+          service: elasticsearch
 
   kibana:
-    extends:
-      file: ./containers/kibana.yml
-      service: kibana
-    depends_on:
-      - elasticsearch
+      extends:
+          file: ./containers/kibana.yml
+          service: kibana
+      depends_on:
+          - elasticsearch
 
   hbase:
       extends:
