@@ -26,7 +26,7 @@ services:
             - STROOM_ADVERTISED_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8080
             # This needs to be an API token issued for a user, i.e. for the admin user. 
             # Without this Stroom won't be able to make calls to it's RemoteDataSources.
-            - STROOM_SECURITY_APITOKEN=eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1Mzg2NDM1NTQsInN1YiI6ImFkbWluIiwiaXNzIjoic3Ryb29tIn0.J8dqtQf9gGXQlKU_rAye46lUKlJR8-vcyrYhOD0Rxoc
+            - STROOM_SECURITY_API_TOKEN=eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1Mzg2NDM1NTQsInN1YiI6ImFkbWluIiwiaXNzIjoic3Ryb29tIn0.J8dqtQf9gGXQlKU_rAye46lUKlJR8-vcyrYhOD0Rxoc
             - ADMIN_CONTEXT_PATH=/stroomAdmin
             - STROOM_LOGGING_LEVEL=INFO
             - STROOM_PLUGINS_LIB_DIR=/stroom/plugins
