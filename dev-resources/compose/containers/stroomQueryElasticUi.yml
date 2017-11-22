@@ -4,7 +4,7 @@ services:
 
   stroom-query-elastic-ui:
     container_name: stroom-query-elastic-ui
-    image: gchq/stroom-query-elastic-ui:v0.0.1-alpha.1
+    image: gchq/stroom-query-elastic-ui:v0.0.1-alpha.2
     environment:
       - REACT_APP_QUERY_ELASTIC_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/queryElasticService
     ports:

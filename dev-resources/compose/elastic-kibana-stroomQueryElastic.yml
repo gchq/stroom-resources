@@ -15,15 +15,15 @@ services:
 
   stroom-query-elastic-ui:
       extends:
-          file: ./containers/stroomElasticQueryUi.yml
+          file: ./containers/stroomQueryElasticUi.yml
           service: stroom-query-elastic-ui
       depends_on:
-          - stroom-query-elastic-service
+          - stroom-query-elastic-svc
 
-  stroom-query-elastic-service:
+  stroom-query-elastic-svc:
       extends:
           file: ./containers/stroomElasticQueryService.yml
-          service: stroom-query-elastic-service
+          service: stroom-query-elastic-svc
       depends_on:
           - elasticsearch
 

@@ -13,21 +13,21 @@ services:
           file: ./containers/elasticsearch.yml
           service: elasticsearch
 
+  stroom-query-elastic-svc:
+      extends:
+          file: ./containers/stroomQueryElasticUi.yml
+          service: stroom-query-elastic-ui
+      depends_on:
+          - stroom-query-elastic-svc
+      image: "gchq/stroom-query-elastic-svc:${STROOM_QUERY_ELASTIC_TAG}"
+
   stroom-query-elastic-ui:
       extends:
           file: ./containers/stroomElasticQueryUi.yml
           service: stroom-query-elastic-ui
       depends_on:
-          - stroom-query-elastic-service
-      image: "gchq/stroom-query-elastic-service:${STROOM_QUERY_ELASTIC_SERVICE_TAG}"
-
-  stroom-query-elastic-service:
-      extends:
-          file: ./containers/stroomElasticQueryService.yml
-          service: stroom-query-elastic-service
-      depends_on:
           - elasticsearch
-      image: "gchq/stroom-query-elastic-ui:${STROOM_QUERY_ELASTIC_SERVICE_TAG}"
+      image: "gchq/stroom-query-elastic-ui:${STROOM_QUERY_ELASTIC_TAG}"
 
   kibana:
       extends:
