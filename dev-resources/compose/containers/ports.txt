@@ -7,6 +7,7 @@
  3309 - stroom-auth-service-db
  3310 - stroom-annotations-db
  5001 - stroom-annotations-ui
+ 5002 - stroom-query-elastic-ui
  5601 - Kibana
  8080 - stroom (app & admin)
  8086 - stroom-stats (app)
