@@ -1,7 +1,12 @@
 #For use when running Stroom in an IDE (or running Stroom's integration tests) with all services/resources it needs e.g. service discovery, kafka, etc. but no HBase
 version: '2'
 
-services: 
+services:
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
 
   kafka:
       extends:
