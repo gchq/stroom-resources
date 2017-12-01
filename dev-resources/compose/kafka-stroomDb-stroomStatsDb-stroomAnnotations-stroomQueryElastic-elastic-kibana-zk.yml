@@ -1,0 +1,68 @@
+#For use when running Stroom in an IDE (or running Stroom's integration tests) with all services/resources it needs e.g. service discovery, kafka, etc. but no HBase
+version: '2'
+
+services: 
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      depends_on:
+        - "zookeeper"
+
+  elasticsearch:
+      extends:
+          file: ./containers/elasticsearch.yml
+          service: elasticsearch
+
+  kibana:
+      extends:
+          file: ./containers/kibana.yml
+          service: kibana
+      depends_on:
+          - elasticsearch
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
+  stroom-query-elastic-ui:
+      extends:
+          file: ./containers/stroomQueryElasticUi.yml
+          service: stroom-query-elastic-ui
+      depends_on:
+          - stroom-query-elastic-svc
+
+  stroom-query-elastic-svc:
+      extends:
+          file: ./containers/stroomQueryElasticService.yml
+          service: stroom-query-elastic-svc
+      depends_on:
+          - elasticsearch
+
+  stroom-annotations-service:
+      extends:
+          file: ./containers/stroomAnnotationsService.yml
+          service: stroom-annotations-service
+
+  stroom-annotations-ui:
+      extends:
+          file: ./containers/stroomAnnotationsUi.yml
+          service: stroom-annotations-ui
+
+  stroom-annotations-db:
+    extends:
+          file: ./containers/stroomAnnotationsDb.yml
+          service: stroom-annotations-db
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+

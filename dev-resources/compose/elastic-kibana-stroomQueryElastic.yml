@@ -22,7 +22,7 @@ services:
 
   stroom-query-elastic-svc:
       extends:
-          file: ./containers/stroomElasticQueryService.yml
+          file: ./containers/stroomQueryElasticService.yml
           service: stroom-query-elastic-svc
       depends_on:
           - elasticsearch
