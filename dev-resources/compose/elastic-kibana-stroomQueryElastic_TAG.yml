@@ -1,0 +1,37 @@
+#Runs the whole stroom estate
+version: '2'
+
+services:
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
+
+  elasticsearch:
+      extends:
+          file: ./containers/elasticsearch.yml
+          service: elasticsearch
+
+  stroom-query-elastic-svc:
+      extends:
+          file: ./containers/stroomQueryElasticUi.yml
+          service: stroom-query-elastic-ui
+      depends_on:
+          - stroom-query-elastic-svc
+      image: "gchq/stroom-query-elastic-svc:${STROOM_QUERY_ELASTIC_TAG}"
+
+  stroom-query-elastic-ui:
+      extends:
+          file: ./containers/stroomQueryElasticUi.yml
+          service: stroom-query-elastic-ui
+      depends_on:
+          - elasticsearch
+      image: "gchq/stroom-query-elastic-ui:${STROOM_QUERY_ELASTIC_TAG}"
+
+  kibana:
+      extends:
+          file: ./containers/kibana.yml
+          service: kibana
+      depends_on:
+          - elasticsearch

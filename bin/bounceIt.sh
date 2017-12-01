@@ -41,6 +41,7 @@ STROOM_AUTH_SERVICE_TAG=master-SNAPSHOT
 STROOM_AUTH_UI_TAG=master-SNAPSHOT
 STROOM_ANNOTATIONS_SERVICE_TAG=master-SNAPSHOT
 STROOM_ANNOTATIONS_UI_TAG=master-SNAPSHOT
+STROOM_QUERY_ELASTIC_TAG=master-SNAPSHOT
 STROOM_STATS_TAG=master-SNAPSHOT"
 
 #regex used to locate a docker tag variable in a docker-compose .yml file
@@ -152,6 +153,8 @@ if grep -q "${TAG_VARIABLE_REGEX}" $ymlFile; then
             setDockerTagValue "stroom-stats" "STROOM_STATS_TAG" "${STROOM_STATS_TAG}"
         elif [ "$tag" = "STROOM_ANNOTATIONS_SERVICE_TAG" ]; then
             setDockerTagValue "stroom-annotations-service" "STROOM_ANNOTATIONS_SERVICE_TAG" "${STROOM_ANNOTATIONS_SERVICE_TAG}"
+        elif [ "$tag" = "STROOM_QUERY_ELASTIC_TAG" ]; then
+            setDockerTagValue "stroom-query-elastic" "STROOM_QUERY_ELASTIC_TAG" "${STROOM_QUERY_ELASTIC_TAG}"
         elif [ "$tag" = "STROOM_ANNOTATIONS_UI_TAG" ]; then
             setDockerTagValue "stroom-annotations-ui" "STROOM_ANNOTATIONS_UI_TAG" "${STROOM_ANNOTATIONS_UI_TAG}"
         elif [ "$tag" = "STROOM_AUTH_SERVICE_TAG" ]; then

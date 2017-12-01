@@ -6,7 +6,9 @@
  3308 - stroom-stats-db
  3309 - stroom-auth-service-db
  3310 - stroom-annotations-db
- 5001 - stroom-annotations-ui 
+ 5001 - stroom-annotations-ui
+ 5002 - stroom-query-elastic-ui
+ 5601 - Kibana
  8080 - stroom (app & admin)
  8086 - stroom-stats (app)
  8087 - stroom-stats (admin)
@@ -14,6 +16,10 @@
  8096 - stroom-auth-service (app)
  8199 - stroom-annotations-service (app)
  8200 - stroom-annotations-service (admin)
+ 8299 - stroom-elastic-query-service (app)
+ 8300 - stroom-elastic-query-service (admin)
+ 9200 - Elastic Search (TCP)
+ 9300 - Elastic Search (HTTP)
  9092 - kakfa
 16000 - hbase
 16010 - hbase

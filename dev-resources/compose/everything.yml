@@ -38,6 +38,20 @@ services:
           file: ./containers/stroomAnnotationsUi.yml
           service: stroom-annotations-ui
 
+  stroom-query-elastic-ui:
+      extends:
+          file: ./containers/stroomQueryElasticUi.yml
+          service: stroom-query-elastic-ui
+      depends_on:
+          - stroom-query-elastic-svc
+
+  stroom-query-elastic-svc:
+      extends:
+          file: ./containers/stroomQueryElasticService.yml
+          service: stroom-query-elastic-svc
+      depends_on:
+          - elasticsearch
+
   stroom-auth-service-db:
       extends:
           file: ./containers/stroomAuthDb.yml
@@ -48,7 +62,19 @@ services:
           file: ./containers/kafka.yml
           service: kafka
       depends_on:
-        - "zookeeper"
+        - zookeeper
+
+  elasticsearch:
+      extends:
+          file: ./containers/elasticsearch.yml
+          service: elasticsearch
+
+  kibana:
+      extends:
+          file: ./containers/kibana.yml
+          service: kibana
+      depends_on:
+          - elasticsearch
 
   hbase:
       extends:
@@ -57,17 +83,17 @@ services:
       #override the hostname as stroom-stats will access it from inside the docker network
       #hostname: hbase
       depends_on:
-        - "zookeeper"
+        - zookeeper
 
   stroom-stats:
       extends:
           file: ./containers/stroomStats.yml
           service: stroom-stats
       depends_on:
-        - "stroom-db"
-        - "zookeeper"
-        - "kafka"
-        - "hbase"
+        - stroom-db
+        - zookeeper
+        - kafka
+        - hbase
 
 #  stroom-proxy:
 #      extends:
@@ -79,7 +105,7 @@ services:
           file: ./containers/stroom.yml
           service: stroom
       depends_on:
-        - "stroom-db"
-        - "stroom-stats-db"
-        - "zookeeper"
-        - "kafka"
+        - stroom-db
+        - stroom-stats-db
+        - zookeeper
+        - kafka
