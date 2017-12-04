@@ -4,7 +4,7 @@ services:
 
   stroom-annotations-ui:
     container_name: stroom-annotations-ui
-    image: gchq/stroom-annotations-ui:v0.1.5-alpha.3
+    image: gchq/stroom-annotations-ui:v0.1.5-alpha.4
     environment:
       - REACT_APP_STROOM_AUTH_SERVICE_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8096
       - REACT_APP_STROOM_UI_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8080
