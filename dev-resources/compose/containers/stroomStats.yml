@@ -10,7 +10,7 @@ services:
             - STATS_DB_USER=stroomuser
             - STATS_DB_PASSWORD=stroompassword1
             - STATS_DB_URL=jdbc:mysql://stroom-db/stroom?useUnicode=yes&characterEncoding=UTF-8
-            - STATS_JWT_SECRET=CHANGE_ME
+            - STATS_JWT_SECRET={"kty":"RSA","kid":"k1","n":"uMF7JkZQDWvC9N0T1sw__7Tdaq0L34ghFBrKq7CkW-LiibQXh3eXBJtNPriDZ7QT4wA23jDF6Bq28RhEyWSssCqrm1Fjvq2ck5dd1shrqR-9WXBs0T1gXi4Mbne3aiWSWFHyW17qjEFoQfx9tLAX9eJYR56KpEu7Au6PAL_9ThQFlQy9wx5Dss8SQy6uwA9qw9A9lCGJKDhRwwBlXZ_5mJSWqqjNSz7ptIKAWvjOVTG8MmgOKqme9RLnWpQnNRf6h9ILK4wixAYLMQpIRphc9tFlZdhiy2yqcdiAEktCF7U0ZcnY3fN_-dw-VEHaCdUoBAPNqBsDPx9ewB8-wtyApQ","e":"AQAB"}
             - STATS_ZK_QUORUM=zookeeper:2181
             # The below two values change the default properties - they don't actually set them in ZK!
             # That is, once these have been set changing the below won't change them. You'd need to do that directly
