@@ -23,8 +23,11 @@ set -e
 #List of hostnames that need to be added to /etc/hosts to resolve to 127.0.0.1
 LOCAL_HOST_NAMES="kafka hbase"
 
+#Location of all local stroom configuration
+STROOM_CONF_DIR="${HOME}/.stroom"
+
 #Location of the file used to define the docker tag variable values
-TAGS_FILE="${HOME}/.stroom/docker.tags"
+TAGS_FILE="${STROOM_CONF_DIR}/docker.tags"
 
 #These are the default values for each docker tag variable
 #This string is used to create the TAGS_FILE if it doesn't exist
@@ -60,6 +63,7 @@ echo
 #Ensure we have a docker.tags file, if not create one using the content of the DEFAULT_TAGS string
 if [ ! -f ${TAGS_FILE} ]; then
     echo -e "Default docker tags file (${BLUE}${TAGS_FILE}${NC}) doesn't exist so have created it"
+    mkdir -p "${STROOM_CONF_DIR}"
     touch "${TAGS_FILE}"
     echo -e "$DEFAULT_TAGS" > $TAGS_FILE
     echo
@@ -107,7 +111,7 @@ for host in $LOCAL_HOST_NAMES; do
         echo -e "${RED}ERROR${NC} - /etc/hosts is missing an entry for \"127.0.0.1 $host\""
         isHostMissing=true
         echo "Add the following line to /etc/hosts:"
-        echo "${GREEN}127.0.0.1 $host${NC}"
+        echo -e "${GREEN}127.0.0.1 $host${NC}"
         echo
     fi
 done

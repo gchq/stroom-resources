@@ -23,7 +23,7 @@ services:
 
   stroom-query-elastic-ui:
       extends:
-          file: ./containers/stroomElasticQueryUi.yml
+          file: ./containers/stroomQueryElasticUi.yml
           service: stroom-query-elastic-ui
       depends_on:
           - elasticsearch

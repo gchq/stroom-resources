@@ -37,6 +37,30 @@ services:
           file: ./containers/stroomStatsDb.yml
           service: stroom-stats-db
 
+  stroom-query-elastic-ui:
+      extends:
+          file: ./containers/stroomQueryElasticUi.yml
+          service: stroom-query-elastic-ui
+      depends_on:
+          - stroom-query-elastic-svc
+
+  stroom-query-elastic-svc:
+      extends:
+          file: ./containers/stroomQueryElasticService.yml
+          service: stroom-query-elastic-svc
+      depends_on:
+          - elasticsearch
+
+  stroom-annotations-service:
+      extends:
+          file: ./containers/stroomAnnotationsService.yml
+          service: stroom-annotations-service
+
+  stroom-annotations-ui:
+      extends:
+          file: ./containers/stroomAnnotationsUi.yml
+          service: stroom-annotations-ui
+
   stroom-annotations-db:
     extends:
           file: ./containers/stroomAnnotationsDb.yml
