@@ -6,6 +6,17 @@ kConsumeTopic() {
     echo "Consuming from topic(s) [$topicName] (comma delimited list of topics)"
     docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --zookeeper zookeeper:2181/kafka --whitelist $topicName"
 }
+
+kCreateTopic() {
+    topicName="$1"
+    partitionCount="$2"
+    if [ "${partitionCount}x" = "x" ]; then
+        partitionCount=1
+    fi
+    echo "Creating topic [$topicName] with partition count [$partitionCount]"
+    docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-topics.sh --create --zookeeper zookeeper:2181/kafka --replication-factor 1 --partitions $partitionCount --topic $topicName"
+}
+
 # Kafka aliases
 # We need to unset the JMX_PORT because these scripts share a script with the Kafka start script. The shared script uses the JMX_PORT, so no more than one of these scripts can be run from the same address
 alias createStatisticsTopic='docker exec -i -t kafka bash -c "unset JMX_PORT; bin/kafka-topics.sh --create --zookeeper zookeeper:2181/kafka --replication-factor 1 --partitions 1 --topic statistics"'
@@ -15,6 +26,7 @@ alias kconsume='kConsumeTopic'
 alias kconsumeAll='echo "Consuming from all topics..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --blacklist noSuchTopic --from-beginning --zookeeper zookeeper:2181/kafka"'
 alias kconsumeEvents='echo "Consuming from topics statisticEvents-Count & statisticEvents-Value ..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --zookeeper zookeeper:2181/kafka --whitelist statisticEvents-Count,statisticEvents-Value"'
 alias ktopics='docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181/kafka"'
+alias kcreate='kCreateTopic'
 
 # For running bash in the containers
 alias kbash='docker exec -i -t kafka bash'
