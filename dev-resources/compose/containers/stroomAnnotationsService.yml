@@ -9,7 +9,6 @@ services:
       - DB_USER=stroomuser
       - DB_PASSWORD=stroompassword1
       - DB_URL=jdbc:mariadb://stroom-annotations-db/annotations
-      - JWS_SECRET={"kty":"RSA","kid":"k1","n":"uMF7JkZQDWvC9N0T1sw__7Tdaq0L34ghFBrKq7CkW-LiibQXh3eXBJtNPriDZ7QT4wA23jDF6Bq28RhEyWSssCqrm1Fjvq2ck5dd1shrqR-9WXBs0T1gXi4Mbne3aiWSWFHyW17qjEFoQfx9tLAX9eJYR56KpEu7Au6PAL_9ThQFlQy9wx5Dss8SQy6uwA9qw9A9lCGJKDhRwwBlXZ_5mJSWqqjNSz7ptIKAWvjOVTG8MmgOKqme9RLnWpQnNRf6h9ILK4wixAYLMQpIRphc9tFlZdhiy2yqcdiAEktCF7U0ZcnY3fN_-dw-VEHaCdUoBAPNqBsDPx9ewB8-wtyApQ","e":"AQAB"}
       - ADMIN_CONTEXT_PATH=/annotationsServiceAdmin
       - AUTH_UI=http://${STROOM_RESOURCES_ADVERTISED_HOST}/auth/login
       - AUTHORISATION_SERVICE_URL=http://stroom:8080/api/authorisation/v1

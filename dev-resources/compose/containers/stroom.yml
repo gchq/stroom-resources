@@ -5,7 +5,6 @@ services:
 
     stroom:
         container_name: stroom
-        # image: gchq/stroom:dev-SNAPSHOT
         image: gchq/stroom:dev-SNAPSHOT
         environment:
             - STROOM_NODE=node1a
