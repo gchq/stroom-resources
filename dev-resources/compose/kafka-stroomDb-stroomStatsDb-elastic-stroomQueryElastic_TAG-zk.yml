@@ -23,19 +23,21 @@ services:
           file: ./containers/stroomStatsDb.yml
           service: stroom-stats-db
 
-  stroom-query-elastic-ui:
+  stroom-query-elastic-svc:
       extends:
           file: ./containers/stroomQueryElasticUi.yml
           service: stroom-query-elastic-ui
       depends_on:
           - stroom-query-elastic-svc
+      image: "gchq/stroom-query-elastic-svc:${STROOM_QUERY_ELASTIC_TAG}"
 
-  stroom-query-elastic-svc:
+  stroom-query-elastic-ui:
       extends:
-          file: ./containers/stroomQueryElasticService.yml
-          service: stroom-query-elastic-svc
+          file: ./containers/stroomQueryElasticUi.yml
+          service: stroom-query-elastic-ui
       depends_on:
           - elasticsearch
+      image: "gchq/stroom-query-elastic-ui:${STROOM_QUERY_ELASTIC_TAG}"
 
   kafka:
       extends:

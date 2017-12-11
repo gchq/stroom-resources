@@ -29,11 +29,13 @@ services:
       extends:
           file: ./containers/stroomAnnotationsService.yml
           service: stroom-annotations-service
+      image: "gchq/stroom-annotations-service:${STROOM_ANNOTATIONS_TAG}"
 
   stroom-annotations-ui:
       extends:
           file: ./containers/stroomAnnotationsUi.yml
           service: stroom-annotations-ui
+      image: "gchq/stroom-annotations-ui:${STROOM_ANNOTATIONS_TAG}"
 
   stroom-annotations-db:
     extends:
