@@ -1,0 +1,27 @@
+#Runs the whole stroom estate
+version: '2'
+
+services: 
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
+  stroom-auth-db:
+      extends:
+          file: ./containers/stroomAuthDb.yml
+          service: stroom-auth-db
+
+  stroom:
+      extends:
+          file: ./containers/stroom.yml
+          service: stroom
+      depends_on:
+        - "stroom-db"
+        - "stroom-stats-db"

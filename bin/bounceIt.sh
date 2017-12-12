@@ -250,7 +250,7 @@ export STROOM_RESOURCES_ADVERTISED_HOST=$ip
 # NGINX: creates config files from templates, adding in the correct IP address
 deployRoot=$DIR/"../deploy"
 echo -e "Creating nginx/nginx.conf using ${GREEN}$ip${NC}"
-cat $deployRoot/template/nginx.conf | sed "s/<SWARM_IP>/$ip/g" | sed "s/<STROOM_URL>/$ip/g" | sed "s/<AUTH_UI_URL>/$ip/g" > $deployRoot/nginx/nginx.conf
+cat $deployRoot/template/nginx.conf | sed "s/<ADVERTISED_HOST>/$ip/g" > $deployRoot/nginx/nginx.conf
 echo
 
 echo "Using the following docker images:"

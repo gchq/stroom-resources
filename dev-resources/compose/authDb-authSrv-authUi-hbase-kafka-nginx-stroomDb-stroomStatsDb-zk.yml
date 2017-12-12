@@ -1,0 +1,59 @@
+#For use when running stroom-stats in the IDE, providing all services it needs.
+#'stroom' only runs to build the database tables it needs
+#'stroom-stats-db' only needed so 'stroom' doesn't complain about its absence
+version: '2'
+
+services: 
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
+  stroom-auth-db:
+      extends:
+          file: ./containers/stroomAuthDb.yml
+          service: stroom-auth-db
+
+  stroom-auth-service:
+      extends:
+          file: ./containers/stroomAuthService.yml
+          service: stroom-auth-service
+      environment:
+        - AUTHORISATION_SERVICE_URL=http://localhost:8080/api/authorisation/v1
+
+  stroom-auth-ui:
+      extends:
+          file: ./containers/stroomAuthUi.yml
+          service: stroom-auth-ui
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      depends_on:
+        - "zookeeper"
+
+  hbase:
+      extends:
+          file: ./containers/hbase.yml
+          service: hbase
+      depends_on:
+        - "zookeeper"
+
+

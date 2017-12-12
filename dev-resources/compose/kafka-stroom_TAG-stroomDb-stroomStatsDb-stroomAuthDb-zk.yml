@@ -1,0 +1,49 @@
+version: '2'
+
+services: 
+
+    kafka:
+        extends:
+            file: ./containers/kafka.yml
+            service: kafka
+        #environment:
+            #override the edvertised hostname as stroom is inside docker
+            #KAFKA_ADVERTISED_HOST_NAME: kafka 
+        depends_on:
+            - "zookeeper"
+
+    stroom:
+        extends:
+            file: ./containers/stroom.yml
+            service: stroom
+        image: "gchq/stroom:${STROOM_TAG}"
+        environment:
+            - STROOM_DEVELOPMENT_MODE=false
+                #TODO remove this line below once the kafka plugin code has reached master
+            - STROOM_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+        depends_on:
+            - "stroom-db"
+            - "stroom-stats-db"
+            - "zookeeper"
+            - "kafka"
+
+    stroom-db:
+        extends:
+            file: ./containers/stroomDb.yml
+            service: stroom-db
+
+    stroom-stats-db:
+        extends:
+            file: ./containers/stroomStatsDb.yml
+            service: stroom-stats-db
+
+    zookeeper:
+        extends:
+            file: ./containers/zookeeper.yml
+            service: zookeeper
+
+
+    stroom-auth-db:
+        extends:
+            file: ./containers/stroomAuthDb.yml
+            service: stroom-auth-db

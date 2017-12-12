@@ -2,9 +2,9 @@ version: '2'
 
 services: 
 
-  stroom-auth-service-db:
+  stroom-auth-db:
     image: mariadb:10.3.0
-    container_name: stroom-auth-service-db
+    container_name: stroom-auth-db
     ports:
         # Expose mysql on 3309 to the host so as not to conflict with stroom-db or stroom-stats-db
       - "3309:3306"

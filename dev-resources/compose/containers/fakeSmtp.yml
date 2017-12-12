@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  fake-smtp:
+    container_name: fake-smtp
+    image: munkyboy/fakesmtp
+    ports:
+      - "2526:25"

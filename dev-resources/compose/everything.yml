@@ -55,7 +55,22 @@ services:
   stroom-auth-service-db:
       extends:
           file: ./containers/stroomAuthDb.yml
-          service: stroom-auth-service-db
+          service: stroom-auth-db
+
+  stroom-auth-service:
+      extends:
+          file: ./containers/stroomAuthService.yml
+          service: stroom-auth-service
+
+  stroom-auth-ui:
+      extends:
+          file: ./containers/stroomAuthUi.yml
+          service: stroom-auth-ui
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
 
   kafka:
       extends:
@@ -95,10 +110,15 @@ services:
         - kafka
         - hbase
 
-#  stroom-proxy:
-#      extends:
-#          file: ./containers/stroomProxy.yml
-#          service: stroom-proxy
+  fake-smtp:
+      extends:
+          file: ./containers/fakeSmtp.yml
+          service: fake-smtp
+
+  #stroom-proxy:
+      #extends:
+          #file: ./containers/stroomProxy.yml
+          #service: stroom-proxy
 
   stroom:
       extends:
