@@ -1,11 +1,11 @@
 #Runs the latest build of stroom from dockerhub 
-version: '2'
+version: '2.1'
 
 services: 
 
     stroom:
         container_name: stroom
-        image: gchq/stroom:dev-SNAPSHOT
+        image: "gchq/stroom:${STROOM_TAG:-master-SNAPSHOT}"
         environment:
             - STROOM_NODE=node1a
             - STROOM_RACK=rack

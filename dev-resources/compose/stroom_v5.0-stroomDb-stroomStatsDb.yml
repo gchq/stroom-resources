@@ -1,5 +1,5 @@
 #Runs the latest stroom 5.0.x build from dockerhub along with its databases 
-version: '2'
+version: '2.1'
 
 services: 
 

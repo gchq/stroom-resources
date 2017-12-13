@@ -1,1 +1,47 @@
-hbase-kafka-stroom-stroomDb-stroomStatsDb-zk.yml
+#For use when running stroom-stats in the IDE, providing all services it needs.
+#'stroom' only runs to build the database tables it needs
+#'stroom-stats-db' only needed so 'stroom' doesn't complain about its absence
+version: '2.1'
+
+services: 
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      depends_on:
+        - "zookeeper"
+
+  hbase:
+      extends:
+          file: ./containers/hbase.yml
+          service: hbase
+      depends_on:
+        - "zookeeper"
+
+  stroom:
+      extends:
+          file: ./containers/stroom.yml
+          service: stroom
+      depends_on:
+        - "stroom-db"
+        - "stroom-stats-db"
+        - "zookeeper"
+        - "kafka"
+
+

@@ -1,7 +1,7 @@
 #For use when running stroom-stats in the IDE, providing all services it needs.
 #'stroom' only runs to build the database tables it needs
 #'stroom-stats-db' only needed so 'stroom' doesn't complain about its absence
-version: '2'
+version: '2.1'
 
 services: 
 

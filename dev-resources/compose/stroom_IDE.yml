@@ -1,1 +1,27 @@
-kafka-stroomDb-stroomStatsDb-zk.yml
+#For use when running Stroom in an IDE (or running Stroom's integration tests) with all services/resources it needs e.g. service discovery, kafka, etc. but no HBase
+version: '2.1'
+
+services: 
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      depends_on:
+        - "zookeeper"
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-stats-db:
+      extends:
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+

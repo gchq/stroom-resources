@@ -1,6 +1,6 @@
 #For use when running Stroom in an IDE with all services/resources it needs e.g. service discovery,
 #kafka, etc.
-version: '2'
+version: '2.1'
 
 services: 
 

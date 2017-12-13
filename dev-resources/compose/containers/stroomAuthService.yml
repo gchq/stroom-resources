@@ -1,10 +1,10 @@
-version: '2'
+version: '2.1'
 
 services:
 
   stroom-auth-service:
     container_name: stroom-auth-service
-    image: gchq/stroom-auth-service:dev-SNAPSHOT
+    image: "gchq/stroom-auth-service:${STROOM_AUTH_SERVICE_TAG:-dev-SNAPSHOT}"
     environment:
       - DB_USER=stroomuser
       - DB_PASSWORD=stroompassword1

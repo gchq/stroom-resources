@@ -1,5 +1,5 @@
 #Runs the aspects of the annotations service required for integration testing
-version: '2'
+version: '2.1'
 
 services:
 

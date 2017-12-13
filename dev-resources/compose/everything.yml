@@ -1,30 +1,60 @@
-#Runs the whole stroom estate
-version: '2'
+#Defines all the services that make up the stroom estate
+version: '2.1'
 
 services:
+
+  elasticsearch:
+      extends:
+          file: ./containers/elasticsearch.yml
+          service: elasticsearch
+
+  fake-smtp:
+      extends:
+          file: ./containers/fakeSmtp.yml
+          service: fake-smtp
+
+  hbase:
+      extends:
+          file: ./containers/hbase.yml
+          service: hbase
+      #override the hostname as stroom-stats will access it from inside the docker network
+      #hostname: hbase
+      depends_on:
+        - zookeeper
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      depends_on:
+        - zookeeper
+
+  kibana:
+      extends:
+          file: ./containers/kibana.yml
+          service: kibana
+      depends_on:
+          - elasticsearch
+
 
   nginx:
       extends:
           file: ./containers/nginx.yml
           service: nginx
 
-  zookeeper:
+  stroom:
       extends:
-          file: ./containers/zookeeper.yml
-          service: zookeeper
-
-  stroom-db:
-      extends:
-          file: ./containers/stroomDb.yml
-          service: stroom-db
-
-  stroom-stats-db:
-      extends:
-          file: ./containers/stroomStatsDb.yml
-          service: stroom-stats-db
+          file: ./containers/stroom.yml
+          service: stroom
+      #image: "gchq/stroom:${STROOM_TAG}"
+      depends_on:
+        - stroom-db
+        - stroom-stats-db
+        - zookeeper
+        - kafka
 
   stroom-annotations-db:
-    extends:
+      extends:
           file: ./containers/stroomAnnotationsDb.yml
           service: stroom-annotations-db
 
@@ -32,11 +62,44 @@ services:
       extends:
           file: ./containers/stroomAnnotationsService.yml
           service: stroom-annotations-service
+      depends_on:
+          - stroom-annotations-db
 
   stroom-annotations-ui:
       extends:
           file: ./containers/stroomAnnotationsUi.yml
           service: stroom-annotations-ui
+      depends_on:
+          - stroom-annotations-service
+
+  stroom-auth-service-db:
+      extends:
+          file: ./containers/stroomAuthDb.yml
+          service: stroom-auth-db
+
+  stroom-auth-service:
+      extends:
+          file: ./containers/stroomAuthService.yml
+          service: stroom-auth-service
+      depends_on:
+          - stroom-auth-service-db
+
+  stroom-auth-ui:
+      extends:
+          file: ./containers/stroomAuthUi.yml
+          service: stroom-auth-ui
+      depends_on:
+          - stroom-auth-service
+
+  stroom-db:
+      extends:
+          file: ./containers/stroomDb.yml
+          service: stroom-db
+
+  stroom-proxy:
+      extends:
+          file: ./containers/stroomProxy.yml
+          service: stroom-proxy
 
   stroom-query-elastic-ui:
       extends:
@@ -52,54 +115,6 @@ services:
       depends_on:
           - elasticsearch
 
-  stroom-auth-service-db:
-      extends:
-          file: ./containers/stroomAuthDb.yml
-          service: stroom-auth-db
-
-  stroom-auth-service:
-      extends:
-          file: ./containers/stroomAuthService.yml
-          service: stroom-auth-service
-
-  stroom-auth-ui:
-      extends:
-          file: ./containers/stroomAuthUi.yml
-          service: stroom-auth-ui
-
-  nginx:
-      extends:
-          file: ./containers/nginx.yml
-          service: nginx
-
-  kafka:
-      extends:
-          file: ./containers/kafka.yml
-          service: kafka
-      depends_on:
-        - zookeeper
-
-  elasticsearch:
-      extends:
-          file: ./containers/elasticsearch.yml
-          service: elasticsearch
-
-  kibana:
-      extends:
-          file: ./containers/kibana.yml
-          service: kibana
-      depends_on:
-          - elasticsearch
-
-  hbase:
-      extends:
-          file: ./containers/hbase.yml
-          service: hbase
-      #override the hostname as stroom-stats will access it from inside the docker network
-      #hostname: hbase
-      depends_on:
-        - zookeeper
-
   stroom-stats:
       extends:
           file: ./containers/stroomStats.yml
@@ -110,22 +125,13 @@ services:
         - kafka
         - hbase
 
-  fake-smtp:
+  stroom-stats-db:
       extends:
-          file: ./containers/fakeSmtp.yml
-          service: fake-smtp
+          file: ./containers/stroomStatsDb.yml
+          service: stroom-stats-db
 
-  #stroom-proxy:
-      #extends:
-          #file: ./containers/stroomProxy.yml
-          #service: stroom-proxy
-
-  stroom:
+  zookeeper:
       extends:
-          file: ./containers/stroom.yml
-          service: stroom
-      depends_on:
-        - stroom-db
-        - stroom-stats-db
-        - zookeeper
-        - kafka
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+

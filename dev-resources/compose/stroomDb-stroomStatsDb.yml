@@ -1,5 +1,5 @@
 #Intended for running stroom v5.x against its databases
-version: '2'
+version: '2.1'
 
 services: 
 

@@ -1,5 +1,5 @@
 #Runs the whole stroom estate
-version: '2'
+version: '2.1'
 
 services: 
 

@@ -1,5 +1,5 @@
 #Runs the latest build of stroom v6.0.x from dockerhub along with all the resources it needs
-version: '2'
+version: '2.1'
 
 services: 
 
