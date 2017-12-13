@@ -61,6 +61,12 @@ NC='\033[0m' # No Color
 DOCKER_TAGS_URL_PREFIX="from ${BLUE}https://hub.docker.com/r/gchq/"
 DOCKER_TAGS_URL_SUFFIX="/tags/${NC}"
 
+printUsage() {
+    echo "Usage:" >&2
+    echo "./bounceIt.sh [OPTIONS] [SERVICE_NAME...]" >&2
+    echo -e "Custom docker tags can be defined in ${BLUE}${TAGS_FILE}${NC}" >&2
+}
+
 echo
 
 isHostMissing=""
@@ -69,7 +75,7 @@ isHostMissing=""
 #work correctly. This code checks they are all there
 for host in $LOCAL_HOST_NAMES; do
     if [ $(cat /etc/hosts | grep -e "127\.0\.0\.1\s*$host" | wc -l) -eq 0 ]; then 
-        echo -e "${RED}ERROR${NC} - /etc/hosts is missing an entry for \"127.0.0.1 $host\""
+        echo -e "${RED}ERROR${NC} - /etc/hosts is missing an entry for ${GREEN}\"127.0.0.1 $host\"${NC}"
         isHostMissing=true
         echo "Add the following line to /etc/hosts:"
         echo -e "${GREEN}127.0.0.1 $host${NC}"
@@ -136,40 +142,10 @@ fi
 ymlFile=${ALL_SERVICES_COMPOSE_FILE}
 projectName=$(basename $ymlFile | sed 's/\.yml$//')
 serviceNames="${*:1}"
-
-#pullLatestImageIfNeeded() {
-    #repoName=$1
-    #tagName=$2
-    #tagValue=$3
-    ##see if the repo name is in the compose file
-    #if grep -q "${repoName}:" $ymlFile ; then
-        #if grep -q "${tagName}=.*LOCAL.*" "$TAGS_FILE" ; then
-            #echo
-            #echo -e "Compose file contains ${GREEN}${repoName}${NC} but is using a locally built image, DockerHub will not be checked for a new version"
-        #else
-            ##use 'docker-compose ps' to establish if we already have a container for this service
-            ##if we do then we won't do a docker-compose pull as that would trash any local state
-            ##if a user wants refreshed images from dockerhub then they should delete their containers first
-            ##using the dockerTidyUp script or similar
-            #existingContainerId=$(docker-compose -f "$ymlFile" -p "$projectName" ps -q ${repoName})
-            #if [ "x" = "${existingContainerId}x" ]; then
-                ##no existing container so do a pull to check for updates
-                ##If the image has a fixed tag version e.g. master-20171008-DAILY, then no change will be
-                ##detected
-                #echo
-                #echo -e "Compose file contains ${GREEN}${repoName}${NC}, checking for any updates to the ${GREEN}${repoName}:${tagValue}${NC} image on dockerhub"
-                ##docker-compose -f "$ymlFile" -p "$projectName" pull ${repoName}
-            #else
-                #echo
-                #echo -e "Compose file contains ${GREEN}${repoName}${NC} but you already have a container with ID ${BLUE}${existingContainerId}${NC}, won't check dockerhub for updates"
-            #fi
-        #fi
-    #fi
-#}
+allImages=$(docker-compose -f $ymlFile config | egrep "image: ")
 
 if [ "${serviceNames}x" != "x" ]; then
     echo "The following Docker services and tags will be used:"
-    allImages=$(docker-compose -f $ymlFile config | egrep "image: ")
     #echo "$allImages"
 
     echo
@@ -178,7 +154,7 @@ if [ "${serviceNames}x" != "x" ]; then
 
         if ! egrep -q "^\s*${serviceName}:\s*$" $ymlFile; then
             echo
-            echo -e "${RED}ERROR - ${ymlFile} does not contain service ${GREEN}${serviceName}${NC}"
+            echo -e "${RED}ERROR${NC} - ${BLUE}${ymlFile}${NC} does not contain service ${GREEN}${serviceName}${NC}"
             exit 1
         else
             image=$(echo "$allImages" | grep "${serviceName}:" | sed 's/.*image: //')
@@ -229,6 +205,19 @@ if [ "${serviceNames}x" != "x" ]; then
         fi
         
     done
+else
+    #no service names supplied
+    echo -e "${RED}ERROR${NC} - No service names specified" >&2
+    echo  >&2
+    printUsage
+    echo  >&2
+    echo "Valid service names are:" >&2
+    echo  >&2
+    for serviceName in $(docker-compose -f ${ymlFile} config --services | sort); do
+        echo -e "  ${GREEN}${serviceName}${NC}" >&2
+    done
+
+    exit 1
 fi
 
 #args from 1 onwards are extra docker args
@@ -246,73 +235,6 @@ else
     echo "Exiting"
     exit 0
 fi
-
-
-#Read in the docker tag variables, either defaulted or as provided by the user
-#source "${TAGS_FILE}"
-
-
-#setDockerTagValue() {
-    #repoName=$1
-    #tagName=$2
-    #tagValue=$3
-    #padding='                       '
-    #url="${DOCKER_TAGS_URL_PREFIX}${repoName}${DOCKER_TAGS_URL_SUFFIX}"
-    #echo -e "Using ${tagName}${padding:${#tagName}}= ${GREEN}${tagValue}${NC}\t$url"
-    ##export the variable so docker-compose can see it and use it
-    #export "$tagName"
-#}
-
-##check if the yml file contains any Docker tag variables, i.e. ${xxxx_TAG}
-#if grep -q "${TAG_VARIABLE_REGEX}" $ymlFile; then
-    #echo "The following Docker tags will be used for this compose file:"
-    #echo
-    ##scan the yml file for any docker tag variables and then display their current
-    ##value (or a default) to the user for confirmation
-    #for tag in $(grep -o "${TAG_VARIABLE_REGEX}" $ymlFile | sed -E 's/\$\{(.*)}/\1/g'); do 
-
-        ##IMAGE SPECIFIC CODE
-        #if [ "$tag" = "STROOM_TAG" ]; then
-            #setDockerTagValue "stroom" "STROOM_TAG" "${STROOM_TAG}"
-        #elif [ "$tag" = "STROOM_STATS_TAG" ]; then
-            #setDockerTagValue "stroom-stats" "STROOM_STATS_TAG" "${STROOM_STATS_TAG}"
-        #elif [ "$tag" = "STROOM_ANNOTATIONS_SERVICE_TAG" ]; then
-            #setDockerTagValue "stroom-annotations-service" "STROOM_ANNOTATIONS_SERVICE_TAG" "${STROOM_ANNOTATIONS_SERVICE_TAG}"
-        #elif [ "$tag" = "STROOM_QUERY_ELASTIC_TAG" ]; then
-            #setDockerTagValue "stroom-query-elastic" "STROOM_QUERY_ELASTIC_TAG" "${STROOM_QUERY_ELASTIC_TAG}"
-        #elif [ "$tag" = "STROOM_ANNOTATIONS_UI_TAG" ]; then
-            #setDockerTagValue "stroom-annotations-ui" "STROOM_ANNOTATIONS_UI_TAG" "${STROOM_ANNOTATIONS_UI_TAG}"
-        #elif [ "$tag" = "STROOM_AUTH_SERVICE_TAG" ]; then
-            #setDockerTagValue "stroom-auth-service" "STROOM_AUTH_SERVICE_TAG" "${STROOM_AUTH_SERVICE_TAG}"
-        #elif [ "$tag" = "STROOM_AUTH_UI_TAG" ]; then
-            #setDockerTagValue "stroom-auth-ui" "STROOM_AUTH_UI_TAG" "${STROOM_AUTH_UI_TAG}"
-        #fi
-    #done
-
-    #echo
-    #echo -e "Docker tags can be changed in the file ${BLUE}${TAGS_FILE}${NC} in the form:"
-    #echo -e "  ${YELLOW}xxxxxxx_TAG=master-SNAPSHOT${NC}"
-    #echo
-    #read -rsp $'Press space to continue, or ctrl-c to exit...\n' -n1 keyPressed
-
-    #if [ "$keyPressed" = '' ]; then
-        #echo
-    #else
-        #echo "Exiting"
-        #exit 0
-    #fi
-#fi
-
-
-
-
-#IMAGE SPECIFIC CODE
-#pullLatestImageIfNeeded "stroom" "STROOM_TAG" ${STROOM_TAG}
-#pullLatestImageIfNeeded "stroom-stats" "STROOM_STATS_TAG" ${STROOM_STATS_TAG}
-#pullLatestImageIfNeeded "stroom-annotations-service" "STROOM_ANNOTATIONS_SERVICE_TAG" ${STROOM_ANNOTATIONS_SERVICE_TAG}
-#pullLatestImageIfNeeded "stroom-annotations-ui" "STROOM_ANNOTATIONS_UI_TAG" ${STROOM_ANNOTATIONS_UI_TAG}
-#pullLatestImageIfNeeded "stroom-auth-service" "STROOM_AUTH_SERVICE_TAG" ${STROOM_AUTH_SERVICE_TAG}
-#pullLatestImageIfNeeded "stroom-auth-ui" "STROOM_AUTH_UI_TAG" ${STROOM_AUTH_UI_TAG}
 
 echo 
 echo -e "Bouncing project $projectName with using $ymlFile with additional arguments for 'docker-compose up' [${GREEN}${extraDockerArgs}${NC}]"
@@ -350,6 +272,4 @@ echo
 
 #pass any additional arguments after the yml filename direct to docker-compose
 #This will create containers as required and then start up the new or existing containers
-docker-compose -f $ymlFile -p $projectName stop && docker-compose -f $ymlFile -p $projectName up $serviceName
-#docker-compose -f $ymlFile -p $projectName stop && docker-compose -f $ymlFile -p $projectName up $extraDockerArgs
-#docker-compose -f $ymlFile -p $projectName stop && docker-compose -f $ymlFile -p $projectName up $extraDockerArgs
+docker-compose -f $ymlFile -p $projectName stop && docker-compose -f $ymlFile -p $projectName up $serviceNames
