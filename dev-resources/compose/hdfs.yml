@@ -1,0 +1,7 @@
+version: '2'
+
+services: 
+  hbase:
+      extends:
+          file: ./containers/hdfs.yml
+          service: hdfs
