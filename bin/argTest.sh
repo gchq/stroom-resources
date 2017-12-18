@@ -12,6 +12,7 @@ NC='\033[0m' # No Colour
 SUPPORTED_COMPOSE_CMDS_REGEX="(start|stop|restart|up|down)"
 DEFAULT_COMPOSE_CMD="up"
 requireConfirmation=false
+requireHostFileCheck=true
 useEnvironmentVariables=false
 
 showUsage() {
@@ -20,6 +21,7 @@ showUsage() {
     echo "OPTIONs:"
     echo "  -h - Show this help text"
     echo "  -e - Rely on existing environment variables for any docker tags, the docker.tags file will not be used"
+    echo "  -x - Do not check hosts file for docker related entries"
     echo "  -y - Do not prompt for confirmation, e.g. when run from a script"
     echo "EXTRA_COMPOSE_ARGs - Any additional arguments for docker-compose, of the form \"--argName\", e.g. \"--build\""
     echo "e.g.: $0 serviceX serviceY"
@@ -55,6 +57,10 @@ while getopts "$optspec" optchar; do
             #help
             showUsage
             exit 1
+            ;;
+        x)
+            #echo "Will not check hosts file"
+            requireHostFileCheck=false
             ;;
         y)
             #echo "Will not prompt for confirmation"
