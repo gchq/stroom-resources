@@ -11,7 +11,6 @@ NC='\033[0m' # No Colour
 
 SUPPORTED_COMPOSE_CMDS_REGEX="(start|stop|restart|up|down)"
 DEFAULT_COMPOSE_CMD="up"
-upWithBuildOption=false
 requireConfirmation=false
 useEnvironmentVariables=false
 
@@ -41,16 +40,15 @@ optspec=":a:ehy-:"
 #The following code to parse long args, e.g. --build, is derived from an answer in
 #https://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
 while getopts "$optspec" optchar; do
-    echo "Parsing $optchar"
+    #echo "Parsing $optchar"
     case "${optchar}" in
         -)
-            #An additional docker-compose argument
-            echo "Using additionl compose argument --${OPTARG}"
+            #An additional double-dash docker-compose argument
+            #echo "Using additionl compose argument --${OPTARG}"
             extraComposeArguments="${extraComposeArguments} --${OPTARG}"
             ;;
         e)
-            #echo "Parsing option: '-${optchar}'" >&2
-            echo "Using environment variables"
+            #echo "Using environment variables"
             useEnvironmentVariables=true
             ;;
         h)
@@ -59,8 +57,7 @@ while getopts "$optspec" optchar; do
             exit 1
             ;;
         y)
-            #echo "Parsing option: '-${optchar}'" >&2
-            echo "Will not prompt for confirmation"
+            #echo "Will not prompt for confirmation"
             requireConfirmation=true
             ;;
         *)
@@ -81,7 +78,7 @@ if [ $# = 0 ]; then
     exit 1
 fi
 
-echo "Remaining args: $@"
+#echo "Remaining args: $@"
 serviceNames="$@"
 
 for serviceName in $serviceNames; do
@@ -94,13 +91,18 @@ for serviceName in $serviceNames; do
     fi
 done
 
-echo "composeCmd: $composeCmd"
-echo "upWithBuildOption: $upWithBuildOption"
-echo "requireConfirmation: $requireConfirmation"
-echo "useEnvironmentVariables: $useEnvironmentVariables"
+#echo "requireConfirmation: $requireConfirmation"
+#echo "useEnvironmentVariables: $useEnvironmentVariables"
 
 #strip any leading whitespace
 extraComposeArguments=$(echo "$extraComposeArguments" | sed -r 's/\s//')
 
-echo 
 echo -e "Using command [${GREEN}${composeCmd}${NC}] with additional arguments [${GREEN}${extraComposeArguments}${NC}] against the following services [${GREEN}${serviceNames}${NC}]"
+
+if $useEnvironmentVariables ; then
+    echo "Using environment variables to resolve any docker tag variables"
+else
+    echo -e "Using ${BLUE}docker.tags${NC} file to resolve any docker tag variables"
+fi
+
+exit 0
