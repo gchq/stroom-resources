@@ -1,5 +1,14 @@
 #!/usr/bin/env bash 
 
+
+#Colour constants for use in echo -e statements
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+NC='\033[0m' # No Colour
+
+
 SUPPORTED_COMPOSE_CMDS_REGEX="(start|stop|restart|up|down)"
 DEFAULT_COMPOSE_CMD="up"
 upWithBuildOption=false
@@ -7,13 +16,15 @@ requireConfirmation=false
 useEnvironmentVariables=false
 
 showUsage() {
-    echo "Usage: $0 [COMPOSE_COMMAND] [OPTIONS] [--build] [SERVICE_NAME...]"
-    echo "COMPOSE_COMMAND - One of $SUPPORTED_COMPOSE_CMDS_REGEX, if not supplied \"$DEFAULT_COMPOSE_CMD\" will be used"
-    echo "Options:"
+    echo "Usage: $0 [COMPOSE_COMMAND] [OPTION]... [EXTRA_COMPOSE_ARG]... [SERVICE_NAME]..."
+    echo "COMPOSE_COMMAND - One of ${SUPPORTED_COMPOSE_CMDS_REGEX}, if not supplied \"${DEFAULT_COMPOSE_CMD}\" will be used"
+    echo "OPTIONs:"
     echo "  -h - Show this help text"
     echo "  -e - Rely on existing environment variables for any docker tags, the docker.tags file will not be used"
     echo "  -y - Do not prompt for confirmation, e.g. when run from a script"
-    echo "e.g.: $0 "
+    echo "EXTRA_COMPOSE_ARGs - Any additional arguments for docker-compose, of the form \"--argName\", e.g. \"--build\""
+    echo "e.g.: $0 serviceX serviceY"
+    echo "e.g.: $0 up -e -y --build --verbose serviceX serviceY"
 }
 
 if [[ "$1" =~ $SUPPORTED_COMPOSE_CMDS_REGEX ]]; then
@@ -24,35 +35,28 @@ else
     composeCmd="$DEFAULT_COMPOSE_CMD"
 fi
 
-optspec=":hye-:"
+extraComposeArguments=""
+
+optspec=":a:ehy-:"
 #The following code to parse long args, e.g. --build, is derived from an answer in
 #https://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
 while getopts "$optspec" optchar; do
     echo "Parsing $optchar"
     case "${optchar}" in
         -)
-            #This is a long arg like --some-long-arg
-            case "${OPTARG}" in
-                build)
-                    upWithBuildOption=true
-                    #echo "Using upWithBuildOption" >&2;
-                    ;;
-                *)
-                    echo "Unknown option --${OPTARG}" >&2
-                    echo
-                    showUsage
-                    exit 2
-                    ;;
-            esac;;
-        h)
-            #help
-            showUsage
-            exit 1
+            #An additional docker-compose argument
+            echo "Using additionl compose argument --${OPTARG}"
+            extraComposeArguments="${extraComposeArguments} --${OPTARG}"
             ;;
         e)
             #echo "Parsing option: '-${optchar}'" >&2
             echo "Using environment variables"
             useEnvironmentVariables=true
+            ;;
+        h)
+            #help
+            showUsage
+            exit 1
             ;;
         y)
             #echo "Parsing option: '-${optchar}'" >&2
@@ -60,7 +64,7 @@ while getopts "$optspec" optchar; do
             requireConfirmation=true
             ;;
         *)
-            echo "Unknown argument: '-${OPTARG}'" >&2
+            echo -e "${RED}Unknown argument: '-${OPTARG}'${NC}" >&2
             echo
             showUsage
             exit 1
@@ -71,21 +75,32 @@ done
 #discard the args parsed so far
 shift $((OPTIND -1))
 
+if [ $# = 0 ]; then
+    echo -e "${RED}No SERVICE_NAMEs specified${NC}" >&2
+    showUsage
+    exit 1
+fi
+
 echo "Remaining args: $@"
 serviceNames="$@"
 
 for serviceName in $serviceNames; do
     #echo "  Service: [${serviceName}]"
     if [[ "${serviceName}" =~ ^-.* ]]; then
-        echo "OPTIONS must be specified before SERVICE_NAMEs" >&2
+        echo -e "${RED}OPTIONS must be specified before SERVICE_NAMEs${NC}" >&2
         echo
         showUsage
         exit 1
     fi
 done
 
-
 echo "composeCmd: $composeCmd"
 echo "upWithBuildOption: $upWithBuildOption"
 echo "requireConfirmation: $requireConfirmation"
 echo "useEnvironmentVariables: $useEnvironmentVariables"
+
+#strip any leading whitespace
+extraComposeArguments=$(echo "$extraComposeArguments" | sed -r 's/\s//')
+
+echo 
+echo -e "Using command [${GREEN}${composeCmd}${NC}] with additional arguments [${GREEN}${extraComposeArguments}${NC}] against the following services [${GREEN}${serviceNames}${NC}]"
