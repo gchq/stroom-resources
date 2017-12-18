@@ -50,8 +50,6 @@ services:
       depends_on:
         - stroom-db
         - stroom-stats-db
-        - zookeeper
-        - kafka
 
   stroom-annotations-db:
       extends:
