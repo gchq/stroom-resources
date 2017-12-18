@@ -32,7 +32,8 @@ services:
             - STROOM_CONNECTORS_KAFKA_DEFAULT_BOOTSTRAP_SERVERS=kafka:9092
             - STROOM_CONNECTORS_KAFKA_DEFAULT_CONNECTOR_VERSION=0.10.0.1
             - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=zookeeper:2181
-            - STROOM_DEVELOPMENT_MODE=true
+              #expose this so we can set it from the shell's env vars
+            - STROOM_DEVELOPMENT_MODE=${STROOM_DEVELOPMENT_MODE:-true}
         ports:
             - 8080:8080
             - 8081:8081
