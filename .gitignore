@@ -1,5 +1,5 @@
 #The file used to define the docker tags to use
-bin/docker.tags
+bin/local.env
 
 .gradle
 classes
