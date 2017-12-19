@@ -413,6 +413,6 @@ fi
 
 #pass any additional arguments after the yml filename direct to docker-compose
 #This will create containers as required and then start up the new or existing containers
-docker-compose -f $ymlFile -p $projectName $extraComposeArguments $composeCmd $serviceNames
+docker-compose -f $ymlFile -p $projectName $composeCmd $extraComposeArguments $serviceNames
 
 exit 0
