@@ -177,7 +177,6 @@ while getopts "$optspec" optchar; do
                 exit 1
             fi
             customEnvFile="${OPTARG}"
-            echo "Using customEnvFile: $customEnvFile"
             ;;
         h)
             #help
@@ -194,7 +193,7 @@ while getopts "$optspec" optchar; do
             requireConfirmation=false
             ;;
         *)
-            echo -e "${RED}Unknown argument: '-${OPTARG}'${NC}" >&2
+            echo -e "${RED}ERROR${NC} Unknown argument: '-${OPTARG}'" >&2
             echo
             showUsage
             exit 1
