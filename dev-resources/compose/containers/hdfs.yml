@@ -1,0 +1,13 @@
+#Runs an HDFS instance
+version: '2'
+
+services: 
+  hdfs:
+    image: sequenceiq/hadoop-docker:2.7.1
+    container_name: hdfs
+    hostname: hdfs
+    command: ["/etc/bootstrap.sh", "-d"]
+    ports:
+      - 9000:9000
+      - 8020:8020
+      - 50010:50010
