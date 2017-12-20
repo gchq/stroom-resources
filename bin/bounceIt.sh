@@ -114,17 +114,12 @@ exportFileContents() {
     echo
     echo -e "Using file ${BLUE}${file}${NC} to resolve any docker tags and other variables"
 
-    #export all un-commented entires in the file as environment variables so they are available to docker-compose to do variable substitution
-    local vars=$(cat ${file} | egrep "^[^#=]+=.*" | sed -E 's/([^=]+=)(.*)/export \1\2/') 
-    #local vars=$(cat ${file} | egrep "^[^#=]+=.*")
-    #echo -e "vars: $vars"
+    #Export all un-commented entries in the file as environment variables so they are available to docker-compose to do variable substitution
+    cat ${file} | egrep "^[^#=]+=.*" | sed -E 's/([^=]+=)(.*)/export \1\2/' > ${SCRIPT_DIR}/~.env
 
-    #echo "$vars" | \
-    #while read line; do 
-        #echo "${line}"
-    #done
+    #Source the export variables.
+    source ${SCRIPT_DIR}/~.env
 
-    source <(echo $vars)
     echo 
 }
 
@@ -206,7 +201,7 @@ done
 shift $((OPTIND -1))
 serviceNamesFromArgs="$@"
 #strip any leading whitespace
-extraComposeArguments=$(echo "$extraComposeArguments" | sed -r 's/^\s//')
+extraComposeArguments=$(echo "$extraComposeArguments" | sed -E 's/^\s//')
 
 if $useEnvironmentVariables && [ -n "$customEnvFile" ]; then
     echo -e "${RED}Cannot use -f and -e arguments together${NC}" >&2
@@ -249,7 +244,7 @@ if [ "${serviceNames}x" = "x" ]; then
     for service in $allServices; do
         serviceNames+=" $service"
     done
-    serviceNames=$(echo "$serviceNames" | sed -r 's/^\s//')
+    serviceNames=$(echo "$serviceNames" | sed -E 's/^\s//')
 else
     validServiceNameRegex=""
     for serviceName in $(docker-compose -f ${ymlFile} config --services | sort); do
@@ -257,7 +252,7 @@ else
     done
 
     #strip leading pipe char
-    validServiceNameRegex=$(echo "$validServiceNameRegex" | sed -r 's/^\|//')
+    validServiceNameRegex=$(echo "$validServiceNameRegex" | sed -E 's/^\|//')
     validServiceNameRegex="(${validServiceNameRegex})"
 
     for serviceName in $serviceNames; do
