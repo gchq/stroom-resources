@@ -172,7 +172,6 @@ while getopts "$optspec" optchar; do
                 exit 1
             fi
             customEnvFile="${OPTARG}"
-            echo "Using customEnvFile: $customEnvFile"
             ;;
         h)
             #help
@@ -189,7 +188,7 @@ while getopts "$optspec" optchar; do
             requireConfirmation=false
             ;;
         *)
-            echo -e "${RED}Unknown argument: '-${OPTARG}'${NC}" >&2
+            echo -e "${RED}ERROR${NC} Unknown argument: '-${OPTARG}'" >&2
             echo
             showUsage
             exit 1
@@ -409,6 +408,6 @@ fi
 
 #pass any additional arguments after the yml filename direct to docker-compose
 #This will create containers as required and then start up the new or existing containers
-docker-compose -f $ymlFile -p $projectName $extraComposeArguments $composeCmd $serviceNames
+docker-compose -f $ymlFile -p $projectName $composeCmd $extraComposeArguments $serviceNames
 
 exit 0
