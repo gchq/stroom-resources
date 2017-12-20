@@ -1,11 +1,10 @@
-#Runs the latest build of stroom-stats
-version: '2'
+version: '2.1'
 
 services: 
 
     stroom-stats:
         container_name: stroom-stats
-        image: gchq/stroom-stats:v1.0.0-SNAPSHOT
+        image: "gchq/stroom-stats:${STROOM_STATS_TAG:-v1.0.0-SNAPSHOT}"
         environment:
             - STATS_DB_USER=stroomuser
             - STATS_DB_PASSWORD=stroompassword1

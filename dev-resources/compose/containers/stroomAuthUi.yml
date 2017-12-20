@@ -1,10 +1,10 @@
-version: '2'
+version: '2.1'
 
 services:
 
   stroom-auth-ui:
     container_name: stroom-auth-ui
-    image: gchq/stroom-auth-ui:dev-SNAPSHOT
+    image: "gchq/stroom-auth-ui:${STROOM_AUTH_UI_TAG:-master-SNAPSHOT}"
     # All URLs are accessed from a browser, and so need to refer to the advertised host.
     environment:
       - REACT_APP_AUTH_SERVICE=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8099

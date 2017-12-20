@@ -1,10 +1,10 @@
-version: '2'
+version: '2.1'
 
 services:
 
   stroom-auth-service:
     container_name: stroom-auth-service
-    image: gchq/stroom-auth-service:dev-SNAPSHOT
+    image: "gchq/stroom-auth-service:${STROOM_AUTH_SERVICE_TAG:-dev-SNAPSHOT}"
     environment:
       - DB_USER=stroomuser
       - DB_PASSWORD=stroompassword1
@@ -13,7 +13,7 @@ services:
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - ADVERTISED_HTTP_HOST=http://${STROOM_RESOURCES_ADVERTISED_HOST}
       - AUTH_UI=http://${STROOM_RESOURCES_ADVERTISED_HOST}:5000/login
-      - AUTHORISATION_SERVICE_URL=http://stroom:8080/api/authorisation/v1
+      - AUTHORISATION_SERVICE_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8080/api/authorisation/v1
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
