@@ -9,6 +9,7 @@
  5001 - stroom-annotations-ui
  5002 - stroom-query-elastic-ui
  5601 - Kibana
+ 8020 - HDFS
  8080 - stroom (app & admin)
  8086 - stroom-stats (app)
  8087 - stroom-stats (admin)
@@ -18,6 +19,7 @@
  8200 - stroom-annotations-service (admin)
  8299 - stroom-elastic-query-service (app)
  8300 - stroom-elastic-query-service (admin)
+ 9000 - HDFS
  9200 - Elastic Search (TCP)
  9300 - Elastic Search (HTTP)
  9092 - kakfa
@@ -25,6 +27,7 @@
 16010 - hbase
 16201 - hbase
 16301 - hbase
+50010 - HDFS
 60000 - hbase
 60010 - hbase
 60020 - hbase

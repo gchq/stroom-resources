@@ -22,6 +22,11 @@ services:
       depends_on:
         - zookeeper
 
+  hdfs:
+      extends:
+          file: ./containers/hdfs.yml
+          service: hdfs
+
   kafka:
       extends:
           file: ./containers/kafka.yml
