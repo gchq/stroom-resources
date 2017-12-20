@@ -1,6 +1,6 @@
 #The file used to define the docker tags to use
 bin/local.env
-bin/~.env
+bin/.temp.env
 
 .gradle
 classes

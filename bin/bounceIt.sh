@@ -17,6 +17,9 @@ LOCAL_HOST_NAMES="kafka hbase"
 #Location of the file used to define the docker tag variable values
 TAGS_FILE="${SCRIPT_DIR}/local.env"
 
+#Temporary file used to hold environment variable for export
+TEMPORARY_ENV_FILE="${SCRIPT_DIR}/.temp.env"
+
 #The docker-compose yml file that defines all the docker services for the whole stroom family
 ALL_SERVICES_COMPOSE_FILE="${SCRIPT_DIR}/compose/everything.yml"
 
@@ -115,10 +118,10 @@ exportFileContents() {
     echo -e "Using file ${BLUE}${file}${NC} to resolve any docker tags and other variables"
 
     #Export all un-commented entries in the file as environment variables so they are available to docker-compose to do variable substitution
-    cat ${file} | egrep "^[^#=]+=.*" | sed -E 's/([^=]+=)(.*)/export \1\2/' > ${SCRIPT_DIR}/~.env
+    cat ${file} | egrep "^\s*[^#=]+=.*" | sed -E 's/([^=]+=)/export \1/' > ${TEMPORARY_ENV_FILE}
 
     #Source the export variables.
-    source ${SCRIPT_DIR}/~.env
+    source ${TEMPORARY_ENV_FILE}
 
     echo 
 }
@@ -230,14 +233,18 @@ fi
 
 #Try setting the service names list from the SERVICE_LIST env var, which may/may not be set.
 serviceNames="${SERVICE_LIST}"
-if [ -n "${serviceNamesFromArgs}" ] && [ -n "${SERVICE_LIST}" ]; then
-    echo -e "Overriding service names from ${BLUE}${SERVICE_LIST}${NC} [${GREEN}${SERVICE_LIST}${NC}] with those from the command line [${GREEN}${serviceNamesFromArgs}${NC}]"
+if [ -n "${serviceNamesFromArgs}" ] ; then
+    if [ -n "${SERVICE_LIST}" ]; then
+        echo -e "Overriding service names from ${BLUE}SERVICE_LIST${NC} [${GREEN}${SERVICE_LIST}${NC}] with those from the command line [${GREEN}${serviceNamesFromArgs}${NC}]"
+    fi
     serviceNames="${serviceNamesFromArgs}"
 fi
+#strip any leading or trailing spaces
+serviceNames=$(echo "$serviceNames" | sed -E 's/^\s//' | sed -E 's/\s$//')
 
 if [ "${serviceNames}x" = "x" ]; then
     echo
-    echo -e "No service names specified, the COMPOSE_COMMAND will be applied to all services" >&2
+    echo -e "No service names specified, the COMPOSE_COMMAND [${GREEN}${composeCmd}${NC}] will be applied to all services" >&2
 
     #build a space delim list of services so we can later display all the images in use
     for service in $allServices; do
@@ -301,7 +308,7 @@ for serviceName in ${serviceNames}; do
 
     if ! egrep -q "^\s*${serviceName}:\s*$" $ymlFile; then
         echo
-        echo -e "${RED}ERROR${NC} - ${BLUE}${ymlFile}${NC} does not contain service ${GREEN}${serviceName}${NC}"
+        echo -e "${RED}ERROR${NC} - Service ${GREEN}${serviceName}${NC} does not exist in ${BLUE}${ymlFile}${NC}"
         exit 1
     else
         image=$(echo "$allImages" | grep "${serviceName}:" | sed 's/.*image: //')
