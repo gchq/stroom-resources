@@ -12,7 +12,7 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 #List of hostnames that need to be added to /etc/hosts to resolve to 127.0.0.1
-LOCAL_HOST_NAMES="kafka hbase"
+LOCAL_HOST_NAMES="kafka hbase auth-service"
 
 #Location of the file used to define the docker tag variable values
 TAGS_FILE="${SCRIPT_DIR}/local.env"

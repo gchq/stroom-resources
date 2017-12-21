@@ -7,7 +7,7 @@ services:
     image: "gchq/stroom-auth-ui:${STROOM_AUTH_UI_TAG:-master-SNAPSHOT}"
     # All URLs are accessed from a browser, and so need to refer to the advertised host.
     environment:
-      - REACT_APP_AUTH_SERVICE=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8099
+      - REACT_APP_AUTH_SERVICE=http://auth-service:8099
       - REACT_APP_STROOM_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/stroom
       - REACT_APP_ADVERTISED_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:5000
       - REACT_APP_ROOT_PATH=
