@@ -2,7 +2,7 @@
 
 #Modified version of https://github.com/jplock/docker-zookeeper
 
-FROM openjdk:8-jre-alpine
+FROM openjdk:8u151-jre-alpine
 
 #Older versions get relegated to the archive mirror, currently the mirror only goes as far back as 3.4.6
 ARG MIRROR=http://archive.apache.org/dist
