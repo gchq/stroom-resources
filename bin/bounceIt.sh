@@ -3,7 +3,7 @@
 
 # 
 # Script to aid the running of the docker containers used in the stroom family.
-# The script will validate 
+# See ./bouncIt.sh -h for details
 
 #exit the script on any error
 set -e
@@ -23,7 +23,15 @@ TEMPORARY_ENV_FILE="${SCRIPT_DIR}/.temp.env"
 #The docker-compose yml file that defines all the docker services for the whole stroom family
 ALL_SERVICES_COMPOSE_FILE="${SCRIPT_DIR}/compose/everything.yml"
 
-DEFAULT_TAGS_HEADER="#comment lines are supported like this (no space before or after '#')"
+#Header text for use when creating a new local.env file
+DEFAULT_TAGS_HEADER="\
+#comment lines are supported like this (no space before or after '#')
+
+#SERVICE_LIST can be set to a list of services to remove the need 
+#to define multiple services on the command line, e.g.
+#SERVICE_LIST=\"stroom stroom-db stroom-stats-db\"
+
+#The following variables set the docker tag used for specific services"
 
 #regex used to locate a docker tag variable in a docker-compose .yml file
 TAG_VARIABLE_REGEX="\${.*_TAG.*}" 
@@ -54,10 +62,10 @@ showUsage() {
     echo -e "Usage: ${BLUE}$0 [COMPOSE_COMMAND] [OPTION]... [EXTRA_COMPOSE_ARG]... [SERVICE_NAME]...${NC}"
     echo -e "COMPOSE_COMMAND - One of ${SUPPORTED_COMPOSE_CMDS_REGEX}, if not supplied a \"stop\" and then \"${DEFAULT_COMPOSE_CMD}\" will be performed"
     echo -e "OPTIONs:"
-    echo -e "  ${GREEN}-e${NC} - Rely on existing environment variables for any docker tags, the docker.tags file will not be used"
-    echo -e "  ${GREEN}-f${NC} - Use custom file to supply service names, tags and environment values, e.g. \"${BLUE}-f ./stroom5.env${NC}\""
+    echo -e "  ${GREEN}-e${NC} - Rely on existing environment variables for any docker tags, the ${BLUE}local.env${NC} file will be ignored"
+    echo -e "  ${GREEN}-f${NC} - Use a custom configuration file to supply service names, tags and environment values, e.g. \"${BLUE}-f ./stroom5.env${NC}\""
     echo -e "  ${GREEN}-h${NC} - Show this help text"
-    echo -e "  ${GREEN}-i${NC} - Do not check dockerhub for my recent versions of tagged images"
+    echo -e "  ${GREEN}-i${NC} - Do not check dockerhub for more recent versions of tagged images"
     echo -e "  ${GREEN}-x${NC} - Do not check hosts file for docker related entries"
     echo -e "  ${GREEN}-y${NC} - Do not prompt for confirmation, e.g. when run from a script"
     echo -e "  NOTE: if nether -f or -e are specified the file ${BLUE}${TAGS_FILE}${NC} will be used (and created if it doesn't exist)"
@@ -78,7 +86,7 @@ createOrUpdateLocalTagsFile() {
     local defaultTags=$(cat ${SCRIPT_DIR}/compose/containers/*.yml | grep -o "\${.*_TAG.*}" | uniq | sed -E 's/\$\{(.*_TAG):?-?(.*)}/\1=\2/' | sed -E 's/(_TAG=)$/\1master-SNAPSHOT/')
     #Ensure we have a TAGS_FILE file, if not create one using the content of the defaultTags string
     if [ ! -f ${TAGS_FILE} ]; then
-        echo -e "Default docker tags file (${BLUE}${TAGS_FILE}${NC}) doesn't exist so have created it with the following content"
+        echo -e "Local configuration file (${BLUE}${TAGS_FILE}${NC}) doesn't exist so have created it with the following content"
         touch "${TAGS_FILE}"
         echo "$DEFAULT_TAGS_HEADER" > $TAGS_FILE
         echo -e "$defaultTags" >> $TAGS_FILE
@@ -154,7 +162,7 @@ fi
 
 extraComposeArguments=""
 
-optspec=":ef:hiy-:"
+optspec=":ef:hiyx-:"
 #The following code to parse long args, e.g. --build, is derived from an answer in
 #https://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
 while getopts "$optspec" optchar; do
