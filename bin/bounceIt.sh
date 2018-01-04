@@ -88,7 +88,7 @@ createOrUpdateLocalTagsFile() {
     if [ ! -f ${TAGS_FILE} ]; then
         echo -e "Local configuration file (${BLUE}${TAGS_FILE}${NC}) doesn't exist so have created it with the following content"
         touch "${TAGS_FILE}"
-        echo "$DEFAULT_TAGS_HEADER" > $TAGS_FILE
+        echo -e "$DEFAULT_TAGS_HEADER" > $TAGS_FILE
         echo -e "$defaultTags" >> $TAGS_FILE
         echo
         cat $TAGS_FILE
