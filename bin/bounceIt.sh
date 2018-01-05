@@ -31,8 +31,9 @@ DEFAULT_TAGS_HEADER="\
 #to define multiple services on the command line, e.g.
 #SERVICE_LIST=\"stroom stroom-db stroom-stats-db\"
 
-#If bounceIt.sh is unable to determine the IP address of this machine from the operating system
-#you can hard code it here
+#If bounceIt.sh is unable to determine the IP address of this machine from 
+#the operating system you can hard code it here. This must be the public facing
+#IP address, e.g. 192.168.0.1, NOT an address local to the machine like 127.0.0.1 .
 #STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x
 
 #The following variables set the docker tag used for specific services"
