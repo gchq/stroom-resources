@@ -5,6 +5,11 @@
 # Script to aid the running of the docker containers used in the stroom family.
 # See ./bouncIt.sh -h for details
 
+# WARNING - This script relies heavily on tools like sed, grep, awk, etc. and was
+# primarily written/tested on GNU Linux.  If you do not have the gnu versions of 
+# these binaries the script may not work.  If you are using macOS you will probably
+# need to install the GNU versions with homebrew.
+
 #exit the script on any error
 set -e
 
@@ -216,7 +221,7 @@ done
 shift $((OPTIND -1))
 serviceNamesFromArgs="$@"
 #strip any leading whitespace
-extraComposeArguments=$(echo "$extraComposeArguments" | sed -E 's/^\s//')
+extraComposeArguments=$(echo "$extraComposeArguments" | sed 's/^\s*//')
 
 if $useEnvironmentVariables && [ -n "$customEnvFile" ]; then
     echo -e "${RED}Cannot use -f and -e arguments together${NC}" >&2
