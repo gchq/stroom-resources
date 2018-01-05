@@ -5,8 +5,7 @@ services:
 
   hbase:
     container_name: hbase
-    build: ../../../dev-resources/images/hbase
-    image: stroom-stats/hbase
+    image: "gchq/stroom-stats-hbase:${STROOM_STATS_TAG:-master-SNAPSHOT}_hbase-v1.2.0"
     #hostname: stroom.hbase
     hostname: hbase
     entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]

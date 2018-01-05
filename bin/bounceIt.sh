@@ -5,6 +5,11 @@
 # Script to aid the running of the docker containers used in the stroom family.
 # See ./bouncIt.sh -h for details
 
+# WARNING - This script relies heavily on tools like sed, grep, awk, etc. and was
+# primarily written/tested on GNU Linux.  If you do not have the gnu versions of 
+# these binaries the script may not work.  If you are using macOS you will probably
+# need to install the GNU versions with homebrew.
+
 #exit the script on any error
 set -e
 
@@ -30,6 +35,11 @@ DEFAULT_TAGS_HEADER="\
 #SERVICE_LIST can be set to a list of services to remove the need 
 #to define multiple services on the command line, e.g.
 #SERVICE_LIST=\"stroom stroom-db stroom-stats-db\"
+
+#If bounceIt.sh is unable to determine the IP address of this machine from 
+#the operating system you can hard code it here. This must be the public facing
+#IP address, e.g. 192.168.0.1, NOT an address local to the machine like 127.0.0.1 .
+#STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x
 
 #The following variables set the docker tag used for specific services"
 
@@ -88,7 +98,7 @@ createOrUpdateLocalTagsFile() {
     if [ ! -f ${TAGS_FILE} ]; then
         echo -e "Local configuration file (${BLUE}${TAGS_FILE}${NC}) doesn't exist so have created it with the following content"
         touch "${TAGS_FILE}"
-        echo "$DEFAULT_TAGS_HEADER" > $TAGS_FILE
+        echo -e "$DEFAULT_TAGS_HEADER" > $TAGS_FILE
         echo -e "$defaultTags" >> $TAGS_FILE
         echo
         cat $TAGS_FILE
@@ -211,7 +221,7 @@ done
 shift $((OPTIND -1))
 serviceNamesFromArgs="$@"
 #strip any leading whitespace
-extraComposeArguments=$(echo "$extraComposeArguments" | sed -E 's/^\s//')
+extraComposeArguments=$(echo "$extraComposeArguments" | sed 's/^\s*//')
 
 if $useEnvironmentVariables && [ -n "$customEnvFile" ]; then
     echo -e "${RED}Cannot use -f and -e arguments together${NC}" >&2
@@ -372,23 +382,35 @@ fi
 
 
 # We need the IP to transpose into our config
-
-# Code required to find IP address is different in MacOS
-if [ "$(uname)" == "Darwin" ]; then
-  ip=`ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`
+if [ "x${STROOM_RESOURCES_ADVERTISED_HOST}" != "x" ]; then
+    ip="${STROOM_RESOURCES_ADVERTISED_HOST}"
+    echo
+    echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as obtained from ${BLUE}STROOM_RESOURCES_ADVERTISED_HOST${NC}"
 else
-  ip=`ip route get 1 | awk '{print $NF;exit}'`
+    if [ "$(uname)" == "Darwin" ]; then
+        # Code required to find IP address is different in MacOS
+        ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}')
+    else
+        ip=$(ip route get 1 |awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
+    fi
+    echo
+    echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as determined from the operating system"
 fi
 
+if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+    echo
+    echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
+    exit 1
+fi
+
+
 # This is used by the docker-compose YML files, so they can tell a browser where to go
-echo
-echo -e "Using the following IP as the advertised host: ${GREEN}$ip${NC}"
-export STROOM_RESOURCES_ADVERTISED_HOST=$ip
+export STROOM_RESOURCES_ADVERTISED_HOST="${ip}"
 
 # NGINX: creates config files from templates, adding in the correct IP address
 deployRoot="${SCRIPT_DIR}/../deploy"
-echo -e "Creating nginx/nginx.conf using ${GREEN}$ip${NC}"
-cat $deployRoot/template/nginx.conf | sed "s/<ADVERTISED_HOST>/$ip/g" > $deployRoot/nginx/nginx.conf
+echo -e "Creating nginx/nginx.conf using ${GREEN}${ip}${NC}"
+cat ${deployRoot}/template/nginx.conf | sed "s/<ADVERTISED_HOST>/${ip}/g" > ${deployRoot}/nginx/nginx.conf
 echo
 
 #echo "Using the following docker images:"

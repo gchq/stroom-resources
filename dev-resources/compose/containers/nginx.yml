@@ -2,7 +2,10 @@ version: '2.1'
 services:
     nginx:
         container_name: nginx
-        build: ../../../deploy/nginx
+        image: "gchq/stroom-apigateway-dev:${STROOM_APIGATEWAY_DEV_TAG:-v0.1-alpha.1}"
+        environment:
+            - DEV_HOST=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8096
         ports:
-            - "80:80"
-            - "443:443"
+            ports:
+                - "80:80"
+                - "443:443"
