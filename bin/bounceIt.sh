@@ -31,6 +31,10 @@ DEFAULT_TAGS_HEADER="\
 #to define multiple services on the command line, e.g.
 #SERVICE_LIST=\"stroom stroom-db stroom-stats-db\"
 
+#If bounceIt.sh is unable to determine the IP address of this machine from the operating system
+#you can hard code it here
+#STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x
+
 #The following variables set the docker tag used for specific services"
 
 #regex used to locate a docker tag variable in a docker-compose .yml file
@@ -372,23 +376,35 @@ fi
 
 
 # We need the IP to transpose into our config
-
-# Code required to find IP address is different in MacOS
-if [ "$(uname)" == "Darwin" ]; then
-  ip=`ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`
+if [ "x${STROOM_RESOURCES_ADVERTISED_HOST}" != "x" ]; then
+    ip="${STROOM_RESOURCES_ADVERTISED_HOST}"
+    echo
+    echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as obtained from ${BLUE}STROOM_RESOURCES_ADVERTISED_HOST${NC}"
 else
-  ip=`ip route get 1 | awk '{print $NF;exit}'`
+    if [ "$(uname)" == "Darwin" ]; then
+        # Code required to find IP address is different in MacOS
+        ip=`ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`
+    else
+        ip=`ip route get 1 | awk '{print $NF;exit}'`
+    fi
+    echo
+    echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as determined from the operating system"
 fi
 
+if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+    echo
+    echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
+    exit 1
+fi
+
+
 # This is used by the docker-compose YML files, so they can tell a browser where to go
-echo
-echo -e "Using the following IP as the advertised host: ${GREEN}$ip${NC}"
-export STROOM_RESOURCES_ADVERTISED_HOST=$ip
+export STROOM_RESOURCES_ADVERTISED_HOST="${ip}"
 
 # NGINX: creates config files from templates, adding in the correct IP address
 deployRoot="${SCRIPT_DIR}/../deploy"
-echo -e "Creating nginx/nginx.conf using ${GREEN}$ip${NC}"
-cat $deployRoot/template/nginx.conf | sed "s/<ADVERTISED_HOST>/$ip/g" > $deployRoot/nginx/nginx.conf
+echo -e "Creating nginx/nginx.conf using ${GREEN}${ip}${NC}"
+cat ${deployRoot}/template/nginx.conf | sed "s/<ADVERTISED_HOST>/${ip}/g" > ${deployRoot}/nginx/nginx.conf
 echo
 
 #echo "Using the following docker images:"
