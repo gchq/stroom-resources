@@ -58,7 +58,7 @@ DOCKER_TAGS_URL_PREFIX="from ${BLUE}https://hub.docker.com/r/gchq/"
 DOCKER_TAGS_URL_SUFFIX="/tags/${NC}"
 
 SUPPORTED_COMPOSE_CMDS_REGEX="^(start|stop|restart|up|down|top|ps|rm|logs|kill|create)"
-CMDS_FOR_IMAGE_CHECK="^(stop|restart|up|create)"
+CMDS_FOR_IMAGE_CHECK="^(up|create)"
 DEFAULT_COMPOSE_CMD="up"
 COMPOSE_CMMD_DELIMITER=":"
 
