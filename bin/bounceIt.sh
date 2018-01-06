@@ -57,8 +57,10 @@ NC='\033[0m' # No Color
 DOCKER_TAGS_URL_PREFIX="from ${BLUE}https://hub.docker.com/r/gchq/"
 DOCKER_TAGS_URL_SUFFIX="/tags/${NC}"
 
-SUPPORTED_COMPOSE_CMDS_REGEX="(start|stop|restart|up|down)"
+SUPPORTED_COMPOSE_CMDS_REGEX="^(start|stop|restart|up|down|top|ps|rm|logs|kill|create)"
+CMDS_FOR_IMAGE_CHECK="^(stop|restart|up|create)"
 DEFAULT_COMPOSE_CMD="up"
+COMPOSE_CMMD_DELIMITER=":"
 
 printValidServiceNames() {
     echo "Valid service names are:"
@@ -71,6 +73,9 @@ printValidServiceNames() {
 showUsage() {
     echo -e "Usage: ${BLUE}$0 [COMPOSE_COMMAND] [OPTION]... [EXTRA_COMPOSE_ARG]... [SERVICE_NAME]...${NC}"
     echo -e "COMPOSE_COMMAND - One of ${SUPPORTED_COMPOSE_CMDS_REGEX}, if not supplied a \"stop\" and then \"${DEFAULT_COMPOSE_CMD}\" will be performed"
+    echo -e "                  If you want to pass extra arguments to the docker-compose command then add them onto the end of the command"
+    echo -e "                  separated by a '${COMPOSE_CMMD_DELIMITER}' (e.g. up:-d:--build) or "
+    echo -e "                  surround it all in quotes (e.g. 'up -d --build')"
     echo -e "OPTIONs:"
     echo -e "  ${GREEN}-e${NC} - Rely on existing environment variables for any docker tags, the ${BLUE}local.env${NC} file will be ignored"
     echo -e "  ${GREEN}-f${NC} - Use a custom configuration file to supply service names, tags and environment values, e.g. \"${BLUE}-f ./stroom5.env${NC}\""
@@ -79,10 +84,9 @@ showUsage() {
     echo -e "  ${GREEN}-x${NC} - Do not check hosts file for docker related entries"
     echo -e "  ${GREEN}-y${NC} - Do not prompt for confirmation, e.g. when run from a script"
     echo -e "  NOTE: if nether -f or -e are specified the file ${BLUE}${TAGS_FILE}${NC} will be used (and created if it doesn't exist)"
-    echo -e "EXTRA_COMPOSE_ARGs - Any additional arguments for docker-compose, of the form \"${BLUE}--argName${NC}\", e.g. \"${BLUE}--build${NC}\""
-    echo -e "e.g.: ${BLUE}$0 serviceX serviceY${NC}"
-    echo -e "e.g.: ${BLUE}$0 up -e -y --build --verbose serviceX serviceY${NC}"
-    echo -e "e.g.: ${BLUE}$0 up -f stroom5.env${NC}"
+    echo -e "e.g.: ${BLUE}$0 serviceX serviceY${NC}    - Executes stop then '${DEFAULT_COMPOSE_CMD}' for serviceX and serviceY"
+    echo -e "e.g.: ${BLUE}$0 'up -d --build' -e -y serviceX serviceY${NC}    - Executes 'up -d --build' for serviceX and serviceY with no confirmation and using environment variables"
+    echo -e "e.g.: ${BLUE}$0 up -f stroom5.env${NC}    - Executes 'up' using the configuration in stroom5.env"
     echo
     printValidServiceNames
 }
@@ -172,16 +176,10 @@ fi
 
 extraComposeArguments=""
 
-optspec=":ef:hiyx-:"
-#The following code to parse long args, e.g. --build, is derived from an answer in
-#https://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
+optspec=":ef:hiyx"
 while getopts "$optspec" optchar; do
     #echo "Parsing $optchar"
     case "${optchar}" in
-        -)
-            #An additional double-dash docker-compose argument
-            extraComposeArguments+=" --${OPTARG}"
-            ;;
         e)
             useEnvironmentVariables=true
             ;;
@@ -220,8 +218,6 @@ done
 #discard the args parsed so far
 shift $((OPTIND -1))
 serviceNamesFromArgs="$@"
-#strip any leading whitespace
-extraComposeArguments=$(echo "$extraComposeArguments" | sed 's/^\s*//')
 
 if $useEnvironmentVariables && [ -n "$customEnvFile" ]; then
     echo -e "${RED}Cannot use -f and -e arguments together${NC}" >&2
@@ -344,9 +340,13 @@ for serviceName in ${serviceNames}; do
     fi
 done
 
-if $requireLatestImageCheck; then
+#only check for updated images for certain compose commands
+if $requireLatestImageCheck && [[ "${composeCmd}" =~ ${CMDS_FOR_IMAGE_CHECK} ]] ; then
     for serviceName in ${serviceNames}; do
+        #TODO this doesn't work for the likes of stroom-db because the image name is not the same
+        #as the service name
         image=$(echo "$allImages" | grep "${serviceName}:" | sed 's/.*image: //')
+        #echo "image: ${image}"
 
         #Ensure we have the latest image of stroom from dockerhub, unless our TAG contains LOCAL
         #Needed for floating tags like *-SNAPSHOT or v6
@@ -370,7 +370,7 @@ if $requireLatestImageCheck; then
                     #detected
                     echo
                     echo -e "Checking for any updates to the ${GREEN}${serviceName}${NC} image on dockerhub"
-                    #docker-compose -f "$ymlFile" -p "$projectName" pull ${repoName}
+                    docker-compose -f "$ymlFile" -p "$projectName" pull ${serviceName}
                 else
                     echo
                     echo -e "${GREEN}${serviceName}${NC} already has a container with ID ${BLUE}${existingContainerId}${NC}, won't check dockerhub for updates"
@@ -420,7 +420,11 @@ echo
 #done
 #echo
 
-echo -e "Using command [${GREEN}${composeCmd}${NC}] with additional arguments [${GREEN}${extraComposeArguments}${NC}] against the following services [${GREEN}${serviceNames}${NC}]"
+#The compose cmd may consist of a command with additional args delimited by a :, e.g. up:-d:--build
+#so we replace the : with a space
+composeCmd="$(echo "${composeCmd}" | sed "s/${COMPOSE_CMMD_DELIMITER}/ /g")"
+
+echo -e "Using command [${GREEN}${composeCmd}${NC}] against the following services [${GREEN}${serviceNames}${NC}]"
 if [ "$composeCmd" = "up" ]; then
     echo "If you want to rebuild images from your own dockerfiles pass the '--build' argument"
 fi
