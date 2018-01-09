@@ -1,8 +1,0 @@
-version: '2'
-services:
-    nginx:
-        container_name: nginx
-        build: ./nginx
-        image: stroom-stats/nginx
-        ports:
-            - "80:80"

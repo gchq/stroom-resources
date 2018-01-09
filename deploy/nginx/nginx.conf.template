@@ -13,7 +13,7 @@ http {
     # Note: We could use `stroomProxy` in `proxy_pass`. Useful if we want to refer to the
     # address several times (which we don't yet).
     #upstream stroomProxy {
-    #    server <SWARM_IP>:8085;
+    #    server ${SWARM_IP}:8085;
     #}
 
     server {
@@ -47,34 +47,34 @@ http {
 
         # We're going to send / to /stroom
         location / {
-            return 301 $scheme://<ADVERTISED_HOST>/stroom;
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}/stroom;
 
             # proxy_pass http://<SWARM_IP>:8080/;
             # proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         }   
 
         location /stats/ {
-            proxy_pass http://<ADVERTISED_HOST>:8086/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8086/;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
         # Note: the path for admin must match the `adminContextPath` in the configuration
         # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
         location /statsAdmin/ {
-            proxy_pass http://<ADVERTISED_HOST>:8087/statsAdmin/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8087/statsAdmin/;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
 
 
         location /proxy/ {
-            proxy_pass http://<ADVERTISED_HOST>:8085/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8085/;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
 
         location /stroom/ {
-            proxy_pass http://<ADVERTISED_HOST>:8080/stroom;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom;
             proxy_pass_header  Set-Cookie;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body  on;
@@ -82,7 +82,7 @@ http {
         }
 
         location /stroomAdmin {
-            proxy_pass http://<ADVERTISED_HOST>:8081/stroomAdmin;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8081/stroomAdmin;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
@@ -91,7 +91,7 @@ http {
         # TODO the auth services will be redundent when everything uses the
         # Swagger clients.
         location /authService {
-            proxy_pass http://<ADVERTISED_HOST>:8099;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8099;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
             # We only need to pass in the DN.
@@ -99,7 +99,7 @@ http {
         }
 
         location /authorisationService {
-            proxy_pass http://<ADVERTISED_HOST>:8080/api/authorisation;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/authorisation;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
             # We only need to pass in the DN.
@@ -109,7 +109,7 @@ http {
         location /authenticationServiceAdmin {
             # Note: the path below must match the `adminContextPath` in the configuration
             # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-            proxy_pass http://<ADVERTISED_HOST>:8100/authenticationServiceAdmin;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8100/authenticationServiceAdmin;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
@@ -117,11 +117,11 @@ http {
             # We're not proxying the auth UI. Instead we're rewriting the request
             # to send the user's browser to the right place. This makes mounting the
             # app in the right place much simpler.
-            return 301 $scheme://<ADVERTISED_HOST>:5000;
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000;
         }
 
         location /annotationsService {
-            proxy_pass http://<ADVERTISED_HOST>:8199/annotations;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8199/annotations;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
             # We only need to pass in the DN.
@@ -131,7 +131,7 @@ http {
         location /annotationsServiceAdmin/ {
             # Note: the path below must match the `adminContextPath` in the configuration
             # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-            proxy_pass http://<ADVERTISED_HOST>:8200/annotationsServiceAdmin;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8200/annotationsServiceAdmin;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
@@ -139,11 +139,11 @@ http {
             # We're not proxying the auth UI. Instead we're rewriting the request
             # to send the user's browser to the right place. This makes mounting the
             # app in the right place much simpler.
-            return 301 $scheme://<ADVERTISED_HOST>:5001;
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5001;
         }
 
         location /queryElasticService/ {
-            proxy_pass http://<ADVERTISED_HOST>:8299/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8299/;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
             # We only need to pass in the DN.
@@ -153,7 +153,7 @@ http {
         location /queryElasticServiceAdmin/ {
             # Note: the path below must match the `adminContextPath` in the configuration
             # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-            proxy_pass http://<ADVERTISED_HOST>:8300;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8300;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
@@ -161,7 +161,7 @@ http {
             # We're not proxying the auth UI. Instead we're rewriting the request
             # to send the user's browser to the right place. This makes mounting the
             # app in the right place much simpler.
-            return 301 $scheme://<ADVERTISED_HOST>:5002;
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5002;
         }
     }
 }
