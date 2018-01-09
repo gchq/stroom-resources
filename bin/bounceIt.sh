@@ -403,14 +403,9 @@ if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
     exit 1
 fi
 
-
 # This is used by the docker-compose YML files, so they can tell a browser where to go
 export STROOM_RESOURCES_ADVERTISED_HOST="${ip}"
 
-# NGINX: creates config files from templates, adding in the correct IP address
-deployRoot="${SCRIPT_DIR}/../deploy"
-echo -e "Creating nginx/nginx.conf using ${GREEN}${ip}${NC}"
-cat ${deployRoot}/template/nginx.conf | sed "s/<ADVERTISED_HOST>/${ip}/g" > ${deployRoot}/nginx/nginx.conf
 echo
 
 #echo "Using the following docker images:"

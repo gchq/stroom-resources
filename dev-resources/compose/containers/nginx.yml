@@ -2,7 +2,9 @@ version: '2.1'
 services:
     nginx:
         container_name: nginx
-        build: ../../../deploy/nginx
+        image: "gchq/stroom-nginx:${STROOM_NGINX_TAG:-v1.0.0_nginx-v1.13.8}"
+        environment:
+          - NGINX_ADVERTISED_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
         ports:
             - "80:80"
             - "443:443"
