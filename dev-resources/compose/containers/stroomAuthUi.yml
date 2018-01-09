@@ -12,7 +12,7 @@ services:
       - AUTH_UI_TOKEN_SERVICE_URL=http://stroom-auth-service:8099/token/v1
       - AUTH_UI_AUTHORISATION_SERVICE_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/api/authorisation/v1
       - AUTH_UI_STROOM_UI_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/stroom
-      - AUTH_UI_ADVERTISED_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:5000
+      - AUTH_UI_ADVERTISED_URL=http://stroom-auth-ui:5000
       - AUTH_UI_APP_CLIENT_ID=stroom-accounts
     ports:
       - 5000:5000
