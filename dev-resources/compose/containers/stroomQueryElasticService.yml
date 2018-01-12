@@ -6,8 +6,8 @@ services:
     container_name: stroom-query-elastic-svc
     image: "${STROOM_QUERY_ELASTIC_SERVICE_DOCKER_REPO:-gchq/stroom-query-elastic-svc}:${STROOM_ELASTIC_SERVICE_TAG:-v0.0.2-alpha.3}"
     environment:
-      - DOCKER_CLUSTER=docker-cluster
-      - DOCKER_HOSTS=elasticsearch:9300
+      - ELASTIC_CLUSTER_NAME=${ELASTIC_CLUSTER_NAME:-docker-cluster}
+      - ELASTIC_TRANSPORT_HOSTS=${ELASTIC_HOST:-elasticsearch}:9300
     ports:
       - 8299:8299
       - 8300:8300

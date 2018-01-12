@@ -10,7 +10,7 @@ services:
       - AUTH_UI_AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}:8099/authentication/v1
       - AUTH_UI_USER_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}:8099/user/v1
       - AUTH_UI_TOKEN_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}:8099/token/v1
-      - AUTH_UI_AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST}/api/authorisation/v1
+      - AUTH_UI_AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/api/authorisation/v1
       - AUTH_UI_STROOM_UI_URL=http://${STROOM_HOST}/stroom
       - AUTH_UI_ADVERTISED_URL=http://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}:5000
       - AUTH_UI_APP_CLIENT_ID=stroom-accounts

@@ -3,7 +3,7 @@ version: '2.1'
 services:
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:5.6.3
+      image: "${KIBANA_DOCKER_REPO:-docker.elastic.co/kibana/kibana}:5.6.3"
     container_name: kibana
     volumes:
       - ./config/kibana/:/usr/share/kibana/config

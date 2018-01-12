@@ -3,6 +3,6 @@ version: '2.1'
 services:
   fake-smtp:
     container_name: fake-smtp
-    image: munkyboy/fakesmtp
+    image: "${FAKE_SMTP_DOCKER_REPO:-munkyboy/fakesmtp}"
     ports:
       - "2526:25"

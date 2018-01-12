@@ -3,7 +3,7 @@ version: '2.1'
 services: 
 
   stroom-annotations-db:
-    image: mariadb:10.3.0
+    image:  "${MARIADB_DOCKER_REPO:-mariadb}:10.3.0"
     container_name: stroom-annotations-db
     ports:
         # Expose mysql on 3310 to the host so as not to conflict with stroom-db, stroom-stats-db, stroom-auth-db

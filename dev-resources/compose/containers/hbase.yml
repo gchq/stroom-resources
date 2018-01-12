@@ -5,10 +5,10 @@ services:
 
   hbase:
     container_name: hbase
-    image: "gchq/stroom-stats-hbase:${STROOM_STATS_TAG:-master-SNAPSHOT}_hbase-v1.2.0"
+    image: "${STROOM_STATS_HBASE_DOCKER_REPO:-gchq/stroom-stats-hbase}:${STROOM_STATS_TAG:-master-SNAPSHOT}_hbase-v1.2.0"
     #hostname: stroom.hbase
     hostname: hbase
-    entrypoint: ["./wait-for-it_busybox.sh", "zookeeper:2181"]
+    entrypoint: ["./wait-for-it_busybox.sh", "${ZOOKEEPER_QUORUM:-zookeeper:2181}"]
     command: ["--", "/entrypoint.sh"]
     environment:
       - HBASE_MANAGES_ZK=false

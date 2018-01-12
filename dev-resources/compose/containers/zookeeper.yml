@@ -4,6 +4,6 @@ services:
 
   zookeeper:
     container_name: zookeeper
-    image: "gchq/stroom-zookeeper:${STROOM_ZOOKEEPER_TAG:-v1.0.0_zk-v3.4.5}"
+    image: "${STROOM_ZOOKEEPER_DOCKER_REPO:-gchq/stroom-zookeeper}:${STROOM_ZOOKEEPER_TAG:-v1.0.0_zk-v3.4.5}"
     ports:
       - "2181:2181"

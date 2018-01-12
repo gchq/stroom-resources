@@ -6,16 +6,11 @@ services:
     container_name: stroom-annotations-ui
     image: "${STROOM_ANNOTATIONS_UI_DOCKER_REPO:-gchq/stroom-annotations-ui}:${STROOM_ANNOTATIONS_UI_TAG:-v0.1.5-alpha.4}"
     environment:
-      - REACT_APP_STROOM_AUTH_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}:8096
-      - REACT_APP_STROOM_UI_URL=http://${STROOM_HOST:-stroom}:8080
-      # the rest need to be fixed when joe commits his changes
-      - REACT_APP_LOGIN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1/login
-      - REACT_APP_AUTHENTICATION_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1
-      - REACT_APP_AUTHORISATION_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authorisationService/v1
-      - REACT_APP_ANNOTATIONS_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/annotationsService/annotations/v1
-      - REACT_APP_USER_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/userService/v1
-      - REACT_APP_TOKEN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/tokenService/v1
-      - REACT_APP_STROOM_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/stroom
-      - REACT_APP_ROOT_PATH=
+      - ANNOTATIONS_UI_AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}:8099/authentication/v1
+      - ANNOTATIONS_UI_AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/api/authorisation/v1
+      - ANNOTATIONS_UI_ADVERTISED_URL=http://${STROOM_ANNOTATIONS_UI_HOST:-stroom-annotations-ui}:5001
+      - ANNOTATIONS_UI_APP_CLIENT_ID=stroom-annotations
+      - ANNOTATIONS_UI_ANNOTATIONS_SERVICE_URL=http://${STROOM_ANNOTATIONS_SERVICE:-stroom-annotations-service}:8199/annotationsService/annotations/v1
     ports:
       - 5001:5000
+
