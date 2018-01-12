@@ -3,7 +3,7 @@ version: '2.1'
 services: 
 
   stroom-stats-db:
-    image: mysql:5.6
+    image:  "$MYSQL_DOCKER_REPO:-mysql}:5.6"
     container_name: stroom-stats-db
     ports:
         #expose mysql on 3307 to the host so as not to conflict with stroom-db

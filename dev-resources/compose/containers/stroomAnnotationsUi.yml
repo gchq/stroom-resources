@@ -4,10 +4,11 @@ services:
 
   stroom-annotations-ui:
     container_name: stroom-annotations-ui
-    image: "gchq/stroom-annotations-ui:${STROOM_ANNOTATIONS_UI_TAG:-v0.1.5-alpha.4}"
+    image: "${STROOM_ANNOTATIONS_UI_DOCKER_REPO:-gchq/stroom-annotations-ui}:${STROOM_ANNOTATIONS_UI_TAG:-v0.1.5-alpha.4}"
     environment:
-      - REACT_APP_STROOM_AUTH_SERVICE_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8096
-      - REACT_APP_STROOM_UI_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}:8080
+      - REACT_APP_STROOM_AUTH_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}:8096
+      - REACT_APP_STROOM_UI_URL=http://${STROOM_HOST:-stroom}:8080
+      # the rest need to be fixed when joe commits his changes
       - REACT_APP_LOGIN_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1/login
       - REACT_APP_AUTHENTICATION_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authenticationService/v1
       - REACT_APP_AUTHORISATION_URL=http://${STROOM_RESOURCES_ADVERTISED_HOST}/authorisationService/v1

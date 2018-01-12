@@ -4,7 +4,7 @@ services:
 
     stroom-stats:
         container_name: stroom-stats
-        image: "gchq/stroom-stats:${STROOM_STATS_TAG:-master-SNAPSHOT}"
+        image: "${STROOM_STATS_DOCKER_REPO:-gchq/stroom-stats}:${STROOM_STATS_TAG:-master-SNAPSHOT}"
         environment:
             - STATS_DB_USER=stroomuser
             - STATS_DB_PASSWORD=stroompassword1

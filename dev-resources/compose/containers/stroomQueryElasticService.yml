@@ -4,7 +4,7 @@ services:
 
   stroom-query-elastic-svc:
     container_name: stroom-query-elastic-svc
-    image: "gchq/stroom-query-elastic-svc:${STROOM_ELASTIC_SERVICE_TAG:-v0.0.2-alpha.3}"
+    image: "${STROOM_QUERY_ELASTIC_SERVICE_DOCKER_REPO:-gchq/stroom-query-elastic-svc}:${STROOM_ELASTIC_SERVICE_TAG:-v0.0.2-alpha.3}"
     environment:
       - DOCKER_CLUSTER=docker-cluster
       - DOCKER_HOSTS=elasticsearch:9300
