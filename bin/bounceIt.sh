@@ -106,7 +106,12 @@ createOrUpdateLocalTagsFile() {
     #into something like:
     #STROOM_ANNOTATIONS_SERVICE_TAG=v0.1.5-alpha.4
     #If the variable has no default part (e.g. ${..._TAG}) then just use 'master-SNAPSHOT'
-    local defaultTags=$(cat ${SCRIPT_DIR}/compose/containers/*.yml | grep -o "\${.*_TAG.*}" | uniq | sed -E 's/\$\{(.*_TAG):?-?(.*)}/\1=\2/' | sed -E 's/(_TAG=)$/\1master-SNAPSHOT/')
+    local defaultTags=$(cat ${SCRIPT_DIR}/compose/containers/*.yml | \
+        grep -oE '\${[A-Z_]*_TAG.*}' | \
+        sort | \
+        uniq | \
+        sed -E 's/\$\{(.*_TAG):?-?(.*)}/\1=\2/' | \
+        sed -E 's/(_TAG=)$/\1master-SNAPSHOT/')
     #Ensure we have a TAGS_FILE file, if not create one using the content of the defaultTags string
     if [ ! -f ${TAGS_FILE} ]; then
         echo -e "Local configuration file (${BLUE}${TAGS_FILE}${NC}) doesn't exist so have created it with the following content"
@@ -436,6 +441,21 @@ echo -e "Using command [${GREEN}${composeCmd}${NC}] against the following servic
 if [ "$composeCmd" = "up" ]; then
     echo "If you want to rebuild images from your own dockerfiles pass the '--build' argument"
 fi
+
+#TODO the follow code is an attempt to inspect all the _HOST env vars and to check
+#if the value for them can be resolve. Would need to use eval or similar to see what 
+#value they have and if it cannt be resolved prompt for something to be added to 
+#/etc/hosts
+#hostVars=$(cat ${SCRIPT_DIR}/compose/containers/*.yml | \
+    #grep -o -E '\${[A-Z_]*HOST.*}' | \
+    #sort | \
+    #uniq )
+
+#for hostVar in $(echo -e "${hostVars}"); do
+    #varName=$(echo "${hostVar}" | sed -E 's/\$\{([A-Z_]*)((:-)(.*))}/\1/')
+    #varDefaulVal=$(echo "${hostVar}" | sed -E 's/\$\{([A-Z_]*)((:-)(.*))}/\4/')
+    #echo "varName [${varName}] default [${varDefaulVal}]"
+#done
 
 if $requireConfirmation; then
     echo
