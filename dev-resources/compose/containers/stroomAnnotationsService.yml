@@ -10,7 +10,7 @@ services:
       - DB_PASSWORD=stroompassword1
       - DB_URL=jdbc:mariadb://${STROOM_ANNOTATIONS_DB_HOST:-stroom-annotations-db}/annotations
       - ADMIN_CONTEXT_PATH=/annotationsServiceAdmin
-      - AUTH_UI=http://${STROOM_AUTH_UI_HOST}/auth/login
+      - AUTH_UI=http://${STROOM_AUTH_UI_HOST:-stroom-auth-service}/auth/login
       - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-stroom}:8080/api/authorisation/v1
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users

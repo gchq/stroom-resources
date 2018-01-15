@@ -3,7 +3,7 @@ version: '2.1'
 services:
 
   elasticsearch:
-      image: "${ELASTIC_DOCKER_REPO:-docker.elastic.co/elasticsearch/elasticsearch}:5.6.3"
+    image: "${ELASTIC_DOCKER_REPO:-docker.elastic.co/elasticsearch/elasticsearch}:5.6.3"
     container_name: elasticsearch
     volumes:
       - ./config/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
