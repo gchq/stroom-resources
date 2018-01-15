@@ -153,6 +153,7 @@ exportFileContents() {
 
 echo
 isHostMissing=false
+hasEchoedMissingHostsMsg=false
 extraComposeArguments=""
 requireConfirmation=true
 requireHostFileCheck=true
@@ -296,11 +297,13 @@ if $requireHostFileCheck; then
     #work correctly. This code checks they are all there
     for host in $LOCAL_HOST_NAMES; do
         if [ $(cat /etc/hosts | grep -e "127\.0\.0\.1\s*$host" | wc -l) -eq 0 ]; then 
-            echo -e "${RED}ERROR${NC} - /etc/hosts is missing an entry for ${GREEN}\"127.0.0.1 $host\"${NC}"
             isHostMissing=true
-            echo "Add the following line to /etc/hosts:"
+            if ! $hasEchoedMissingHostsMsg; then
+                echo -e "${RED}ERROR${NC} - /etc/hosts is missing required entries for stroom hosts"
+                echo "Add the following lines to /etc/hosts (or use the '-x' argument to ignore this check):"
+                hasEchoedMissingHostsMsg=true
+            fi
             echo -e "${GREEN}127.0.0.1 $host${NC}"
-            echo
         fi
     done
 
