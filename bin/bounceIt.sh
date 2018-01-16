@@ -162,6 +162,34 @@ exportFileContents() {
     echo 
 }
 
+determineHostAddress() {
+    # We need the IP to transpose into our config
+    if [ "x${STROOM_RESOURCES_ADVERTISED_HOST}" != "x" ]; then
+        ip="${STROOM_RESOURCES_ADVERTISED_HOST}"
+        echo
+        echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as obtained from ${BLUE}STROOM_RESOURCES_ADVERTISED_HOST${NC}"
+    else
+        if [ "$(uname)" == "Darwin" ]; then
+            # Code required to find IP address is different in MacOS
+            ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}')
+        else
+            ip=$(ip route get 1 |awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
+        fi
+        echo
+        echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as determined from the operating system"
+    fi
+
+    if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        echo
+        echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
+        exit 1
+    fi
+
+    # This is used by the docker-compose YML files, so they can tell a browser where to go
+    export STROOM_RESOURCES_ADVERTISED_HOST="${ip}"
+    echo
+}
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~start~of~script~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -245,32 +273,7 @@ if [ ! -f $customEnvFile ]; then
     exit 1
 fi
 
-# We need the IP to transpose into our config
-if [ "x${STROOM_RESOURCES_ADVERTISED_HOST}" != "x" ]; then
-    ip="${STROOM_RESOURCES_ADVERTISED_HOST}"
-    echo
-    echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as obtained from ${BLUE}STROOM_RESOURCES_ADVERTISED_HOST${NC}"
-else
-    if [ "$(uname)" == "Darwin" ]; then
-        # Code required to find IP address is different in MacOS
-        ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}')
-    else
-        ip=$(ip route get 1 |awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
-    fi
-    echo
-    echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as determined from the operating system"
-fi
-
-if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-    echo
-    echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
-    exit 1
-fi
-
-# This is used by the docker-compose YML files, so they can tell a browser where to go
-export STROOM_RESOURCES_ADVERTISED_HOST="${ip}"
-
-echo
+determineHostAddress
 
 if [ -n "$customEnvFile" ]; then
     #custom env file
@@ -333,15 +336,22 @@ else
     done
 fi
 
-if $requireHostFileCheck; then
+#REQUIRE_HOSTS_FILE_CHECK is used in the precanned env files as an override to
+if $requireHostFileCheck && [[ "$REQUIRE_HOSTS_FILE_CHECK" != "false" ]]; then
     #Some of the docker containers required entries in your local hosts file to
     #work correctly. This code checks they are all there
+    #echo -e "${RED}Performing hosts check${NC}"
     for host in $LOCAL_HOST_NAMES; do
-        if [ $(cat /etc/hosts | grep -e "127\.0\.0\.1\s*$host" | wc -l) -eq 0 ]; then 
+        #echo "Checking for $host"
+        if [ $(cat /etc/hosts | grep -e "^\s*127\.0\.0\.1\s*$host\s*$" | wc -l) -eq 0 ]; then 
             isHostMissing=true
             if ! $hasEchoedMissingHostsMsg; then
-                echo -e "${RED}ERROR${NC} - /etc/hosts is missing required entries for stroom hosts"
-                echo "Add the following lines to /etc/hosts (or use the '-x' argument to ignore this check):"
+                echo
+                echo -e "${RED}WARNING${NC} - /etc/hosts is missing required entries for stroom hosts"
+                echo -e "These entries are only required if you have not set variables like"
+                echo -e "'${BLUE}...._HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}${NC}' in your env files"
+                echo -e "Add the following lines to ${BLUE}/etc/hosts${NC} (or use the '${GREEN}-x${NC}' argument to ignore this check):"
+                echo
                 hasEchoedMissingHostsMsg=true
             fi
             echo -e "${GREEN}127.0.0.1 $host${NC}"
