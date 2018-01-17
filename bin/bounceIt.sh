@@ -38,19 +38,64 @@ TEMPORARY_ENV_FILE="${SCRIPT_DIR}/.temp.env"
 ALL_SERVICES_COMPOSE_FILE="${SCRIPT_DIR}/compose/everything.yml"
 
 #Header text for use when creating a new local.env file
-DEFAULT_TAGS_HEADER="\
-#comment lines are supported like this (no space before or after '#')
-
-#SERVICE_LIST can be set to a list of services to remove the need 
-#to define multiple services on the command line, e.g.
-#SERVICE_LIST=\"stroom stroom-db stroom-stats-db\"
+#to generate the list of _HOST variables run the following 
+#cat compose/containers/*.yml | grep -oE "\\$\{[A-Z_]*_HOST(:-.*)?}" | sort | uniq | sed -E 's/\$\{([A-Z_]*)(:-.*)?}/\1=\\${STROOM_RESOURCES_ADVERTISED_HOST}/'
+DEFAULT_TAGS_HEADER='#comment lines are supported like this (no space before or after "#")
 
 #If bounceIt.sh is unable to determine the IP address of this machine from 
 #the operating system you can hard code it here. This must be the public facing
 #IP address, e.g. 192.168.0.1, NOT an address local to the machine like 127.0.0.1 .
 #STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x
 
-#The following variables set the docker tag used for specific services"
+#SERVICE_LIST can be set to a list of space delimited services to remove the need 
+#to define multiple services on the command line. Therefore uncomment some of the
+#following lines to build the required SERVICE_LIST
+SERVICE_LIST=""
+#SERVICE_LIST="${SERVICE_LIST} elasticsearch"
+#SERVICE_LIST="${SERVICE_LIST} fake-smtp"
+#SERVICE_LIST="${SERVICE_LIST} hbase"
+#SERVICE_LIST="${SERVICE_LIST} kafka"
+#SERVICE_LIST="${SERVICE_LIST} kibana"
+#SERVICE_LIST="${SERVICE_LIST} nginx"
+#SERVICE_LIST="${SERVICE_LIST} stroom"
+#SERVICE_LIST="${SERVICE_LIST} stroom-annotations-db"
+#SERVICE_LIST="${SERVICE_LIST} stroom-annotations-service"
+#SERVICE_LIST="${SERVICE_LIST} stroom-annotations-ui"
+#SERVICE_LIST="${SERVICE_LIST} stroom-auth-service"
+#SERVICE_LIST="${SERVICE_LIST} stroom-auth-service-db"
+#SERVICE_LIST="${SERVICE_LIST} stroom-auth-ui"
+#SERVICE_LIST="${SERVICE_LIST} stroom-db"
+#SERVICE_LIST="${SERVICE_LIST} stroom-query-elastic-svc"
+#SERVICE_LIST="${SERVICE_LIST} stroom-query-elastic-ui"
+#SERVICE_LIST="${SERVICE_LIST} stroom-stats"
+#SERVICE_LIST="${SERVICE_LIST} stroom-stats-db"
+#SERVICE_LIST="${SERVICE_LIST} zookeeper"
+
+#If you are a developer running one of the services in an IDE then you will need to
+#uncommennt the _HOST variable for that service here so that it uses the host''s address
+#when advertisig its address, this then makes it visible to services running in docker.
+#E.g. if you run stroom in an IDE with all other services in docker, uncomment 
+#the STROOM_HOST line.
+#ELASTIC_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#HBASE_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#KAFKA_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#NGINX_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_ANNOTATIONS_DB_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_ANNOTATIONS_UI_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_AUTH_DB_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_AUTHORISATION_SERVICE_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_AUTH_SERVICE_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_AUTH_UI_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_AUTH_UI_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_DB_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_ELASTIC_SERVICE_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_ELASTIC_UI_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+#STROOM_STATS_DB_HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}
+
+
+#The following variables set the docker tag used for specific services'
+#--------------end of DEFAULT_TAGS_HEADER---------------------------
 
 #regex used to locate a docker tag variable in a docker-compose .yml file
 TAG_VARIABLE_REGEX="\${.*_TAG.*}" 
