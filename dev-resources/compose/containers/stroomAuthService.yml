@@ -4,7 +4,7 @@ services:
 
   stroom-auth-service:
     container_name: stroom-auth-service
-    image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-dev-SNAPSHOT}"
+    image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v0.1-LATEST}"
     environment:
       - DB_USER=stroomuser
       - DB_PASSWORD=stroompassword1
