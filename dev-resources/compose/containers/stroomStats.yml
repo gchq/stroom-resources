@@ -9,7 +9,8 @@ services:
             - STATS_DB_USER=stroomuser
             - STATS_DB_PASSWORD=stroompassword1
             - STATS_DB_URL=jdbc:mysql://${STROOM_DB_HOST:-stroom-db}/stroom?useUnicode=yes&characterEncoding=UTF-8
-            - STATS_ZK_QUORUM=${ZOOKEEPER_QUORUM:-zookeeper:2181}
+              #comma delimited list of hosts, without port suffix
+            - STATS_ZK_QUORUM_HOSTS=${ZOOKEEPER_QUORUM_HOSTS:-zookeeper}
             # The below two values change the default properties - they don't actually set them in ZK!
             # That is, once these have been set changing the below won't change them. You'd need to do that directly
              # on zk, using the CLI or some GUI.
