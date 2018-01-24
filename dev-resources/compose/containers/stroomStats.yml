@@ -16,7 +16,6 @@ services:
             - STATS_KAFKA_BOOTSTRAP=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
             - STATS_HBASE_ZK_QUORUM=${ZOOKEEPER_QUORUM:-zookeeper:2181}
             - ADMIN_CONTEXT_PATH=/statsAdmin
-            # - AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}:8099
             - AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authService
             - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-stroom}:8080/api/authorisation/v1
         ports:
