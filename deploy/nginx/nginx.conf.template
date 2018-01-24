@@ -37,8 +37,8 @@ http {
         send_timeout                300;
 
         # Was the CA cert configured with an OCSP responder?
-        #   - If so you can enable the following lines and NGINX will call out to the OCSP 
-        #     server to check for revoked certificates. 
+        #   - If so you can enable the following lines and NGINX will call out to the OCSP
+        #     server to check for revoked certificates.
         # Are there intermediate CA certs?
         #   - If so you will need to cat them together to make sure the OCSP server is picked up.
         #ssl_stapling on;
@@ -66,7 +66,7 @@ http {
             }
             if ($request_method = 'POST') {
                add_header 'Access-Control-Allow-Credentials' true;
-                add_header 'Access-Control-Allow-Origin' http://${NGINX_ADVERTISED_HOST}:5000;                
+                add_header 'Access-Control-Allow-Origin' http://${NGINX_ADVERTISED_HOST}:5000;
                 add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
                 add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
                 add_header 'Access-Control-Expose-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
@@ -80,16 +80,51 @@ http {
             }
         }
 
+        # This is the root for all services hosted by auth.
+        # It's needed for the Swagger client's baseUrl.
         location /authService/ {
             proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
             proxy_pass_request_body on;
             proxy_pass_request_headers on;
         }
 
+        location /authenticationService/ {
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/authentication/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
 
+        location /userService/ {
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/user/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
 
+        location /tokenService/ {
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/token/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
+        location /authorisationService/ {
+          proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/authorisation/;
+          proxy_pass_header Set-Cookie;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_pass_request_body on;
+          proxy_pass_request_headers on;
+        }
 
         # We're going to send / to /stroom
         # location / {
@@ -97,7 +132,7 @@ http {
 
         #     # proxy_pass http://<SWARM_IP>:8080/;
         #     # proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }   
+        # }
 
         # location /stats/ {
         #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8086/;
@@ -111,13 +146,10 @@ http {
         #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         # }
 
-
-
         # location /proxy/ {
         #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8085/;
         #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         # }
-
 
         # location /stroom/ {
         #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom;
@@ -125,45 +157,6 @@ http {
         #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         #     proxy_pass_request_body  on;
         #     proxy_pass_request_headers  on;
-        # }
-
-        # location /stroomAdmin {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8081/stroomAdmin;
-        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }
-
-        # # This is the root for all services hosted by auth. 
-        # # It's needed for the Swagger client's baseUrl. 
-        # # TODO the auth services will be redundent when everything uses the
-        # # Swagger clients.
-        # location /authService {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8099;
-        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-        #     # We only need to pass in the DN.
-        #     proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
-        # }
-
-        # location /authorisationService {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/authorisation;
-        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-        #     # We only need to pass in the DN.
-        #     proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
-        # }
-
-        # location /authenticationServiceAdmin {
-        #     # Note: the path below must match the `adminContextPath` in the configuration
-        #     # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8100/authenticationServiceAdmin;
-        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }
-
-        # location /auth {
-        #     # We're not proxying the auth UI. Instead we're rewriting the request
-        #     # to send the user's browser to the right place. This makes mounting the
-        #     # app in the right place much simpler.
-        #     return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000;
         # }
 
         # location /annotationsService {

@@ -13,7 +13,7 @@ services:
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - ADVERTISED_HTTP_HOST=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authService
       - AUTH_UI=http://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}:5000/login
-      - AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}:8080/api/authorisation/v1
+      - AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days

@@ -6,11 +6,10 @@ services:
     container_name: stroom-annotations-ui
     image: "${STROOM_ANNOTATIONS_UI_DOCKER_REPO:-gchq/stroom-annotations-ui}:${STROOM_ANNOTATIONS_UI_TAG:-v0.1.5-alpha.4}"
     environment:
-      - ANNOTATIONS_UI_AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authService/authentication/v1
+      - ANNOTATIONS_UI_AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authenticationService/v1
       - ANNOTATIONS_UI_AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/api/authorisation/v1
       - ANNOTATIONS_UI_ADVERTISED_URL=http://${STROOM_ANNOTATIONS_UI_HOST:-stroom-annotations-ui}:5001
       - ANNOTATIONS_UI_APP_CLIENT_ID=stroom-annotations
       - ANNOTATIONS_UI_ANNOTATIONS_SERVICE_URL=http://${STROOM_ANNOTATIONS_SERVICE:-stroom-annotations-service}:8199/annotationsService/annotations/v1
     ports:
       - 5001:5000
-
