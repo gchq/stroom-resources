@@ -45,123 +45,169 @@ http {
         #ssl_stapling_verify on;
         #ssl_trusted_certificate /etc/nginx/certs/ca.pem.crt;
 
+
+       location / {
+            # From https://enable-cors.org/server_nginx.html
+            if ($request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Credentials' true;
+                add_header 'Access-Control-Allow-Origin' http://${NGINX_ADVERTISED_HOST}:5000;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                #
+                # Custom headers and headers various browsers *should* be OK with but aren't
+                #
+                add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
+                #
+                # Tell client that this pre-flight info is valid for 20 days
+                #
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain; charset=utf-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+            if ($request_method = 'POST') {
+               add_header 'Access-Control-Allow-Credentials' true;
+                add_header 'Access-Control-Allow-Origin' http://${NGINX_ADVERTISED_HOST}:5000;                
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
+                add_header 'Access-Control-Expose-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
+            }
+            if ($request_method = 'GET') {
+                add_header 'Access-Control-Allow-Credentials' true;
+                add_header 'Access-Control-Allow-Origin' http://${NGINX_ADVERTISED_HOST}:5000;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
+                add_header 'Access-Control-Expose-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
+            }
+        }
+
+        location /authService/ {
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
+
+
+
         # We're going to send / to /stroom
-        location / {
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}/stroom;
+        # location / {
+        #     return 301 $scheme://${NGINX_ADVERTISED_HOST}/stroom;
 
-            # proxy_pass http://<SWARM_IP>:8080/;
-            # proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        }   
+        #     # proxy_pass http://<SWARM_IP>:8080/;
+        #     # proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }   
 
-        location /stats/ {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8086/;
-            proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
+        # location /stats/ {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8086/;
+        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }
 
-        # Note: the path for admin must match the `adminContextPath` in the configuration
-        # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-        location /statsAdmin/ {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8087/statsAdmin/;
-            proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
-
-
-
-        location /proxy/ {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8085/;
-            proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
+        # # Note: the path for admin must match the `adminContextPath` in the configuration
+        # # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
+        # location /statsAdmin/ {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8087/statsAdmin/;
+        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }
 
 
-        location /stroom/ {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom;
-            proxy_pass_header  Set-Cookie;
-            proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body  on;
-            proxy_pass_request_headers  on;
-        }
 
-        location /stroomAdmin {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8081/stroomAdmin;
-            proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
+        # location /proxy/ {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8085/;
+        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }
 
-        # This is the root for all services hosted by auth. 
-        # It's needed for the Swagger client's baseUrl. 
-        # TODO the auth services will be redundent when everything uses the
-        # Swagger clients.
-        location /authService {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8099;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-            # We only need to pass in the DN.
-            proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
-        }
+        # location /stroom/ {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom;
+        #     proxy_pass_header  Set-Cookie;
+        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        #     proxy_pass_request_body  on;
+        #     proxy_pass_request_headers  on;
+        # }
 
-        location /authorisationService {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/authorisation;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # location /stroomAdmin {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8081/stroomAdmin;
+        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }
 
-            # We only need to pass in the DN.
-            proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
-        }
+        # # This is the root for all services hosted by auth. 
+        # # It's needed for the Swagger client's baseUrl. 
+        # # TODO the auth services will be redundent when everything uses the
+        # # Swagger clients.
+        # location /authService {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8099;
+        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        location /authenticationServiceAdmin {
-            # Note: the path below must match the `adminContextPath` in the configuration
-            # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8100/authenticationServiceAdmin;
-            proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
+        #     # We only need to pass in the DN.
+        #     proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
+        # }
 
-        location /auth {
-            # We're not proxying the auth UI. Instead we're rewriting the request
-            # to send the user's browser to the right place. This makes mounting the
-            # app in the right place much simpler.
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000;
-        }
+        # location /authorisationService {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/authorisation;
+        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        location /annotationsService {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8199/annotations;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #     # We only need to pass in the DN.
+        #     proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
+        # }
 
-            # We only need to pass in the DN.
-            proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
-        }
+        # location /authenticationServiceAdmin {
+        #     # Note: the path below must match the `adminContextPath` in the configuration
+        #     # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8100/authenticationServiceAdmin;
+        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }
 
-        location /annotationsServiceAdmin/ {
-            # Note: the path below must match the `adminContextPath` in the configuration
-            # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8200/annotationsServiceAdmin;
-            proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
+        # location /auth {
+        #     # We're not proxying the auth UI. Instead we're rewriting the request
+        #     # to send the user's browser to the right place. This makes mounting the
+        #     # app in the right place much simpler.
+        #     return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000;
+        # }
 
-        location /annotations {
-            # We're not proxying the auth UI. Instead we're rewriting the request
-            # to send the user's browser to the right place. This makes mounting the
-            # app in the right place much simpler.
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5001;
-        }
+        # location /annotationsService {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8199/annotations;
+        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        location /queryElasticService/ {
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8299/;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #     # We only need to pass in the DN.
+        #     proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
+        # }
 
-            # We only need to pass in the DN.
-            proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
-        }
+        # location /annotationsServiceAdmin/ {
+        #     # Note: the path below must match the `adminContextPath` in the configuration
+        #     # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8200/annotationsServiceAdmin;
+        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }
 
-        location /queryElasticServiceAdmin/ {
-            # Note: the path below must match the `adminContextPath` in the configuration
-            # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8300;
-            proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
+        # location /annotations {
+        #     # We're not proxying the auth UI. Instead we're rewriting the request
+        #     # to send the user's browser to the right place. This makes mounting the
+        #     # app in the right place much simpler.
+        #     return 301 $scheme://${NGINX_ADVERTISED_HOST}:5001;
+        # }
 
-        location /queryElastic {
-            # We're not proxying the auth UI. Instead we're rewriting the request
-            # to send the user's browser to the right place. This makes mounting the
-            # app in the right place much simpler.
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5002;
-        }
+        # location /queryElasticService/ {
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8299/;
+        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        #     # We only need to pass in the DN.
+        #     proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
+        # }
+
+        # location /queryElasticServiceAdmin/ {
+        #     # Note: the path below must match the `adminContextPath` in the configuration
+        #     # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
+        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8300;
+        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        # }
+
+        # location /queryElastic {
+        #     # We're not proxying the auth UI. Instead we're rewriting the request
+        #     # to send the user's browser to the right place. This makes mounting the
+        #     # app in the right place much simpler.
+        #     return 301 $scheme://${NGINX_ADVERTISED_HOST}:5002;
+        # }
     }
 }
