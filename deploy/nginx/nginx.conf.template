@@ -45,8 +45,10 @@ http {
         #ssl_stapling_verify on;
         #ssl_trusted_certificate /etc/nginx/certs/ca.pem.crt;
 
-
-       location / {
+        ##############
+        # CORS setup #
+        ##############
+        location / {
             # From https://enable-cors.org/server_nginx.html
             if ($request_method = 'OPTIONS') {
                 add_header 'Access-Control-Allow-Credentials' true;
@@ -79,6 +81,10 @@ http {
                 add_header 'Access-Control-Expose-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
             }
         }
+
+        ########################
+        # ROUTING FOR SERVICES #
+        ########################
 
         # This is the root for all services hosted by auth.
         # It's needed for the Swagger client's baseUrl.
@@ -126,13 +132,33 @@ http {
           proxy_pass_request_headers on;
         }
 
-        # We're going to send / to /stroom
-        # location / {
-        #     return 301 $scheme://${NGINX_ADVERTISED_HOST}/stroom;
+        ##############
+        # UI ROUTING #
+        ##############
 
-        #     # proxy_pass http://<SWARM_IP>:8080/;
-        #     # proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }
+        location /stroom {
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}:8080/stroom;
+        }
+
+        location /login {
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000/login/;
+        }
+
+        location /users {
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000/userSearch/;
+        }
+
+        location /tokens {
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000/tokens/;
+        }
+
+        location /changepassword {
+            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000/changepassword;
+        }
+
+        #########################
+        # TODO: OBSOLETE ROUTES #
+        #########################
 
         # location /stats/ {
         #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8086/;
