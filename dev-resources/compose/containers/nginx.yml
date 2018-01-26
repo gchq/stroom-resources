@@ -6,7 +6,7 @@ services:
         environment:
             - NGINX_ADVERTISED_HOST=${NGINX_HOST:-stroom-nginx}
         volumes:
-            - "../../../certs:/etc/nginx/certs"
+            - "../../../nginx/volume:/etc/nginx/vol/"
         ports:
             - "80:80"
             - "443:443"

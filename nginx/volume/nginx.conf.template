@@ -23,9 +23,9 @@ http {
         listen                  443 ssl;
         server_name             localhost;
 
-        ssl_certificate         /etc/nginx/certs/server.pem.crt;
-        ssl_certificate_key     /etc/nginx/certs/server.unencrypted.key;
-        ssl_client_certificate  /etc/nginx/certs/ca.pem.crt;
+        ssl_certificate         /etc/nginx/vol/certs/server.pem.crt;
+        ssl_certificate_key     /etc/nginx/vol/certs/server.unencrypted.key;
+        ssl_client_certificate  /etc/nginx/vol/certs/ca.pem.crt;
         # This needs to be on otherwise we won't be able to extract the DN or the cert
         ssl_verify_client       on;
         ssl_verify_depth        1;
