@@ -17,9 +17,6 @@ FROM nginx:1.13.8-alpine
 #Copy our templated conf file in ready for substitution of the host name variables
 COPY ./nginx.conf.template /tmp/
 
-#Copy in our dev certificates
-COPY ./certs/* /etc/nginx/certs/
-
 #Add bash in case we want to shell onto the container
 RUN apk add --no-cache bash
 
