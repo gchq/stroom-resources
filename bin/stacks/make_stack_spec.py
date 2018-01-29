@@ -38,7 +38,7 @@ def prompt_for_stack_name():
 
 def build_stack(name, services_to_include):
     """Builds a stack file in YAML format"""
-    output_file_name = 'stacks/' + name + '.yml'
+    output_file_name = name + '.yml'
 
     with open(output_file_name, 'w') as outfile:
         outfile.write('version: \'2.1\'\n\n')
