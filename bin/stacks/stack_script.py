@@ -2,7 +2,6 @@
  them to a script for exporting. I know this is easier in bash but
  I wanted to keep these tools consistently in python."""
 
-import sys
 import re
 import os
 
@@ -12,8 +11,11 @@ def write_out_vars(output_file, var_set):
         output_file.write("export %s=\n" % var)
     output_file.write('\n')
 
-if __name__ == "__main__":
-    with open(sys.argv[1]) as infile:
+def write_out_script(stack_name):
+    """Writes out a start script, based on the supplied stack name.
+    The stack name must have a corresponding .yml file."""
+    input_file_name = stack_name + '.yml'
+    with open(input_file_name) as infile:
         host_vars = set()
         tag_vars = set()
         repo_vars = set()
@@ -41,12 +43,13 @@ if __name__ == "__main__":
     repo_vars = sorted(repo_vars)
     other_vars = sorted(other_vars)
 
-    output_script_name = sys.argv[1].split('.')[0] + '.sh'
+    output_script_name = stack_name + '.sh'
 
     with open(output_script_name, 'w') as outfile:
         write_out_vars(outfile, host_vars)
         write_out_vars(outfile, tag_vars)
         write_out_vars(outfile, repo_vars)
         write_out_vars(outfile, other_vars)
+        outfile.write('docker stack deploy --compose-file ' + output_script_name )
 
     os.chmod(output_script_name, 0o755)

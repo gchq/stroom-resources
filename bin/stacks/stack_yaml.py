@@ -36,46 +36,19 @@ def prompt_for_stack_name():
     return inquirer.prompt(stack_name_question)['stackName']
 
 
-def build_stack(name, services_to_include):
+def write_out_yaml(name, services_to_include):
     """Builds a stack file in YAML format"""
     output_file_name = name + '.yml'
-
+    compose_version = '3'
     with open(output_file_name, 'w') as outfile:
-        outfile.write('version: \'2.1\'\n\n')
+        outfile.write('version: \'' + compose_version + '\'\n\n')
         outfile.write('services:\n\n')
         for fname in services_to_include:
             with open('../compose/containers/' + fname + '.yml') as infile:
                 for line in infile:
                     if 'version: \'2.1\'' not in line \
+                    and 'version: \'3\'' not in line \
                     and 'services:' not in line \
                     and str.strip(line):
                         outfile.write(line)
             outfile.write('\n\n')
-
-
-if __name__ == "__main__":
-    SERVICE_LIST = [
-        'stroom', 'stroomDb', 'stroomAuthService', 'stroomAuthUi',
-        'stroomAuthDb', 'stroomStats', 'stroomStatsDb', 'stroomProxy',
-        'stroomAnnotationsService', 'stroomAnnotationsUi',
-        'stroomAnnotationsDb', 'stroomQueryElasticService',
-        'stroomQueryElasticUi', 'zookeeper', 'nginx', 'kafka', 'kibana',
-        'hdfs', 'hbase', 'elasticsearch', 'fakeSmtp'
-    ]
-
-    SERVICES = []
-    STACK_TYPE = prompt_for_stack_type()
-
-    if STACK_TYPE == 'Full':
-        SERVICES = SERVICE_LIST
-
-    elif STACK_TYPE == 'Core':
-        SERVICES = [
-            'stroom', 'stroomDb', 'stroomAuthService', 'stroomAuthUi',
-            'stroomAuthDb', 'stroomStatsDb', 'nginx'
-        ]
-    elif STACK_TYPE == 'Custom':
-        SERVICES = prompt_for_services(SERVICE_LIST)
-
-    STACK_NAME = prompt_for_stack_name()
-    build_stack(STACK_NAME, SERVICES)
