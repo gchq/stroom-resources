@@ -1,12 +1,12 @@
 version: '2.1'
 services:
-    nginx:
-        container_name: nginx
-        image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v1.0.0_nginx-v1.13.8}"
-        environment:
-            - NGINX_ADVERTISED_HOST=${NGINX_HOST:-stroom-nginx}
-        volumes:
-            - "../../../nginx/volume:/etc/nginx/vol/"
-        ports:
-            - "80:80"
-            - "443:443"
+  nginx:
+    container_name: nginx
+    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v1.0.0_nginx-v1.13.8}"
+    environment:
+      - NGINX_ADVERTISED_HOST=${NGINX_HOST:-stroom-nginx}
+    volumes:
+      - "../../../nginx/volume:/etc/nginx/vol/"
+    ports:
+      - "80:80"
+      - "443:443"
