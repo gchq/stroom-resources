@@ -11,12 +11,11 @@ services:
       - DB_URL=jdbc:mariadb://${STROOM_ANNOTATIONS_DB_HOST:-stroom-annotations-db}/annotations
       - ADMIN_CONTEXT_PATH=/annotationsServiceAdmin
       - AUTH_UI=http://${STROOM_AUTH_UI_HOST:-stroom-auth-service}/auth/login
-      - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-stroom}:8080/api/authorisation/v1
-      - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
-      - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes
+      - AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}:8080/api/authorisation/v1
+      - AUTHORISATION_SERVICE_IS_AUTHORISED_PATH=/isAuthorised
     ports:
       - 8199:8199
       - 8200:8200
