@@ -1,6 +1,8 @@
 """Asks the user questions and then builds a stack file in YAML,
  ready for user with docker-compose."""
 
+import os
+
 import stack_yaml
 import stack_script
 
@@ -28,6 +30,7 @@ if __name__ == "__main__":
     elif STACK_TYPE == 'Custom':
         SERVICES = stack_yaml.prompt_for_services(SERVICE_LIST)
 
+    
     STACK_NAME = stack_yaml.prompt_for_stack_name()
     stack_yaml.write_out_yaml(STACK_NAME, SERVICES)
 
