@@ -4,7 +4,7 @@ services:
 
   stroom-auth-ui:
     container_name: stroom-auth-ui
-    image: "${STROOM_AUTH_UI_DOCKER_REPO:-gchq/stroom-auth-ui}:${STROOM_AUTH_UI_TAG:-master-SNAPSHOT}"
+    image: "${STROOM_AUTH_UI_DOCKER_REPO:-gchq/stroom-auth-ui}:${STROOM_AUTH_UI_TAG:-v0.1-LATEST}"
     # All URLs are accessed from a browser, and so need to refer to the advertised host.
     environment:
       - AUTH_UI_AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}:8099/authentication/v1
