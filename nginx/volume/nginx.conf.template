@@ -89,6 +89,7 @@ http {
         # This is the root for all services hosted by auth.
         # It's needed for the Swagger client's baseUrl.
         location /authService/ {
+            proxy_ssl_server_name on;
             proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -98,6 +99,7 @@ http {
         }
 
         location /authenticationService/ {
+            proxy_ssl_server_name on;
             proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/authentication/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -107,6 +109,7 @@ http {
         }
 
         location /userService/ {
+            proxy_ssl_server_name on;
             proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/user/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -116,6 +119,7 @@ http {
         }
 
         location /tokenService/ {
+            proxy_ssl_server_name on;
             proxy_pass http://${NGINX_ADVERTISED_HOST}:8099/token/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -125,11 +129,12 @@ http {
         }
 
         location /authorisationService/ {
-          proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/authorisation/;
-          proxy_pass_header Set-Cookie;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_pass_request_body on;
-          proxy_pass_request_headers on;
+            proxy_ssl_server_name on;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/authorisation/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
         }
 
         ##############
