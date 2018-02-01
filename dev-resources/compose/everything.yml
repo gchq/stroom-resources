@@ -105,10 +105,10 @@ services:
           file: ./containers/stroomQueryElasticUi.yml
           service: stroom-query-elastic-ui
 
-  stroom-query-elastic-svc:
+  stroom-query-elastic-service:
       extends:
           file: ./containers/stroomQueryElasticService.yml
-          service: stroom-query-elastic-svc
+          service: stroom-query-elastic-service
 
   stroom-stats:
       extends:
