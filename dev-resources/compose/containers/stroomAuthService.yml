@@ -8,7 +8,7 @@ services:
     environment:
       - DB_USER=stroomuser
       - DB_PASSWORD=stroompassword1
-      - DB_URL=jdbc:mariadb://${STROOM_AUTH_DB_HOST:-stroom-auth-db}/auth
+      - DB_URL=jdbc:mariadb://${STROOM_AUTH_DB_HOST:-stroom-auth-db}:3309/auth
       - JWS_ISSUER=stroom
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - ADVERTISED_HTTP_HOST=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authService
