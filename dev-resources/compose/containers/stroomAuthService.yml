@@ -22,4 +22,4 @@ services:
     ports:
       - 8099:8099
       - 8100:8100
-    entrypoint: ./wait-for-it_busybox.sh ${STROOM_AUTH_DB_HOST:-stroom-auth-db}:3306 -- java -jar stroom-auth-service-all.jar server config.yml
+    entrypoint: ./wait-for-it_busybox.sh ${STROOM_AUTH_DB_HOST:-stroom-auth-db}:3309 -- java -jar stroom-auth-service-all.jar server config.yml
