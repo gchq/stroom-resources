@@ -5,6 +5,7 @@ services:
     image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v1.0-LATEST}"
     environment:
       - NGINX_ADVERTISED_HOST=${NGINX_HOST:-stroom-nginx}
+      - STROOM_HOST=${STROOM_HOST:-localhost}
     volumes:
       - "../../../nginx/volume:/etc/nginx/vol/"
     ports:
