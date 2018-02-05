@@ -130,7 +130,7 @@ http {
 
         location /authorisationService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/authorisation/;
+            proxy_pass http://${STROOM_HOST}:8080/api/authorisation/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -142,23 +142,23 @@ http {
         ##############
 
         location /stroom {
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}:8080/stroom;
+            return 301 http://${NGINX_ADVERTISED_HOST}:8080/stroom;
         }
 
         location /login {
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000/login/;
+            return 301 http://${NGINX_ADVERTISED_HOST}:5000/login/;
         }
 
         location /users {
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000/userSearch/;
+            return 301 http://${NGINX_ADVERTISED_HOST}:5000/userSearch/;
         }
 
         location /tokens {
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000/tokens/;
+            return 301 http://${NGINX_ADVERTISED_HOST}:5000/tokens/;
         }
 
         location /changepassword {
-            return 301 $scheme://${NGINX_ADVERTISED_HOST}:5000/changepassword;
+            return 301 http://${NGINX_ADVERTISED_HOST}:5000/changepassword;
         }
 
         #########################
