@@ -137,13 +137,28 @@ http {
             proxy_pass_request_headers on;
         }
 
-        ##############
-        # UI ROUTING #
-        ##############
+        ##################
+        # ROUTING FOR UI #
+        ##################
 
-        location /stroom {
-            return 301 http://${NGINX_ADVERTISED_HOST}:8080/stroom;
+        ## ROUTING FOR STROOM
+
+        # This is an exact match that directs '/stroom' to the Stroom UI...
+        location ~ /stroom$ {
+             return 301 http://${NGINX_ADVERTISED_HOST}/stroom/ui;
         }
+
+        # ... and everything else gets reverse-proxied to stroom.
+        location /stroom {
+            proxy_ssl_server_name on;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
+        ## ROUTING FOR OTHER UI
 
         location /login {
             return 301 http://${NGINX_ADVERTISED_HOST}:5000/login/;
