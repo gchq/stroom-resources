@@ -10,6 +10,6 @@ services:
       - QUERY_ELASTIC_UI_AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
       - QUERY_ELASTIC_UI_ADVERTISED_URL=http://${STROOM_ELASTIC_UI_HOST:-stroom-query-elastic-ui}:5002
       - QUERY_ELASTIC_UI_APP_CLIENT_ID=stroom-query-elastic
-      - QUERY_ELASTIC_UI_ANNOTATIONS_SERVICE_URL=http://${STROOM_ELASTIC_SERVICE_HOST:-stroom-query-elastic-service}:8299
+      - QUERY_ELASTIC_UI_QUERY_ELASTIC_URL=http://${STROOM_ELASTIC_SERVICE_HOST:-stroom-query-elastic-service}/queryElasticService
     ports:
       - 5002:5000
