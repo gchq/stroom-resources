@@ -16,8 +16,9 @@ services:
       # host1:2181,host2:2181,host3:2181/myChRoot
       - STATS_ZK_QUORUM=${ZOOKEEPER_QUORUM:-zookeeper:2181}
 
-      # The following en vars change the values used to seed zookeeper. Once ZK has been seeded changing
-      # these values has no affect as stroom-stats will use the values from ZK.
+      # The following env vars set the values used to seed an empty zookeeper. 
+      # Once ZK has been seeded, changing these values has no affect as stroom-stats 
+      # will always use the values obtained from ZK.
       # Changing the value in ZK requires the ZK CLI or some other tool.
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       - STATS_KAFKA_BOOTSTRAP=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
