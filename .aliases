@@ -4,7 +4,7 @@ alias bounceAll='./bounceIt.sh compose/hbase-kafka-mysql-zk.yml'
 kConsumeTopic() {
     topicName="$1"
     echo "Consuming from topic(s) [$topicName] (comma delimited list of topics)"
-    docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --property key.separator=\"|\" --zookeeper zookeeper:2181/kafka --whitelist $topicName"
+    docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --property print.key=true --property key.separator=\"|\" --zookeeper zookeeper:2181/kafka --whitelist $topicName"
 }
 
 kCreateTopic() {
