@@ -75,10 +75,9 @@ SERVICE_LIST=""
 # instead of the supplied host/IP. Docker container names only work for communication
 # between Docker containers on the Docker network and not externally hosted services.
 #
-# Chances are you don''t want to use Docker container names as they only work if
-# referenced components are running in Docker so basically don''t bother commenting
+# Chances are you don'\''t want to use Docker container names as they only work if
+# referenced components are running in Docker so basically don'\''t bother commenting
 # out the lines below.
-
 ELASTIC_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
 ELASTIC_PORT=9300
 HBASE_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
