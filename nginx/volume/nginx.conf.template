@@ -137,6 +137,24 @@ http {
             proxy_pass_request_headers on;
         }
 
+        location /annotationsService/ {
+            proxy_ssl_server_name on;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8199/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
+        location /queryElasticService/ {
+            proxy_ssl_server_name on;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8299/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
         ##################
         # ROUTING FOR UI #
         ##################
@@ -176,6 +194,14 @@ http {
             return 301 http://${NGINX_ADVERTISED_HOST}:5000/changepassword;
         }
 
+        location /annotations {
+            return 301 http://${NGINX_ADVERTISED_HOST}:5001;
+        }
+
+        location /query-elastic {
+            return 301 http://${NGINX_ADVERTISED_HOST}:5002;
+        }
+
         #########################
         # TODO: OBSOLETE ROUTES #
         #########################
@@ -203,50 +229,6 @@ http {
         #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
         #     proxy_pass_request_body  on;
         #     proxy_pass_request_headers  on;
-        # }
-
-        # location /annotationsService {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8199/annotations;
-        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-        #     # We only need to pass in the DN.
-        #     proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
-        # }
-
-        # location /annotationsServiceAdmin/ {
-        #     # Note: the path below must match the `adminContextPath` in the configuration
-        #     # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8200/annotationsServiceAdmin;
-        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }
-
-        # location /annotations {
-        #     # We're not proxying the auth UI. Instead we're rewriting the request
-        #     # to send the user's browser to the right place. This makes mounting the
-        #     # app in the right place much simpler.
-        #     return 301 $scheme://${NGINX_ADVERTISED_HOST}:5001;
-        # }
-
-        # location /queryElasticService/ {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8299/;
-        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-        #     # We only need to pass in the DN.
-        #     proxy_set_header X-SSL-ClIENT-S-DN   $ssl_client_s_dn;
-        # }
-
-        # location /queryElasticServiceAdmin/ {
-        #     # Note: the path below must match the `adminContextPath` in the configuration
-        #     # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8300;
-        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }
-
-        # location /queryElastic {
-        #     # We're not proxying the auth UI. Instead we're rewriting the request
-        #     # to send the user's browser to the right place. This makes mounting the
-        #     # app in the right place much simpler.
-        #     return 301 $scheme://${NGINX_ADVERTISED_HOST}:5002;
         # }
     }
 }

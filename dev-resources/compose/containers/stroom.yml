@@ -10,10 +10,10 @@ services:
       - STROOM_RACK=rack
       - STROOM_JPA_DIALECT=org.hibernate.dialect.MySQLInnoDBDialect
       - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
-      - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-stroom-db}:3307/stroom?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-stroom-db}:${STROOM_DB_PORT:-3306}/stroom?useUnicode=yes&characterEncoding=UTF-8
       - STROOM_JDBC_DRIVER_USERNAME=stroomuser
       - STROOM_JDBC_DRIVER_PASSWORD=stroompassword1
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-stroom-stats-db}:3308/statistics?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-stroom-stats-db}:${STROOM_STATS_DB_PORT:-3306}/statistics?useUnicode=yes&characterEncoding=UTF-8
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=stroomuser
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=stroompassword1
       # The browser is redirected to this URL so, like the AUTH UI URL, it needs to be the advertised host.
