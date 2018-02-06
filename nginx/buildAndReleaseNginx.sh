@@ -29,7 +29,7 @@ fi
 # This script is all you need to build an image of stroom-stats.
 ver="$1"
 
-docker build --tag ${DOCKER_REPO}:${ver} ./nginx/
+docker build --tag ${DOCKER_REPO}:${ver} .
 
 # This assumes you have authenticated with docker using 'docker login', else it will fail
 docker push ${DOCKER_REPO}:${ver}
