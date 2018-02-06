@@ -7,8 +7,10 @@ services:
     container_name: hbase
     image: "${STROOM_STATS_HBASE_DOCKER_REPO:-gchq/stroom-stats-hbase}:${STROOM_STATS_TAG:-master-SNAPSHOT}_hbase-v1.2.0"
     hostname: "${HBASE_HOST:-hbase}"
-    entrypoint: ["./wait-for-it_busybox.sh", "${ZOOKEEPER_QUORUM:-zookeeper:2181}"]
-    command: ["--", "/entrypoint.sh"]
+    #The optimal solution here would be to specify '["./wait-for-it_busybox.sh", "${ZOOKEEPER_QUORUM:-zookeeper:2181}", "--"]
+    #in entrypoint then let the command from the docker file be tacked on the end, however if you override entrypoint
+    #compose will wipe out the dockerfile's command.  Thus it all needs to be decalred here
+    command: ["./wait-for-it_busybox.sh", "${ZOOKEEPER_QUORUM:-zookeeper:2181}", "--", "/entrypoint.sh"]
     environment:
       - HBASE_MANAGES_ZK=false
     ports:
