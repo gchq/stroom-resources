@@ -10,7 +10,7 @@ services:
       - DB_PASSWORD=stroompassword1
       - DB_URL=jdbc:mariadb://${STROOM_ANNOTATIONS_DB_HOST:-stroom-annotations-db}:${STROOM_ANNOTATIONS_DB_PORT:-3306}/annotations
       - ADMIN_CONTEXT_PATH=/annotationsServiceAdmin
-      - AUTH_UI=http://${STROOM_AUTH_UI_HOST:-stroom-auth-service}/auth/login
+      - AUTH_UI=${STROOM_AUTH_UI_URL}/login
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes

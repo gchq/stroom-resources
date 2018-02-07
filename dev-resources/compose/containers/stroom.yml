@@ -21,10 +21,10 @@ services:
       - STROOM_AUTH_AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authenticationService/v1
       - STROOM_AUTH_JWT_ISSUER=stroom
       - STROOM_AUTH_JWT_ENABLETOKENREVOCATIONCHECK=${ENABLE_TOKEN_REVOCATION_CHECK}
-      - STROOM_USERS_UI_URL=http://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}/users
-      - STROOM_APIKEYS_UI_URL=http://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}/tokens
-      - STROOM_CHANGEPASSWORD_URL=http://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}/changepassword
-      - STROOM_ADVERTISED_URL=http://${NGINX_HOST:-stroom}/stroom/ui
+      - STROOM_USERS_UI_URL=https://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}/users
+      - STROOM_APIKEYS_UI_URL=https://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}/tokens
+      - STROOM_CHANGEPASSWORD_URL=https://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}/changepassword
+      - STROOM_ADVERTISED_URL=https://${NGINX_HOST:-stroom}/stroom/ui
       # This needs to be an API token issued for a user, i.e. for the admin user.
       # Without this Stroom won't be able to make calls to it's RemoteDataSources.
       - STROOM_SECURITY_API_TOKEN=eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjE1NDQ4NjMwNDMsInN1YiI6InN0cm9vbVNlcnZpY2VVc2VyIiwiaXNzIjoic3Ryb29tIn0.gHJkpxeW5CjU_hBzuLhQd8Ot8XkLvhu45_-Ql4gOX96iNbl0AnKEwKu2QmMY3uVerGjYBHDczgKJlLVF_RQtFiwFLorT2P_Mv-9ShcCL0Ml-Tq-1i-_UnHMYHP5Nv-rP3ajUz-vTHwIYqi_WU-IEpIF56MCYBqeDkgQfe-I03VyfsLkWt-3f8L3AKESZirmqjPUB_SPi4vWGpyN28FuJe1KyqdCPo5QVKnrM_dpguE_aIj1Dy1sovmgO5WxFm3-hE7asW3WrnokSopNXQ1bJ3W77v4k1CnMpYDw5schQAKqUffPVGxNE6UxNunZTlRQJQqYihKkhpeiTiZMo9XCHGg

@@ -12,7 +12,7 @@ services:
       - AUTH_UI_USER_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/userService/v1
       - AUTH_UI_TOKEN_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/tokenService/v1
       - AUTH_UI_AUTHORISATION_SERVICE_URL=https://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
-      - AUTH_UI_STROOM_UI_URL=http://${STROOM_HOST:-stroom}:8080/stroom
+      - AUTH_UI_STROOM_UI_URL=https://${STROOM_HOST:-stroom}:8080/stroom
       - AUTH_UI_ADVERTISED_URL=${STROOM_AUTH_UI_URL:-http://localhost:5000}
       - AUTH_UI_APP_CLIENT_ID=stroom-accounts
       # The NGINX_xxx variables configure the NGINX server that serves the app

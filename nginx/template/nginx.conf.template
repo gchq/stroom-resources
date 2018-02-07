@@ -16,7 +16,7 @@ http {
         listen                  80;
         listen                  443 ssl;
         server_name             ${NGINX_ADVERTISED_HOST};
-    
+
         ssl_certificate         /etc/nginx/certs/${NGINX_SSL_CERTIFICATE};
         ssl_certificate_key     /etc/nginx/certs/${NGINX_SSL_CERTIFICATE_KEY};
         ssl_client_certificate  /etc/nginx/certs/${NGINX_SSL_CLIENT_CERTIFICATE};
@@ -157,7 +157,7 @@ http {
 
         # This is an exact match that directs '/stroom' to the Stroom UI...
         location ~ /stroom$ {
-             return 301 http://${NGINX_ADVERTISED_HOST}/stroom/ui;
+             return 301 https://${NGINX_ADVERTISED_HOST}/stroom/ui;
         }
 
         # ... and everything else gets reverse-proxied to stroom.
