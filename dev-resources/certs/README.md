@@ -1,6 +1,8 @@
 # Dev certs
 These certs may be used to test SSL termination in NGINX.
 
+The `all` directory contains all the self-signed certificates and keys and CSRs. The `server` directory contains the certificates and key needed for serving files over HTTPS.
+
 ## Using HTTPie to test
 
 When using self-signed certificates, like we are here, HTTPie needs to be passed `--verify=no`, otherwise it'll fail. For example:
