@@ -10,12 +10,6 @@ http {
 
     index index.html index.htm;
 
-    # Note: We could use `stroomProxy` in `proxy_pass`. Useful if we want to refer to the
-    # address several times (which we don't yet).
-    #upstream stroomProxy {
-    #    server ${SWARM_IP}:8085;
-    #}
-
     server {
         root /usr/share/nginx/html;
 
@@ -23,9 +17,9 @@ http {
         listen                  443 ssl;
         server_name             ${NGINX_ADVERTISED_HOST};
 
-        ssl_certificate         /etc/nginx/vol/certs/server.pem.crt;
-        ssl_certificate_key     /etc/nginx/vol/certs/server.unencrypted.key;
-        ssl_client_certificate  /etc/nginx/vol/certs/ca.pem.crt;
+        ssl_certificate         /etc/nginx/certs/server.pem.crt;
+        ssl_certificate_key     /etc/nginx/certs/server.unencrypted.key;
+        ssl_client_certificate  /etc/nginx/certs/ca.pem.crt;
         # This needs to be on otherwise we won't be able to extract the DN or the cert
         ssl_verify_client       on;
         ssl_verify_depth        10;
@@ -201,34 +195,5 @@ http {
         location /query-elastic {
             return 301 http://${NGINX_ADVERTISED_HOST}:5002;
         }
-
-        #########################
-        # TODO: OBSOLETE ROUTES #
-        #########################
-
-        # location /stats/ {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8086/;
-        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }
-
-        # # Note: the path for admin must match the `adminContextPath` in the configuration
-        # # for the Dropwizard app. This is configured by environment variable in `swarm.yml`.
-        # location /statsAdmin/ {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8087/statsAdmin/;
-        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }
-
-        # location /proxy/ {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8085/;
-        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        # }
-
-        # location /stroom/ {
-        #     proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom;
-        #     proxy_pass_header  Set-Cookie;
-        #     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        #     proxy_pass_request_body  on;
-        #     proxy_pass_request_headers  on;
-        # }
     }
 }
