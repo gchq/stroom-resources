@@ -16,12 +16,12 @@ http {
         listen                  80;
         listen                  443 ssl;
         server_name             ${NGINX_ADVERTISED_HOST};
-
-        ssl_certificate         /etc/nginx/certs/server.pem.crt;
-        ssl_certificate_key     /etc/nginx/certs/server.unencrypted.key;
-        ssl_client_certificate  /etc/nginx/certs/ca.pem.crt;
+    
+        ssl_certificate         /etc/nginx/certs/${NGINX_SSL_CERTIFICATE};
+        ssl_certificate_key     /etc/nginx/certs/${NGINX_SSL_CERTIFICATE_KEY};
+        ssl_client_certificate  /etc/nginx/certs/${NGINX_SSL_CLIENT_CERTIFICATE};
         # This needs to be on otherwise we won't be able to extract the DN or the cert
-        ssl_verify_client       on;
+        ssl_verify_client       ${NGINX_SSL_VERIFY_CLIENT};
         ssl_verify_depth        10;
 
         # These set the timeouts - the unit is seconds
@@ -173,19 +173,19 @@ http {
         ## ROUTING FOR OTHER UI
 
         location /login {
-            return 301 http://${NGINX_ADVERTISED_HOST}:5000/login/;
+            return 301 ${AUTH_UI_URL}/login/;
         }
 
         location /users {
-            return 301 http://${NGINX_ADVERTISED_HOST}:5000/userSearch/;
+            return 301 ${AUTH_UI_URL}/userSearch/;
         }
 
         location /tokens {
-            return 301 http://${NGINX_ADVERTISED_HOST}:5000/tokens/;
+            return 301 ${AUTH_UI_URL}/tokens/;
         }
 
         location /changepassword {
-            return 301 http://${NGINX_ADVERTISED_HOST}:5000/changepassword;
+            return 301 ${AUTH_UI_URL}/changepassword;
         }
 
         location /annotations {

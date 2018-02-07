@@ -5,6 +5,11 @@ services:
     image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v1.0-LATEST}"
     environment:
       - NGINX_ADVERTISED_HOST=${NGINX_HOST:-stroom-nginx}
+      - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-on}
+      - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
+      - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
+      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+      - AUTH_UI_URL=${STROOM_AUTH_UI_URL}
       - STROOM_HOST=${STROOM_HOST:-localhost}
     volumes:
       # Shared certs volume: TODO: move it to the top level

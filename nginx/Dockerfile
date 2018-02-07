@@ -27,4 +27,12 @@ RUN apk add --no-cache bash
 #We need to create nginx.conf from nginx.conf.template, substituting NGINX_ADVERTISED_HOST from its environment variable
 #As nginx.conf contains stiff like '$proxy_add_x_forwarded_for', we need to give envsubst a specific list of variables
 #to substitute, else it will breake the config
-CMD [ "/bin/bash", "-c", "envsubst '${NGINX_ADVERTISED_HOST} ${STROOM_HOST}' < /etc/nginx/template/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]
+CMD [ "/bin/bash", "-c", "envsubst ' \
+    ${NGINX_ADVERTISED_HOST} \
+    ${STROOM_HOST} \
+    ${AUTH_UI_URL} \
+    ${NGINX_SSL_VERIFY_CLIENT} \
+    ${NGINX_SSL_CERTIFICATE} \
+    ${NGINX_SSL_CERTIFICATE_KEY} \
+    ${NGINX_SSL_CLIENT_CERTIFICATE} \
+    ' < /etc/nginx/template/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]
