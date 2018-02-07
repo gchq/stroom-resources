@@ -7,6 +7,7 @@ services:
     image: "${STROOM_AUTH_UI_DOCKER_REPO:-gchq/stroom-auth-ui}:${STROOM_AUTH_UI_TAG:-v0.1-LATEST}"
     # All URLs are accessed from a browser, and so need to refer to the advertised host.
     environment:
+      # The AUTH_UI_xxx variables configure the app as loaded in the browser
       - AUTH_UI_AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authenticationService/v1
       - AUTH_UI_USER_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/userService/v1
       - AUTH_UI_TOKEN_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/tokenService/v1
@@ -14,5 +15,18 @@ services:
       - AUTH_UI_STROOM_UI_URL=http://${STROOM_HOST:-stroom}:8080/stroom
       - AUTH_UI_ADVERTISED_URL=http://${STROOM_AUTH_UI_HOST:-stroom-auth-ui}:5000
       - AUTH_UI_APP_CLIENT_ID=stroom-accounts
+      # The NGINX_xxx variables configure the NGINX server that serves the app
+      - NGINX_HOST=${STROOM_AUTH_UI_HOST:-localhost}
+      - NGINX_HTTP_PORT=${AUTH_UI_NGINX_HTTP_PORT:-80}
+      - NGINX_HTTPS_PORT=${AUTH_UI_NGINX_HTTPS_PORT:-443}
+      - NGINX_SSL_CERTIFICATE=${AUTH_UI_NGINX_SSL_CERTIFICATE:-server.pem.crt}
+      - NGINX_SSL_CERTIFICATE_KEY=${AUTH_UI_NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
+      - NGINX_SSL_CLIENT_CERTIFICATE=${AUTH_UI_NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+    volumes:
+      # Shared certs volume: TODO: move it to the top level
+      - ../../../dev-resources/certs/server:/etc/nginx/certs
+      # nginx.conf.template - used to create the actual config when the container starts
+      - ../../../stroom-auth-ui/template:/etc/nginx/template
     ports:
       - 5000:5000
+      - 9443:9443
