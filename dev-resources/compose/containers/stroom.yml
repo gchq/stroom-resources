@@ -4,7 +4,7 @@ services:
     
   stroom:
     container_name: stroom
-    image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-master-SNAPSHOT}"
+    image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
       - STROOM_NODE=node1a
       - STROOM_RACK=rack
