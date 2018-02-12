@@ -10,6 +10,6 @@ services:
       - ANNOTATIONS_UI_AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
       - ANNOTATIONS_UI_ADVERTISED_URL=http://${STROOM_ANNOTATIONS_UI_HOST:-stroom-annotations-ui}:5001
       - ANNOTATIONS_UI_APP_CLIENT_ID=stroom-annotations
-      - ANNOTATIONS_UI_ANNOTATIONS_SERVICE_URL=http://${STROOM_ANNOTATIONS_SERVICE:-stroom-annotations-service}/annotationsService/annotations/v1
+      - ANNOTATIONS_UI_ANNOTATIONS_SERVICE_URL=http://${STROOM_ANNOTATIONS_SERVICE_HOST:-stroom-annotations-service}/annotationsService/annotations/v1
     ports:
       - 5001:5000

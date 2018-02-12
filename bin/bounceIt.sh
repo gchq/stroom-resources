@@ -71,13 +71,8 @@ SERVICE_LIST="${SERVICE_LIST} stroom-db"
 SERVICE_LIST="${SERVICE_LIST} stroom-stats-db"
 SERVICE_LIST="${SERVICE_LIST} zookeeper"
 
-#If you are a developer running one of the services in an IDE then you will need to
-#uncommennt the _HOST variable for that service here so that it uses the hosts address
-#when advertisig its address, this then makes it visible to services running in docker.
-#E.g. if you run stroom in an IDE with all other services in docker, uncomment 
-#the STROOM_HOST line.
-STROOM_ELASTIC_SERVICE_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
-STROOM_ELASTIC_UI_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
+# The following contains most of the essential configuration for the stack.
+
 ELASTIC_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
 ELASTIC_PORT=9300
 HBASE_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
