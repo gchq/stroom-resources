@@ -160,6 +160,10 @@ http {
              return 301 https://${NGINX_ADVERTISED_HOST}/stroom/ui;
         }
 
+        location ~ .*/clustercall.rpc$ {
+            deny all;
+        }
+
         # ... and everything else gets reverse-proxied to stroom.
         location /stroom {
             proxy_ssl_server_name on;
