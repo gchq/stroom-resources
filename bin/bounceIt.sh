@@ -228,14 +228,20 @@ exportFileContents() {
 
     echo
     echo -e "Using file ${BLUE}${file}${NC} to resolve any docker tags and other variables"
+    echo 
 
     #Export all un-commented entries in the file as environment variables so they are available to docker-compose to do variable substitution
+    #Convert the entries in the file into export XXX=YYY commands and dumpt to a temp file
     cat ${file} | egrep "^\s*[^#=]+=.*" | sed -E 's/([^=]+=)/export \1/' > ${TEMPORARY_ENV_FILE}
 
-    #Source the export variables.
-    source ${TEMPORARY_ENV_FILE}
+    #These lines can be used for debugging what env vars are being exported
+    #echo -e "Using the following environment variables"
+    #echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    #cat ${TEMPORARY_ENV_FILE}
+    #echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-    echo 
+    #Source the temp file to export all our env vars
+    source ${TEMPORARY_ENV_FILE}
 }
 
 determineHostAddress() {
@@ -280,7 +286,9 @@ useEnvironmentVariables=false
 runStopCmdFirst=false
 ymlFile=${ALL_SERVICES_COMPOSE_FILE}
 projectName=$(basename $ymlFile | sed 's/\.yml$//')
-allServices=$(docker-compose -f ${ymlFile} config --services | sort)
+#redirect stderr to /dev/null as running compose before we have exported env vars means we get a load
+#of warnings about empty env vars. In this case we only want service names so don't care about stderr
+allServices=$(docker-compose -f ${ymlFile} config --services 2>/dev/null | sort)
 customEnvFile=""
 
 if [[ "$1" =~ $SUPPORTED_COMPOSE_CMDS_REGEX ]]; then
@@ -388,13 +396,14 @@ if [ "${serviceNames}x" = "x" ]; then
     serviceNames=$(echo "$serviceNames" | sed -E 's/^\s//')
 else
     validServiceNameRegex=""
-    for serviceName in $(docker-compose -f ${ymlFile} config --services | sort); do
+    for serviceName in ${allServices}; do
         validServiceNameRegex="${validServiceNameRegex}|${serviceName}"
     done
 
     #strip leading pipe char
     validServiceNameRegex=$(echo "$validServiceNameRegex" | sed -E 's/^\|//')
     validServiceNameRegex="(${validServiceNameRegex})"
+    #echo -e "validServiceNameRegex: [${validServiceNameRegex}]"
 
     for serviceName in $serviceNames; do
         #echo "  Service: [${serviceName}]"
@@ -441,7 +450,7 @@ fi
 
 
 #'docker-compose config' will perform any tag substitution so the tags here will have come from the TAGS_FILE or env vars or defaults
-allImages=$(docker-compose -f $ymlFile config | egrep "image: ")
+allImages=$(docker-compose -f $ymlFile config 2>/dev/null | egrep "image: ")
 
 echo
 echo "The following Docker services and tags will be used:"
