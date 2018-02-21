@@ -525,6 +525,7 @@ fi
 #so we replace the : with a space
 composeCmd="$(echo "${composeCmd}" | sed "s/${COMPOSE_CMMD_DELIMITER}/ /g")"
 
+echo
 echo -e "Using command [${GREEN}${composeCmd}${NC}] against the following services [${GREEN}${serviceNames}${NC}]"
 if [ "$composeCmd" = "up" ]; then
     echo "If you want to rebuild images from your own dockerfiles pass the '--build' argument"
@@ -547,7 +548,7 @@ fi
 
 if $requireConfirmation; then
     echo
-    read -rsp $'Press space to continue, or ctrl-c to exit...\n' -n1 keyPressed
+    read -rsp $'Press space to continue, or ctrl-c to exit... (you can use the \'-y\' argument to supress this confirmation prompt)\n' -n1 keyPressed
 
     if [ "$keyPressed" = '' ]; then
         echo
