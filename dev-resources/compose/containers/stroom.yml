@@ -54,10 +54,10 @@ services:
       - STROOM_INTERNAL_STATISTICS_VOLUMES_DOC_REFS=${STROOM_INTERNAL_STATISTICS_VOLUMES_DOC_REFS:-docRef(StatisticStore,ac4d8d10-6f75-4946-9708-18b8cb42a5a3,Volumes),docRef(StroomStatsStore,60f4f5f0-4cc3-42d6-8fe7-21a7cec30f8e,Volumes)}
       # External Doc Ref Types
       - STROOM_DOC-REF_TYPES=AnnotationsIndex,ElasticIndex
-      - STROOM_URL_DOC-REF_SERVICE__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_SERVICE_HOST}/annotationsService
-      - STROOM_URL_DOC-REF_SERVICE__ELASTIC_INDEX=${STROOM_ELASTIC_SERVICE_HOST}/queryElasticService
-      - STROOM_URL_DOC-REF_UI__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_UI_HOST}/annotations
-      - STROOM_URL_DOC-REF_UI__ELASTIC_INDEX=${STROOM_ELASTIC_UI_HOST}/query-elastic
+      - STROOM_URL_DOC-REF_SERVICE__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_SERVICE_HOST:-stroom-annotations-service}/annotationsService
+      - STROOM_URL_DOC-REF_SERVICE__ELASTIC_INDEX=${STROOM_ELASTIC_SERVICE_HOST:-stroom-elastic-service}/queryElasticService
+      - STROOM_URL_DOC-REF_UI__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_UI_HOST:-stroom-annotations-ui}/annotations
+      - STROOM_URL_DOC-REF_UI__ELASTIC_INDEX=${STROOM_ELASTIC_UI_HOST:-stroom-elastic-ui}/query-elastic
 
     ports:
       - 8080:8080

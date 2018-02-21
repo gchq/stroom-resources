@@ -12,7 +12,7 @@ services:
       - JWS_ISSUER=stroom
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - ADVERTISED_HTTP_HOST=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authService
-      - AUTH_UI=${STROOM_AUTH_UI_URL}/login
+      - AUTH_UI=${STROOM_AUTH_UI_URL:-http://localhost:5000}/login
       - AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users

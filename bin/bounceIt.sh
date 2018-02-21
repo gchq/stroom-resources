@@ -19,14 +19,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #List of hostnames that need to be added to /etc/hosts to resolve to 127.0.0.1
 LOCAL_HOST_NAMES=" \
 kafka \
-hbase \
-stroom \
-stroom-auth-service \
-stroom-auth-ui \
-stroom-annotations-service \
-stroom-annotations-ui \
-stroom-query-elastic-service \
-stroom-query-elastic-ui"
+hbase"
 
 #Location of the file used to define the docker tag variable values
 TAGS_FILE="${SCRIPT_DIR}/local.env"
@@ -532,6 +525,7 @@ fi
 #so we replace the : with a space
 composeCmd="$(echo "${composeCmd}" | sed "s/${COMPOSE_CMMD_DELIMITER}/ /g")"
 
+echo
 echo -e "Using command [${GREEN}${composeCmd}${NC}] against the following services [${GREEN}${serviceNames}${NC}]"
 if [ "$composeCmd" = "up" ]; then
     echo "If you want to rebuild images from your own dockerfiles pass the '--build' argument"
@@ -554,7 +548,7 @@ fi
 
 if $requireConfirmation; then
     echo
-    read -rsp $'Press space to continue, or ctrl-c to exit...\n' -n1 keyPressed
+    read -rsp $'Press space to continue, or ctrl-c to exit... (you can use the \'-y\' argument to supress this confirmation prompt)\n' -n1 keyPressed
 
     if [ "$keyPressed" = '' ]; then
         echo
