@@ -193,11 +193,11 @@ http {
         }
 
         location /annotations {
-            return 301 http://${NGINX_ADVERTISED_HOST}:5001;
+            return 301 ${ANNOTATIONS_UI_URL}/;
         }
 
         location /query-elastic {
-            return 301 http://${NGINX_ADVERTISED_HOST}:5002;
+            return 301 ${QUERY_ELASTIC_UI_URL}/;
         }
     }
 }

@@ -31,6 +31,8 @@ CMD [ "/bin/bash", "-c", "envsubst ' \
     ${NGINX_ADVERTISED_HOST} \
     ${STROOM_HOST} \
     ${AUTH_UI_URL} \
+    ${ANNOTATIONS_UI_URL} \
+    ${QUERY_ELASTIC_UI_URL} \
     ${NGINX_SSL_VERIFY_CLIENT} \
     ${NGINX_SSL_CERTIFICATE} \
     ${NGINX_SSL_CERTIFICATE_KEY} \
