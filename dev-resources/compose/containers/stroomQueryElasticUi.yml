@@ -15,14 +15,14 @@ services:
       - NGINX_HOST=${STROOM_QUERY_ELASTIC_UI_HOST:-localhost}
       - NGINX_HTTP_PORT=${STROOM_QUERY_ELASTIC_UI_HTTP_PORT:-5002}
       - NGINX_HTTPS_PORT=${STROOM_QUERY_ELASTIC_UI_HTTPS_PORT:-9445}
-      - NGINX_SSL_CERTIFICATE=${STROOM_QUERY_ELASTIC_UI_SSL_CERTIFICATE:-server.pem.crt}
-      - NGINX_SSL_CERTIFICATE_KEY=${STROOM_QUERY_ELASTIC_UI_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
-      - NGINX_SSL_CLIENT_CERTIFICATE=${STROOM_QUERY_ELASTIC_UI_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+      - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
+      - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
+      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
     volumes:
       # Shared certs volume: TODO: move it to the top level
       - ../../../dev-resources/certs/server:/etc/nginx/certs
       # nginx.conf.template - used to create the actual config when the container starts
-      - ../../../stroom-auth-ui/template:/etc/nginx/template
+      - ../../../stroom-microservice-ui/template:/etc/nginx/template
     ports:
       - 5002:5002
       - 9445:9445
