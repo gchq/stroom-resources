@@ -503,7 +503,11 @@ if $requireLatestImageCheck && [[ "${composeCmd}" =~ ${CMDS_FOR_IMAGE_CHECK} ]] 
         #method to pull updated image files from dockerhub if required
         #This is to support -SNAPSHOT tags that are floating
         if [ "${image}x" != "x" ]; then
-            if [[ "${image}" =~ .*(SNAPSHOT|LATEST|latest).* ]]; then
+            if [[ "${image}" =~ .*(LOCAL).* ]]; then
+                echo
+                echo -e "${GREEN}${image}${NC} is a LOCAL image, DockerHub will not be checked for a new version"
+
+            elif [[ "${image}" =~ .*(SNAPSHOT|LATEST|latest).* ]]; then
                 #use 'docker-compose ps' to establish if we already have a container for this service
                 #if we do then we won't do a docker-compose pull as that would trash any local state
                 #if a user wants refreshed images from dockerhub then they should delete their containers first
