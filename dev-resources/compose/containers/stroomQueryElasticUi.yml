@@ -4,7 +4,7 @@ services:
 
   stroom-query-elastic-ui:
     container_name: stroom-query-elastic-ui
-    image: "${STROOM_ELASTIC_UI_DOCKER_REPO:-gchq/stroom-query-elastic-ui}:${STROOM_ELASTIC_UI_TAG:-v0.0.3-alpha.2}"
+    image: "${STROOM_ELASTIC_UI_DOCKER_REPO:-gchq/stroom-query-elastic-ui}:${STROOM_ELASTIC_UI_TAG:-v0.0.4-alpha.1}"
     environment:
       - QUERY_ELASTIC_UI_AUTHENTICATION_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authenticationService/v1
       - QUERY_ELASTIC_UI_AUTHORISATION_SERVICE_URL=https://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1

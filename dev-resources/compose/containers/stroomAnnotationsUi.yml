@@ -4,7 +4,7 @@ services:
 
   stroom-annotations-ui:
     container_name: stroom-annotations-ui
-    image: "${STROOM_ANNOTATIONS_UI_DOCKER_REPO:-gchq/stroom-annotations-ui}:${STROOM_ANNOTATIONS_UI_TAG:-v0.2.0-alpha.2}"
+    image: "${STROOM_ANNOTATIONS_UI_DOCKER_REPO:-gchq/stroom-annotations-ui}:${STROOM_ANNOTATIONS_UI_TAG:-v0.2.1-alpha.1}"
     environment:
       - ANNOTATIONS_UI_AUTHENTICATION_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authenticationService/v1
       - ANNOTATIONS_UI_AUTHORISATION_SERVICE_URL=https://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
