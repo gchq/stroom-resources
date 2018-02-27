@@ -1,0 +1,6 @@
+language: bash
+dist: trusty
+group: edge
+sudo: false 
+
+script: ./travis.script.sh
