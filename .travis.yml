@@ -1,7 +1,11 @@
 language: bash
 dist: trusty
-sudo: false 
+sudo: required
+
 # require the tag name to match a regular expression for build to fire
 if: tag =~ ^.*-v[0-9]+\.[0-9]+.*$
+
+services:
+  - docker
 
 script: ./travis.script.sh
