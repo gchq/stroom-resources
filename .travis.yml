@@ -2,6 +2,6 @@ language: bash
 dist: trusty
 sudo: false 
 # require the tag name to match a regular expression for build to fire
-# if: tag =~ ^.*-v[0-9]+\.[0-9]+\.[0-9].*$
+if: tag =~ ^.*-v[0-9]+\.[0-9]+.*$
 
 script: ./travis.script.sh
