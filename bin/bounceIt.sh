@@ -83,6 +83,7 @@ NGINX_SSL_CLIENT_CERTIFICATE=ca.pem.crt
 STROOM_ANNOTATIONS_DB_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
 STROOM_ANNOTATIONS_SERVICE_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
 STROOM_ANNOTATIONS_DB_PORT=3310
+STROOM_ANNOTATIONS_SERVICE_URL=http://${STROOM_ANNOTATIONS_SERVICE_HOST}/annotationsService
 
 # ANNOTATIONS UI
 STROOM_ANNOTATIONS_UI_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
@@ -97,6 +98,7 @@ STROOM_ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_ACTIVE_SCHEME}://${STROOM_ANNO
 
 # QUERY ELASTIC SERVICE
 STROOM_QUERY_ELASTIC_SERVICE_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
+STROOM_QUERY_ELASTIC_SERVICE_URL=http://${STROOM_QUERY_ELASTIC_SERVICE_HOST}/queryElasticService
 
 # QUERY ELASTIC UI
 STROOM_QUERY_ELASTIC_UI_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
@@ -146,6 +148,8 @@ RED='\033[1;31m'
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
+LGREY='\e[37m'
+DGREY='\e[90m'
 NC='\033[0m' # No Color
 
 #Constants for the dockerhub URL
@@ -245,10 +249,12 @@ exportFileContents() {
     cat ${file} | egrep "^\s*[^#=]+=.*" | sed -E 's/([^=]+=)/export \1/' > ${TEMPORARY_ENV_FILE}
 
     #These lines can be used for debugging what env vars are being exported
-    #echo -e "Using the following environment variables"
-    #echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    #cat ${TEMPORARY_ENV_FILE}
-    #echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo -e "${LGREY}Using the following environment variables${NC}"
+    echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    while read line; do
+        echo -e "${DGREY}${line}${NC}"
+    done < ${TEMPORARY_ENV_FILE}
+    echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
 
     #Source the temp file to export all our env vars
     source ${TEMPORARY_ENV_FILE}
