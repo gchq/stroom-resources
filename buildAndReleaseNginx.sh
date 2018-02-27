@@ -34,15 +34,27 @@ NC='\033[0m' # No Color
 set -e
 
 DOCKER_REPO=gchq/stroom-nginx
+GIT_TAG_PREFIX="nginx-"
 
 showUsage() {
-    echo -e "Usage: ${BLUE}$0 [-l] dockerTag"
+    echo -e "Usage: ${BLUE}$0 [-l] dockerTag${NC}"
     echo -e "OPTIONs:"
     echo -e "  ${GREEN}-l${NC} - Local build only, won't push to DockerHub"
     echo -e "e.g.: ${BLUE}$0 -l v1.2.3${NC}"
     echo -e "e.g.: ${BLUE}$0 v1.2.3${NC}"
     echo
 }
+
+# deletes the temp directory
+cleanup() {      
+    if [ -d "$tmpDir" ]; then
+        rm -rf "$tmpDir"
+        echo "Deleted temp working directory $tmpDir"
+    fi
+}
+
+# register the cleanup function to be called on the EXIT signal
+trap cleanup EXIT
 
 localBuild=false
 
@@ -65,7 +77,7 @@ done
 shift $((OPTIND -1))
 
 if [ $# -ne 1 ]; then
-    echo "Must supply the dockerTag"
+    echo -e "${RED}ERROR${NC} Must supply the dockerTag"
     showUsage
     exit 1
 fi
@@ -77,12 +89,39 @@ echo
 echo -e "${GREEN}Building ${BLUE}${DOCKER_REPO}:${ver}${NC}"
 echo
 
-docker build --tag ${DOCKER_REPO}:${ver} .
+docker build --tag ${DOCKER_REPO}:${ver} ./nginx
 
 if ! ${localBuild}; then
+    #tagName="${GIT_TAG_PREFIX}${ver}"
+    #currentBranch="$(git rev-parse --abbrev-ref HEAD)"
+    #if [ $(git tag --list ${tagName} | wc -l) -eq 1 ]; then
+        ##Found a git tag for this version so 
+
+        ##create a temp directory in $TMPDIR or /tmp
+        ##See https://unix.stackexchange.com/questions/30091/fix-or-alternative-for-mktemp-in-os-x
+        ##for why we do it like this.
+        #tmpDir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
+
+        ## check if tmp dir was created
+        #if [[ ! "$tmpDir" || ! -d "$tmpDir" ]]; then
+            #echo -e "${RED}ERROR${NC} Could not create temp dir"
+            #exit 1
+        #fi
+
+        #echo -e "Checking out tag ${GREEN}${tagName}${NC}"
+
+
+        #echo -e "Checking out tag ${GREEN}${tagName}${NC}"
+
+    #else
+        #echo -e "${RED}ERROR${NC} Git has not been tagged with [${GREEN}${tagName}${NC}]"
+        #echo -e "Before pushing to DockerHub you must tag the repository with '${BLUE}git tag -a ${tagName}${NC}'"
+        #exit 1
+    #fi
+
     echo
     echo -e "${GREEN}Pushing to DockerHub (will fail if you haven't run '${BLUE}docker login${GREEN}'${NC}"
     echo
     # This assumes you have authenticated with docker using 'docker login', else it will fail
-    docker push ${DOCKER_REPO}:${ver}
+    #docker push ${DOCKER_REPO}:${ver}
 fi
