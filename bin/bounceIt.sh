@@ -152,6 +152,8 @@ RED='\033[1;31m'
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
+LGREY='\e[37m'
+DGREY='\e[90m'
 NC='\033[0m' # No Color
 
 #Constants for the dockerhub URL
@@ -251,10 +253,12 @@ exportFileContents() {
     cat ${file} | egrep "^\s*[^#=]+=.*" | sed -E 's/([^=]+=)/export \1/' > ${TEMPORARY_ENV_FILE}
 
     #These lines can be used for debugging what env vars are being exported
-    #echo -e "Using the following environment variables"
-    #echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    #cat ${TEMPORARY_ENV_FILE}
-    #echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo -e "${LGREY}Using the following environment variables${NC}"
+    echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    while read line; do
+        echo -e "${DGREY}${line}${NC}"
+    done < ${TEMPORARY_ENV_FILE}
+    echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
 
     #Source the temp file to export all our env vars
     source ${TEMPORARY_ENV_FILE}

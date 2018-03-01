@@ -17,7 +17,7 @@ services:
       # Shared certs volume: TODO: move it to the top level
       - ../../../dev-resources/certs/server:/etc/nginx/certs
       # nginx.conf.template - used to create the actual config when the container starts
-      - ../../../nginx/template:/etc/nginx/template
+      - ../../../stroom-nginx/template:/etc/nginx/template
     ports:
       - "80:80"
       - "443:443"
