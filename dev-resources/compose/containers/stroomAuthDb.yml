@@ -13,3 +13,5 @@ services:
       - MYSQL_USER=${STROOM_AUTH_DB_USERNAME:-stroomuser}
       - MYSQL_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
       - MYSQL_DATABASE=auth
+    volumes:
+      - ${STROOM_AUTH_DB_DATA_VOLUME:-~/.stroom/db_data/stroom-auth-db}:/var/lib/mysql
