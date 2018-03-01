@@ -21,6 +21,9 @@ LOCAL_HOST_NAMES=" \
 kafka \
 hbase"
 
+# Location of the file used to store private values (db credentials)
+CREDENTIALS_FILE=~/.stroom/credentials.sh
+
 #Location of the file used to define the docker tag variable values
 TAGS_FILE="${SCRIPT_DIR}/local.env"
 
@@ -378,6 +381,7 @@ if [ ! -f $customEnvFile ]; then
 fi
 
 determineHostAddress
+source ${SCRIPT_DIR}/captureCredentials.sh ${CREDENTIALS_FILE} ${SCRIPT_DIR}/stroomCredentialNames.txt
 
 if [ -n "$customEnvFile" ]; then
     #custom env file
@@ -393,6 +397,7 @@ else
     echo
     echo "Using environment variables to resolve any docker tags and other variables"
 fi
+
 
 #Try setting the service names list from the SERVICE_LIST env var, which may/may not be set.
 serviceNames="${SERVICE_LIST}"

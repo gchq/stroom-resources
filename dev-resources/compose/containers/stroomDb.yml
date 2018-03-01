@@ -8,7 +8,7 @@ services:
     ports:
       - "3307:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=my-secret-pw
-      - MYSQL_USER=stroomuser
-      - MYSQL_PASSWORD=stroompassword1
+      - MYSQL_ROOT_PASSWORD=${STROOM_DB_ROOT_PASSWORD:-my-secret-pw}
+      - MYSQL_USER=${STROOM_DB_USERNAME:-stroomuser}
+      - MYSQL_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
       - MYSQL_DATABASE=stroom
