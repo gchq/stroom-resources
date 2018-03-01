@@ -6,8 +6,8 @@ services:
     container_name: stroom-annotations-service
     image: "${STROOM_ANNOTATIONS_SERVICE_DOCKER_REPO:-gchq/stroom-annotations-service}:${STROOM_ANNOTATIONS_SERVICE_TAG:-v0.2.1-alpha.1}"
     environment:
-      - DB_USER=stroomuser
-      - DB_PASSWORD=stroompassword1
+      - DB_USER=${STROOM_ANNOTATIONS_DB_USERNAME:-stroomuser}
+      - DB_PASSWORD=${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}
       - DB_URL=jdbc:mariadb://${STROOM_ANNOTATIONS_DB_HOST:-stroom-annotations-db}:${STROOM_ANNOTATIONS_DB_PORT:-3306}/annotations
       - ADMIN_CONTEXT_PATH=/annotationsServiceAdmin
       - AUTH_UI=${STROOM_AUTH_UI_URL:-http://localhost:5000}/login
