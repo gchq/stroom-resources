@@ -56,6 +56,23 @@ services:
         - stroom-db
         - stroom-stats-db
 
+  # Alternative to running stroom, run stroom with remote debugging enabled.
+  stroom-debug:
+      extends:
+          file: ./containers/stroom.yml
+          service: stroom
+      #image: "gchq/stroom:${STROOM_TAG}"
+
+      ## Additional arguments required ahead of the -jar to enable debugging
+      command: ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${STROOM_DEBUG_PORT}", "-jar", "stroom-app-all.jar", "server", "config.yml"]
+      ports:
+        - 8080:8080
+        - 8081:8081
+        - "${STROOM_DEBUG_PORT}:${STROOM_DEBUG_PORT}"
+      depends_on:
+        - stroom-db
+        - stroom-stats-db
+
   stroom-annotations-db:
       extends:
           file: ./containers/stroomAnnotationsDb.yml

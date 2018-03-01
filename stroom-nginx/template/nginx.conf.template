@@ -13,22 +13,34 @@ http {
     server {
         root /usr/share/nginx/html;
 
-        listen                  80;
-        listen                  443 ssl;
-        server_name             ${NGINX_ADVERTISED_HOST};
+        listen                      80;
+        listen                      443 ssl;
+        server_name                 ${NGINX_ADVERTISED_HOST};
 
-        ssl_certificate         /etc/nginx/certs/${NGINX_SSL_CERTIFICATE};
-        ssl_certificate_key     /etc/nginx/certs/${NGINX_SSL_CERTIFICATE_KEY};
-        ssl_client_certificate  /etc/nginx/certs/${NGINX_SSL_CLIENT_CERTIFICATE};
+        ssl_certificate             /etc/nginx/certs/${NGINX_SSL_CERTIFICATE};
+        ssl_certificate_key         /etc/nginx/certs/${NGINX_SSL_CERTIFICATE_KEY};
+        ssl_client_certificate      /etc/nginx/certs/${NGINX_SSL_CLIENT_CERTIFICATE};
         # This needs to be on otherwise we won't be able to extract the DN or the cert
-        ssl_verify_client       ${NGINX_SSL_VERIFY_CLIENT};
-        ssl_verify_depth        10;
+        ssl_verify_client           ${NGINX_SSL_VERIFY_CLIENT};
+        ssl_verify_depth            10;
 
         # These set the timeouts - the unit is seconds
         proxy_connect_timeout       300;
         proxy_send_timeout          300;
         proxy_read_timeout          300;
         send_timeout                300;
+
+        # Set the max body sizde to unlimited to allow for large data imports
+        client_max_body_size        0;
+
+        # Set the amount of memory used to buffer client bodies before using temporary files
+        client_body_buffer_size     1M;
+
+        #TODO - May want to consider this approach for large file uploads
+        #https://stackoverflow.com/questions/44371643/nginx-php-failing-with-large-file-uploads-over-6-gb
+        #i.e. getting nginx to persist the body to disk then only pass the persisted filename to stroom.
+        #This is on the assumption that stroom and nginx can both rw to the same disk location, e.g. a
+        #a common docker volume.
 
         # Was the CA cert configured with an OCSP responder?
         #   - If so you can enable the following lines and NGINX will call out to the OCSP
