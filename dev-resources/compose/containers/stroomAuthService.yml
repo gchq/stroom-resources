@@ -6,8 +6,8 @@ services:
     container_name: stroom-auth-service
     image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v0.1-LATEST}"
     environment:
-      - DB_USER=stroomuser
-      - DB_PASSWORD=stroompassword1
+      - DB_USER=${STROOM_AUTH_DB_USERNAME:-stroomuser}
+      - DB_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
       - DB_URL=jdbc:mariadb://${STROOM_AUTH_DB_HOST:-stroom-auth-db}:${STROOM_AUTH_DB_PORT:-3306}/auth
       - JWS_ISSUER=stroom
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin

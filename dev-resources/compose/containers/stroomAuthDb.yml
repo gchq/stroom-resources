@@ -9,7 +9,7 @@ services:
         # Expose mysql on 3309 to the host so as not to conflict with stroom-db or stroom-stats-db
       - "3309:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=my-secret-pw
-      - MYSQL_USER=stroomuser
-      - MYSQL_PASSWORD=stroompassword1
+      - MYSQL_ROOT_PASSWORD=${STROOM_AUTH_DB_ROOT_PASSWORD:-my-secret-pw}
+      - MYSQL_USER=${STROOM_AUTH_DB_USERNAME:-stroomuser}
+      - MYSQL_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
       - MYSQL_DATABASE=auth
