@@ -10,11 +10,11 @@ determineHostAddress
 SQL_DUMP_FILE=$1
 STROOM_FAT_JAR=$2
 DATABASE_NAME=$3
+FLYWAY_COMMAND=$4
 
 # Location of migration
 WORKING_DIR=~/.stroom/migrationTest/jars
 TEMP_DB_ROOT_PW=my-secret-pw
-IP_ADDRESS=192.168.1.12
 
 echo "Deleting any existing migration MySQL DB"
 docker rm -f stroom-migration-test-db
@@ -45,7 +45,7 @@ docker run --name stroom-flyway-migration \
             -password=${TEMP_DB_ROOT_PW} \
             -locations="classpath:/stroom/db/migration/mysql" \
             -table=schema_version \
-            info
+            $FLYWAY_COMMAND
 
 echo "Connecting to Migration MySQL for manual checking"
 #docker exec -it stroom-migration-test-db mysql -u"root" -p"my-secret-pw" ${DATABASE_NAME}
