@@ -56,5 +56,13 @@ alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3307" -u"stroom
 alias stroomstatsdb='docker exec -it stroom-stats-db mysql -h"localhost" -P"3308" -u"stroomuser" -p"stroompassword1" statistics'
 alias stroomauthdb='docker exec -it stroom-auth-db mysql -h"localhost" -P"3309" -u"stroomuser" -p"stroompassword1" auth'
 
+alias stroomdb_dump='docker exec -it stroom-db mysqldump --databases stroom -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
+alias stroomstatsdb_dump='docker exec -it stroom-stats-db mysqldump --databases statistics -h"localhost" -P"3308" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
+alias stroomauthdb_dump='docker exec -it stroom-auth-db mysqldump --databases auth -h"localhost" -P"3309" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
+
+# Pipe the output of the dump commands to a file on the host
+# To re-import the database dumps, use something like this
+#cat ~/stroomDb.backup.02032018.sql | docker exec -i stroom-db mysql -u"root" -p"my-secret-pw"
+
 # docker status
 alias ds='echo -e "\e[96mSummary\e[0m" && docker system df && echo && echo -e "\e[96mImages\e[0m" && docker images && echo "" && echo -e "\e[96mAll containers\e[0m" && docker ps -a -s && echo "" && echo -e "\e[96mRunning containers\e[0m" && docker ps && echo ""'

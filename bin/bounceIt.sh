@@ -476,8 +476,10 @@ if $requireHostFileCheck && [[ "$REQUIRE_HOSTS_FILE_CHECK" != "false" ]]; then
     fi
 fi
 
-
 #'docker-compose config' will perform any tag substitution so the tags here will have come from the TAGS_FILE or env vars or defaults
+# This first line is a dry run so that we can see any errors
+docker-compose -f $ymlFile config
+# Now capture the images by running the command again
 allImages=$(docker-compose -f $ymlFile config 2>/dev/null | egrep "image: ")
 
 echo
