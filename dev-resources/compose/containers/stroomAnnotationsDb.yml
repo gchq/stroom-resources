@@ -13,3 +13,5 @@ services:
       - MYSQL_USER=${STROOM_ANNOTATIONS_DB_USERNAME:-stroomuser}
       - MYSQL_PASSWORD=${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}
       - MYSQL_DATABASE=annotations
+    volumes:
+      - ${STROOM_ANNOTATIONS_DB_DATA_VOLUME:-~/.stroom/db_data/stroom-annotations-db}:/var/lib/mysql
