@@ -412,7 +412,7 @@ if [ ! -f ${CREDENTIALS_FILE} ]; then
         echo "export ${ENV_VAR_TO_CAPTURE}=${VALUE}" >> ${CREDENTIALS_FILE}
     done
 
-    echo "Created default credentials in ${GREEN}${CREDENTIALS_FILE}${NC}, if you wish to customise the values, ensure they are edited before any containers are created"
+    echo -e "Created default credentials in ${GREEN}${CREDENTIALS_FILE}${NC}, if you wish to customise the values, ensure they are edited before any containers are created"
 fi
 source ${CREDENTIALS_FILE}
 
