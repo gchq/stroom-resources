@@ -186,6 +186,7 @@ showUsage() {
     echo -e "                  separated by a '${COMPOSE_CMMD_DELIMITER}' (e.g. up:-d:--build) or "
     echo -e "                  surround it all in quotes (e.g. 'up -d --build')"
     echo -e "OPTIONs:"
+    echo -e "  ${GREEN}-d${NC} - Enable DEBUG mode. This will output additional information to aid diagnosing problems"
     echo -e "  ${GREEN}-e${NC} - Rely on existing environment variables for any docker tags, the ${BLUE}local.env${NC} file will be ignored"
     echo -e "  ${GREEN}-f${NC} - Use a custom configuration file to supply service names, tags and environment values, e.g. \"${BLUE}-f ./stroom5.env${NC}\""
     echo -e "  ${GREEN}-h${NC} - Show this help text"
@@ -258,13 +259,15 @@ exportFileContents() {
     #Convert the entries in the file into export XXX=YYY commands and dumpt to a temp file
     cat ${file} | egrep "^\s*[^#=]+=.*" | sed -E 's/([^=]+=)/export \1/' > ${TEMPORARY_ENV_FILE}
 
-    #These lines can be used for debugging what env vars are being exported
-    echo -e "${LGREY}Using the following environment variables${NC}"
-    echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-    while read line; do
-        echo -e "${DGREY}${line}${NC}"
-    done < ${TEMPORARY_ENV_FILE}
-    echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    if ${isDebugModeEnabled}; then
+        #These lines can be used for debugging what env vars are being exported
+        echo -e "${LGREY}Using the following environment variables${NC}"
+        echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+        while read line; do
+            echo -e "${DGREY}${line}${NC}"
+        done < ${TEMPORARY_ENV_FILE}
+        echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    fi
 
     #Source the temp file to export all our env vars
     source ${TEMPORARY_ENV_FILE}
@@ -310,6 +313,7 @@ requireHostFileCheck=true
 requireLatestImageCheck=true
 useEnvironmentVariables=false
 runStopCmdFirst=false
+isDebugModeEnabled=false
 ymlFile=${ALL_SERVICES_COMPOSE_FILE}
 projectName=$(basename $ymlFile | sed 's/\.yml$//')
 #redirect stderr to /dev/null as running compose before we have exported env vars means we get a load
@@ -329,10 +333,13 @@ fi
 
 extraComposeArguments=""
 
-optspec=":ef:hiyx"
+optspec=":def:hiyx"
 while getopts "$optspec" optchar; do
     #echo "Parsing $optchar"
     case "${optchar}" in
+        d)
+            isDebugModeEnabled=true
+            ;;
         e)
             useEnvironmentVariables=true
             ;;
@@ -478,7 +485,10 @@ fi
 
 #'docker-compose config' will perform any tag substitution so the tags here will have come from the TAGS_FILE or env vars or defaults
 # This first line is a dry run so that we can see any errors
-docker-compose -f $ymlFile config
+if ${isDebugModeEnabled}; then
+    docker-compose -f $ymlFile config
+fi
+
 # Now capture the images by running the command again
 allImages=$(docker-compose -f $ymlFile config 2>/dev/null | egrep "image: ")
 
@@ -494,12 +504,14 @@ for serviceName in ${serviceNames}; do
         echo -e "${RED}ERROR${NC} - Service ${GREEN}${serviceName}${NC} does not exist in ${BLUE}${ymlFile}${NC}"
         exit 1
     else
-        image=$(echo "$allImages" | grep "${serviceName}:" | sed 's/.*image: //')
+        # The use of uniq is a bit of a hack to deal with the addition of the stroom-debug service 
+        # (that shares the stroom image), therefore it outputs the same image twice for stroom.
+        image=$(echo "$allImages" | grep "${serviceName}:" | sed 's/.*image: //' | uniq)
         #image=$(docker-compose -f ${ymlFile} config | grep -Pzo "${serviceName}:\s*\n(.|\n)*?\s*image:\s*.*\n" | grep -zo "image.*" | sed 's/image: //')
         #if [ "${image}x" != "x" ]; then
-            #echo
-            #echo -e "${RED}ERROR - Unable to establish image name for service ${GREEN}${serviceName}${NC}"
-            #exit 1
+        #echo
+        #echo -e "${RED}ERROR - Unable to establish image name for service ${GREEN}${serviceName}${NC}"
+        #exit 1
         #fi
 
         #TODO figure out a way to get the image for the serviceName as we currently assume that the
@@ -558,7 +570,7 @@ fi
 #echo "Using the following docker images:"
 #echo
 #for image in $(docker-compose -f $ymlFile config | grep "image:" | sed 's/.*image: //'); do
-    #echo -e "  ${GREEN}${image}${NC}"
+#echo -e "  ${GREEN}${image}${NC}"
 #done
 #echo
 
@@ -582,9 +594,9 @@ fi
     #uniq )
 
 #for hostVar in $(echo -e "${hostVars}"); do
-    #varName=$(echo "${hostVar}" | sed -E 's/\$\{([A-Z_]*)((:-)(.*))}/\1/')
-    #varDefaulVal=$(echo "${hostVar}" | sed -E 's/\$\{([A-Z_]*)((:-)(.*))}/\4/')
-    #echo "varName [${varName}] default [${varDefaulVal}]"
+#varName=$(echo "${hostVar}" | sed -E 's/\$\{([A-Z_]*)((:-)(.*))}/\1/')
+#varDefaulVal=$(echo "${hostVar}" | sed -E 's/\$\{([A-Z_]*)((:-)(.*))}/\4/')
+#echo "varName [${varName}] default [${varDefaulVal}]"
 #done
 
 if $requireConfirmation; then

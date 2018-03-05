@@ -51,7 +51,6 @@ services:
       extends:
           file: ./containers/stroom.yml
           service: stroom
-      #image: "gchq/stroom:${STROOM_TAG}"
       depends_on:
         - stroom-db
         - stroom-stats-db
@@ -61,7 +60,6 @@ services:
       extends:
           file: ./containers/stroom.yml
           service: stroom
-      #image: "gchq/stroom:${STROOM_TAG}"
 
       ## Additional arguments required ahead of the -jar to enable debugging
       command: ["java", "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=${STROOM_DEBUG_PORT}", "-jar", "stroom-app-all.jar", "server", "config.yml"]
