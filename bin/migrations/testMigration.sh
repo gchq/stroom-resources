@@ -39,7 +39,7 @@ ls -lrth ${WORKING_DIR}
 echo "Running the migration"
 docker run --name stroom-flyway-migration \
             --rm -v ${WORKING_DIR}:/flyway/jars \
-            boxfuse/flyway \
+            boxfuse/flyway:5.0.7-alpine \
             -url="jdbc:mysql://${STROOM_RESOURCES_ADVERTISED_HOST}:5506/${DATABASE_NAME}" \
             -user=root \
             -password=${TEMP_DB_ROOT_PW} \
