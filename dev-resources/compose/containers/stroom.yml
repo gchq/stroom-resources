@@ -60,7 +60,7 @@ services:
       - STROOM_DOCREF_URL_UI__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_UI_URL:-http://stroom-elastic-ui/query-elastic}
 
       ## Additional arguments required ahead of the -jar to enable debugging
-    command: ["java", "${STROOM_JAVA_OPTS}", "-jar", "stroom-app-all.jar", "server", "config.yml"]
+    command: java ${STROOM_JAVA_OPTS} -jar stroom-app-all.jar server config.yml
     ports:
       - 8080:8080
       - 8081:8081

@@ -142,7 +142,7 @@ STROOM_DB_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
 STROOM_DB_PORT=3307
 STROOM_DB_DATA_VOLUME=~/.stroom/db_data/stroom-db
 STROOM_DEBUG_PORT=10765
-STROOM_JAVA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=${STROOM_DEBUG_PORT}"
+STROOM_JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${STROOM_DEBUG_PORT}"
 
 # STROOM STATS
 STROOM_STATS_DB_HOST=${STROOM_RESOURCES_ADVERTISED_HOST}
