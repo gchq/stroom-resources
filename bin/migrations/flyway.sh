@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#
+# Script to help with running the FlywayHelper in the Stroom fat jar.
 
 # Arguments managed using argbash. To re-generate install argbash and run 'argbash flyway_args.m4 -o flyway_args.sh'
 source flyway_args.sh
