@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
+#
+# Use this script to take a SQL dumps from Stroom databases.
 
 # Location of the file used to store private values (db credentials)
-CREDENTIALS_FILE=~/.stroom/credentials.sh
+readonly CREDENTIALS_FILE=~/.stroom/credentials.sh
 
 # Location of migration
-WORKING_DIR=~/.stroom/migrationTest
+readonly WORKING_DIR=~/.stroom/migrationTest
 
 #Source the temp file to export all our env vars
 echo "Running Credentials File ${CREDENTIALS_FILE}"
@@ -15,16 +17,16 @@ echo "Cleaning up Working Directory $WORKING_DIR"
 # rm -rf $WORKING_DIR
 mkdir -p $WORKING_DIR
 
-STACK_VERSION=$1
+readonly STACK_VERSION=$1
 
 dumpDb() {
-    local dockerContainer=$1
-    local dbName=$2
-    local port=$3
-    local rootPw=$4
+    local readonly DOCKER_CONTAINER=$1
+    local readonly DB_NAME=$2
+    local readonly PORT=$3
+    local readonly ROOT_PW=$4
 
-    echo "Taking Dump of ${dockerContainer} at port ${port} with root pw ${rootPw}"
-    docker exec -it ${dockerContainer} mysqldump --databases $dbName -u"root" -p"${rootPw}" | grep -v "Using a password" > $WORKING_DIR/${dockerContainer}_${STACK_VERSION}.sql
+    echo "Taking Dump of ${DOCKER_CONTAINER} at port ${PORT} with root pw ${ROOT_PW}"
+    docker exec -it ${DOCKER_CONTAINER} mysqldump --databases $DB_NAME -u"root" -p"${ROOT_PW}" | grep -v "Using a password" > $WORKING_DIR/${DOCKER_CONTAINER}_${STACK_VERSION}.sql
 }
 
 dumpDb stroom-db stroom 3307 ${STROOM_DB_ROOT_PASSWORD} STACK_VERSION

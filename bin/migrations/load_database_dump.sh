@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
+#
+# Use this script to load a SQL database dump into a temporary database.
+# This is useful for testing database migrations.
 
 #Get the dir that this script lives in, no matter where it is called from
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $SCRIPT_DIR/../utilities.sh
 
 determineHostAddress
 
-SQL_DUMP_FILE=$1
-STROOM_FAT_JAR=$2
-DATABASE_NAME=$3
+readonly SQL_DUMP_FILE=$1
+readonly STROOM_FAT_JAR=$2
+readonly DATABASE_NAME=$3
 
 # Location of migration
-WORKING_DIR=~/.stroom/migrationTest/jars
-TEMP_DB_ROOT_PW=my-secret-pw
+readonly WORKING_DIR=~/.stroom/migrationTest/jars
+readonly TEMP_DB_ROOT_PW=my-secret-pw
 
 echo "Deleting any existing migration MySQL DB"
 docker rm -f stroom-migration-test-db
