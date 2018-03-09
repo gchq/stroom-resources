@@ -6,6 +6,8 @@ services:
     container_name: stroom
     image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
+      - STROOM_APP_PORT=${STROOM_APP_PORT:-8080}
+      - STROOM_ADMIN_PORT=${STROOM_ADMIN_PORT:-8081}
       - STROOM_NODE=node1a
       - STROOM_RACK=rack
       - STROOM_JPA_DIALECT=org.hibernate.dialect.MySQLInnoDBDialect
@@ -62,6 +64,6 @@ services:
       ## Additional arguments required ahead of the -jar to enable debugging
     command: java ${STROOM_JAVA_OPTS} -jar stroom-app-all.jar server config.yml
     ports:
-      - 8080:8080
-      - 8081:8081
+      - "${STROOM_APP_PORT:-8080}:${STROOM_APP_PORT:-8080}"
+      - "${STROOM_ADMIN_PORT:-8081}:${STROOM_ADMIN_PORT:-8081}"
       - "${STROOM_DEBUG_PORT:-10765}:${STROOM_DEBUG_PORT:-10765}"

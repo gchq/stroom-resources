@@ -30,6 +30,7 @@ RUN apk add --no-cache bash
 CMD [ "/bin/bash", "-c", "envsubst ' \
     ${NGINX_ADVERTISED_HOST} \
     ${STROOM_HOST} \
+    ${STROOM_PORT} \
     ${AUTH_UI_URL} \
     ${ANNOTATIONS_UI_URL} \
     ${QUERY_ELASTIC_UI_URL} \
