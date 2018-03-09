@@ -31,6 +31,7 @@ CMD [ "/bin/bash", "-c", "envsubst ' \
     ${NGINX_ADVERTISED_HOST} \
     ${STROOM_HOST} \
     ${STROOM_PORT} \
+    ${STROOM_AUTH_SERVICE_PORT} \
     ${AUTH_UI_URL} \
     ${ANNOTATIONS_UI_URL} \
     ${QUERY_ELASTIC_UI_URL} \
