@@ -34,7 +34,7 @@ http {
         client_max_body_size        0;
 
         # Set the amount of memory used to buffer client bodies before using temporary files
-        client_body_buffer_size     1M;
+        client_body_buffer_size     ${NGINX_CLIENT_BODY_BUFFER_SIZE};
 
         # If this were on NGINX would buffer all client request bodies. This includes any huge
         # files sent to datafeed. Turning this off means all requests are immediately sent to
