@@ -6,6 +6,8 @@ services:
     container_name: stroom-auth-service
     image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v0.1-LATEST}"
     environment:
+      - STROOM_AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
+      - STROOM_AUTH_SERVICE_ADMIN_PORT=${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}
       - DB_USER=${STROOM_AUTH_DB_USERNAME:-stroomuser}
       - DB_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
       - DB_URL=jdbc:mariadb://${STROOM_AUTH_DB_HOST:-stroom-auth-db}:${STROOM_AUTH_DB_PORT:-3306}/auth
@@ -31,6 +33,6 @@ services:
       - EMAIL_SMTP_USERNAME=${EMAIL_SMTP_USERNAME:-TODO}
       - EMAIL_SMTP_PASSWORD=${EMAIL_SMTP_PASSWORD:-TODO}
     ports:
-      - 8099:8099
-      - 8100:8100
+      - "${STROOM_AUTH_SERVICE_PORT:-8099}:${STROOM_AUTH_SERVICE_PORT:-8099}"
+      - "${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}"
     entrypoint: ./wait-for-it_busybox.sh ${STROOM_AUTH_DB_HOST:-stroom-auth-db}:${STROOM_AUTH_DB_PORT:-3306} -- java -jar stroom-auth-service-all.jar server config.yml
