@@ -96,7 +96,7 @@ http {
         # It's needed for the Swagger client's baseUrl.
         location /authService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_AUTH_SERVICE_PORT}/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:${AUTH_SERVICE_PORT}/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -106,7 +106,7 @@ http {
 
         location /authenticationService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_AUTH_SERVICE_PORT}/authentication/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:${AUTH_SERVICE_PORT}/authentication/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -116,7 +116,7 @@ http {
 
         location /userService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_AUTH_SERVICE_PORT}/user/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:${AUTH_SERVICE_PORT}/user/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -126,7 +126,7 @@ http {
 
         location /tokenService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_AUTH_SERVICE_PORT}/token/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:${AUTH_SERVICE_PORT}/token/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
