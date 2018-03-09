@@ -13,6 +13,7 @@ services:
       - ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_URL:-http://localhost:5001}
       - QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://localhost:5002}
       - STROOM_HOST=${STROOM_HOST:-localhost}
+      - STROOM_PORT=${STROOM_APP_PORT:-8080}
     volumes:
       # Shared certs volume: TODO: move it to the top level
       - ../../../dev-resources/certs/server:/etc/nginx/certs

@@ -143,7 +143,7 @@ http {
 
         location /authorisationService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${STROOM_HOST}:8080/api/authorisation/;
+            proxy_pass http://${STROOM_HOST}:${STROOM_PORT}/api/authorisation/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -162,7 +162,7 @@ http {
         #Lucene index query service on Stroom
         location /indexService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/stroom-index/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_PORT}/api/stroom-index/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -172,7 +172,7 @@ http {
         #SQL Statistics query service on Stroom
         location /sqlstatisticsService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/api/sqlstatistics/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_PORT}/api/sqlstatistics/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -200,7 +200,7 @@ http {
 
         location /datafeedService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom/datafeed/;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_PORT}/stroom/datafeed/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -225,7 +225,7 @@ http {
         # ... and everything else gets reverse-proxied to stroom.
         location /stroom {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_PORT}/stroom;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
