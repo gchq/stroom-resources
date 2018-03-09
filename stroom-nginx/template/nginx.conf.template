@@ -36,11 +36,11 @@ http {
         # Set the amount of memory used to buffer client bodies before using temporary files
         client_body_buffer_size     1M;
 
-        #TODO - May want to consider this approach for large file uploads
-        #https://stackoverflow.com/questions/44371643/nginx-php-failing-with-large-file-uploads-over-6-gb
-        #i.e. getting nginx to persist the body to disk then only pass the persisted filename to stroom.
-        #This is on the assumption that stroom and nginx can both rw to the same disk location, e.g. a
-        #a common docker volume.
+        # TODO - May want to consider this approach for large file uploads
+        # https://stackoverflow.com/questions/44371643/nginx-php-failing-with-large-file-uploads-over-6-gb
+        # i.e. getting nginx to persist the body to disk then only pass the persisted filename to stroom.
+        # This is on the assumption that stroom and nginx can both rw to the same disk location, e.g. a
+        # a common docker volume.
 
         # Was the CA cert configured with an OCSP responder?
         #   - If so you can enable the following lines and NGINX will call out to the OCSP
@@ -185,6 +185,15 @@ http {
         location /queryElasticService/ {
             proxy_ssl_server_name on;
             proxy_pass http://${NGINX_ADVERTISED_HOST}:8299/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
+        location /datafeedService/ {
+            proxy_ssl_server_name on;
+            proxy_pass http://${NGINX_ADVERTISED_HOST}:8080/stroom/datafeed/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
