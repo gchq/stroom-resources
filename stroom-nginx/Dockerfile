@@ -39,4 +39,5 @@ CMD [ "/bin/bash", "-c", "envsubst ' \
     ${NGINX_SSL_CERTIFICATE} \
     ${NGINX_SSL_CERTIFICATE_KEY} \
     ${NGINX_SSL_CLIENT_CERTIFICATE} \
+    ${NGINX_CLIENT_BODY_BUFFER_SIZE} \
     ' < /etc/nginx/template/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]
