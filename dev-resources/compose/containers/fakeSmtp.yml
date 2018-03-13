@@ -5,4 +5,6 @@ services:
     container_name: fake-smtp
     image: "${FAKE_SMTP_DOCKER_REPO:-munkyboy/fakesmtp}"
     ports:
-      - "2526:25"
+      - "2525:25"
+    volumes:
+      - ~/.stroom/fakemail:/var/mail

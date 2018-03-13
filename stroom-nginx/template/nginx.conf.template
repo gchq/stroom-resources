@@ -243,6 +243,13 @@ http {
             return 301 ${AUTH_UI_URL}/changepassword;
         }
 
+        # TODO: We don't really want this path. Auth has several responsibilities.
+        # Some of them are mapped to more helpful locations, as above, but really 
+        # should be non-root. E.g. passwordReset is root, so we need this location.
+        location /authui {
+            return 301 ${AUTH_UI_URL};
+        }
+
         location /annotations {
             return 301 ${ANNOTATIONS_UI_URL}/;
         }
