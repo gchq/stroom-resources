@@ -36,6 +36,12 @@ http {
         # Set the amount of memory used to buffer client bodies before using temporary files
         client_body_buffer_size     1M;
 
+        # If this were on NGINX would buffer all client request bodies. This includes any huge
+        # files sent to datafeed. Turning this off means all requests are immediately sent to
+        # the proxied upstream server. 
+        # TODO: I _think_ this makes client_max_body_size and client_body_buffer_size redundent.
+        proxy_request_buffering     off;
+
         # TODO - May want to consider this approach for large file uploads
         # https://stackoverflow.com/questions/44371643/nginx-php-failing-with-large-file-uploads-over-6-gb
         # i.e. getting nginx to persist the body to disk then only pass the persisted filename to stroom.
