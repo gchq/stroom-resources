@@ -15,6 +15,18 @@ create_stack_from_services() {
     done
 }
 
+validate_service_parameters() {
+    # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
+    readonly local VALID_SERVICES='stroom stroomDb'
+
+    for service in "${@:2}"; do
+        if [[ $VALID_SERVICES != *$service* ]]; then
+            services_are_valid=false
+            echo -e "${RED}'$service'${NC} is not a valid service!"
+        fi
+    done
+}
+
 main(){
     # Exit the script on any error
     set -e
@@ -29,19 +41,12 @@ main(){
     NC='\033[0m' # No Color
 
     readonly local OUTPUT_FILE=$1
-    # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
-    readonly local VALID_SERVICES='stroom stroomDb'
-    for service in "${@:2}"; do
-        if [[ $VALID_SERVICES != *$service* ]]; then
-            services_are_valid=false
-            echo -e "${RED}'$service'${NC} is not a valid service!"
-        fi
-    done
+    validate_service_parameters "${@}"
 
     if [ -z ${services_are_valid+x} ]; then
         echo -e "Creating a stack with the following services: ${GREEN}${*:2}${NC}"
         echo -e "Saving to file ${GREEN}$1${NC}"
-        create_stack_from_services "${@:2}" > $OUTPUT_FILE
+        create_stack_from_services "${@:2}" > "$OUTPUT_FILE"
     else
         echo -e "Please choose from the following services and try again: ${GREEN}$VALID_SERVICES${NC}"
     fi
