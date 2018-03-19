@@ -4,10 +4,11 @@
 # This is useful for testing database migrations.
 
 create_stack_from_services() {
+    readonly local PATH_TO_CONTAINERS="../compose/containers"
     echo version: \'2.1\'
     echo services:
     for service in "$@"; do
-        local target_yaml="compose/containers/$service.yml"
+        local target_yaml="$PATH_TO_CONTAINERS/$service.yml"
         # TODO: make this a single grep
         local service
         service=$(grep -v '^services' "$target_yaml" | grep -v '^version:')
