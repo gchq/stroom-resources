@@ -4,7 +4,7 @@
 # This is useful for testing database migrations.
 
 create_stack_from_services() {
-    echo version: '2.1'
+    echo version: \'2.1\'
     echo services:
     for service in "$@"; do
         local target_yaml="compose/containers/$service.yml"
@@ -29,6 +29,7 @@ main(){
     NC='\033[0m' # No Color
 
     readonly local OUTPUT_FILE=$1
+    # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
     readonly local VALID_SERVICES='stroom stroomDb'
     for service in "${@:2}"; do
         if [[ $VALID_SERVICES != *$service* ]]; then
@@ -38,7 +39,7 @@ main(){
     done
 
     if [ -z ${services_are_valid+x} ]; then
-        echo -e "Creating a stack with the following services: ${GREEN}${@:2}${NC}"
+        echo -e "Creating a stack with the following services: ${GREEN}${*:2}${NC}"
         echo -e "Saving to file ${GREEN}$1${NC}"
         create_stack_from_services "${@:2}" > $OUTPUT_FILE
     else
