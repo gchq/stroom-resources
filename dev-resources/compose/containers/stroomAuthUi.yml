@@ -30,3 +30,5 @@ services:
     ports:
       - 5000:5000
       - 9443:9443
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

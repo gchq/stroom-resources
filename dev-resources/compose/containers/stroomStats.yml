@@ -30,3 +30,5 @@ services:
     ports:
       - 8086:8086 # app
       - 8087:8087 # admin
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

@@ -15,3 +15,5 @@ services:
       - MYSQL_DATABASE=annotations
     volumes:
       - ${STROOM_ANNOTATIONS_DB_DATA_VOLUME:-~/.stroom/db_data/stroom-annotations-db}:/var/lib/mysql
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

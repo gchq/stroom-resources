@@ -1,0 +1,13 @@
+version: '2.1'
+
+services:
+
+  ctop:
+    container_name: ctop
+    image: "${CTOP_DOCKER_REPO:-quay.io/vektorlab/ctop}:${CTOP_DOCKER_TAG:-latest}"
+    stdin_open: true
+    tty: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

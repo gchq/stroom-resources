@@ -26,3 +26,5 @@ services:
     ports:
       - 5002:5002
       - 9445:9445
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

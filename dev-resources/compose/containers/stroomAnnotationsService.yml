@@ -20,3 +20,5 @@ services:
       - 8199:8199
       - 8200:8200
     entrypoint: ./wait-for-it_busybox.sh ${STROOM_ANNOTATIONS_DB_HOST:-stroom-annotations-db}:${STROOM_ANNOTATIONS_DB_PORT:-3306} -- java -jar stroom-annotations-service-all.jar server config.yml
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

@@ -15,3 +15,5 @@ services:
       - MYSQL_DATABASE=auth
     volumes:
       - ${STROOM_AUTH_DB_DATA_VOLUME:-~/.stroom/db_data/stroom-auth-db}:/var/lib/mysql
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

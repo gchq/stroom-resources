@@ -60,8 +60,9 @@ services:
       - STROOM_DOCREF_URL_SERVICE__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_SERVICE_URL:-http://stroom-elastic-service/queryElasticService}
       - STROOM_DOCREF_URL_UI__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_UI_URL:-http://stroom-annotations-ui/annotations}
       - STROOM_DOCREF_URL_UI__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_UI_URL:-http://stroom-elastic-ui/query-elastic}
-
     ports:
       - "${STROOM_APP_PORT:-8080}:${STROOM_APP_PORT:-8080}"
       - "${STROOM_ADMIN_PORT:-8081}:${STROOM_ADMIN_PORT:-8081}"
       - "${STROOM_DEBUG_PORT:-10765}:${STROOM_DEBUG_PORT:-10765}"
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

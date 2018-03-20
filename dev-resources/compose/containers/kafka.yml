@@ -29,3 +29,5 @@ services:
       - KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=20000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

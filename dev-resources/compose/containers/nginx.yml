@@ -4,14 +4,14 @@ services:
     container_name: nginx
     image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v1.0-LATEST}"
     environment:
-      - NGINX_ADVERTISED_HOST=${NGINX_HOST:-stroom-nginx}
-      - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-on}
+      - NGINX_ADVERTISED_HOST=${NGINX_ADVERTISED_HOST:-<HOST_IP>}
+      - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-off}
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
       - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
       - NGINX_CLIENT_BODY_BUFFER_SIZE=${NGINX_CLIENT_BODY_BUFFER_SIZE:-1M}
       - AUTH_UI_URL=${STROOM_AUTH_UI_URL:-http://localhost:5000}
-      - AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8080}
+      - AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
       - ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_URL:-http://localhost:5001}
       - QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://localhost:5002}
       - STROOM_HOST=${STROOM_HOST:-localhost}
@@ -25,3 +25,5 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

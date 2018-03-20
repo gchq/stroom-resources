@@ -14,3 +14,5 @@ services:
       - 8299:8299
       - 8300:8300
     entrypoint: ./wait-for-it_busybox.sh elasticsearch:${ELASTIC_PORT:-9300} -- java -jar stroom-query-elastic-all.jar server config.yml
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

@@ -3,7 +3,19 @@
 # Use this script to load a SQL database dump into a temporary database.
 # This is useful for testing database migrations.
 
-source common.sh
+source lib/shell.sh
+
+validate_requested_services() {
+    # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
+    readonly local VALID_SERVICES='stroom stroomDb zookeeper stroomStatsDb stroomStats stroomQueryElasticUi stroomQueryElasticService stroomProxy stroomAuthUi stroomAuthService stroomAuthDb stroomAnnotationsUi stroomAnnotationsService stroomAnnotationsDb nginx kibana kafka hbase fakeSmtp elasticsearch ctop'
+
+    for service in "${@:2}"; do
+        if [[ $VALID_SERVICES != *$service* ]]; then
+            services_are_valid=false
+            echo -e "${RED}'$service'${NC} is not a valid service!"
+        fi
+    done
+}
 
 create_stack_from_services() {
     readonly local PATH_TO_CONTAINERS="../compose/containers"
@@ -18,22 +30,13 @@ create_stack_from_services() {
     done
 }
 
-validate_requested_services() {
-    # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
-    readonly local VALID_SERVICES='stroom stroomDb zookeeper stroomStatsDb stroomStats stroomQueryElasticUi stroomQueryElasticService stroomProxy stroomAuthUi stroomAuthService stroomAuthDb stroomAnnotationsUi stroomAnnotationsService stroomAnnotationsDb nginx kibana kafka hbase fakeSmtp elasticsearch'
-
-    for service in "${@:2}"; do
-        if [[ $VALID_SERVICES != *$service* ]]; then
-            services_are_valid=false
-            echo -e "${RED}'$service'${NC} is not a valid service!"
-        fi
-    done
-}
-
 main() {
     setup_echo_colours
-
-    readonly local OUTPUT_FILE=$1
+    readonly local BUILD_FOLDER='build'
+    readonly local STACK_NAME=$1
+    readonly local WORKING_DIRECTORY="$BUILD_FOLDER/$STACK_NAME"
+    readonly local OUTPUT_FILE="$WORKING_DIRECTORY/$STACK_NAME.yml"
+    mkdir -p $WORKING_DIRECTORY
     validate_requested_services "${@}"
 
     if [ -z ${services_are_valid+x} ]; then

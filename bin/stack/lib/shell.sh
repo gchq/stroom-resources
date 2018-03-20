@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Re-usable functions
+# Re-usable shell functions 
 
 setup_echo_colours() {
     # Exit the script on any error
