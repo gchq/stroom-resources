@@ -54,6 +54,16 @@ services:
       depends_on:
         - stroom-db
         - stroom-stats-db
+      ## Additional arguments required ahead of the -jar to enable debugging
+      command: java ${STROOM_JAVA_OPTS} -jar stroom-app-all.jar server config.yml
+
+  stroom-5:
+      extends:
+          file: ./containers/stroom.yml
+          service: stroom
+      depends_on:
+        - stroom-db
+        - stroom-stats-db
 
   stroom-annotations-db:
       extends:

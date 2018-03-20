@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -a containers=(
-    "stroom"
+    "stroom-5"
     "stroom"
     "stroom-db"
     "stroom-stats-db"

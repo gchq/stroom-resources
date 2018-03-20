@@ -7,10 +7,11 @@ services:
     image: "${STROOM_QUERY_ELASTIC_SERVICE_DOCKER_REPO:-gchq/stroom-query-elastic-service}:${STROOM_ELASTIC_SERVICE_TAG:-v0.0.4-alpha.1}"
     environment:
       - ELASTIC_CLUSTER_NAME=${ELASTIC_CLUSTER_NAME:-docker-cluster}
-      - ELASTIC_TRANSPORT_HOSTS=${ELASTIC_HOST:-elasticsearch}:${ELASTIC_PORT:-9300}
+      - ELASTIC_TRANSPORT_HOSTS=${ELASTIC_HOST:-elasticsearch}:${ELASTIC_BINARY_PORT:-9300}
+      - ELASTIC_HTTP_HOST=${ELASTIC_HOST:-elasticsearch}:${ELASTIC_HTTP_PORT:-9200}
       - AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
       - AUTHORISATION_SERVICE_IS_AUTHORISED_PATH=/isAuthorised
     ports:
       - 8299:8299
       - 8300:8300
-    entrypoint: ./wait-for-it_busybox.sh elasticsearch:${ELASTIC_PORT:-9300} -- java -jar stroom-query-elastic-all.jar server config.yml
+    entrypoint: ./wait-for-it_busybox.sh elasticsearch:${ELASTIC_BINARY_PORT:-9300} -- java -jar stroom-query-elastic-all.jar server config.yml
