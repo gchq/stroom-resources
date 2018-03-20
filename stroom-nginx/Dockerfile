@@ -30,6 +30,9 @@ RUN apk add --no-cache bash
 CMD [ "/bin/bash", "-c", "envsubst ' \
     ${NGINX_ADVERTISED_HOST} \
     ${STROOM_HOST} \
+    ${STROOM_PORT} \
+    ${AUTH_SERVICE_HOST} \
+    ${AUTH_SERVICE_PORT} \
     ${AUTH_UI_URL} \
     ${ANNOTATIONS_UI_URL} \
     ${QUERY_ELASTIC_UI_URL} \
@@ -37,4 +40,5 @@ CMD [ "/bin/bash", "-c", "envsubst ' \
     ${NGINX_SSL_CERTIFICATE} \
     ${NGINX_SSL_CERTIFICATE_KEY} \
     ${NGINX_SSL_CLIENT_CERTIFICATE} \
+    ${NGINX_CLIENT_BODY_BUFFER_SIZE} \
     ' < /etc/nginx/template/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]

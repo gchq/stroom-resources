@@ -89,7 +89,7 @@ echo
 echo -e "${GREEN}Building ${BLUE}${DOCKER_REPO}:${ver}${NC}"
 echo
 
-docker build --tag ${DOCKER_REPO}:${ver} ./nginx
+docker build --tag ${DOCKER_REPO}:${ver} ./stroom-nginx
 
 if ! ${localBuild}; then
     #tagName="${GIT_TAG_PREFIX}${ver}"
