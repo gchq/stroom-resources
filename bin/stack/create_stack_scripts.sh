@@ -25,6 +25,7 @@ main() {
     create_script start
     create_script status
     create_script stop
+    create_script stack
 
 }
 
