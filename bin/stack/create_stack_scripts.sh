@@ -6,8 +6,9 @@ source lib/shell.sh
 
 create_script() {
   local script_name=$1
-  sed "s/<STACK_NAME>/$STACK_NAME/g" "$LIB_DIRECTORY/template_$script_name.sh" > "$WORKING_DIRECTORY/$script_name.sh"
-
+  local SCRIPT_PATH="$WORKING_DIRECTORY/$script_name.sh"
+  sed "s/<STACK_NAME>/$STACK_NAME/g" "$LIB_DIRECTORY/template_$script_name.sh" > "$SCRIPT_PATH"
+  chmod +x "$SCRIPT_PATH"
 }
 
 main() {
