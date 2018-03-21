@@ -8,7 +8,7 @@ services:
     environment:
       - STATS_DB_USER=stroomuser
       - STATS_DB_PASSWORD=stroompassword1
-      - STATS_DB_URL=jdbc:mysql://${STROOM_DB_HOST:-<HOST_IP>}/stroom?useUnicode=yes&characterEncoding=UTF-8
+      - STATS_DB_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}/stroom?useUnicode=yes&characterEncoding=UTF-8
       # quorum string of the form along the lines of
       # host1:2181
       # host1:2181/myChRoot
@@ -25,8 +25,8 @@ services:
       # Comma delimited list of hosts in the ZK quorum (no port or chroot), e.g. host1,host2,host3
       - STATS_HBASE_ZK_QUORUM_HOSTS=${HBASE_ZOOKEEPER_QUORUM_HOSTS:-zookeeper}
       - ADMIN_CONTEXT_PATH=/statsAdmin
-      - AUTHENTICATION_SERVICE_URL=http://${AUTH_SERVICE_HOST:-<HOST_IP>}/authService
-      - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-<HOST_IP>}:8080/api/authorisation/v1
+      - AUTHENTICATION_SERVICE_URL=http://${AUTH_SERVICE_HOST:-$HOST_IP}/authService
+      - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-$HOST_IP}:8080/api/authorisation/v1
     ports:
       - 8086:8086 # app
       - 8087:8087 # admin

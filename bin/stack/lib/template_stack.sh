@@ -18,6 +18,23 @@ err() {
   echo -e "$@" >&2
 }
 
+determine_host_address() {
+    if [ "$(uname)" == "Darwin" ]; then
+        # Code required to find IP address is different in MacOS
+        ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}')
+    else
+        ip=$(ip route get 1 |awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
+    fi
+
+    if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        echo
+        echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
+        exit 1
+    fi
+
+    echo "$ip"
+}
+
 NO_ARGUMENT_MESSAGE="Please supply an argument: either ${YELLOW}start${NC}, ${YELLOW}stop${NC}, ${YELLOW}restart${NC}, ${YELLOW}logs${NC}, ${YELLOW}status${NC}, ${YELLOW}ctop${NC}, or ${YELLOW}remove${NC}."
 # Check script's params
 if [ $# -ne 1 ]; then
@@ -25,28 +42,29 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
+readonly local HOST_IP=$(determine_host_address)
 source core.env
 
 case $1 in
     start)
-        docker-compose -f <STACK_NAME>.yml up -d
+        docker-compose -f "$STACK_NAME".yml up -d
     ;;
     stop)
-        docker-compose -f <STACK_NAME>.yml stop
+        docker-compose -f $STACK_NAME.yml stop
     ;;
     restart)
-        docker-compose -f <STACK_NAME>.yml restart
+        docker-compose -f $STACK_NAME.yml restart
     ;;
     logs)
-        docker-compose -f <STACK_NAME>.yml logs -f
+        docker-compose -f $STACK_NAME.yml logs -f
     ;;
     status)
-        docker ps --all --filter "label=stack_name=<STACK_NAME>" --format  "table {{.Names}}\t{{.Status}}\t{{.Image}}\t{{.ID}}"
+        docker ps --all --filter "label=stack_name=$STACK_NAME" --format  "table {{.Names}}\t{{.Status}}\t{{.Image}}\t{{.ID}}"
     ;;
     ctop)
         docker attach ctop
     ;;
     remove)
-        docker-compose -f <STACK_NAME>.yml down -v
+        docker-compose -f $STACK_NAME.yml down -v
     ;;
 esac

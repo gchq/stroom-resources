@@ -14,21 +14,17 @@ create_config() {
 }
 
 add_params() {
-    readonly local HOST_IP=$(determine_host_address)
-    echo -e "Using ${GREEN}$HOST_IP${NC} as the host IP address."
     params=$( \
         # Extracts the params
         grep -Po "(?<=\\$\\{).*?(?=\\})" $INPUT_FILE |
         # Replaces ':-'' with '='
-        sed "s/:-/='/g" |
+        sed "s/:-/=\"/g" |
         # Adds a closing single quote to the end of the line
-        sed "s/$/'/g" |
+        sed "s/$/\"/g" |
         # Adds 'export' to the start of the line
         sed "s/^/export /" | 
         # Add in the stack name
-        sed "s/<STACK_NAME>/$STACK_NAME/g" |
-        # Add in the HOST_IP where needed
-        sed "s|<HOST_IP>|$HOST_IP|" )
+        sed "s/<STACK_NAME>/$STACK_NAME/g" )
 
     echo "$params" >> "$OUTPUT_FILE"
 }
