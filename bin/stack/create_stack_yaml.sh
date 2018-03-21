@@ -3,7 +3,7 @@
 # Use this script to load a SQL database dump into a temporary database.
 # This is useful for testing database migrations.
 
-source lib/shell.sh
+source lib/shell_utils.sh
 
 validate_requested_services() {
     # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.

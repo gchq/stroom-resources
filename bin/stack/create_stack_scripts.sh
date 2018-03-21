@@ -2,7 +2,7 @@
 #
 # Creates scripts to run stacks
 
-source lib/shell.sh
+source lib/shell_utils.sh
 
 create_script() {
   local script_name=$1
@@ -32,8 +32,8 @@ main() {
     # Copy libs to build
     readonly local DEST_LIB="$WORKING_DIRECTORY/lib"
     mkdir -p "$DEST_LIB"
-    cp lib/shell.sh "$DEST_LIB"
-    cp lib/network.sh "$DEST_LIB"
+    cp lib/shell_utils.sh "$DEST_LIB"
+    cp lib/network_utils.sh "$DEST_LIB"
 
 }
 

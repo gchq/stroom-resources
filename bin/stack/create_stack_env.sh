@@ -4,8 +4,8 @@
 # including the default values. This can be used to make sure the 
 # configuration is always complete.
 
-source lib/shell.sh
-source lib/network.sh
+source lib/shell_utils.sh
+source lib/network_utils.sh
 
 create_config() {
     rm -f "$OUTPUT_FILE"

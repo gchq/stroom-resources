@@ -2,7 +2,7 @@
 #
 # Starts the stack, using the configuration defined in the .env file.
 
-source lib/network.sh
+source lib/network_utils.sh
 HOST_IP=$(determine_host_address)
 source config/core.env
 

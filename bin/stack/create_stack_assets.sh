@@ -2,12 +2,12 @@
 #
 # Copies the necessary assets into the build
 
-source lib/shell.sh
+source lib/shell_utils.sh
 
 main() {
     setup_echo_colours
     echo -e "${GREEN}Copying assets${NC}"
-    
+
     readonly local STACK_NAME=$1
     readonly local BUILD_FOLDER='build'
     readonly local WORKING_DIRECTORY="$BUILD_FOLDER/$STACK_NAME"
