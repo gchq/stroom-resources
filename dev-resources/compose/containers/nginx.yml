@@ -10,18 +10,18 @@ services:
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
       - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
       - NGINX_CLIENT_BODY_BUFFER_SIZE=${NGINX_CLIENT_BODY_BUFFER_SIZE:-1M}
-      - AUTH_UI_URL=${STROOM_AUTH_UI_URL:-http://localhost:5000}
+      - AUTH_UI_URL=${STROOM_AUTH_UI_URL:-http://<HOST_IP>:5000}
       - AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
-      - ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_URL:-http://localhost:5001}
-      - QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://localhost:5002}
-      - STROOM_HOST=${STROOM_HOST:-localhost}
+      - ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_URL:-http://<HOST_IP>:5001}
+      - QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://<HOST_IP>:5002}
+      - STROOM_HOST=${STROOM_HOST:-<HOST_IP>}
       - STROOM_PORT=${STROOM_APP_PORT:-8080}
-      - AUTH_SERVICE_HOST=${STROOM_AUTH_SERVICE_HOST:-localhost}
+      - AUTH_SERVICE_HOST=${AUTH_SERVICE_HOST:-<HOST_IP>}
     volumes:
       # Shared certs volume: TODO: move it to the top level
-      - ../../../dev-resources/certs/server:/etc/nginx/certs
+      - ${NGINX_VOLUME_CERTS:-./volumes/nginx/certs}:/etc/nginx/certs
       # nginx.conf.template - used to create the actual config when the container starts
-      - ../../../stroom-nginx/template:/etc/nginx/template
+      - ${NGINX_VOLUME_CONF:-./volumes/nginx/conf}:/etc/nginx/template
     ports:
       - "80:80"
       - "443:443"

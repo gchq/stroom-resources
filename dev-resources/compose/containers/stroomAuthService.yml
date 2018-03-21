@@ -10,13 +10,13 @@ services:
       - STROOM_AUTH_SERVICE_ADMIN_PORT=${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}
       - DB_USER=${STROOM_AUTH_DB_USERNAME:-stroomuser}
       - DB_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
-      - DB_URL=jdbc:mariadb://${STROOM_AUTH_DB_HOST:-stroom-auth-db}:${STROOM_AUTH_DB_PORT:-3306}/auth
+      - DB_URL=jdbc:mariadb://${STROOM_AUTH_DB_HOST:-<HOST_IP>}:${STROOM_AUTH_DB_PORT:-3309}/auth
       - JWS_ISSUER=stroom
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
-      - ADVERTISED_HTTP_HOST=http://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authService
-      - AUTH_UI=${STROOM_AUTH_UI_URL:-http://localhost:5000}/login
-      - CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_URL:-http://localhost:5000}/changePassword
-      - AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
+      - ADVERTISED_HTTP_HOST=http://${AUTH_SERVICE_HOST:-<HOST_IP>}/authService
+      - AUTH_UI=${STROOM_AUTH_UI_URL:-http://<HOST_IP>:5000}/login
+      - CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_URL:-http://<HOST_IP>:5000}/changePassword
+      - AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-<HOST_IP>}/authorisationService/v1
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
@@ -35,6 +35,6 @@ services:
     ports:
       - "${STROOM_AUTH_SERVICE_PORT:-8099}:${STROOM_AUTH_SERVICE_PORT:-8099}"
       - "${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}"
-    entrypoint: ./wait-for-it_busybox.sh ${STROOM_AUTH_DB_HOST:-stroom-auth-db}:${STROOM_AUTH_DB_PORT:-3306} -- java -jar stroom-auth-service-all.jar server config.yml
+    entrypoint: java -jar stroom-auth-service-all.jar server config.yml
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
