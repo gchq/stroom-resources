@@ -15,3 +15,7 @@ setup_echo_colours() {
     DGREY='\e[90m'
     NC='\033[0m' # No Color
 }
+
+err() {
+  echo -e "$@" >&2
+}

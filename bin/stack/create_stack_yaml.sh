@@ -12,7 +12,8 @@ validate_requested_services() {
     for service in "${@:2}"; do
         if [[ $VALID_SERVICES != *$service* ]]; then
             services_are_valid=false
-            echo -e "${RED}'$service'${NC} is not a valid service!"
+            err "${RED}'$service'${NC} is not a valid service!"
+            exit 1
         fi
     done
 }
@@ -44,7 +45,8 @@ main() {
         echo -e "Saving to file ${GREEN}$1${NC}"
         create_stack_from_services "${@:2}" > "$OUTPUT_FILE"
     else
-        echo -e "Please choose from the following services and try again: ${GREEN}$VALID_SERVICES${NC}"
+        err "Please choose from the following services and try again: ${GREEN}$VALID_SERVICES${NC}"
+        exit 1
     fi
 }
 

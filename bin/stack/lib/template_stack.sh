@@ -14,11 +14,14 @@ LGREY='\e[37m'
 DGREY='\e[90m'
 NC='\033[0m' # No Color
 
+err() {
+  echo -e "$@" >&2
+}
+
 NO_ARGUMENT_MESSAGE="Please supply an argument: either ${YELLOW}start${NC}, ${YELLOW}stop${NC}, ${YELLOW}restart${NC}, ${YELLOW}logs${NC}, ${YELLOW}status${NC}, ${YELLOW}ctop${NC}, or ${YELLOW}remove${NC}."
 # Check script's params
 if [ $# -ne 1 ]; then
-    echo -e $NO_ARGUMENT_MESSAGE
-    echo -e ""
+    err $NO_ARGUMENT_MESSAGE
     exit 1
 fi
 
