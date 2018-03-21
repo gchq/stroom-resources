@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 #
+# shellcheck disable=SC2034
+# shellcheck disable=SC1090
+#
 # Starts the stack, using the configuration defined in the .env file.
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will

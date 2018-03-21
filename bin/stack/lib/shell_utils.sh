@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# shellcheck disable=SC2034
+#
 # Re-usable shell functions 
 
 setup_echo_colours() {
