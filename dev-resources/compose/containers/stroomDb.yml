@@ -13,6 +13,6 @@ services:
       - MYSQL_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
       - MYSQL_DATABASE=stroom
     volumes:
-      - ${STROOM_DB_DATA_VOLUME:-~/.stroom/db_data/stroom-db}:/var/lib/mysql
+      - ${STROOM_DB_DATA_VOLUME:-../volumes/stroom-db}:/var/lib/mysql
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
