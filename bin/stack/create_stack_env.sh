@@ -5,6 +5,7 @@
 # configuration is always complete.
 
 source lib/shell.sh
+source lib/network.sh
 
 create_config() {
     rm -f "$OUTPUT_FILE"
@@ -13,6 +14,8 @@ create_config() {
 }
 
 add_params() {
+    readonly local HOST_IP=$(determine_host_address)
+    echo -e "Using ${GREEN}$HOST_IP${NC} as the host IP address."
     params=$( \
         # Extracts the params
         grep -Po "(?<=\\$\\{).*?(?=\\})" $INPUT_FILE |
@@ -22,13 +25,11 @@ add_params() {
         sed "s/$/'/g" |
         # Adds 'export' to the start of the line
         sed "s/^/export /" | 
-        # sed "s/^/export /") 
         # Add in the stack name
-        sed "s/<STACK_NAME>/$STACK_NAME/g")
+        sed "s/<STACK_NAME>/$STACK_NAME/g" |
         # Add in the HOST_IP where needed
-        # sed "s/<HOST_IP>/$determine_host_address/g" \
-        # )
-    #TODO sort and de-dupe
+        sed "s|<HOST_IP>|$HOST_IP|" )
+
     echo "$params" >> "$OUTPUT_FILE"
 }
 
