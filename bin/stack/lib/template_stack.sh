@@ -43,20 +43,20 @@ if [ $# -ne 1 ]; then
 fi
 
 readonly local HOST_IP=$(determine_host_address)
-source core.env
+source config/core.env
 
 case $1 in
     start)
-        docker-compose -f "$STACK_NAME".yml up -d
+        docker-compose -f config/$STACK_NAME.yml up -d
     ;;
     stop)
-        docker-compose -f $STACK_NAME.yml stop
+        docker-compose -f config/$STACK_NAME.yml stop
     ;;
     restart)
-        docker-compose -f $STACK_NAME.yml restart
+        docker-compose -f config/$STACK_NAME.yml restart
     ;;
     logs)
-        docker-compose -f $STACK_NAME.yml logs -f
+        docker-compose -f config/$STACK_NAME.yml logs -f
     ;;
     status)
         docker ps --all --filter "label=stack_name=$STACK_NAME" --format  "table {{.Names}}\t{{.Status}}\t{{.Image}}\t{{.ID}}"
@@ -65,6 +65,6 @@ case $1 in
         docker attach ctop
     ;;
     remove)
-        docker-compose -f $STACK_NAME.yml down -v
+        docker-compose -f config/$STACK_NAME.yml down -v
     ;;
 esac

@@ -2,4 +2,4 @@
 #
 # Stops the stack
 
-docker-compose -f <STACK_NAME>.yml stop
+docker-compose -f config/<STACK_NAME>.yml stop

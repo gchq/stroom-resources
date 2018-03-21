@@ -24,9 +24,9 @@ services:
       - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
     volumes:
       # Shared certs volume: TODO: move it to the top level
-      - ${STROOM_AUTH_UI_VOLUME_CERTS:-./volumes/auth-ui/certs}:/etc/nginx/certs
+      - ${STROOM_AUTH_UI_VOLUME_CERTS:-../volumes/auth-ui/certs}:/etc/nginx/certs
       # nginx.conf.template - used to create the actual config when the container starts
-      - ${STROOM_AUTH_UI_VOLUME_CONF:-./volumes/auth-ui/conf}:/etc/nginx/template
+      - ${STROOM_AUTH_UI_VOLUME_CONF:-../volumes/auth-ui/conf}:/etc/nginx/template
     ports:
       - 5000:5000
       - 9443:9443

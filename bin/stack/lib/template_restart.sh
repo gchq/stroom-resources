@@ -3,4 +3,4 @@
 # Restarts the stack
 
 source core.env
-docker-compose -f <STACK_NAME>.yml restart
+docker-compose -f config/<STACK_NAME>.yml restart

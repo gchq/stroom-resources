@@ -19,9 +19,9 @@ services:
       - AUTH_SERVICE_HOST=${AUTH_SERVICE_HOST:-$HOST_IP}
     volumes:
       # Shared certs volume: TODO: move it to the top level
-      - ${NGINX_VOLUME_CERTS:-./volumes/nginx/certs}:/etc/nginx/certs
+      - ${NGINX_VOLUME_CERTS:-../volumes/nginx/certs}:/etc/nginx/certs
       # nginx.conf.template - used to create the actual config when the container starts
-      - ${NGINX_VOLUME_CONF:-./volumes/nginx/conf}:/etc/nginx/template
+      - ${NGINX_VOLUME_CONF:-../volumes/nginx/conf}:/etc/nginx/template
     ports:
       - "80:80"
       - "443:443"

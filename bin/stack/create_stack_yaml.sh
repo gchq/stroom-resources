@@ -33,16 +33,17 @@ create_stack_from_services() {
 
 main() {
     setup_echo_colours
+
     readonly local BUILD_FOLDER='build'
     readonly local STACK_NAME=$1
-    readonly local WORKING_DIRECTORY="$BUILD_FOLDER/$STACK_NAME"
+    readonly local WORKING_DIRECTORY="$BUILD_FOLDER/$STACK_NAME/config"
+    mkdir -p $WORKING_DIRECTORY
     readonly local OUTPUT_FILE="$WORKING_DIRECTORY/$STACK_NAME.yml"
     mkdir -p $WORKING_DIRECTORY
     validate_requested_services "${@}"
 
     if [ -z ${services_are_valid+x} ]; then
-        echo -e "Creating a stack with the following services: ${GREEN}${*:2}${NC}"
-        echo -e "Saving to file ${GREEN}$1${NC}"
+        echo -e "${GREEN}Creating a stack called ${YELLOW}$STACK_NAME${GREEN} with the following services: ${BLUE}${*:2}${NC}"
         create_stack_from_services "${@:2}" > "$OUTPUT_FILE"
     else
         err "Please choose from the following services and try again: ${GREEN}$VALID_SERVICES${NC}"
