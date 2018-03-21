@@ -2,5 +2,8 @@
 #
 # Starts the stack, using the configuration defined in the .env file.
 
-source core.env
+source lib/network.sh
+HOST_IP=$(determine_host_address)
+source config/core.env
+
 docker-compose -f config/<STACK_NAME>.yml up -d

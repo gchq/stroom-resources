@@ -29,6 +29,12 @@ main() {
     create_script stop
     create_script stack
 
+    # Copy libs to build
+    readonly local DEST_LIB="$WORKING_DIRECTORY/lib"
+    mkdir -p "$DEST_LIB"
+    cp lib/shell.sh "$DEST_LIB"
+    cp lib/network.sh "$DEST_LIB"
+
 }
 
 main "$@"
