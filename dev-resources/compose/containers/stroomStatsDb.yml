@@ -15,3 +15,5 @@ services:
       - MYSQL_DATABASE=statistics
     volumes:
       - ${STROOM_STATS_DB_DATA_VOLUME:-~/.stroom/db_data/stroom-stats-db}:/var/lib/mysql
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

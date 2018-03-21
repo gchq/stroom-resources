@@ -8,3 +8,5 @@ services:
       - "2525:25"
     volumes:
       - ~/.stroom/fakemail:/var/mail
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

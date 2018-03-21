@@ -6,13 +6,13 @@ services:
     container_name: stroom-query-elastic-ui
     image: "${STROOM_ELASTIC_UI_DOCKER_REPO:-gchq/stroom-query-elastic-ui}:${STROOM_ELASTIC_UI_TAG:-v0.0.4-alpha.1}"
     environment:
-      - QUERY_ELASTIC_UI_AUTHENTICATION_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-stroom-auth-service}/authenticationService/v1
-      - QUERY_ELASTIC_UI_AUTHORISATION_SERVICE_URL=https://${STROOM_AUTHORISATION_SERVICE_HOST:-stroom}/authorisationService/v1
-      - QUERY_ELASTIC_UI_ADVERTISED_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://localhost:5002}
+      - QUERY_ELASTIC_UI_AUTHENTICATION_SERVICE_URL=https://${AUTH_SERVICE_HOST:-$HOST_IP}/authenticationService/v1
+      - QUERY_ELASTIC_UI_AUTHORISATION_SERVICE_URL=https://${STROOM_AUTHORISATION_SERVICE_HOST:-$HOST_IP}/authorisationService/v1
+      - QUERY_ELASTIC_UI_ADVERTISED_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP:5002}
       - QUERY_ELASTIC_UI_APP_CLIENT_ID=stroom-query-elastic
-      - QUERY_ELASTIC_UI_QUERY_ELASTIC_URL=https://${STROOM_QUERY_ELASTIC_SERVICE_HOST:-stroom-query-elastic-service}/queryElasticService
+      - QUERY_ELASTIC_UI_QUERY_ELASTIC_URL=https://${STROOM_QUERY_ELASTIC_SERVICE_HOST:-$HOST_IP}/queryElasticService
       # The NGINX_xxx variables configure the NGINX server that serves the app
-      - NGINX_HOST=${STROOM_QUERY_ELASTIC_UI_HOST:-localhost}
+      - NGINX_HOST=${STROOM_QUERY_ELASTIC_UI_HOST:-$HOST_IP}
       - NGINX_HTTP_PORT=${STROOM_QUERY_ELASTIC_UI_HTTP_PORT:-5002}
       - NGINX_HTTPS_PORT=${STROOM_QUERY_ELASTIC_UI_HTTPS_PORT:-9445}
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
@@ -26,3 +26,5 @@ services:
     ports:
       - 5002:5002
       - 9445:9445
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

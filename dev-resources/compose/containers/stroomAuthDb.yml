@@ -7,7 +7,7 @@ services:
     container_name: stroom-auth-db
     ports:
         # Expose mysql on 3309 to the host so as not to conflict with stroom-db or stroom-stats-db
-      - "3309:3306"
+      - "${STROOM_AUTH_DB_PORT:-3309}:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${STROOM_AUTH_DB_ROOT_PASSWORD:-my-secret-pw}
       - MYSQL_USER=${STROOM_AUTH_DB_USERNAME:-stroomuser}
@@ -15,3 +15,5 @@ services:
       - MYSQL_DATABASE=auth
     volumes:
       - ${STROOM_AUTH_DB_DATA_VOLUME:-~/.stroom/db_data/stroom-auth-db}:/var/lib/mysql
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"
