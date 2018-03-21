@@ -7,7 +7,7 @@ source lib/shell_utils.sh
 
 validate_requested_services() {
     # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
-    readonly local VALID_SERVICES='stroom stroomDb zookeeper stroomStatsDb stroomStats stroomQueryElasticUi stroomQueryElasticService stroomProxy stroomAuthUi stroomAuthService stroomAuthDb stroomAnnotationsUi stroomAnnotationsService stroomAnnotationsDb nginx kibana kafka hbase fakeSmtp elasticsearch ctop'
+    readonly local VALID_SERVICES='stroom stroomDb zookeeper stroomStatsDb stroomStats stroomQueryElasticUi stroomQueryElasticService stroomProxy stroomAuthUi stroomAuthService stroomAuthDb stroomAnnotationsUi stroomAnnotationsService stroomAnnotationsDb nginx kibana kafka hbase fakeSmtp elasticsearch hdfs'
 
     for service in "${@:2}"; do
         if [[ $VALID_SERVICES != *$service* ]]; then

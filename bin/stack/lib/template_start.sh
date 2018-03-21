@@ -11,7 +11,7 @@ readonly local DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "$DIR"/lib/network_utils.sh
 HOST_IP=$(determine_host_address)
-source "$DIR"/config/core.env
+source "$DIR"/config/<STACK_NAME>.env
 
 
 docker-compose -f "$DIR"/config/<STACK_NAME>.yml up -d
