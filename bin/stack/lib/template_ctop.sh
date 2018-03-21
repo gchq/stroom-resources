@@ -15,6 +15,6 @@
 #   S	        Save current configuration to file
 #   q	        Quit ctop
 
-# TODO Add check to see if a CTOP container exists
-
-docker attach ctop
+docker run -ti --name ctop --rm \
+   -v /var/run/docker.sock:/var/run/docker.sock \
+   quay.io/vektorlab/ctop:latest
