@@ -14,6 +14,7 @@ create_script() {
 main() {
     setup_echo_colours
 
+    echo -e "${GREEN}Copying stack management scripts${NC}"
     readonly local BUILD_DIRECTORY='build'
     readonly local STACK_NAME=$1
     readonly local LIB_DIRECTORY='lib'

@@ -30,13 +30,17 @@ add_params() {
 }
 
 main() {
+    setup_echo_colours
+
+    echo -e "${GREEN}Creating configuration${NC}"
+
     readonly local STACK_NAME=$1
     readonly local BUILD_FOLDER='build'
-    readonly local WORKING_DIRECTORY="$BUILD_FOLDER/$STACK_NAME"
+    readonly local WORKING_DIRECTORY="$BUILD_FOLDER/$STACK_NAME/config"
+    mkdir -p $WORKING_DIRECTORY
     readonly local INPUT_FILE="$WORKING_DIRECTORY/$STACK_NAME.yml"
     readonly local OUTPUT_FILE="$WORKING_DIRECTORY/$STACK_NAME.env"
 
-    setup_echo_colours
     create_config
     add_params
     # Sort and de-duplicate param list before we do anything else with the file
