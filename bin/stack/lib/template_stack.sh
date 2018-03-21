@@ -2,14 +2,6 @@
 #
 # A single script interface to manage the stack
 
-# source lib/network.sh
-# host_ip=$(determine_host_address)
-
-# source lib/shell.sh
-# setup_echo_colours
-
-# source config/core.env
-
 NO_ARGUMENT_MESSAGE="Please supply an argument: either ${YELLOW}start${NC}, ${YELLOW}stop${NC}, ${YELLOW}restart${NC}, ${YELLOW}logs${NC}, ${YELLOW}status${NC}, ${YELLOW}ctop${NC}, or ${YELLOW}remove${NC}."
 # Check script's params
 if [ $# -ne 1 ]; then
