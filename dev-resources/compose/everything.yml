@@ -98,6 +98,11 @@ services:
       extends:
           file: ./containers/stroomAuthUi.yml
           service: stroom-auth-ui
+  
+  stroom-ui:
+      extends:
+          file: ./containers/stroomUi.yml
+          service: stroom-ui
 
   stroom-db:
       extends:
