@@ -279,8 +279,6 @@ if [ ! -f $customEnvFile ]; then
     exit 1
 fi
 
-determineHostAddress
-
 # Check that the credentials file exists, if it doesn't create a default one
 if [ ! -f ${CREDENTIALS_FILE} ]; then
     echo -e "Credentials File ${YELLOW}${CREDENTIALS_FILE}${NC} does not exist, creating a default one"
@@ -319,6 +317,7 @@ else
     echo "Using environment variables to resolve any docker tags and other variables"
 fi
 
+determineHostAddress
 
 #Try setting the service names list from the SERVICE_LIST env var, which may/may not be set.
 serviceNames="${SERVICE_LIST}"
