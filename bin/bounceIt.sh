@@ -36,7 +36,7 @@ ALL_SERVICES_COMPOSE_FILE="${SCRIPT_DIR}/compose/everything.yml"
 
 #Header text for use when creating a new local.env file
 #to generate the list of _HOST variables run the following 
-#cat compose/containers/*.yml | grep -oE "\\$\{[A-Z_]*_HOST(:-.*)?}" | sort | uniq | sed -E 's/\$\{([A-Z_]*)(:-.*)?}/\1=\\${STROOM_RESOURCES_ADVERTISED_HOST}/'
+#cat compose/containers/*.yml | grep -oE "\\$\{[A-Z_]*_HOST(:-.*)?}" | sort | uniq | sed -E 's/\$\{([A-Z_]*)(:-.*)?}/\1=\\${HOST_IP}/'
 DEFAULT_TAGS_HEADER=$(<local.default.env)
 
 #regex used to locate a docker tag variable in a docker-compose .yml file
@@ -164,10 +164,10 @@ exportFileContents() {
 
 determineHostAddress() {
     # We need the IP to transpose into our config
-    if [ "x${STROOM_RESOURCES_ADVERTISED_HOST}" != "x" ]; then
-        ip="${STROOM_RESOURCES_ADVERTISED_HOST}"
+    if [ "x${HOST_IP}" != "x" ]; then
+        ip="${HOST_IP}"
         echo
-        echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as obtained from ${BLUE}STROOM_RESOURCES_ADVERTISED_HOST${NC}"
+        echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as obtained from ${BLUE}HOST_IP${NC}"
     else
         if [ "$(uname)" == "Darwin" ]; then
             # Code required to find IP address is different in MacOS
@@ -181,12 +181,12 @@ determineHostAddress() {
 
     if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
         echo
-        echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
+        echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}HOST_IP=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
         exit 1
     fi
 
     # This is used by the docker-compose YML files, so they can tell a browser where to go
-    export STROOM_RESOURCES_ADVERTISED_HOST="${ip}"
+    export HOST_IP="${ip}"
     echo
 }
 
@@ -379,7 +379,7 @@ if $requireHostFileCheck && [[ "$REQUIRE_HOSTS_FILE_CHECK" != "false" ]]; then
                 echo
                 echo -e "${RED}WARNING${NC} - /etc/hosts is missing required entries for stroom hosts"
                 echo -e "These entries are only required if you have not set variables like"
-                echo -e "'${BLUE}...._HOST=\${STROOM_RESOURCES_ADVERTISED_HOST}${NC}' in your env files"
+                echo -e "'${BLUE}...._HOST=\${HOST_IP}${NC}' in your env files"
                 echo -e "Add the following lines to ${BLUE}/etc/hosts${NC} (or use the '${GREEN}-x${NC}' argument to ignore this check):"
                 echo
                 hasEchoedMissingHostsMsg=true

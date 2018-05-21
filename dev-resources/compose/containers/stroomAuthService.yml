@@ -13,7 +13,7 @@ services:
       - DB_URL=jdbc:mariadb://${STROOM_AUTH_DB_HOST:-$HOST_IP}:${STROOM_AUTH_DB_PORT:-3309}/auth
       - JWS_ISSUER=stroom
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
-      - ADVERTISED_HTTP_HOST=http://${AUTH_SERVICE_HOST:-$HOST_IP}/authService
+      - ADVERTISED_HTTP_HOST=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authService
       - AUTH_UI=${STROOM_AUTH_UI_URL:-http://$HOST_IP:5000}/login
       - CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_URL:-http://$HOST_IP:5000}/changePassword
       - AUTHORISATION_SERVICE_URL=http://${STROOM_AUTHORISATION_SERVICE_HOST:-$HOST_IP}/authorisationService/v1
