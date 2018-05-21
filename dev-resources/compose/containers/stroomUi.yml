@@ -10,6 +10,7 @@ services:
       # The AUTH_UI_xxx variables configure the app as loaded in the browser
       - STROOM_UI_AUTHENTICATION_SERVICE_URL=https://${AUTH_SERVICE_HOST:-$HOST_IP}/authenticationService/v1
       - STROOM_UI_AUTHORISATION_SERVICE_URL=https://${STROOM_AUTHORISATION_SERVICE_HOST:-$HOST_IP}/authorisationService/v1
+      - STROOM_UI_STREAM_TASK_SERVICE_URL=https://${STROOM_STREAM_TASK_SERVICE_HOST:-$HOST_IP}/streamTaskService/v1
       - STROOM_UI_ADVERTISED_URL=${STROOM_UI_URL:-https://$HOST_IP:STROOM_UI_HTTP_PORT}
       - STROOM_UI_APP_CLIENT_ID=stroom-ui
       # The NGINX_xxx variables configure the NGINX server that serves the app
