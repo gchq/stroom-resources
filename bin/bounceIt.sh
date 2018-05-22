@@ -181,7 +181,7 @@ determineHostAddress() {
 
     if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
         echo
-        echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
+        echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting it manually i.e. '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x ./bounceIt.sh ........${NC}'" >&2
         exit 1
     fi
 
@@ -302,6 +302,8 @@ if [ ! -f ${CREDENTIALS_FILE} ]; then
 fi
 source ${CREDENTIALS_FILE}
 
+determineHostAddress
+
 if [ -n "$customEnvFile" ]; then
     #custom env file
     exportFileContents "${customEnvFile}"
@@ -316,8 +318,6 @@ else
     echo
     echo "Using environment variables to resolve any docker tags and other variables"
 fi
-
-determineHostAddress
 
 #Try setting the service names list from the SERVICE_LIST env var, which may/may not be set.
 serviceNames="${SERVICE_LIST}"
