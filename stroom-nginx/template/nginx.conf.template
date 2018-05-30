@@ -8,6 +8,98 @@ events {
 
 http {
 
+    ####################
+    # Upstream servers #
+    ####################
+
+    upstream authService {
+        ip_hash; # Upstream determined by a hash of the clients IP address -- effectively enabling sticky sessions
+        server ${AUTH_SERVICE_HOST}:${AUTH_SERVICE_PORT};
+        # Can add other servers below
+    }
+
+
+    ######################
+    # Upstream redirects #
+    ######################
+    ### USERS ###
+    upstream users {
+        # server ${AUTH_UI_URL};
+        server 127.0.0.1:46011;
+        #server 127.0.0.1:46012;
+    }
+    server {
+        listen 46011;
+        return 301 https://${AUTH_UI_URL}/userSearch/;
+    }
+
+    ### LOGIN ###
+    upstream login {
+        # server ${AUTH_UI_URL};
+        server 127.0.0.1:46021;
+        #server 127.0.0.1:46012;
+    }
+    server {
+        listen 46021;
+        return 301 https://${AUTH_UI_URL}/login/;
+    }
+
+    ### TOKENS ###
+    upstream tokens {
+        # server ${AUTH_UI_URL};
+        server 127.0.0.1:46031;
+        #server 127.0.0.1:46012;
+    }
+    server {
+        listen 46031;
+        return 301 https://${AUTH_UI_URL}/tokens/;
+    }
+
+    ### CHANGEPASSWORD ###
+    upstream changepassword {
+        # server ${AUTH_UI_URL};
+        server 127.0.0.1:46041;
+        #server 127.0.0.1:46012;
+    }
+    server {
+        listen 46041;
+        return 301 https://${AUTH_UI_URL}/changepassword/;
+    }
+
+    ### AUTHUI ###
+    upstream authUi {
+        # server ${AUTH_UI_URL};
+        server 127.0.0.1:46051;
+        #server 127.0.0.1:46012;
+    }
+    server {
+        listen 46051;
+        return 301 https://${AUTH_UI_URL}/;
+    }
+
+    ### ANNOTATIONS ###
+    upstream annotations {
+        # server ${AUTH_UI_URL};
+        server 127.0.0.1:46061;
+        #server 127.0.0.1:46012;
+    }
+    server {
+        listen 46061;
+        return 301 ${ANNOTATIONS_UI_URL}/;
+    }
+
+    ### QUERY-ELASTIC ###
+    upstream queryElastic {
+        # server ${AUTH_UI_URL};
+        server 127.0.0.1:46071;
+        #server 127.0.0.1:46012;
+    }
+    server {
+        listen 46071;
+        return 301 ${QUERY_ELASTIC_UI_URL}/;
+    }
+
+
     index index.html index.htm;
 
     server {
@@ -95,6 +187,7 @@ http {
             }
         }
 
+
         ########################
         # ROUTING FOR SERVICES #
         ########################
@@ -103,7 +196,7 @@ http {
         # It's needed for the Swagger client's baseUrl.
         location /authService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${AUTH_SERVICE_HOST}:${AUTH_SERVICE_PORT}/;
+            proxy_pass http://authService/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -113,7 +206,7 @@ http {
 
         location /authenticationService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${AUTH_SERVICE_HOST}:${AUTH_SERVICE_PORT}/authentication/;
+            proxy_pass http://authService/authentication/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -123,7 +216,7 @@ http {
 
         location /userService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${AUTH_SERVICE_HOST}:${AUTH_SERVICE_PORT}/user/;
+            proxy_pass http://authService/user/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -133,7 +226,7 @@ http {
 
         location /tokenService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${AUTH_SERVICE_HOST}:${AUTH_SERVICE_PORT}/token/;
+            proxy_pass http://authService/token/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -235,34 +328,34 @@ http {
         ## ROUTING FOR OTHER UI
 
         location /login {
-            return 301 ${AUTH_UI_URL}/login/;
+            proxy_pass http://login;
         }
 
         location /users {
-            return 301 ${AUTH_UI_URL}/userSearch/;
+            proxy_pass http://users;
         }
 
         location /tokens {
-            return 301 ${AUTH_UI_URL}/tokens/;
+            proxy_pass http://tokens;
         }
 
         location /changepassword {
-            return 301 ${AUTH_UI_URL}/changepassword;
+            proxy_pass http://changepassword;
         }
 
         # TODO: We don't really want this path. Auth has several responsibilities.
         # Some of them are mapped to more helpful locations, as above, but really 
         # should be non-root. E.g. passwordReset is root, so we need this location.
         location /authui {
-            return 301 ${AUTH_UI_URL};
+            proxy_pass http://authUi;
         }
 
         location /annotations {
-            return 301 ${ANNOTATIONS_UI_URL}/;
+            proxy_pass http://annotations
         }
 
         location /query-elastic {
-            return 301 ${QUERY_ELASTIC_UI_URL}/;
+            proxy_pass http://queryElastic
         }
     }
 }
