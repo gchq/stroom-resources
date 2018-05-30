@@ -1,13 +1,17 @@
 #!/bin/sh
 
+# 'xargs -r' doesn't work on MacOS, see 
+# https://stackoverflow.com/questions/17402345/ignore-empty-results-for-xargs-in-mac-os-x
+# Suggest you use GNU xargs from 'brew install findutils'
+
 # remove exited containers:
-docker ps --filter status=dead --filter status=exited -aq | xargs docker rm -v
+docker ps --filter status=dead --filter status=exited -aq | xargs -r docker rm -v
     
 # remove unused images:
-docker images --no-trunc | grep '<none>' | awk '{ print $3 }' | xargs docker rmi
+docker images --no-trunc | grep '<none>' | awk '{ print $3 }' | xargs -r docker rmi
 
 # remove unused volumes:
-docker volume ls -qf dangling=true | xargs docker volume rm
+docker volume ls -qf dangling=true | xargs -r docker volume rm
 
 # Remove the externalised database volumes
 while true; do
