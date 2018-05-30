@@ -24,7 +24,6 @@ http {
     ######################
     ### USERS ###
     upstream users {
-        # server ${AUTH_UI_URL};
         server 127.0.0.1:46011;
         #server 127.0.0.1:46012;
     }
@@ -35,7 +34,6 @@ http {
 
     ### LOGIN ###
     upstream login {
-        # server ${AUTH_UI_URL};
         server 127.0.0.1:46021;
         #server 127.0.0.1:46012;
     }
@@ -46,7 +44,6 @@ http {
 
     ### TOKENS ###
     upstream tokens {
-        # server ${AUTH_UI_URL};
         server 127.0.0.1:46031;
         #server 127.0.0.1:46012;
     }
@@ -57,7 +54,6 @@ http {
 
     ### CHANGEPASSWORD ###
     upstream changepassword {
-        # server ${AUTH_UI_URL};
         server 127.0.0.1:46041;
         #server 127.0.0.1:46012;
     }
@@ -68,7 +64,6 @@ http {
 
     ### AUTHUI ###
     upstream authUi {
-        # server ${AUTH_UI_URL};
         server 127.0.0.1:46051;
         #server 127.0.0.1:46012;
     }
@@ -79,7 +74,6 @@ http {
 
     ### ANNOTATIONS ###
     upstream annotations {
-        # server ${AUTH_UI_URL};
         server 127.0.0.1:46061;
         #server 127.0.0.1:46012;
     }
@@ -90,7 +84,6 @@ http {
 
     ### QUERY-ELASTIC ###
     upstream queryElastic {
-        # server ${AUTH_UI_URL};
         server 127.0.0.1:46071;
         #server 127.0.0.1:46012;
     }
