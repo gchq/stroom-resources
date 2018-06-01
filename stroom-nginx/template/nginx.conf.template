@@ -351,11 +351,11 @@ http {
         }
 
         location /annotations {
-            proxy_pass http://annotations
+            proxy_pass http://annotations;
         }
 
         location /query-elastic {
-            proxy_pass http://queryElastic
+            proxy_pass http://queryElastic;
         }
     }
 }
