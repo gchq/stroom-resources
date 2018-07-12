@@ -3,7 +3,7 @@ version: '2.1'
 services: 
 
   stroom-auth-db:
-    image: "${MARIADB_DOCKER_REPO:-mariadb}:10.3.0"
+    image: "${MARIADB_DOCKER_REPO:-mysql}:5.5"
     container_name: stroom-auth-db
     ports:
         # Expose mysql on 3309 to the host so as not to conflict with stroom-db or stroom-stats-db
