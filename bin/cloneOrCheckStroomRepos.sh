@@ -48,15 +48,23 @@ cloneOrUpdateAllRepos() {
 
     cloneOrUpdate stroom
     cloneOrUpdate stroom-agent
+    cloneOrUpdate stroom-annotations
     cloneOrUpdate stroom-auth
     cloneOrUpdate stroom-clients
     cloneOrUpdate stroom-content
     cloneOrUpdate stroom-docs
     cloneOrUpdate stroom-expression
+    cloneOrUpdate stroom-headless
+    cloneOrUpdate stroom-js
     cloneOrUpdate stroom-proxy
     cloneOrUpdate stroom-query
+    cloneOrUpdate stroom-query-elastic
     cloneOrUpdate stroom-resources
+    cloneOrUpdate stroom-shaded-dependencies
     cloneOrUpdate stroom-stats
+    cloneOrUpdate stroom-test-data
+    cloneOrUpdate stroom-timeline
+    cloneOrUpdate stroom-timeline-loader
     cloneOrUpdate stroom-visualisations-dev
 
     cloneOrUpdate event-logging
