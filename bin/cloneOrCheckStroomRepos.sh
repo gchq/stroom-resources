@@ -46,6 +46,13 @@ cloneOrUpdateAllRepos() {
     # We need to be cloning siblings of stroom-resources, and this script resides in stroom-resources/bin
     #cd ../..
 
+    # To find out all the stroom-* repos on github do (assumes you have httpie and jq installed)
+    # http https://api.github.com/users/gchq/repos?per_page=1000 | jq -r ".[].name" | grep stroom- | sort
+
+    # To check the non stroom-* repos do
+    # http https://api.github.com/users/gchq/repos?per_page=1000 | jq -r ".[].name" | grep -v stroom- | sort
+
+    #stroom-* repos, no longer used ones commented out
     cloneOrUpdate stroom
     cloneOrUpdate stroom-agent
     cloneOrUpdate stroom-annotations
@@ -60,17 +67,17 @@ cloneOrUpdateAllRepos() {
     cloneOrUpdate stroom-query
     cloneOrUpdate stroom-query-elastic
     cloneOrUpdate stroom-resources
-    cloneOrUpdate stroom-shaded-dependencies
+    #cloneOrUpdate stroom-shaded-dependencies
     cloneOrUpdate stroom-stats
     cloneOrUpdate stroom-test-data
-    cloneOrUpdate stroom-timeline
-    cloneOrUpdate stroom-timeline-loader
+    #cloneOrUpdate stroom-timeline
+    #cloneOrUpdate stroom-timeline-loader
     cloneOrUpdate stroom-visualisations-dev
 
     cloneOrUpdate event-logging
     cloneOrUpdate event-logging-schema
 
-    cloneOrUpdate urlDependencies-plugin
+    #cloneOrUpdate urlDependencies-plugin
 
     # We don't necessarily need the shaded repos because we pull these dependencies
     # down using urlDependencies-plugin
@@ -78,10 +85,6 @@ cloneOrUpdateAllRepos() {
     cloneOrUpdate hadoop-hdfs-shaded
     cloneOrUpdate hbase-common-shaded
 
-    # Are these defunct?
-    #cloneOrUpdate stroom-timeline
-    #cloneOrUpdate stroom-timeline-loaded
-    #cloneOrUpdate stroom-shaded-dependencies
 }
 isInsideGitRepo=$(git rev-parse --is-inside-work-tree 2>/dev/null)
 repoDir=$(git rev-parse --show-toplevel 2>/dev/null)
