@@ -177,12 +177,12 @@ determineHostAddress() {
         fi
         echo
         echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as determined from the operating system"
-    fi
 
-    if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-        echo
-        echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting it manually i.e. '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x ./bounceIt.sh ........${NC}'" >&2
-        exit 1
+        if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            echo
+            echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting it manually i.e. '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x ./bounceIt.sh ........${NC}'" >&2
+            exit 1
+        fi
     fi
 
     # This is used by the docker-compose YML files, so they can tell a browser where to go
