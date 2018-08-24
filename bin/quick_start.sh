@@ -30,6 +30,7 @@ welcome_user() {
   echo    # (optional) move to a new line
   if [[ ! $REPLY =~ ^[Yy]$ ]]
   then
+      echo -e "Ok then. Bye!"
       exit 1
   fi
 }
@@ -58,7 +59,7 @@ setup_resources() {
 
 run_stroom() {
   cd "${RESOURCES_DIR}/bin"
-  ./bounceIt.sh
+  ./bounceIt.sh -y
 }
 
 main() {
