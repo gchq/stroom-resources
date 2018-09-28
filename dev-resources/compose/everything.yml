@@ -139,6 +139,11 @@ services:
           file: ./containers/stroomStatsDb.yml
           service: stroom-stats-db
 
+  stroom-all-dbs:
+      extends:
+          file: ./containers/stroomAllDbs.yml
+          service: stroom-all-dbs
+
   zookeeper:
       extends:
           file: ./containers/zookeeper.yml
