@@ -15,10 +15,10 @@ main() {
     setup_echo_colours
 
     echo -e "${GREEN}Copying stack management scripts${NC}"
-    readonly local BUILD_DIRECTORY='build'
-    readonly local STACK_NAME=$1
-    readonly local LIB_DIRECTORY='lib'
-    readonly local WORKING_DIRECTORY="$BUILD_DIRECTORY/$STACK_NAME"
+    local -r BUILD_DIRECTORY='build'
+    local -r STACK_NAME=$1
+    local -r LIB_DIRECTORY='lib'
+    local -r WORKING_DIRECTORY="$BUILD_DIRECTORY/$STACK_NAME"
 
     create_script ctop
     create_script logs
@@ -30,7 +30,7 @@ main() {
     create_script stack
 
     # Copy libs to build
-    readonly local DEST_LIB="$WORKING_DIRECTORY/lib"
+    local -r DEST_LIB="$WORKING_DIRECTORY/lib"
     mkdir -p "$DEST_LIB"
     cp lib/shell_utils.sh "$DEST_LIB"
     cp lib/network_utils.sh "$DEST_LIB"

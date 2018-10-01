@@ -12,13 +12,13 @@ await_pid() {
 
 # Shell colour constants for use in 'echo -e'
 setup_echo_colours() {
-  RED='\033[1;31m'
-  GREEN='\033[1;32m'
-  YELLOW='\033[1;33m'
-  BLUE='\033[1;34m'
-  LGREY='\e[37m'
-  DGREY='\e[90m'
-  NC='\033[0m' # No Color
+  readonly RED='\033[1;31m'
+  readonly GREEN='\033[1;32m'
+  readonly YELLOW='\033[1;33m'
+  readonly BLUE='\033[1;34m'
+  readonly LGREY='\e[37m'
+  readonly DGREY='\e[90m'
+  readonly NC='\033[0m' # No Color
 }
 
 welcome_user() {
@@ -67,8 +67,8 @@ main() {
   set -e
 
   # Set up constants
-  readonly local RESOURCES_DIR="${HOME}/.stroom/quickStartResources"
-  readonly local RESOURCES_REPO="git@github.com:gchq/stroom-resources.git"
+  local -r RESOURCES_DIR="${HOME}/.stroom/quickStartResources"
+  local -r RESOURCES_REPO="git@github.com:gchq/stroom-resources.git"
 
   setup_echo_colours
   welcome_user

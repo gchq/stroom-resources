@@ -7,7 +7,7 @@ source lib/shell_utils.sh
 
 validate_requested_services() {
     # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
-    readonly local VALID_SERVICES='stroom stroomDb zookeeper stroomStatsDb stroomStats stroomQueryElasticUi stroomQueryElasticService stroomProxy stroomAuthUi stroomAuthService stroomAuthDb stroomAnnotationsUi stroomAnnotationsService stroomAnnotationsDb nginx kibana kafka hbase fakeSmtp elasticsearch hdfs'
+    local -r VALID_SERVICES='stroom stroomDb zookeeper stroomStatsDb stroomStats stroomQueryElasticUi stroomQueryElasticService stroomProxy stroomAuthUi stroomAuthService stroomAuthDb stroomAnnotationsUi stroomAnnotationsService stroomAnnotationsDb nginx kibana kafka hbase fakeSmtp elasticsearch hdfs'
 
     for service in "${@:2}"; do
         if [[ $VALID_SERVICES != *$service* ]]; then
@@ -19,7 +19,7 @@ validate_requested_services() {
 }
 
 create_stack_from_services() {
-    readonly local PATH_TO_CONTAINERS="../compose/containers"
+    local -r PATH_TO_CONTAINERS="../compose/containers"
     echo version: \'2.1\'
     echo services:
     for service in "$@"; do
@@ -34,16 +34,16 @@ create_stack_from_services() {
 main() {
     setup_echo_colours
 
-    readonly local BUILD_FOLDER='build'
-    readonly local STACK_NAME=$1
-    readonly local WORKING_DIRECTORY="$BUILD_FOLDER/$STACK_NAME/config"
+    local -r BUILD_FOLDER='build'
+    local -r STACK_NAME=$1
+    local -r WORKING_DIRECTORY="$BUILD_FOLDER/$STACK_NAME/config"
     mkdir -p $WORKING_DIRECTORY
-    readonly local OUTPUT_FILE="$WORKING_DIRECTORY/$STACK_NAME.yml"
+    local -r OUTPUT_FILE="$WORKING_DIRECTORY/$STACK_NAME.yml"
     mkdir -p $WORKING_DIRECTORY
     validate_requested_services "${@}"
 
     if [ -z ${services_are_valid+x} ]; then
-        echo -e "${GREEN}Creating a stack called ${YELLOW}$STACK_NAME${GREEN} with the following services: ${BLUE}${*:2}${NC}"
+        echo -e "${GREEN}Creating a stack called ${YELLOW}${STACK_NAME}${GREEN} with the following services: ${BLUE}${*:2}${NC}"
         create_stack_from_services "${@:2}" > "$OUTPUT_FILE"
     else
         err "Please choose from the following services and try again: ${GREEN}$VALID_SERVICES${NC}"

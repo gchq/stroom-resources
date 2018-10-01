@@ -7,8 +7,8 @@ set -e
 source lib/shell_utils.sh
 setup_echo_colours
 
-STACK_NAME=$1
-SERVICES=${@:2}
+readonly STACK_NAME=$1
+readonly SERVICES=${@:2}
 
 ./create_stack_yaml.sh $STACK_NAME $SERVICES
 ./create_stack_env.sh $STACK_NAME
