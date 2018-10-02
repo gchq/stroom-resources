@@ -10,6 +10,9 @@ if [ $# -ne 1 ]; then
 fi
 
 case $1 in
+    config)
+        source config.sh
+    ;;
     start)
         source start.sh
     ;;
