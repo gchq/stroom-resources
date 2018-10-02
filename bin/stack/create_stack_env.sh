@@ -39,6 +39,10 @@ add_params() {
 
     # NOTE if this cmd fails it is probably because you don't have GNU sed. 
     sed -i'' -E "s/(export .*_TAG).*/grep \"\1\" ${CONTAINER_VERSIONS_FILE}/e" ${OUTPUT_FILE}
+
+    cat ${OUTPUT_FILE} | 
+        sed -nE "s/(export .*_TAG).*/grep \"\1\" ${CONTAINER_VERSIONS_FILE}/ep" | 
+        sed 's/export //' > ${BUILD_FOLDER}/${STACK_NAME}/VERSIONS.txt
 }
 
 main() {
