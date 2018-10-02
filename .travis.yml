@@ -9,3 +9,16 @@ services:
   - docker
 
 script: ./travis.script.sh
+
+# The deployment to github releases will only happen for a stroom_core or stroom_full tag
+deploy:
+  - provider: releases
+    api_key:
+      secure: PyEBdbiMPxytkICh2zsDK9btgs+Hp7+w1NT2iztDOKXBF2yYmBZws4stgqFaXM/Xm/DCYtBIEaK+D/tFnYgLAG8r5x/PE03ZtHw5XgCff0M+4oCMiKJ/qB+u/pgcagQgePmodWR/7uieaJnYephEXoPb9zDuBXCCgY5FWUX1T8XHrhFJBMS8e4+RYRpMeWTx41MUNlgrNMYkhtpXEEqmNUx7yjxMNXG3pyGXBGpXSz6e2+z4zHrUmdQKouVUNZZybPuyL95/sVZyOeTn4Rmp/RzUA6tTTviqulirnsGZ/gTxSRhJtG/FWbm0maaY/gAt3aTdnDYykCbl24GDJBLl7kOuVJGyUa61f1H18LARQEvaMVEtvVfJkR7SScXDQhg7EuBCY9h+pKL2ykZQ6HlGMSN85CFoycooi1rZr1Jm4SYL6pDFWMbIU296tzNM/6uEmlwJbK8eNtLdMPwA8kZoA711MpQ7sMdzY6RSGo1cTxiEFM2ZJeK4IknB6FXL2rzkYtEMbjLNNjoh/HbXB6Veych+kRSXQLsP6Dy7b5n45Dbhj5+raqDugqCs+P5oOaWZywJwRbuS5FIA3xbCSmQDZIUgRuTQ668A78uHmA6r//Fr6dXHMIV0HZl2dDPOdMRP40lNbB7uaORo/PTIiC2NQct//tkc8LdFzUVF3y3Z2U8=
+    file_glob: true # this needs to be turned on for wildcards to work
+    file:
+      - bin/stack/stroom*.tar.gz
+    skip_cleanup: true
+    on:
+      tags: true
+      condition: $TRAVIS_TAG =~ ^stroom_core|stroom_full$
