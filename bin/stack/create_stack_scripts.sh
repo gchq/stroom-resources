@@ -20,14 +20,15 @@ main() {
     local -r LIB_DIRECTORY='lib'
     local -r WORKING_DIRECTORY="$BUILD_DIRECTORY/$STACK_NAME"
 
+    create_script config
     create_script ctop
     create_script logs
     create_script remove
     create_script restart
+    create_script stack
     create_script start
     create_script status
     create_script stop
-    create_script stack
 
     # Copy libs to build
     local -r DEST_LIB="$WORKING_DIRECTORY/lib"
