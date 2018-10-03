@@ -3,11 +3,11 @@ version: '2.1'
 services: 
 
   stroom-annotations-db:
-    image:  "${MARIADB_DOCKER_REPO:-mariadb}:10.3.0"
+    image:  "${MYSQL_DOCKER_REPO:-mysql}:5.6"
     container_name: stroom-annotations-db
     ports:
         # Expose mysql on 3310 to the host so as not to conflict with stroom-db, stroom-stats-db, stroom-auth-db
-      - "3310:3306"
+      - "${STROOM_ANNOTATIONS_DB_PORT:-3310}:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${STROOM_ANNOTATIONS_DB_ROOT_PASSWORD:-my-secret-pw}
       - MYSQL_USER=${STROOM_ANNOTATIONS_DB_USERNAME:-stroomuser}
