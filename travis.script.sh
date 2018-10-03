@@ -93,12 +93,23 @@ deriveDockerTags() {
 doStackBuild() {
     local -r scriptName="${1}.sh"
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
+    local -r buildDir=${scriptDir}/build/
     pushd ${scriptDir} > /dev/null
 
     echo "Running ${scriptName} in ${scriptDir}"
 
     ./${scriptName}
 
+    pushd ${buildDir} > /dev/null
+
+    local -r fileName="$(ls -1 *.tar.gz)"
+    # Add the version into the filename
+    local -r newFileName="${fileName/\.tar\.gz/_${BUILD_VERSION}.tar.gz}"
+
+    echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
+    mv "${filename}" "${newFileName}"  
+
+    popd > /dev/null
     popd > /dev/null
 }
 
