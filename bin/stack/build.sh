@@ -18,4 +18,6 @@ readonly SERVICES=${@:2}
 ./create_stack_assets.sh $STACK_NAME $SERVICES
 
 echo -e "${GREEN}Creating build/$STACK_NAME.tar.gz ${NC}"
-tar -zcf build/$STACK_NAME.tar.gz build/$STACK_NAME
+pushd build/$STACK_NAME > /dev/null
+tar -zcf ../$STACK_NAME.tar.gz ./*
+popd > /dev/null
