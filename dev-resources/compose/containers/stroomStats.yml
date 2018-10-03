@@ -6,9 +6,11 @@ services:
     container_name: stroom-stats
     image: "${STROOM_STATS_DOCKER_REPO:-gchq/stroom-stats}:${STROOM_STATS_TAG:-master-SNAPSHOT}"
     environment:
-      - STATS_DB_USER=stroomuser
-      - STATS_DB_PASSWORD=stroompassword1
-      - STATS_DB_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}/stroom?useUnicode=yes&characterEncoding=UTF-8
+      # At the moment, stroom-stats gets it document entities from the stroom DB, not the 'stats' DB.
+      # The 'stats' DB contains legacy SQL stats tables only
+      - STATS_DB_USER=${STROOM_DB_USERNAME:-stroomuser}
+      - STATS_DB_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
+      - STATS_DB_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}:${STROOM_DB_PORT:-3307}/stroom?useUnicode=yes&characterEncoding=UTF-8
       # quorum string of the form along the lines of
       # host1:2181
       # host1:2181/myChRoot

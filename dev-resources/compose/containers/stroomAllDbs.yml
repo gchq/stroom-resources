@@ -15,32 +15,50 @@ services:
       # As we want to use env vars to set db/user names and passwords we have to craft a file
       # dynamically rather than having a static file in a volume.
       sh -c "
-          echo > /docker-entrypoint-initdb.d/init.sql;
+          echo \"STROOM_ANNOTATIONS_DB_USERNAME=${STROOM_ANNOTATIONS_DB_USERNAME}\n\"
+          echo \"STROOM_AUTH_DB_USERNAME=${STROOM_AUTH_DB_USERNAME}\n\"
+
+          echo \"\" > /docker-entrypoint-initdb.d/init.sql;
+
           echo \"SELECT USER();\" >> /docker-entrypoint-initdb.d/init.sql;
           echo \"SELECT DATABASE();\" >> /docker-entrypoint-initdb.d/init.sql;
 
-          echo \"CREATE DATABASE IF NOT EXISTS stroom;\" >> /docker-entrypoint-initdb.d/init.sql;
-          echo 'CREATE USER \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\" IDENTIFIED BY \"${STROOM_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
-          echo 'GRANT ALL ON stroom.* TO \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
-
-          echo \"CREATE DATABASE IF NOT EXISTS statistics;\" >> /docker-entrypoint-initdb.d/init.sql;
-          echo 'CREATE USER \"${STROOM_STATS_DB_USERNAME:-statisticsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_STATS_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
-          echo 'GRANT ALL ON statistics.* TO \"${STROOM_STATS_DB_USERNAME:-statisticsuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
-
-          echo \"CREATE DATABASE IF NOT EXISTS auth;\" >> /docker-entrypoint-initdb.d/init.sql;
-          echo 'CREATE USER \"${STROOM_AUTH_DB_USERNAME:-authuser}\"@\"%\" IDENTIFIED BY \"${STROOM_AUTH_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
-          echo 'GRANT ALL ON auth.* TO \"${STROOM_AUTH_DB_USERNAME:-authuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
 
           echo \"CREATE DATABASE IF NOT EXISTS annotations;\" >> /docker-entrypoint-initdb.d/init.sql;
           echo 'CREATE USER \"${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
           echo 'GRANT ALL ON annotations.* TO \"${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
 
+          echo \"CREATE DATABASE IF NOT EXISTS auth;\" >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'CREATE USER \"${STROOM_AUTH_DB_USERNAME:-authuser}\"@\"%\" IDENTIFIED BY \"${STROOM_AUTH_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'GRANT ALL ON auth.* TO \"${STROOM_AUTH_DB_USERNAME:-authuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
+
+          echo \"CREATE DATABASE IF NOT EXISTS config;\" >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'CREATE USER \"${STROOM_CONFIG_DB_USERNAME:-configuser}\"@\"%\" IDENTIFIED BY \"${STROOM_CONFIG_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'GRANT ALL ON config.* TO \"${STROOM_CONFIG_DB_USERNAME:-configuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
+
+          echo \"CREATE DATABASE IF NOT EXISTS datameta;\" >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'CREATE USER \"${STROOM_DATAMETA_DB_USERNAME:-datametauser}\"@\"%\" IDENTIFIED BY \"${STROOM_DATAMETA_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'GRANT ALL ON datameta.* TO \"${STROOM_DATAMETA_DB_USERNAME:-datametauser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
+
+          echo \"CREATE DATABASE IF NOT EXISTS explorer;\" >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'CREATE USER \"${STROOM_EXPLORER_DB_USERNAME:-exploreruser}\"@\"%\" IDENTIFIED BY \"${STROOM_EXPLORER_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'GRANT ALL ON explorer.* TO \"${STROOM_EXPLORER_DB_USERNAME:-exploreruser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
+
+          echo \"CREATE DATABASE IF NOT EXISTS stats;\" >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'CREATE USER \"${STROOM_STATS_DB_USERNAME:-statsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_STATS_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'GRANT ALL ON stats.* TO \"${STROOM_STATS_DB_USERNAME:-statsuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
+
+          echo \"CREATE DATABASE IF NOT EXISTS stroom;\" >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'CREATE USER \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\" IDENTIFIED BY \"${STROOM_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
+          echo 'GRANT ALL ON stroom.* TO \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
+
+
           echo \"show databases;\" >> /docker-entrypoint-initdb.d/init.sql;
           echo \"SELECT User, Host FROM mysql.user;\" >> /docker-entrypoint-initdb.d/init.sql;
-          echo \"Dumping contents of /docker-entrypoint-initdb.d/init.sql\"
-          echo \"--------------------------------------------------------------\";
+          echo \"Dumping contents of /docker-entrypoint-initdb.d/init.sql\n\"
+          echo \"--------------------------------------------------------------\n\";
           cat /docker-entrypoint-initdb.d/init.sql;
-          echo \"--------------------------------------------------------------\";
+          echo \"--------------------------------------------------------------\n\";
           /usr/local/bin/docker-entrypoint.sh mysqld"
     volumes:
       - ${STROOM_DB_DATA_VOLUME:-../volumes/stroom-all-dbs}:/var/lib/mysql

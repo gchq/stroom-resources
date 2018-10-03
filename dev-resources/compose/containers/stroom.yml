@@ -15,8 +15,8 @@ services:
       - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}:${STROOM_DB_PORT:-3307}/stroom?useUnicode=yes&characterEncoding=UTF-8
       - STROOM_JDBC_DRIVER_USERNAME=${STROOM_DB_USERNAME:-stroomuser}
       - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-$HOST_IP}:${STROOM_STATS_DB_PORT:-3308}/statistics?useUnicode=yes&characterEncoding=UTF-8
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=${STROOM_STATS_DB_USERNAME:-stroomuser}
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-$HOST_IP}:${STROOM_STATS_DB_PORT:-3307}/stats?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=${STROOM_STATS_DB_USERNAME:-statsuser}
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
       # The browser is redirected to this URL so, like the AUTH UI URL, it needs to be the advertised host.
       - STROOM_AUTH_SERVICES_URL=http://${AUTH_SERVICE_HOST:-$HOST_IP}/authService

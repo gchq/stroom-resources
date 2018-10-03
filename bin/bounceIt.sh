@@ -24,6 +24,7 @@ hbase"
 # Location of the file used to store private values (db credentials)
 mkdir -p ~/.stroom
 CREDENTIALS_FILE=~/.stroom/credentials.sh
+DEFAULT_CREDENTIALS_FILE=${SCRIPT_DIR}/credentials.default.sh
 
 #Location of the file used to define the docker tag variable values
 TAGS_FILE="${SCRIPT_DIR}/local.env"
@@ -282,21 +283,8 @@ fi
 # Check that the credentials file exists, if it doesn't create a default one
 if [ ! -f ${CREDENTIALS_FILE} ]; then
     echo -e "Credentials File ${YELLOW}${CREDENTIALS_FILE}${NC} does not exist, creating a default one"
-    touch ${CREDENTIALS_FILE}
-    ENV_VARS_TO_CAPTURE=`cat ${SCRIPT_DIR}/stroomCredentialNames.txt`
-    for ENV_VAR_TO_CAPTURE in ${ENV_VARS_TO_CAPTURE}
-    do
-        VALUE=nothing
-        if [[ $ENV_VAR_TO_CAPTURE = *"DB_ROOT_PASSWORD" ]]; then
-            VALUE=my-secret-pw
-        elif [[ $ENV_VAR_TO_CAPTURE = *"DB_PASSWORD" ]]; then
-            VALUE=stroompassword1
-        elif [[ $ENV_VAR_TO_CAPTURE = *"DB_USERNAME" ]]; then
-            VALUE=stroomuser
-        fi
 
-        echo "export ${ENV_VAR_TO_CAPTURE}=${VALUE}" >> ${CREDENTIALS_FILE}
-    done
+    cp ${DEFAULT_CREDENTIALS_FILE} ${CREDENTIALS_FILE}
 
     echo -e "Created default credentials in ${GREEN}${CREDENTIALS_FILE}${NC}, if you wish to customise the values, ensure they are edited before any containers are created"
 fi
