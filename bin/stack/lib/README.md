@@ -1,6 +1,7 @@
 # Stroom
 
 Use the scripts in this directory to control a set of Docker containers that make up a working Stroom stack.
+This stack is not intended for production use, it is intended to be used for testing, trialing or demonstarting the Stroom software.
 The file _VERSIONS.txt_ defines the version of each container in use.
 
 ## Prerequisites
