@@ -48,9 +48,15 @@ The following scripts are available to control the docker containers:
 * `config.sh` - Displays the effective configuration that docker-compose will use.
 * `ctop.sh` - Runs the _ctop_ utility for monitoring each of the containers (e.g. memory, CPU, etc.).
 * `logs.sh` - Starts tailing the logs of all containers from the last 5 entries of each.
-* `remove.sh` - Removes all the containers in the stack.
+* `remove.sh` - Removes all the containers in the stack, destroying any state.
 * `restart.sh` - Restarts all the containers in the stack.
 * `stack.sh` - A single script for controlling the stack, e.g. `./stack.sh start`
 * `start.sh` - Starts all the containers for the stack.
 * `status.sh` - Displays the status of all the docker containers in the stack.
 * `stop.sh` - Stops all the containers in the stack.
+
+## Volumes
+
+Some of the containers in the stack will create docker volumes on your file system, e.g. the database containers store their state outside the container.
+These volumes are mapped to directories in `./volumes`.  Because they are writen to by Docker the files/directories will be owned by a different user.
+To delete the files for the stack you will need to use sudo to have the permission to delete the content of `./volumes`.
