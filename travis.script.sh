@@ -107,7 +107,7 @@ doStackBuild() {
     local -r newFileName="${fileName/\.tar\.gz/_${BUILD_VERSION}.tar.gz}"
 
     echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
-    mv "${filename}" "${newFileName}"  
+    mv "${fileName}" "${newFileName}"  
 
     popd > /dev/null
     popd > /dev/null
