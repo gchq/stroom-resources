@@ -92,14 +92,14 @@ deriveDockerTags() {
 
 doStackBuild() {
     local -r scriptName="${1}.sh"
-    local -r scriptDir=${TRAVIS_BUILD_DIR}/stroom-resources/bin/stack/
-    pushd ${scriptDir}
+    local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
+    pushd ${scriptDir} > /dev/null
 
     echo "Running ${scriptName} in ${scriptDir}"
 
     ./${scriptName}
 
-    popd
+    popd > /dev/null
 }
 
 main() {
