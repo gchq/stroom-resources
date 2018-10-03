@@ -6,7 +6,7 @@ services:
     image: "${ELASTIC_DOCKER_REPO:-docker.elastic.co/elasticsearch/elasticsearch}:5.6.3"
     container_name: elasticsearch
     volumes:
-      - ${ELASTIC_VOLUME_CONF_FILE:-../volumes/elasticsearch/conf/elasticsearch.yml}:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ${ELASTIC_VOLUME_CONF_FILE:-../volumes/elasticsearch/conf/elasticsearch.yml}:/usr/share/elasticsearch/config/elasticsearch.yml:ro
     ports:
       - "${ELASTIC_HTTP_PORT:-9200}:9200"
       - "${ELASTIC_BINARY_PORT:-9300}:9300"
