@@ -497,6 +497,12 @@ fi
 #echo "varName [${varName}] default [${varDefaulVal}]"
 #done
 
+echo
+echo -e "The following DropWizard admin pages will be available"
+echo -e "  ${GREEN}stroom${NC}:${BLUE}       http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin${NC}"
+echo -e "  ${GREEN}stroom-stats${NC}:${BLUE} http://localhost:${STROOM_STATS_SERVICE_ADMIN_PORT}/statsAdmin${NC}"
+echo -e "  ${GREEN}stroom-auth${NC}:${BLUE}  http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT}/authenticationServiceAdmin${NC}"
+
 if $requireConfirmation; then
     echo
     read -rsp $'Press space to continue, or ctrl-c to exit... (you can use the \'-y\' argument to supress this confirmation prompt)\n' -n1 keyPressed
