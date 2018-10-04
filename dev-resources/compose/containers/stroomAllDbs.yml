@@ -15,14 +15,10 @@ services:
       # As we want to use env vars to set db/user names and passwords we have to craft a file
       # dynamically rather than having a static file in a volume.
       sh -c "
-          echo \"STROOM_ANNOTATIONS_DB_USERNAME=${STROOM_ANNOTATIONS_DB_USERNAME}\n\"
-          echo \"STROOM_AUTH_DB_USERNAME=${STROOM_AUTH_DB_USERNAME}\n\"
-
           echo \"\" > /docker-entrypoint-initdb.d/init.sql;
 
           echo \"SELECT USER();\" >> /docker-entrypoint-initdb.d/init.sql;
           echo \"SELECT DATABASE();\" >> /docker-entrypoint-initdb.d/init.sql;
-
 
           echo \"CREATE DATABASE IF NOT EXISTS annotations;\" >> /docker-entrypoint-initdb.d/init.sql;
           echo 'CREATE USER \"${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
@@ -51,7 +47,6 @@ services:
           echo \"CREATE DATABASE IF NOT EXISTS stroom;\" >> /docker-entrypoint-initdb.d/init.sql;
           echo 'CREATE USER \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\" IDENTIFIED BY \"${STROOM_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
           echo 'GRANT ALL ON stroom.* TO \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
-
 
           echo \"show databases;\" >> /docker-entrypoint-initdb.d/init.sql;
           echo \"SELECT User, Host FROM mysql.user;\" >> /docker-entrypoint-initdb.d/init.sql;
