@@ -3,8 +3,18 @@
 #exit script on any error
 set -e
 
-#stroom-nginx
+#Shell Colour constants for use in 'echo -e'
+#e.g.  echo -e "My message ${GREEN}with just this text in green${NC}"
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+NC='\033[0m' # No Colour 
+
 TAG_PREFIX_STROOM_NGINX="stroom-nginx"
+TAG_PREFIX_STROOM_STROOM_CORE="stroom_core"
+TAG_PREFIX_STROOM_STROOM_FULL="stroom_full"
+
 DOCKER_REPO_STROOM_NGINX="gchq/stroom-nginx"
 DOCKER_CONTEXT_ROOT_STROOM_NGINX="stroom-nginx/."
 
@@ -15,14 +25,6 @@ MINOR_VER_FLOATING_TAG=""
 VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
-
-#Shell Colour constants for use in 'echo -e'
-#e.g.  echo -e "My message ${GREEN}with just this text in green${NC}"
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[1;34m'
-NC='\033[0m' # No Colour 
 
 #args: dockerRepo contextRoot tag1VersionPart tag2VersionPart ... tagNVersionPart
 releaseToDockerHub() {
@@ -46,11 +48,10 @@ releaseToDockerHub() {
         fi
     done
 
-    echo -e "Building and releasing a docker image to ${GREEN}${dockerRepo}${NC} with tags: ${GREEN}${allTagArgs}${NC}"
-    echo -e "dockerRepo:  [${GREEN}${dockerRepo}${NC}]"
-    echo -e "contextRoot: [${GREEN}${contextRoot}${NC}]"
-    echo -e "allTags:     [${GREEN}${allTagArgs}${NC}]"
-
+    echo -e "Building and releasing a docker image using:"
+    echo -e "dockerRepo:                    [${GREEN}${dockerRepo}${NC}]"
+    echo -e "contextRoot:                   [${GREEN}${contextRoot}${NC}]"
+    echo -e "allTags:                       [${GREEN}${allTagArgs}${NC}]"
 
     docker build ${allTagArgs} ${contextRoot}
 
@@ -58,28 +59,12 @@ releaseToDockerHub() {
     echo -e "Logging in to DockerHub"
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" >/dev/null 2>&1
 
-    #docker build ${allTagArgs} ${contextRoot} >/dev/null 2>&1
+    docker build ${allTagArgs} ${contextRoot} >/dev/null 2>&1
     echo -e "Pushing to DockerHub"
-    docker push ${dockerRepo} >/dev/null 2>&1
+    #docker push ${dockerRepo} >/dev/null 2>&1
 }
 
-#Start of script
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#establish what version of stroom we are building
-if [ -n "$TRAVIS_TAG" ] && [[ "$TRAVIS_BRANCH" =~ ${RELEASE_VERSION_REGEX} ]] ; then
-    #Tagged commit so use that as our build version, e.g. v6.0.0
-    BUILD_VERSION="$(echo "${TRAVIS_TAG}" | grep -oP "${VERSION_PART_REGEX}")"
-
-    #Dump all the travis env vars to the console for debugging
-    echo -e "TRAVIS_BUILD_NUMBER:           [${GREEN}${TRAVIS_BUILD_NUMBER}${NC}]"
-    echo -e "TRAVIS_COMMIT:                 [${GREEN}${TRAVIS_COMMIT}${NC}]"
-    echo -e "TRAVIS_BRANCH:                 [${GREEN}${TRAVIS_BRANCH}${NC}]"
-    echo -e "TRAVIS_TAG:                    [${GREEN}${TRAVIS_TAG}${NC}]"
-    echo -e "TRAVIS_PULL_REQUEST:           [${GREEN}${TRAVIS_PULL_REQUEST}${NC}]"
-    echo -e "TRAVIS_EVENT_TYPE:             [${GREEN}${TRAVIS_EVENT_TYPE}${NC}]"
-    echo -e "BUILD_VERSION:                 [${GREEN}${BUILD_VERSION}${NC}]"
-
+deriveDockerTags() {
     #This is a tagged commit, so create a docker image with that tag
     VERSION_FIXED_TAG="${BUILD_VERSION}"
 
@@ -103,19 +88,78 @@ if [ -n "$TRAVIS_TAG" ] && [[ "$TRAVIS_BRANCH" =~ ${RELEASE_VERSION_REGEX} ]] ; 
     #If say the build for v6.0.1 is re-run after the build for v6.0.2 has run then v6.0-LATEST will point to v6.0.1
     #which is incorrect, hopefully this course of events is unlikely to happen
     allDockerTags="${VERSION_FIXED_TAG} ${SNAPSHOT_FLOATING_TAG} ${MAJOR_VER_FLOATING_TAG} ${MINOR_VER_FLOATING_TAG}"
+}
 
-    if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
-        #This is a stroom-nginx release, so do a docker build/push
-        DOCKER_REPO=""
-        DOCKER_CONTEXT_ROOT=""
-        
-        #build and release the image to dockerhub
-        releaseToDockerHub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
+doStackBuild() {
+    local -r scriptName="${1}.sh"
+    local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
+    local -r buildDir=${scriptDir}/build/
+    pushd ${scriptDir} > /dev/null
+
+    echo "Running ${scriptName} in ${scriptDir}"
+
+    ./${scriptName}
+
+    pushd ${buildDir} > /dev/null
+
+    local -r fileName="$(ls -1 *.tar.gz)"
+    # Add the version into the filename
+    local -r newFileName="${fileName/\.tar\.gz/_${BUILD_VERSION}.tar.gz}"
+
+    echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
+    mv "${fileName}" "${newFileName}"  
+
+    popd > /dev/null
+    popd > /dev/null
+}
+
+main() {
+    #establish what version we are building
+    if [ -n "$TRAVIS_TAG" ] && [[ "$TRAVIS_TAG" =~ ${RELEASE_VERSION_REGEX} ]] ; then
+
+        #Tagged commit so use that as our build version, e.g. v6.0.0
+        BUILD_VERSION="$(echo "${TRAVIS_TAG}" | grep -oP "${VERSION_PART_REGEX}")"
+
+        #Dump all the travis env vars to the console for debugging, aligned with
+        # the ones above
+        echo -e "TRAVIS_BUILD_NUMBER:       [${GREEN}${TRAVIS_BUILD_NUMBER}${NC}]"
+        echo -e "TRAVIS_COMMIT:             [${GREEN}${TRAVIS_COMMIT}${NC}]"
+        echo -e "TRAVIS_BRANCH:             [${GREEN}${TRAVIS_BRANCH}${NC}]"
+        echo -e "TRAVIS_TAG:                [${GREEN}${TRAVIS_TAG}${NC}]"
+        echo -e "TRAVIS_PULL_REQUEST:       [${GREEN}${TRAVIS_PULL_REQUEST}${NC}]"
+        echo -e "TRAVIS_EVENT_TYPE:         [${GREEN}${TRAVIS_EVENT_TYPE}${NC}]"
+        echo -e "BUILD_VERSION:             [${GREEN}${BUILD_VERSION}${NC}]"
+
+        if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
+            #This is a stroom-nginx release, so do a docker build/push
+            echo -e "${GREEN}Performing a stroom-nginx release to dockerhub${NC}"
+
+            deriveDockerTags
+            
+            #build and release the image to dockerhub
+            releaseTodockerHub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
+
+        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
+            #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
+            echo -e "${GREEN}Performing a stroom_core stack release to github${NC}"
+
+            doStackBuild buildCore
+
+        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
+            #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
+            echo -e "${GREEN}Performing a stroom_full stack release to github${NC}"
+
+            doStackBuild buildFull
+        fi
+    else
+        #No tag so finish
+        echo -e "Not a tagged build so doing nothing"
     fi
-else
-    #No tag so finish
-    echo -e "Not a tagged build so doing nothing and quitting"
-    exit 0
-fi
+}
+
+#Start of script
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+main "$@"
 
 exit 0
