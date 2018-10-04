@@ -29,6 +29,7 @@ services:
       - ADMIN_CONTEXT_PATH=/statsAdmin
       - AUTHENTICATION_SERVICE_URL=http://${AUTH_SERVICE_HOST:-$HOST_IP}/authService
       - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-$HOST_IP}:8080/api/authorisation/v1
+      - STATS_ADVERTISED_HOST_OR_IP=${STATS_ADVERTISED_HOST_OR_IP:-localhost}
     ports:
       - 8086:8086 # app
       - 8087:8087 # admin
