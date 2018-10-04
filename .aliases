@@ -60,16 +60,16 @@ hbaseTableCount() {
 alias hbasecount='hbaseTableCount'
 
 #MySQL CLI
-alias stroomdb='docker exec -it stroom-db mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'
-alias stroomstatsdb='docker exec -it stroom-stats-db mysql -h"localhost" -P"3308" -u"stroomuser" -p"stroompassword1" statistics'
-alias stroomauthdb='docker exec -it stroom-auth-db mysql -h"localhost" -P"3309" -u"stroomuser" -p"stroompassword1" auth'
+alias stroomdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'
+alias stroomstatsdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stats'
+alias stroomauthdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" auth'
 
-alias stroomdb_dump='docker exec -it stroom-db mysqldump --databases stroom -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
-alias stroomstatsdb_dump='docker exec -it stroom-stats-db mysqldump --databases statistics -h"localhost" -P"3308" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
-alias stroomauthdb_dump='docker exec -it stroom-auth-db mysqldump --databases auth -h"localhost" -P"3309" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
+alias stroomdb_dump='docker exec -it stroom-all-dbs mysqldump --databases stroom -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
+alias stroomstatsdb_dump='docker exec -it stroom-all-dbs mysqldump --databases stats -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
+alias stroomauthdb_dump='docker exec -it stroom-all-dbs mysqldump --databases auth -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
 
 #TODO not working 
-alias stroomstatsdb_counts='execSQL stroom-stats-db "-h\"localhost\" -P\"3308\" -u\"stroomuser\" -p\"stroompassword1\" statistics" "select \"key\", count(*) from SQL_STAT_KEY union select \"val\", count(*) from SQL_STAT_VAL union select \"src\", count(*) from SQL_STAT_VAL_SRC;" '
+alias stroomstatsdb_counts='execSQL stroom-all-dbs "-h\"localhost\" -P\"3307\" -u\"statsuser\" -p\"stroompassword1\" stats" "select \"key\", count(*) from SQL_STAT_KEY union select \"val\", count(*) from SQL_STAT_VAL union select \"src\", count(*) from SQL_STAT_VAL_SRC;" '
 
 # Pipe the output of the dump commands to a file on the host
 # To re-import the database dumps, use something like this
