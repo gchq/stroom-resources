@@ -5,6 +5,6 @@
 set -e
 
 readonly STACK_NAME="stroom_core"
-readonly SERVICES="stroom stroomDb stroomAuthService stroomAuthUi stroomAuthDb stroomStatsDb zookeeper nginx"
+readonly SERVICES="stroom stroomAllDbs stroomAuthService stroomAuthUi zookeeper nginx"
 
 ./build.sh $STACK_NAME $SERVICES

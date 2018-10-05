@@ -2,10 +2,7 @@
    80 - nginx
   443 - nginx
  2181 - zookeeper
- 3307 - stroom-db
- 3308 - stroom-stats-db
- 3309 - stroom-auth-service-db
- 3310 - stroom-annotations-db
+ 3307 - stroom-all-dbs
  5001 - stroom-annotations-ui
  5002 - stroom-query-elastic-ui
  5601 - Kibana

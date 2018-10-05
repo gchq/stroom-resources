@@ -17,8 +17,10 @@ add_params() {
     readonly CONTAINER_VERSIONS_FILE="container_versions.env"
 
     params=$( \
+        # Bit of a fudge to ignore the echo lines in stroomAllDbs.yml
+        grep -v "\w* echo" ${INPUT_FILE} |
         # Extracts the params
-        grep -Po "(?<=\\$\\{).*?(?=\\})" ${INPUT_FILE} |
+        grep -Po "(?<=\\$\\{).*?(?=\\})" |
         # Replaces ':-' with '='
         sed "s/:-/=\"/g" |
         # Adds a closing single quote to the end of the line
