@@ -30,13 +30,14 @@ execSQL() {
 alias createStatisticsTopic='docker exec -i -t kafka bash -c "unset JMX_PORT; bin/kafka-topics.sh --create --zookeeper zookeeper:2181/kafka --replication-factor 1 --partitions 1 --topic statistics"'
 alias kproduce='docker exec -i -t kafka bash -c "unset JMX_PORT; bin/kafka-console-producer.sh --broker-list localhost:9092 --topic statistics"'
 alias kconsume='kConsumeTopic'
-#consume from all topics
+# consume from all topics
 alias kconsumeAll='echo "Consuming from all topics..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --blacklist noSuchTopic --from-beginning --zookeeper zookeeper:2181/kafka"'
 alias kconsumeEvents='echo "Consuming from topics statisticEvents-Count & statisticEvents-Value ..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --zookeeper zookeeper:2181/kafka --whitelist statisticEvents-Count,statisticEvents-Value"'
 alias ktopics='docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181/kafka"'
 alias kcreate='kCreateTopic'
 
-# For running bash in the containers
+# bash shells in containers
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 alias kbash='docker exec -i -t kafka bash'
 alias zkbash='docker exec -i -t zookeeper bash'
 alias hbasebash='docker exec -i -t hbase bash'
@@ -44,11 +45,15 @@ alias stroombash='docker exec -it --user stroom stroom bash'
 alias statsbash='docker exec -it --user stroomstats stroom-stats bash'
 alias stroomdbbash='docker exec -it stroom-db bash'
 alias nginxbash='docker exec -it nginx bash'
+# A generic one that uses FZF to fuzzy find from a list of running containers (but only runs as root).
+alias dbash='service=$(docker ps --format '{{.Names}}' | fzf); docker exec -it $service bash'
 
 # ZK CLI
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
 #
-#HBase CLI
+# HBase
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 alias hbasecli='docker exec -i -t hbase hbase/bin/hbase shell'
 
 hbaseTableCount() {
@@ -59,10 +64,18 @@ hbaseTableCount() {
 }
 alias hbasecount='hbaseTableCount'
 
-#MySQL CLI
+# MySQL 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Use FZF to pick a DB to open a sql shell on
+alias db='theDb=$(echo "stroom\nauth\nstats\nannotations\nconfig\explorer\ndatameta" | fzf); docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"${theDb}user" -p"stroompassword1" ${theDb}'
+
 alias stroomdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'
-alias stroomstatsdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stats'
-alias stroomauthdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" auth'
+alias statsdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"statsuser" -p"stroompassword1" stats'
+alias authdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"authuser" -p"stroompassword1" auth'
+alias annotationsdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"annotationsuser" -p"stroompassword1" annotations'
+alias configdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"configuser" -p"stroompassword1" config'
+alias explorerdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"exploreruser" -p"stroompassword1" explorer'
+alias datametadb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"datametauser" -p"stroompassword1" datameta'
 
 alias stroomdb_dump='docker exec -it stroom-all-dbs mysqldump --databases stroom -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
 alias stroomstatsdb_dump='docker exec -it stroom-all-dbs mysqldump --databases stats -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
