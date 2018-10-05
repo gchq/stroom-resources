@@ -36,6 +36,7 @@ main() {
     cp lib/shell_utils.sh "$DEST_LIB"
     cp lib/network_utils.sh "$DEST_LIB"
     cp lib/README.md "$WORKING_DIRECTORY"
+    cp lib/banner.txt "$DEST_LIB"
 
 }
 

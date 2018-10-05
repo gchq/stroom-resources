@@ -10,7 +10,23 @@
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "$DIR"/lib/network_utils.sh
+source "$DIR"/lib/shell_utils.sh
+
+setup_echo_colours
+
 readonly HOST_IP=$(determine_host_address)
+
 source "$DIR"/config/<STACK_NAME>.env
 
+echo -e "${GREEN}Restarting the docker containers${NC}"
+echo
+
 docker-compose -f "$DIR"/config/<STACK_NAME>.yml restart
+
+echo
+echo -e "${GREEN}Waiting for stroom to complete its restart.${NC}"
+
+wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
+
+echo
+echo -e "${GREEN}Ready${NC}"
