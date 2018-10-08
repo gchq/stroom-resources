@@ -1,3 +1,12 @@
+#Shell Colour constants for use in 'echo -e'
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+LGREY='\e[37m'
+DGREY='\e[90m'
+NC='\033[0m' # No Color
+
 # docker-compose 
 alias bounceAll='./bounceIt.sh compose/hbase-kafka-mysql-zk.yml'
 
@@ -51,6 +60,85 @@ alias dbash='service=$(docker ps --format '{{.Names}}' | fzf); docker exec -it $
 # ZK CLI
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
+
+getZkProp() {
+    local -r ZK_SERVER="127.0.0.1:2181/propertyService"
+    local -r ZK_SERVICE_NAME="zookeeper"
+
+    # for some reason zkCli outputs ^M chars at the end of each line so we need to remove them
+    # or they cause loads of problems later on
+    local -r prop=$( \
+        docker exec -t ${ZK_SERVICE_NAME} bin/zkCli.sh -server ${ZK_SERVER} ls / | \
+        sed 's///g' | \
+        tail -n1 | \
+        sed -E 's/\[(.*?)\]/\1/' | \
+        sed 's/, /\n/g' | \
+        fzf)
+
+    local curr_val=$( \
+        docker exec -t ${ZK_SERVICE_NAME} bin/zkCli.sh -server ${ZK_SERVER} get /${prop} | \
+        sed 's///g' | \
+        grep -B 1 cZxid | \
+        grep -v cZxid)
+
+    #echo "[${curr_val}]"
+
+    echo -e "${BLUE}${prop}${NC}=[${GREEN}${curr_val}${NC}]"
+
+    echo
+    echo -e "${YELLOW}Enter the new property value:${NC}"
+
+    read new_val
+
+    #echo "[${new_val}]"
+
+    echo
+    echo -e "Changing ${BLUE}${prop}${NC} from [${GREEN}${curr_val}${NC}] to [${GREEN}${new_val}${NC}]"
+
+    docker exec -i -t ${ZK_SERVICE_NAME} bin/zkCli.sh -server ${ZK_SERVER} set /${prop} ${new_val} > /dev/null
+
+    local curr_val=$( \
+        docker exec -t ${ZK_SERVICE_NAME} bin/zkCli.sh -server ${ZK_SERVER} get /${prop} | \
+        sed 's///g' | \
+        grep -B 1 cZxid | \
+        grep -v cZxid)
+
+    echo
+    echo -e "${BLUE}${prop}${NC}=[${GREEN}${curr_val}${NC}]"
+
+    echo
+    echo "Done"
+}
+
+setZkProp() {
+    local -r ZK_SERVER="127.0.0.1:2181/propertyService"
+    local -r ZK_SERVICE_NAME="zookeeper"
+
+    if [[ $# -ne 2 ]]; then
+        echo "Invalid arguments" >&2
+    else
+        local -r prop=$1
+        local -r new_val=$2
+
+        docker exec -i -t ${ZK_SERVICE_NAME} bin/zkCli.sh -server ${ZK_SERVER} set /${prop} ${new_val} > /dev/null
+
+        local curr_val=$( \
+            docker exec -t ${ZK_SERVICE_NAME} bin/zkCli.sh -server ${ZK_SERVER} get /${prop} | \
+            sed 's///g' | \
+            grep -B 1 cZxid | \
+            grep -v cZxid)
+
+        echo
+        echo -e "${BLUE}${prop}${NC}=[${GREEN}${curr_val}${NC}]"
+
+        echo
+        echo "Done"
+    fi
+}
+
+alias zkgetprop='getZkProp'
+alias zksetprop='setZkProp'
+
 #
 # HBase
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
