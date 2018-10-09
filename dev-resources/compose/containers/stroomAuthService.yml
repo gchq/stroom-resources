@@ -1,7 +1,6 @@
-version: '2.1'
+version: "2.1"
 
 services:
-
   stroom-auth-service:
     container_name: stroom-auth-service
     image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v1.0-LATEST}"
@@ -22,6 +21,7 @@ services:
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes
+      - FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN=${STROOM_AUTH_FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN:-true}
       - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-TODO}
       - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-Stroom User Accounts}
       - EMAIL_RESET_SUBJECT=${EMAIL_RESET_SUBJECT:-Password reset for Stroom}
