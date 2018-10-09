@@ -157,6 +157,7 @@ alias hbasecount='hbaseTableCount'
 # Use FZF to pick a DB to open a sql shell on
 alias db='theDb=$(echo "stroom\nauth\nstats\nannotations\nconfig\nexplorer\ndatameta" | fzf); docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"${theDb}user" -p"stroompassword1" ${theDb}'
 
+alias rootdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"root" -p"my-secret-pw"'
 alias stroomdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'
 alias statsdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"statsuser" -p"stroompassword1" stats'
 alias authdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"authuser" -p"stroompassword1" auth'
