@@ -33,9 +33,18 @@ services:
       - EMAIL_SMTP_USERNAME=${EMAIL_SMTP_USERNAME:-TODO}
       - EMAIL_SMTP_PASSWORD=${EMAIL_SMTP_PASSWORD:-TODO}
       - OWN_PATH=${STROOM_AUTH_SERVICE:-authentication}
+      - SEND_LOGS_FEED_NAME=${STROOM_AUTH_SEND_LOGS_FEED_NAME:-STROOM_AUTH}
+      - SEND_LOGS_SYSTEM=${STROOM_AUTH_SEND_LOGS_SYSTEM:-StroomAuth}
+      - SEND_LOGS_ENV=${STROOM_AUTH_SEND_LOGS_ENV:-Dev}
+      - SEND_LOGS_STROOM_URL=${STROOM_AUTH_SEND_LOGS_STROOM_URL:-PleaseProvideStroomLoggingUrl}
+      - SEND_LOGS_CRONTAB=${STROOM_AUTH_SEND_LOGS_CRONTAB:-* * * * * root}
+      - SEND_LOGS_MAX_SLEEP=${STROOM_SEND_LOGS_MAX_SLEEP:-0}
+      - SEND_LOGS_SECURE=${STROOM_SEND_LOGS_SECURE:-true}
     ports:
       - "${STROOM_AUTH_SERVICE_PORT:-8099}:${STROOM_AUTH_SERVICE_PORT:-8099}"
       - "${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}"
-    entrypoint: java -jar stroom-auth-service-all.jar server config.yml
+    volumes:
+      - ${STROOM_AUTH_SERVICE_VOLUME_LOGS:-../volumes/auth-service/logs}:/usr/stroom-auth-service/logs
+    entrypoint: ./run.sh
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
