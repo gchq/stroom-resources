@@ -20,6 +20,10 @@ setup_echo_colours
 # available to docker-compose
 source "$DIR"/config/<STACK_NAME>.env
 
+# These lines may help in debugging the config that is passed to the containers
+#env
+#docker-compose -f "$DIR"/config/stroom_core.yml config
+
 echo -e "${GREEN}Creating and starting the docker containers${NC}"
 #echo -e "${GREEN}Using IP address ${BLUE}${HOST_IP}${NC}"
 echo
@@ -29,12 +33,22 @@ docker-compose -f "$DIR"/config/<STACK_NAME>.yml up -d
 echo
 echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
 echo -e "${DGREY}Stroom has to build its database tables when started for the first time,${NC}"
-echo -e "${DGREY}so this may take a minute or so.${NC}"
+echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
 
 wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
 
-# Print the stroom banner in blue
-echo -en "${BLUE}"
+# Stroom is now up or we have given up waiting so print the banner and links
+
+# see if the terminal supports colors...
+no_of_colours=$(tput colors)
+
+if test -n "$no_of_colours" && test $no_of_colours -eq 256; then
+    # 256 colours so print the stroom banner in dirty orange
+    echo -en "\e[38;5;202m"
+else
+    # No 256 colour support so fall back to blue
+    echo -en "${BLUE}"
+fi
 cat ${DIR}/lib/banner.txt
 echo -en "${NC}"
 
