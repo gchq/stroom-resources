@@ -52,8 +52,7 @@ services:
           file: ./containers/stroom.yml
           service: stroom
       depends_on:
-        - stroom-db
-        - stroom-stats-db
+        - stroom-all-dbs
       ## Additional arguments required ahead of the -jar to enable debugging
       command: java ${STROOM_JAVA_OPTS} -jar stroom-app-all.jar server config.yml
 
@@ -62,37 +61,26 @@ services:
           file: ./containers/stroom.yml
           service: stroom
       depends_on:
-        - stroom-db
-        - stroom-stats-db
-
-  stroom-annotations-db:
-      extends:
-          file: ./containers/stroomAnnotationsDb.yml
-          service: stroom-annotations-db
+        - stroom-all-dbs
 
   stroom-annotations-service:
       extends:
           file: ./containers/stroomAnnotationsService.yml
           service: stroom-annotations-service
       depends_on:
-          - stroom-annotations-db
+          - stroom-all-dbs
 
   stroom-annotations-ui:
       extends:
           file: ./containers/stroomAnnotationsUi.yml
           service: stroom-annotations-ui
 
-  stroom-auth-service-db:
-      extends:
-          file: ./containers/stroomAuthDb.yml
-          service: stroom-auth-db
-
   stroom-auth-service:
       extends:
           file: ./containers/stroomAuthService.yml
           service: stroom-auth-service
       depends_on:
-          - stroom-auth-service-db
+          - stroom-all-dbs
 
   stroom-auth-ui:
       extends:
@@ -103,11 +91,6 @@ services:
       extends:
           file: ./containers/stroomUi.yml
           service: stroom-ui
-
-  stroom-db:
-      extends:
-          file: ./containers/stroomDb.yml
-          service: stroom-db
 
   stroom-proxy:
       extends:
@@ -129,15 +112,15 @@ services:
           file: ./containers/stroomStats.yml
           service: stroom-stats
       depends_on:
-        - stroom-db
+        - stroom-all-dbs
         - zookeeper
         - kafka
         - hbase
 
-  stroom-stats-db:
+  stroom-all-dbs:
       extends:
-          file: ./containers/stroomStatsDb.yml
-          service: stroom-stats-db
+          file: ./containers/stroomAllDbs.yml
+          service: stroom-all-dbs
 
   zookeeper:
       extends:

@@ -1,0 +1,27 @@
+export STROOM_ANNOTATIONS_DB_PASSWORD=stroompassword1
+export STROOM_ANNOTATIONS_DB_ROOT_PASSWORD=my-secret-pw
+export STROOM_ANNOTATIONS_DB_USERNAME=annotationsuser
+
+export STROOM_AUTH_DB_PASSWORD=stroompassword1
+export STROOM_AUTH_DB_ROOT_PASSWORD=my-secret-pw
+export STROOM_AUTH_DB_USERNAME=authuser
+
+export STROOM_CONFIG_DB_PASSWORD=stroompassword1
+export STROOM_CONFIG_DB_ROOT_PASSWORD=my-secret-pw
+export STROOM_CONFIG_DB_USERNAME=configuser
+
+export STROOM_DATA_META_DB_PASSWORD=stroompassword1
+export STROOM_DATA_META_DB_ROOT_PASSWORD=my-secret-pw
+export STROOM_DATA_META_DB_USERNAME=datametauser
+
+export STROOM_EXPLORER_DB_PASSWORD=stroompassword1
+export STROOM_EXPLORER_DB_ROOT_PASSWORD=my-secret-pw
+export STROOM_EXPLORER_DB_USERNAME=exploreruser
+
+export STROOM_STATS_DB_PASSWORD=stroompassword1
+export STROOM_STATS_DB_ROOT_PASSWORD=my-secret-pw
+export STROOM_STATS_DB_USERNAME=statsuser
+
+export STROOM_DB_PASSWORD=stroompassword1
+export STROOM_DB_ROOT_PASSWORD=my-secret-pw
+export STROOM_DB_USERNAME=stroomuser

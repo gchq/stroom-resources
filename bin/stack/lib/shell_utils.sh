@@ -21,3 +21,8 @@ setup_echo_colours() {
 err() {
   echo -e "$@" >&2
 }
+
+die () {
+    echo -e "$@" >&2
+    exit 1
+}

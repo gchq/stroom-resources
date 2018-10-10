@@ -7,9 +7,9 @@ services:
     environment:
       - STROOM_AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
       - STROOM_AUTH_SERVICE_ADMIN_PORT=${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}
-      - DB_USER=${STROOM_AUTH_DB_USERNAME:-stroomuser}
+      - DB_USER=${STROOM_AUTH_DB_USERNAME:-authuser}
       - DB_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
-      - DB_URL=jdbc:mariadb://${STROOM_AUTH_DB_HOST:-$HOST_IP}:${STROOM_AUTH_DB_PORT:-3309}/auth
+      - DB_URL=jdbc:mysql://${STROOM_AUTH_DB_HOST:-$HOST_IP}:${STROOM_AUTH_DB_PORT:-3307}/auth
       - JWS_ISSUER=stroom
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - ADVERTISED_HTTP_HOST=http://${AUTH_SERVICE_HOST:-$HOST_IP}/authService

@@ -6,9 +6,9 @@ services:
     container_name: stroom-annotations-service
     image: "${STROOM_ANNOTATIONS_SERVICE_DOCKER_REPO:-gchq/stroom-annotations-service}:${STROOM_ANNOTATIONS_SERVICE_TAG:-v0.2.1-alpha.1}"
     environment:
-      - DB_USER=${STROOM_ANNOTATIONS_DB_USERNAME:-stroomuser}
+      - DB_USER=${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}
       - DB_PASSWORD=${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}
-      - DB_URL=jdbc:mariadb://${STROOM_ANNOTATIONS_DB_HOST:-stroom-annotations-db}:${STROOM_ANNOTATIONS_DB_PORT:-3306}/annotations
+      - DB_URL=jdbc:mysql://${STROOM_ANNOTATIONS_DB_HOST:-$HOST_IP}:${STROOM_ANNOTATIONS_DB_PORT:-3307}/annotations
       - ADMIN_CONTEXT_PATH=/annotationsServiceAdmin
       - AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/login
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
@@ -19,6 +19,6 @@ services:
     ports:
       - 8199:8199
       - 8200:8200
-    entrypoint: ./wait-for-it_busybox.sh ${STROOM_ANNOTATIONS_DB_HOST:-stroom-annotations-db}:${STROOM_ANNOTATIONS_DB_PORT:-3306} -- java -jar stroom-annotations-service-all.jar server config.yml
+    entrypoint: ./wait-for-it_busybox.sh ${STROOM_ANNOTATIONS_DB_HOST:-$HOST_IP}:${STROOM_ANNOTATIONS_DB_PORT:-3307} -- java -jar stroom-annotations-service-all.jar server config.yml
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

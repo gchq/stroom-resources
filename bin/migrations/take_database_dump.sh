@@ -20,10 +20,10 @@ mkdir -p $WORKING_DIR
 readonly STACK_VERSION=$1
 
 dumpDb() {
-    local readonly DOCKER_CONTAINER=$1
-    local readonly DB_NAME=$2
-    local readonly PORT=$3
-    local readonly ROOT_PW=$4
+    local -r DOCKER_CONTAINER=$1
+    local -r DB_NAME=$2
+    local -r PORT=$3
+    local -r ROOT_PW=$4
 
     echo "Taking Dump of ${DOCKER_CONTAINER} at port ${PORT} with root pw ${ROOT_PW}"
     docker exec -it ${DOCKER_CONTAINER} mysqldump --databases $DB_NAME -u"root" -p"${ROOT_PW}" | grep -v "Using a password" > $WORKING_DIR/${DOCKER_CONTAINER}_${STACK_VERSION}.sql

@@ -2,7 +2,7 @@ version: '2.1'
 services:
   nginx:
     container_name: nginx
-    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-dev-SNAPSHOT}"
+    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v1.0-LATEST}"
     environment:
       - NGINX_ADVERTISED_HOST=${NGINX_ADVERTISED_HOST:-$HOST_IP}
       - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-off}
