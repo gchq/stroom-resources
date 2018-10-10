@@ -17,8 +17,9 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
-
-
+# We never want to control the contents of these folders
+dev-resources/compose/volumes/auth-service/logs
+dev-resources/compose/volumes/stroom-auth-db
 
 # IntelliJ
 # Note: Deciding what IntelliJ files should be ignored is over-complicated and boring.
