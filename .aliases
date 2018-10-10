@@ -8,7 +8,6 @@ DGREY='\e[90m'
 NC='\033[0m' # No Color
 
 # docker-compose 
-alias bounceAll='./bounceIt.sh compose/hbase-kafka-mysql-zk.yml'
 
 kConsumeTopic() {
     topicName="$1"
@@ -54,10 +53,11 @@ alias stroombash='docker exec -it --user stroom stroom bash'
 alias statsbash='docker exec -it --user stroomstats stroom-stats bash'
 alias stroomdbbash='docker exec -it stroom-db bash'
 alias nginxbash='docker exec -it nginx bash'
+
 # A generic one that uses FZF to fuzzy find from a list of running containers (but only runs as root).
 alias dbash='service=$(docker ps --format '{{.Names}}' | fzf); docker exec -it $service bash'
 
-# ZK CLI
+# Zookeeper CLI
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 alias zkcli='docker exec -i -t zookeeper bin/zkCli.sh -server 127.0.0.1:2181'
 
@@ -150,13 +150,19 @@ hbaseTableCount() {
     cmd="count '"${tableName}"'"
     docker exec -i -t hbase bash -c "echo \"${cmd}\" | hbase/bin/hbase shell"
 }
+
 alias hbasecount='hbaseTableCount'
 
 # MySQL 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # Use FZF to pick a DB to open a sql shell on
 alias db='theDb=$(echo "stroom\nauth\nstats\nannotations\nconfig\nexplorer\ndatameta" | fzf); docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"${theDb}user" -p"stroompassword1" ${theDb}'
 
+# Connect to the DB as root
+alias rootdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"root" -p"my-secret-pw"'
+
+# Connect to the DB as a user
 alias stroomdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"stroomuser" -p"stroompassword1" stroom'
 alias statsdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"statsuser" -p"stroompassword1" stats'
 alias authdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"authuser" -p"stroompassword1" auth'
@@ -165,6 +171,7 @@ alias configdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"c
 alias explorerdb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"exploreruser" -p"stroompassword1" explorer'
 alias datametadb='docker exec -it stroom-all-dbs mysql -h"localhost" -P"3307" -u"datametauser" -p"stroompassword1" datameta'
 
+# Performa database dump of a named database
 alias stroomdb_dump='docker exec -it stroom-all-dbs mysqldump --databases stroom -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
 alias stroomstatsdb_dump='docker exec -it stroom-all-dbs mysqldump --databases stats -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
 alias stroomauthdb_dump='docker exec -it stroom-all-dbs mysqldump --databases auth -h"localhost" -P"3307" -u"root" -p"my-secret-pw" | grep -v "Using a password"'
