@@ -43,7 +43,10 @@ main() {
     validate_requested_services "${@}"
 
     if [ -z ${services_are_valid+x} ]; then
-        echo -e "${GREEN}Creating a stack called ${YELLOW}${STACK_NAME}${GREEN} with the following services: ${BLUE}${*:2}${NC}"
+        echo -e "${GREEN}Creating a stack called ${YELLOW}${STACK_NAME}${GREEN} with the following services:"
+        for service in "${@:2}"; do
+            echo -e "  ${BLUE}${service}${NC}"
+        done
         create_stack_from_services "${@:2}" > "$OUTPUT_FILE"
     else
         err "Please choose from the following services and try again: ${GREEN}$VALID_SERVICES${NC}"
