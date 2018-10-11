@@ -41,7 +41,7 @@ wait_for_200_response() {
     fi
 
     local -r url=$1
-    local -r maxWaitSecs=90
+    local -r maxWaitSecs=120
     echo
 
     n=0
@@ -67,6 +67,6 @@ wait_for_200_response() {
     printf "\n"
 
     if [[ $n -ge ${maxWaitSecs} ]]; then
-        echo -e "${RED}Gave up wating for stroom to start up${NC}"
+        echo -e "${RED}Gave up wating for stroom to start up, check the logs (${BLUE}docker logs stroom${NC}${RED})${NC}"
     fi
 }
