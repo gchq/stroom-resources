@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2.4'
 
 services:
     
@@ -66,5 +66,20 @@ services:
       - "${STROOM_APP_PORT:-8080}:${STROOM_APP_PORT:-8080}"
       - "${STROOM_ADMIN_PORT:-8081}:${STROOM_ADMIN_PORT:-8081}"
       - "${STROOM_DEBUG_PORT:-10765}:${STROOM_DEBUG_PORT:-10765}"
+    volumes:
+      - type: volume
+        source: stroom_volumes
+        target: /stroom/volumes
+      - type: volume
+        source: stroom_logs
+        target: /stroom/logs
+      - type: volume
+        source: stroom_repo
+        target: /stroom/repo
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+
+        # volumes:
+        #   stroom_volumes:
+        #   stroom_logs:
+        #   stroom_repo:

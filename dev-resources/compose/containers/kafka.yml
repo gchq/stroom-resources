@@ -1,6 +1,6 @@
 #Runs a kafka broker with precreated topics requried for stroom-stats/stroom
 #Also runs a zookeeper instance for kafka
-version: '2.1'
+version: '2.4'
 
 #NOTE: Kafka will store its advertised hostanme in zookeeper and when a consumer/producer connects with the
 #bootstrap.servers it will obtain the list of broker hosts.  If the advertised host is not visible to the

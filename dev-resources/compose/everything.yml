@@ -1,5 +1,5 @@
 #Defines all the services that make up the stroom estate
-version: '2.1'
+version: '2.4'
 
 services:
 
@@ -126,3 +126,19 @@ services:
       extends:
           file: ./containers/zookeeper.yml
           service: zookeeper
+
+
+volumes:
+
+  stroom_volumes:
+  stroom_logs:
+  stroom_repo:
+
+  stroom-proxy_config:
+  stroom-proxy_content:
+  stroom-proxy_logs:
+  stroom-proxy_repo:
+
+  stroom-auth-service_logs:
+
+  stroom-all-dbs:

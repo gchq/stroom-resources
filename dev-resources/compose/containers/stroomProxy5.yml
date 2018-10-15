@@ -1,0 +1,11 @@
+version: '2.4'
+
+services: 
+
+  stroom-proxy-5:
+    container_name: stroom-proxy-5
+    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v5.1-LATEST}"
+    ports:
+      - 8090:8080
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

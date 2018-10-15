@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2.4'
 
 services: 
 
@@ -56,7 +56,12 @@ services:
           echo \"--------------------------------------------------------------\n\";
           /usr/local/bin/docker-entrypoint.sh mysqld"
     volumes:
-      - ${STROOM_DB_DATA_VOLUME:-../volumes/stroom-all-dbs}:/var/lib/mysql
+      - type: volume
+        source: stroom-all-dbs
+        target: /var/lib/mysql
+      #- ${STROOM_DB_DATA_VOLUME:-../volumes/stroom-all-dbs}:/var/lib/mysql
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
 
+        # volumes:
+        # stroom-all-dbs:

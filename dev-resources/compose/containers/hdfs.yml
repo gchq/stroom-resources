@@ -1,5 +1,5 @@
 #Runs an HDFS instance
-version: '2.1'
+version: '2.4'
 
 services: 
   hdfs:
