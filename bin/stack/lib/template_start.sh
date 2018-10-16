@@ -24,11 +24,11 @@ source "$DIR"/config/<STACK_NAME>.env
 #env
 #docker-compose -f "$DIR"/config/stroom_core.yml config
 
-echo -e "${GREEN}Creating and starting the docker containers${NC}"
+echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}"
 #echo -e "${GREEN}Using IP address ${BLUE}${HOST_IP}${NC}"
 echo
 
-docker-compose -f "$DIR"/config/<STACK_NAME>.yml up -d
+docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml up -d
 
 echo
 echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"

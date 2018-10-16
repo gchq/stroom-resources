@@ -21,7 +21,7 @@ source "$DIR"/config/<STACK_NAME>.env
 echo -e "${GREEN}Restarting the docker containers${NC}"
 echo
 
-docker-compose -f "$DIR"/config/<STACK_NAME>.yml restart
+docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml restart
 
 echo
 echo -e "${GREEN}Waiting for stroom to complete its restart.${NC}"
