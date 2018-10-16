@@ -18,10 +18,9 @@ services:
       - STROOM_PORT=${STROOM_APP_PORT:-8080}
       - AUTH_SERVICE_HOST=${AUTH_SERVICE_HOST:-$HOST_IP}
     volumes:
-      # Shared certs volume: TODO: move it to the top level
-      - ${NGINX_VOLUME_CERTS:-../volumes/nginx/certs}:/etc/nginx/certs
+      - ${NGINX_VOLUME_CERTS:-../volumes/nginx/certs}:/etc/nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
-      - ${NGINX_VOLUME_CONF:-../volumes/nginx/conf}:/etc/nginx/template
+      - ${NGINX_VOLUME_CONF:-../volumes/nginx/conf}:/etc/nginx/template:ro
     ports:
       - "80:80"
       - "443:443"

@@ -141,4 +141,20 @@ volumes:
 
   stroom-auth-service_logs:
 
-  stroom-all-dbs:
+  stroom-all-dbs_data:
+  stroom-all-dbs_logs:
+
+  zookeeper_data:
+
+  kafka_data:
+  kafka_logs:
+  
+# If you want to have a docker managed/named volume but pointing to somewhere
+# other than /var/lib/docker/volumes/..... then you can do stuff like this.
+# Relative paths are not supported, but you can substitute env vars
+# my-shared-volume:
+#   driver: local
+#   driver_opts:
+#     type: none
+#     o: bind
+#     device: "/my/path/on/host"

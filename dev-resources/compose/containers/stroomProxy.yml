@@ -24,9 +24,3 @@ services:
         target: /stroom-proxy/repo
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
-
-        # volumes:
-        #  stroom-proxy_config:
-        #  stroom-proxy_content:
-        #  stroom-proxy_logs:
-        #  stroom-proxy_repo:

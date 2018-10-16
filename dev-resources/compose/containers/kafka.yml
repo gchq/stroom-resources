@@ -28,6 +28,13 @@ services:
       - KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=10000
       - KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=20000
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      # I don't hink this line is needed, see https://github.com/wurstmeister/kafka-docker/wiki
+      #- /var/run/docker.sock:/var/run/docker.sock
+      - type: volume
+        source: kafka_data
+        target: /kafka
+      - type: volume
+        source: kafka_logs
+        target: /opt/kafka/logs
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
