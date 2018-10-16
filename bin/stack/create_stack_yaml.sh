@@ -20,7 +20,7 @@ validate_requested_services() {
 
 create_stack_from_services() {
     local -r PATH_TO_CONTAINERS="../compose/containers"
-    echo version: \'2.1\'
+    echo version: \'2.4\'
     echo services:
     for service in "$@"; do
         local target_yaml="$PATH_TO_CONTAINERS/$service.yml"
@@ -29,6 +29,15 @@ create_stack_from_services() {
         service=$(grep -v '^services' "$target_yaml" | grep -v '^version:')
         echo "$service"
     done
+}
+
+append_shared_volumes() {
+    local -r MASTER_YAML="../compose/everything.yml"
+
+    # grab all content from master yaml file after and including 'volumes:' entry
+    # and ignoring comments
+    sed -n -e '/^\w*volumes:/,$p' "${MASTER_YAML}" \
+        | grep -v '^\w*#' >> "${OUTPUT_FILE}"
 }
 
 main() {
@@ -48,6 +57,7 @@ main() {
             echo -e "  ${BLUE}${service}${NC}"
         done
         create_stack_from_services "${@:2}" > "$OUTPUT_FILE"
+        append_shared_volumes
     else
         err "Please choose from the following services and try again: ${GREEN}$VALID_SERVICES${NC}"
         exit 1
