@@ -54,7 +54,7 @@ services:
       depends_on:
         - stroom-all-dbs
       ## Additional arguments required ahead of the -jar to enable debugging
-      command: java ${STROOM_JAVA_OPTS} -jar stroom-app-all.jar server config.yml
+      command: java ${STROOM_JAVA_OPTS} -jar stroom-app-all.jar server config/config.yml
 
   stroom-5:
       extends:
@@ -92,10 +92,15 @@ services:
           file: ./containers/stroomUi.yml
           service: stroom-ui
 
-  stroom-proxy:
+  stroom-proxy-local:
       extends:
-          file: ./containers/stroomProxy.yml
-          service: stroom-proxy
+          file: ./containers/stroomProxyLocal.yml
+          service: stroom-proxy-local
+
+  stroom-proxy-remote:
+      extends:
+          file: ./containers/stroomProxyRemote.yml
+          service: stroom-proxy-remote
 
   stroom-query-elastic-ui:
       extends:
@@ -127,17 +132,21 @@ services:
           file: ./containers/zookeeper.yml
           service: zookeeper
 
-
 volumes:
 
-  stroom_volumes:
   stroom_logs:
-  stroom_repo:
+  stroom_output:
+  stroom_volumes:
 
-  stroom-proxy_config:
-  stroom-proxy_content:
-  stroom-proxy_logs:
-  stroom-proxy_repo:
+  stroom-proxy-local_config:
+  stroom-proxy-local_content:
+  stroom-proxy-local_logs:
+  stroom-proxy-local_repo:
+
+  stroom-proxy-remote_config:
+  stroom-proxy-remote_content:
+  stroom-proxy-remote_logs:
+  stroom-proxy-remote_repo:
 
   stroom-auth-service_logs:
 

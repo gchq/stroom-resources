@@ -68,18 +68,16 @@ services:
       - "${STROOM_DEBUG_PORT:-10765}:${STROOM_DEBUG_PORT:-10765}"
     volumes:
       - type: volume
-        source: stroom_volumes
-        target: /stroom/volumes
-      - type: volume
         source: stroom_logs
         target: /stroom/logs
       - type: volume
-        source: stroom_repo
-        target: /stroom/repo
+        source: stroom_output
+        target: /stroom/output
+      - type: volume
+        source: stroom-proxy-local_repo
+        target: /stroom/proxy-repo
+      - type: volume
+        source: stroom_volumes
+        target: /stroom/volumes
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
-
-        # volumes:
-        #   stroom_volumes:
-        #   stroom_logs:
-        #   stroom_repo:

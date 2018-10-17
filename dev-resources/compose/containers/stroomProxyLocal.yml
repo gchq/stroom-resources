@@ -1,0 +1,37 @@
+version: '2.4'
+
+services: 
+
+  stroom-proxy-local:
+    container_name: stroom-proxy-local
+    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
+    environment:
+      - STROOM_PROXY_APP_PORT=${STROOM_PROXY_APP_PORT:-8090}
+      - STROOM_PROXY_ADMIN_PORT=${STROOM_PROXY_ADMIN_PORT:-8091}
+      - RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
+      - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
+      - STORING_ENABLED=${STROOM_PROXY_LOCAL_STORING_ENABLED:-true}
+      - CONTENT_SYNC_ENABLED=${STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED:-true}
+      - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-http://stroom:8080/stroom/datafeed}
+      - UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
+      - UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-http://stroom:8080/api/dictionary/v1}
+      #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-http://stroom:8080/api/dictionary/v1}
+    ports:
+      - "${STROOM_PROXY_APP_PORT:-8090}:${STROOM_PROXY_APP_PORT:-8090}"
+      #- "${STROOM_PROXY_APP_PORT_HTTPS:-8543}:${STROOM_PROXY_APP_PORT_HTTPS:-8543}"
+      - "${STROOM_PROXY_ADMIN_PORT:-8091}:${STROOM_PROXY_ADMIN_PORT:-8091}"
+    volumes:
+      - type: volume
+        source: stroom-proxy-local_config
+        target: /stroom-proxy/config
+      - type: volume
+        source: stroom-proxy-local_content
+        target: /stroom-proxy/content
+      - type: volume
+        source: stroom-proxy-local_logs
+        target: /stroom-proxy/logs
+      - type: volume
+        source: stroom-proxy-local_repo
+        target: /stroom-proxy/repo
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

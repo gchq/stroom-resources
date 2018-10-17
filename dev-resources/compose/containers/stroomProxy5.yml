@@ -7,5 +7,18 @@ services:
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v5.1-LATEST}"
     ports:
       - 8090:8080
+    volumes:
+      - type: volume
+        source: stroom-proxy-local_config
+        target: /stroom-proxy/config
+      - type: volume
+        source: stroom-proxy-local_content
+        target: /stroom-proxy/content
+      - type: volume
+        source: stroom-proxy-local_logs
+        target: /stroom-proxy/logs
+      - type: volume
+        source: stroom-proxy-local_repo
+        target: /stroom-proxy/repo
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
