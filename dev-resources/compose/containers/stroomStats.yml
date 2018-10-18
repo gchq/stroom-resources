@@ -4,7 +4,7 @@ services:
 
   stroom-stats:
     container_name: stroom-stats
-    image: "${STROOM_STATS_DOCKER_REPO:-gchq/stroom-stats}:${STROOM_STATS_TAG:-master-SNAPSHOT}"
+    image: "${STROOM_STATS_DOCKER_REPO:-gchq/stroom-stats}:${STROOM_STATS_TAG:-v0.6-LATEST}"
     environment:
       # At the moment, stroom-stats gets it document entities from the stroom DB, not the 'stats' DB.
       # The 'stats' DB contains legacy SQL stats tables only

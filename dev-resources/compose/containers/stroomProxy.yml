@@ -4,7 +4,7 @@ services:
 
   stroom-proxy:
     container_name: stroom-proxy
-    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-5.1-beta.5}"
+    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v5.1-LATEST}"
     ports:
       - 8090:8085
     labels:

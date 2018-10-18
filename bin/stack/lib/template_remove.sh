@@ -9,7 +9,7 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$DIR"/lib/shell_utils.sh
 setup_echo_colours
 
-echo -e "${GREEN}Removing the docker containers${NC}"
+echo -e "${GREEN}Stopping and removing the docker containers${NC}"
 echo
 
 docker-compose -f "$DIR"/config/<STACK_NAME>.yml down -v
