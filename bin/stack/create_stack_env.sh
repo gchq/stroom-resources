@@ -63,7 +63,8 @@ add_params() {
             echo -e "  With       ${YELLOW}${var_name}${NC}=${BLUE}${override_value}${NC}"
 
             # Replace the current value with the override
-            sed -i'' -E "s/(${var_name})=.*/\1=${override_value}/g" ${OUTPUT_FILE}
+            # This line may break if the sed delimiter (currently |) appears in ${override_value}
+            sed -i'' -E "s|(${var_name})=.*|\1=${override_value}|g" ${OUTPUT_FILE}
         done
     fi
 
