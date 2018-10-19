@@ -55,16 +55,17 @@ echo -en "${NC}"
 echo
 echo -e "Please use the following URLs to access stroom"
 echo
-echo -e "  ${GREEN}stroom UI${NC}:${BLUE}            http://localhost/stroom${NC}"
+echo -e "  ${GREEN}stroom UI${NC}:${BLUE}             http://localhost/stroom${NC}"
 echo
 echo -e "  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})"
 echo
-echo -e "  ${GREEN}stroom (admin)${NC}:${BLUE}       http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin${NC}"
+echo -e "  ${GREEN}stroom (admin)${NC}:${BLUE}        http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin${NC}"
 
 if [[ ! -z ${STROOM_STATS_SERVICE_ADMIN_PORT} ]]; then
-    echo -e "  ${GREEN}stroom-stats${NC}:${BLUE} http://localhost:${STROOM_STATS_SERVICE_ADMIN_PORT}/statsAdmin${NC}"
+    echo -e "  ${GREEN}stroom-stats${NC}:${BLUE}  http://localhost:${STROOM_STATS_SERVICE_ADMIN_PORT}/statsAdmin${NC}"
 fi
 
-echo -e "  ${GREEN}stroom-auth (admin)${NC}:${BLUE}  http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT}/authenticationServiceAdmin${NC}"
+echo -e "  ${GREEN}stroom-proxy (admin)${NC}:${BLUE}  http://localhost:${STROOM_PROXY_ADMIN_PORT}/proxyAdmin${NC}"
+echo -e "  ${GREEN}stroom-auth (admin)${NC}:${BLUE}   http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT}/authenticationServiceAdmin${NC}"
 echo
 
