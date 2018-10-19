@@ -3,7 +3,7 @@ version: '2.4'
 services:
 
   kibana:
-    image: "${KIBANA_DOCKER_REPO:-docker.elastic.co/kibana/kibana}:5.6.3"
+    image: "${KIBANA_DOCKER_REPO:-docker.elastic.co/kibana/kibana}:${KIBANA_TAG:-5.6.3}"
     container_name: kibana
     volumes:
       - ${KIBANA_VOLUME_CONF_FILE:-../volumes/kibana/conf/kibana.yml}:/usr/share/kibana/config/kibana.yml:ro
