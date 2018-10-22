@@ -47,6 +47,6 @@ services:
       - "${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}"
     volumes:
       - ${STROOM_AUTH_SERVICE_VOLUME_LOGS:-../volumes/auth-service/logs}:/usr/stroom-auth-service/logs
-    entrypoint: /usr/stroom-auth-service/run.sh
+    entrypoint: /stroom-auth-service/run.sh
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
