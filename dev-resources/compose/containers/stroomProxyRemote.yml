@@ -6,6 +6,7 @@ services:
     container_name: stroom-proxy-remote
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
     environment:
+      - JAVA_OPTS=${STROOM_PROXY_REMOTE_JAVA_OPTS:-}
       #- STROOM_PROXY_APP_PORT=${STROOM_PROXY_REMOTE_APP_PORT:-9090}
       - STROOM_PROXY_APP_PORT=8090
       #- STROOM_PROXY_ADMIN_PORT=${STROOM_PROXY_REMOTE_ADMIN_PORT:-9091}

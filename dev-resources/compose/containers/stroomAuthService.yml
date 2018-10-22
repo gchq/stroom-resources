@@ -6,6 +6,7 @@ services:
     container_name: stroom-auth-service
     image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v1.0-LATEST}"
     environment:
+      - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:-}
       - STROOM_AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
       - STROOM_AUTH_SERVICE_ADMIN_PORT=${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}
       - DB_USER=${STROOM_AUTH_DB_USERNAME:-authuser}

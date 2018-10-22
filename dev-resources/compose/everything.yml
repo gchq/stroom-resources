@@ -53,8 +53,6 @@ services:
           service: stroom
       depends_on:
         - stroom-all-dbs
-      ## Additional arguments required ahead of the -jar to enable debugging
-      command: java ${STROOM_JAVA_OPTS} -jar stroom-app-all.jar server config/config.yml
 
   stroom-5:
       extends:

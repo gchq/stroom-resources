@@ -6,6 +6,7 @@ services:
     container_name: stroom-proxy-local
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
     environment:
+      - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:-}
       - STROOM_PROXY_APP_PORT=${STROOM_PROXY_APP_PORT:-8090}
       - STROOM_PROXY_ADMIN_PORT=${STROOM_PROXY_ADMIN_PORT:-8091}
       - RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
