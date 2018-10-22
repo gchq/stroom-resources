@@ -26,27 +26,38 @@ check_health() {
     echo
     echo -e "Checking the health of ${BLUE}${health_check_url}${NC}"
 
-    # Count all the unhealthy checks
-    local -r unhealthy_count=$( \
-        curl -s ${health_check_url} | 
-        jq '[to_entries[] | {key: .key, value: .value.healthy}] | map(select(.value == false)) | length')
+    # First hit the url to see if it is there
+    if curl -s -S -f ${health_check_url} > /dev/null 2>&1; then
+        # Count all the unhealthy checks
+        local -r unhealthy_count=$( \
+            curl -s ${health_check_url} | 
+            jq '[to_entries[] | {key: .key, value: .value.healthy}] | map(select(.value == false)) | length')
 
-    if [ ${unhealthy_count} -eq 0 ]; then
-        echo -e "  Status: ${GREEN}HEALTHY${NC}"
+        #echo "unhealthy_count: $unhealthy_count"
+        if [ ${unhealthy_count} -eq 0 ]; then
+            echo -e "  Status: ${GREEN}HEALTHY${NC}"
+        else
+            echo -e "  Status: ${RED}UNHEALTHY${NC}"
+            echo -e "  Details:"
+            echo
+
+            # Dump details of the failing health checks
+            curl -s ${health_check_url} | 
+                jq 'to_entries | map(select(.value.healthy == false)) | from_entries'
+
+            echo
+            echo -e "  See ${BLUE}${health_check_url}?pretty=true${NC} for the full report"
+
+            total_unhealthy_count=$((total_unhealthy_count + unhealthy_count))
+        fi
     else
         echo -e "  Status: ${RED}UNHEALTHY${NC}"
+        local err_msg=$(curl -s --show-error ${health_check_url} 2>&1)
         echo -e "  Details:"
         echo
-
-        # Dump details of the failing health checks
-        curl -s ${health_check_url} | 
-            jq 'to_entries | map(select(.value.healthy == false)) | from_entries'
-
-        echo
-        echo -e "  See ${BLUE}${health_check_url}?pretty=true${NC} for the full report"
+        echo -e "${RED}${err_msg}${NC}"
+        total_unhealthy_count=$((total_unhealthy_count + 1))
     fi
-
-    total_unhealthy_count=$((total_unhealthy_count + $?))
 }
 
 main() {
@@ -79,4 +90,4 @@ main() {
 main 
 
 # return the unhealthy count so this script can be used in an automated way
-exit $?
+return $?
