@@ -55,6 +55,8 @@ echo -en "${NC}"
 # If jq binary is available run the health script
 if command -v jq 1>/dev/null; then
     ./health.sh
+else
+    echo -e "WARN: Unable to check system health, please install ${BLUE}jq${NC} (${BLUE}https://stedolan.github.io/jq/${NC})"
 fi
 
 echo
