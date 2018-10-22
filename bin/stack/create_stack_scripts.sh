@@ -22,6 +22,7 @@ main() {
 
     create_script config
     create_script ctop
+    create_script health
     create_script logs
     create_script remove
     create_script restart

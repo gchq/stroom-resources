@@ -52,6 +52,11 @@ fi
 cat ${DIR}/lib/banner.txt
 echo -en "${NC}"
 
+# If jq binary is available run the health script
+if command -v jq 1>/dev/null; then
+    ./health.sh
+fi
+
 echo
 echo -e "Please use the following URLs to access stroom"
 echo
