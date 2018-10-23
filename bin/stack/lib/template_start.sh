@@ -24,11 +24,11 @@ source "$DIR"/config/<STACK_NAME>.env
 #env
 #docker-compose -f "$DIR"/config/stroom_core.yml config
 
-echo -e "${GREEN}Creating and starting the docker containers${NC}"
+echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}"
 #echo -e "${GREEN}Using IP address ${BLUE}${HOST_IP}${NC}"
 echo
 
-docker-compose -f "$DIR"/config/<STACK_NAME>.yml up -d
+docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml up -d
 
 echo
 echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
@@ -52,19 +52,27 @@ fi
 cat ${DIR}/lib/banner.txt
 echo -en "${NC}"
 
+# If jq binary is available run the health script
+if command -v jq 1>/dev/null; then
+    ./health.sh
+else
+    echo -e "WARN: Unable to check system health, please install ${BLUE}jq${NC} (${BLUE}https://stedolan.github.io/jq/${NC})"
+fi
+
 echo
 echo -e "Please use the following URLs to access stroom"
 echo
-echo -e "  ${GREEN}stroom UI${NC}:${BLUE}            http://localhost/stroom${NC}"
+echo -e "  ${GREEN}stroom UI${NC}:${BLUE}             http://localhost/stroom${NC}"
 echo
 echo -e "  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})"
 echo
-echo -e "  ${GREEN}stroom (admin)${NC}:${BLUE}       http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin${NC}"
+echo -e "  ${GREEN}stroom (admin)${NC}:${BLUE}        http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin${NC}"
 
 if [[ ! -z ${STROOM_STATS_SERVICE_ADMIN_PORT} ]]; then
-    echo -e "  ${GREEN}stroom-stats${NC}:${BLUE} http://localhost:${STROOM_STATS_SERVICE_ADMIN_PORT}/statsAdmin${NC}"
+    echo -e "  ${GREEN}stroom-stats${NC}:${BLUE}  http://localhost:${STROOM_STATS_SERVICE_ADMIN_PORT}/statsAdmin${NC}"
 fi
 
-echo -e "  ${GREEN}stroom-auth (admin)${NC}:${BLUE}  http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT}/authenticationServiceAdmin${NC}"
+echo -e "  ${GREEN}stroom-proxy (admin)${NC}:${BLUE}  http://localhost:${STROOM_PROXY_ADMIN_PORT}/proxyAdmin${NC}"
+echo -e "  ${GREEN}stroom-auth (admin)${NC}:${BLUE}   http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT}/authenticationServiceAdmin${NC}"
 echo
 

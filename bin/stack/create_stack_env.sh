@@ -29,7 +29,7 @@ add_params() {
         # Adds 'export' to the start of the line
         sed "s/^/export /" | 
         # Add in the stack name
-        sed "s/<STACK_NAME>/${STACK_NAME}/g" )
+        sed "s/<STACK_NAME>/${BUILD_STACK_NAME}/g" )
 
     echo "${params}" >> "${OUTPUT_FILE}"
 
@@ -63,21 +63,54 @@ add_params() {
             echo -e "  With       ${YELLOW}${var_name}${NC}=${BLUE}${override_value}${NC}"
 
             # Replace the current value with the override
-            sed -i'' -E "s/(${var_name})=.*/\1=${override_value}/g" ${OUTPUT_FILE}
+            # This line may break if the sed delimiter (currently |) appears in ${override_value}
+            sed -i'' -E "s|(${var_name})=.*|\1=${override_value}|g" ${OUTPUT_FILE}
         done
     fi
 
     # Dump all the container tag variables to a file that will end up in the tar.gz
-    cat ${OUTPUT_FILE} | 
-        grep -E "export .*_TAG.*" > ${BUILD_FOLDER}/${STACK_NAME}/VERSIONS.txt
+    #cat ${OUTPUT_FILE} | 
+        #grep -E "export .*_TAG.*" > ${BUILD_FOLDER}/${STACK_NAME}/VERSIONS.txt
+
+}
+
+#function docker_tag_exists() {
+    #curl --silent -f -lSL https://index.docker.io/v1/repositories/$1/tags/$2 > /dev/null
+#}
+
+create_versions_file() {
+
+    # Produce a list of fully qualified docker image tags by sourcing the OUTPUT_FILE
+    # that contains all the env vars and using their values to do variable substitution
+    # against the image definitions obtained from the yml (INPUT_FILE)
+    # Source the env file in a subshell to avoid poluting ours
+    ( 
+        source ${OUTPUT_FILE}
+        
+        # Find all image: lines in the yml and turn them into echo statements so we can
+        # eval them so bash does its variable substitution. Bit hacky using eval.
+        cat ${INPUT_FILE} | 
+            grep "image:" | 
+            sed -e 's/\s*image:\s*/echo /g' | 
+            while read line; do
+
+                echo "$(eval $line)"
+        done
+    ) | sort > ${VERSIONS_FILE}
 
     echo -e "${GREEN}Using container versions:${NC}"
-    cat ${BUILD_FOLDER}/${STACK_NAME}/VERSIONS.txt | sed 's/export //g' | while read line; do
-        local var_name="$(echo "${line}" | sed -E 's/([A-Z_]*)=.*/\1/')"
-        local value="$(echo "${line}" | sed -E 's/[A-Z_]*="(.*)"/\1/')"
 
-        echo -e "  ${YELLOW}${var_name}${NC}: ${BLUE}${value}${NC}"
+    cat ${VERSIONS_FILE} | while read line; do
+        echo -e "  ${BLUE}${line}${NC}"
     done
+
+
+    # TODO validate tags
+    #if docker_tag_exists library/nginx 1.7.5; then
+        #echo exist
+    #else 
+        #echo not exists
+    #fi
 }
 
 main() {
@@ -85,18 +118,20 @@ main() {
 
     echo -e "${GREEN}Creating configuration${NC}"
 
-    local -r STACK_NAME=$1
+    local -r BUILD_STACK_NAME=$1
     local -r BUILD_FOLDER='build'
-    local -r WORKING_DIRECTORY="${BUILD_FOLDER}/${STACK_NAME}/config"
+    local -r WORKING_DIRECTORY="${BUILD_FOLDER}/${BUILD_STACK_NAME}/config"
     mkdir -p ${WORKING_DIRECTORY}
-    local -r INPUT_FILE="${WORKING_DIRECTORY}/${STACK_NAME}.yml"
-    local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${STACK_NAME}.env"
-    local -r OVERRIDE_FILE="overrides/${STACK_NAME}.override.env"
+    local -r INPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
+    local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
+    local -r OVERRIDE_FILE="overrides/${BUILD_STACK_NAME}.override.env"
+    local -r VERSIONS_FILE="${BUILD_FOLDER}/${BUILD_STACK_NAME}/VERSIONS.txt"
 
     create_config
     add_params
     # Sort and de-duplicate param list before we do anything else with the file
     sort -o "${OUTPUT_FILE}" -u "${OUTPUT_FILE}"
+    create_versions_file
 }
 
 main "$@"
