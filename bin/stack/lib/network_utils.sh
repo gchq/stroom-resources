@@ -19,7 +19,7 @@ setup_echo_colours() {
 determine_host_address() {
     if [ "$(uname)" == "Darwin" ]; then
         # Code required to find IP address is different in MacOS
-        ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}')
+        ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk 'NR==1{print $2}')
     else
         ip=$(ip route get 1 |awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
     fi
@@ -41,7 +41,7 @@ wait_for_200_response() {
     fi
 
     local -r url=$1
-    local -r maxWaitSecs=90
+    local -r maxWaitSecs=120
     echo
 
     n=0
@@ -67,6 +67,6 @@ wait_for_200_response() {
     printf "\n"
 
     if [[ $n -ge ${maxWaitSecs} ]]; then
-        echo -e "${RED}Gave up wating for stroom to start up${NC}"
+        echo -e "${RED}Gave up wating for stroom to start up, check the logs (${BLUE}docker logs stroom${NC}${RED})${NC}"
     fi
 }

@@ -56,6 +56,7 @@ alias nginxbash='docker exec -it nginx bash'
 
 # A generic one that uses FZF to fuzzy find from a list of running containers (but only runs as root).
 alias dbash='service=$(docker ps --format '{{.Names}}' | fzf); docker exec -it $service bash'
+alias dsh='service=$(docker ps --format '{{.Names}}' | fzf); docker exec -it $service sh'
 
 # Zookeeper CLI
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -183,8 +184,39 @@ alias stroomstatsdb_counts='execSQL stroom-all-dbs "-h\"localhost\" -P\"3307\" -
 # To re-import the database dumps, use something like this
 #cat ~/stroomDb.backup.02032018.sql | docker exec -i stroom-db mysql -u"root" -p"my-secret-pw"
 
+
 # docker status
-alias ds='echo -e "\e[96mSummary\e[0m" && docker system df && echo && echo -e "\e[96mImages\e[0m" && docker images && echo "" && echo -e "\e[96mAll containers\e[0m" && docker ps -a -s && echo "" && echo -e "\e[96mRunning containers\e[0m" && docker ps && echo ""'
+docker_summary() {
+    echo -e "\e[96mSummary\e[0m" \
+        && docker system df \
+        && echo
+}
+
+docker_images() {
+    echo -e "\e[96mImages\e[0m" \
+        && docker images \
+        && echo ""
+}
+
+docker_all_containers() {
+    echo -e "\e[96mAll containers\e[0m" \
+        && docker ps -a -s \
+        && echo ""
+}
+
+docker_running_containers() {
+    echo -e "\e[96mRunning containers\e[0m" \
+    && docker ps \
+    && echo ""
+}
+
+docker_volumes() {
+    echo -e "\e[96mVolumes\e[0m" \
+    && docker volume ls \
+    && echo ""
+}
+
+alias ds='docker_summary && docker_images && docker_volumes && docker_all_containers && docker_running_containers'
 
 # top for docker containers
 alias ctop='docker run --rm -ti --name=ctop -v /var/run/docker.sock:/var/run/docker.sock quay.io/vektorlab/ctop:latest'

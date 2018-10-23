@@ -1,5 +1,5 @@
 #Defines all the services that make up the stroom estate
-version: '2.1'
+version: '2.4'
 
 services:
 
@@ -53,8 +53,6 @@ services:
           service: stroom
       depends_on:
         - stroom-all-dbs
-      ## Additional arguments required ahead of the -jar to enable debugging
-      command: java ${STROOM_JAVA_OPTS} -jar stroom-app-all.jar server config.yml
 
   stroom-5:
       extends:
@@ -92,10 +90,15 @@ services:
           file: ./containers/stroomUi.yml
           service: stroom-ui
 
-  stroom-proxy:
+  stroom-proxy-local:
       extends:
-          file: ./containers/stroomProxy.yml
-          service: stroom-proxy
+          file: ./containers/stroomProxyLocal.yml
+          service: stroom-proxy-local
+
+  stroom-proxy-remote:
+      extends:
+          file: ./containers/stroomProxyRemote.yml
+          service: stroom-proxy-remote
 
   stroom-query-elastic-ui:
       extends:
@@ -126,3 +129,39 @@ services:
       extends:
           file: ./containers/zookeeper.yml
           service: zookeeper
+
+volumes:
+
+  stroom_logs:
+  stroom_output:
+  stroom_volumes:
+
+  stroom-proxy-local_config:
+  stroom-proxy-local_content:
+  stroom-proxy-local_logs:
+  stroom-proxy-local_repo:
+
+  stroom-proxy-remote_config:
+  stroom-proxy-remote_content:
+  stroom-proxy-remote_logs:
+  stroom-proxy-remote_repo:
+
+  stroom-auth-service_logs:
+
+  stroom-all-dbs_data:
+  stroom-all-dbs_logs:
+
+  zookeeper_data:
+
+  kafka_data:
+  kafka_logs:
+  
+# If you want to have a docker managed/named volume but pointing to somewhere
+# other than /var/lib/docker/volumes/..... then you can do stuff like this.
+# Relative paths are not supported, but you can substitute env vars
+# my-shared-volume:
+#   driver: local
+#   driver_opts:
+#     type: none
+#     o: bind
+#     device: "/my/path/on/host"
