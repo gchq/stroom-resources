@@ -25,7 +25,7 @@ check_health() {
     local -r health_check_url="http://${health_check_host}:${health_check_port}/${health_check_path}/healthcheck"
 
     echo
-    echo -e "Checking the health of ${GREEN}${health_check_service}${NC} using ${BLUE}${health_check_url}${NC}"
+    echo -e "Checking the health of ${GREEN}${health_check_service}${NC} using ${BLUE}${health_check_url}?pretty=true${NC}"
 
     local -r http_status_code=$(curl -s -o /dev/null -w "%{http_code}" ${health_check_url})
 

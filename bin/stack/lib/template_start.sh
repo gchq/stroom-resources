@@ -60,11 +60,7 @@ else
 fi
 
 echo
-echo -e "Please use the following URLs to access stroom"
-echo
-echo -e "  ${GREEN}stroom UI${NC}:${BLUE}             http://localhost/stroom${NC}"
-echo
-echo -e "  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})"
+echo -e "The following admin pages are available"
 echo
 echo -e "  ${GREEN}stroom (admin)${NC}:${BLUE}        http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin${NC}"
 
@@ -75,4 +71,9 @@ fi
 echo -e "  ${GREEN}stroom-proxy (admin)${NC}:${BLUE}  http://localhost:${STROOM_PROXY_ADMIN_PORT}/proxyAdmin${NC}"
 echo -e "  ${GREEN}stroom-auth (admin)${NC}:${BLUE}   http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT}/authenticationServiceAdmin${NC}"
 echo
-
+echo -e "Stroom can be accessed at the following URL"
+echo
+echo -e "  ${GREEN}stroom UI${NC}:${BLUE}             http://localhost/stroom${NC}"
+echo
+echo -e "  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})"
+echo
