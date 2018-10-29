@@ -1,27 +1,17 @@
-# Dev certs
-These certs may be used to test SSL termination in NGINX.
+# Re-creating the dev certificates
 
-The `all` directory contains all the self-signed certificates and keys and CSRs. The `server` directory contains the certificates and key needed for serving files over HTTPS.
+## Creating a certificate authority
+We create a private key for our new CA:
+`openssl genrsa -out ca.key 2048`
+We can then use this key to create a certificate:
+`openssl req -x509 -new -nodes -key ca.key -sha256 -days 1024 -out ca.pem`
 
-## Using HTTPie to test
+## Creating the certificate for our server
+We create the key:
+`openssl genrsa -out server.key 2048`
+Then we create a signing request:
+`openssl req -new -key server.key -out server.csr`
+Which we can sign using the CA, to get our server certificate:
+`openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out server.crt -days 500 -sha256`
 
-When using self-signed certificates, like we are here, HTTPie needs to be passed `--verify=no`, otherwise it'll fail. For example:
-
-```
-http --cert=client.pem.crt --cert-key=client.unencrypted.key https://localhost/login --verify=no
-
-```
-
-Conversely, if NGINX doesn't specify `ssl_verify_client on;`, then it won't extract the DN from the client's certificate. Stroom and friends need the DN to identify the user.
-
-## References
-
-[How to generate client certificates](http://nategood.com/client-side-certificate-authentication-in-ngi)
-
-[How to remove a pass phrase from a certificate](http://www.insivia.com/removing-a-pass-phrase-from-a-ssl-certificate/)
-
-[Useful OpenSSL commands](https://www.sslshopper.com/article-most-common-openssl-commands.html)
-
-[More useful OpenSSL commands](https://support.asperasoft.com/hc/en-us/articles/216128468-OpenSSL-commands-to-check-and-verify-your-SSL-certificate-key-and-CSR)
-
-[Converting PEM to DER](https://support.ssl.com/Knowledgebase/Article/View/19/0/der-vs-crt-vs-cer-vs-pem-certificates-and-how-to-convert-them)
+The server then needs the CA's cert (`ca.pem`), it's own cert (`server.pem`) and it's own private key (`server.key`).
