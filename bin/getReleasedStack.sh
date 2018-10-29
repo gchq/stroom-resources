@@ -88,6 +88,10 @@ main(){
 
     echo -e "${GREEN}Deleting downloaded file ${BLUE}${file}${NC}"
     rm ${file}
+
+    echo
+    echo -e "${GREEN}Stroom stack ${BLUE}${tag} ${GREEN}is now available at ${BLUE}${install_dir}${NC}"
+    echo
 }
 
 main $@
