@@ -27,4 +27,4 @@ The server then needs the CA's cert (`ca.pem.crt`), it's own cert (`server.pem.c
 We can optionally create a Java keystore (for use with DropWizard) from the PEM format certificate and private key (going via a PKCS12 file):
 `openssl pkcs12 -export -in server.pem.crt -inkey server.unencrypted.key -out server.p12 -name server -CAfile ca.pem.crt -caname root -passout pass:password`
 
-`keytool -importkeystore -deststorepass password -destkeypass password -destkeystore server.jks -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass password -alias server`
+`keytool -importkeystore -deststorepass password -destkeypass password -destkeystore server.jks -deststoretype JKS -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass password -alias server`
