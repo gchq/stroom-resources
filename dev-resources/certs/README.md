@@ -9,9 +9,9 @@ We can then use this key to create a certificate. This asks for information abou
 ## Creating the certificate for our server
 We create the key:
 `openssl genrsa -out server.key 2048`
-Then we create a signing request:
+Then we create a signing request. This asks for information about your organisation, which you can make up or just accept the defaults:
 `openssl req -new -key server.key -out server.csr`
-Which we can sign using the CA, to get our server certificate. This asks for information about your organisation, which you can make up or just accept the defaults:
+Which we can sign using the CA, to get our server certificate: 
 `openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out server.crt -days 99999 -sha256`
 
 The server then needs the CA's cert (`ca.pem`), it's own cert (`server.pem`) and it's own private key (`server.key`).
