@@ -23,6 +23,11 @@ main() {
     local -r SRC_KIBANA_CONF_DIRECTORY="../compose/volumes/kibana/conf"
     local -r SRC_AUTH_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
 
+    local -r DEST_PROXY_CERTS_DIRECTORY="$WORKING_DIRECTORY/volumes/stroom-proxy/certs"
+    mkdir -p "$DEST_PROXY_CERTS_DIRECTORY"
+    cp $SRC_CERTS_DIRECTORY/ca.jks $DEST_PROXY_CERTS_DIRECTORY
+    cp $SRC_CERTS_DIRECTORY/server.jks $DEST_PROXY_CERTS_DIRECTORY
+
     local -r DEST_AUTH_UI_CERTS_DIRECTORY="$WORKING_DIRECTORY/volumes/auth-ui/certs"
     mkdir -p "$DEST_AUTH_UI_CERTS_DIRECTORY"
     cp $SRC_CERTS_DIRECTORY/ca.pem.crt $DEST_AUTH_UI_CERTS_DIRECTORY

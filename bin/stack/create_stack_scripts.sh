@@ -30,6 +30,7 @@ main() {
     create_script start
     create_script status
     create_script stop
+    create_script info
 
     # Copy libs to build
     local -r DEST_LIB="$WORKING_DIRECTORY/lib"
