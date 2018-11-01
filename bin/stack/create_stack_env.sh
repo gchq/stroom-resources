@@ -67,16 +67,8 @@ add_params() {
             sed -i'' -E "s|(${var_name})=.*|\1=${override_value}|g" ${OUTPUT_FILE}
         done
     fi
-
-    # Dump all the container tag variables to a file that will end up in the tar.gz
-    #cat ${OUTPUT_FILE} | 
-        #grep -E "export .*_TAG.*" > ${BUILD_FOLDER}/${STACK_NAME}/VERSIONS.txt
-
 }
 
-#function docker_tag_exists() {
-    #curl --silent -f -lSL https://index.docker.io/v1/repositories/$1/tags/$2 > /dev/null
-#}
 
 create_versions_file() {
 

@@ -61,18 +61,45 @@ The following scripts are available to control the docker containers:
 * `config.sh` - Displays the effective configuration that docker-compose will use.
 * `ctop.sh` - Runs the _ctop_ utility for monitoring each of the containers (e.g. memory, CPU, etc.).
 * `health.sh` - Checks the health of the applications in the stack.
+* `info.sh` - Displays information about the various URLs to use for accessing Stroom.
 * `logs.sh` - Starts tailing the logs of all containers from the last 5 entries of each.
 * `remove.sh` - Removes all the containers in the stack, destroying any state.
 * `restart.sh` - Restarts all the containers in the stack.
+* `send-data.sh` - A script for sending data into Stroom or Stroom Proxy
 * `stack.sh` - A single script for controlling the stack, e.g. `./stack.sh start`
 * `start.sh` - Starts all the containers for the stack.
 * `status.sh` - Displays the status of all the docker containers in the stack.
 * `stop.sh` - Stops all the containers in the stack.
 
+## Sending data to Stroom
+
+Data can be POSTed to Stroom or Stroom Proxy at the URLs described when you run the `./info.sh` script. 
+The data should be sent with the following HTTP header attributes as a minimum:
+
+* `Feed: MY_FEED_NAME` - The name of the feed in Stroom that the data will be stored against.
+* `System: MY_SYSTEM_NAME` - The name of the system that produced the data.
+* `Environment: DEV` - The type of environment of the source system, e.g. DEV, OPS, etc.
+
+A helper script is provided for easily sending all files in a directory to Stroom or Stroom Proxy, e.g.:
+
+``` bash
+./send_data.sh /tmp/data stroom TEST_FEED TEST_SYSTEM DEV
+
+```
+
+or
+
+``` bash
+./send_data.sh /tmp/data stroom-proxy TEST_FEED TEST_SYSTEM DEV
+
+```
+
+For more configuration options you can use the script `./lib/send_to_stroom.sh`.
+
 ## Volumes
 
-The Stroom stack uses a mixture of Docker manged volumes and volumes bound to the file system.  The bound volumes are all
-bound to directories in `./volumes`, however these volumes are all read-only so the containers will only read from them.  All application state (e.g. database tables, stream store, indexes, proxy repositories, etc.) is held in the docker manged volumes and is independent of the containers.
+The Stroom stack uses a mixture of Docker managed volumes and volumes bound to the file system.  The bound volumes are all
+bound to directories in `./volumes`, however these volumes are all read-only so the containers will only read from them.  All application state (e.g. database tables, stream store, indexes, proxy repositories, etc.) is held in the docker managed volumes and is independent of the containers.
 
 ## Upgrading the stack
 
