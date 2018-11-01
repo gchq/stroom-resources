@@ -46,6 +46,12 @@ services:
     ports:
       - "${STROOM_AUTH_SERVICE_PORT:-8099}:${STROOM_AUTH_SERVICE_PORT:-8099}"
       - "${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}"
+    healthcheck:
+      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}/authenticationServiceAdmin/healthcheck || exit 1
+      start_period: 1m
+      interval: 1m
+      timeout: 5s
+      retries: 3
     volumes:
       - type: volume
         source: stroom-auth-service_logs
