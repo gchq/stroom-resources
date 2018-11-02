@@ -109,6 +109,9 @@ do_stack_build() {
     echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
     mv "${fileName}" "${newFileName}"  
 
+    # Now spin up the stack to make sure it all works
+    test_stack "${newFileName}"
+
     popd > /dev/null
     popd > /dev/null
 }
@@ -121,11 +124,16 @@ test_stack() {
         exit 1
     fi
 
+    # Although the stack was already exploded when it was built, we want to
+    # make sure the tar.gz has everything in it.
     mkdir exploded_stack
-    cd exploded_stack
+    pushd exploded_stack > /dev/null
 
     echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
-    tar -xvf "${stack_archive_file}"
+    tar -xvf "../${stack_archive_file}"
+
+    echo -e "${GREEN}Installing ${BLUE}jq${GREEN} for the health check script${NC}"
+    sudo apt-get install -y jq
 
     echo -e "${GREEN}Starting stack${NC}"
     # If the stack is unhealthy then start should exit with a non-zero code.
@@ -135,23 +143,26 @@ test_stack() {
     ./health.sh
 
     ./stop.sh
+
+    popd
 }
 
 main() {
+    #Dump all the travis env vars to the console for debugging, aligned with
+    # the ones above
+    echo -e "TRAVIS_BUILD_NUMBER:       [${GREEN}${TRAVIS_BUILD_NUMBER}${NC}]"
+    echo -e "TRAVIS_COMMIT:             [${GREEN}${TRAVIS_COMMIT}${NC}]"
+    echo -e "TRAVIS_BRANCH:             [${GREEN}${TRAVIS_BRANCH}${NC}]"
+    echo -e "TRAVIS_TAG:                [${GREEN}${TRAVIS_TAG}${NC}]"
+    echo -e "TRAVIS_PULL_REQUEST:       [${GREEN}${TRAVIS_PULL_REQUEST}${NC}]"
+    echo -e "TRAVIS_EVENT_TYPE:         [${GREEN}${TRAVIS_EVENT_TYPE}${NC}]"
+
     #establish what version we are building
     if [ -n "$TRAVIS_TAG" ] && [[ "$TRAVIS_TAG" =~ ${RELEASE_VERSION_REGEX} ]] ; then
 
         #Tagged commit so use that as our build version, e.g. v6.0.0
         BUILD_VERSION="$(echo "${TRAVIS_TAG}" | grep -oP "${VERSION_PART_REGEX}")"
 
-        #Dump all the travis env vars to the console for debugging, aligned with
-        # the ones above
-        echo -e "TRAVIS_BUILD_NUMBER:       [${GREEN}${TRAVIS_BUILD_NUMBER}${NC}]"
-        echo -e "TRAVIS_COMMIT:             [${GREEN}${TRAVIS_COMMIT}${NC}]"
-        echo -e "TRAVIS_BRANCH:             [${GREEN}${TRAVIS_BRANCH}${NC}]"
-        echo -e "TRAVIS_TAG:                [${GREEN}${TRAVIS_TAG}${NC}]"
-        echo -e "TRAVIS_PULL_REQUEST:       [${GREEN}${TRAVIS_PULL_REQUEST}${NC}]"
-        echo -e "TRAVIS_EVENT_TYPE:         [${GREEN}${TRAVIS_EVENT_TYPE}${NC}]"
         echo -e "BUILD_VERSION:             [${GREEN}${BUILD_VERSION}${NC}]"
 
         if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
@@ -169,24 +180,20 @@ main() {
 
             do_stack_build buildCore
 
-            test_stack ./build/*.tar.gz
-
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
             echo -e "${GREEN}Performing a stroom_full stack release to github${NC}"
 
             do_stack_build buildFull
-
-            test_stack ./build/*.tar.gz
         fi
     else
+        BUILD_VERSION="SNAPSHOT"
+
         #No tag so finish
         echo -e "Not a tagged build so just build the stack and test it"
 
         # TODO need to also do the full stack at some point.
         do_stack_build buildCore
-
-        test_stack ./build/*.tar.gz
     fi
 }
 
