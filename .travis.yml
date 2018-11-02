@@ -8,6 +8,8 @@ if: tag =~ ^.*-v[0-9]+\.[0-9]+.*$
 services:
   - docker
 
+before_script: ./travis.before_script.sh
+
 script: ./travis.script.sh
 
 # The deployment to github releases will only happen for a stroom_core or stroom_full tag

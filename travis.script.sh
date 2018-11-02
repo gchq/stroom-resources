@@ -27,7 +27,7 @@ RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
 
 #args: dockerRepo contextRoot tag1VersionPart tag2VersionPart ... tagNVersionPart
-releaseToDockerHub() {
+release_to_docker_hub() {
     #echo "releaseToDockerHub called with args [$@]"
 
     if [ $# -lt 3 ]; then
@@ -64,7 +64,7 @@ releaseToDockerHub() {
     #docker push ${dockerRepo} >/dev/null 2>&1
 }
 
-deriveDockerTags() {
+derive_docker_tags() {
     #This is a tagged commit, so create a docker image with that tag
     VERSION_FIXED_TAG="${BUILD_VERSION}"
 
@@ -90,7 +90,7 @@ deriveDockerTags() {
     allDockerTags="${VERSION_FIXED_TAG} ${SNAPSHOT_FLOATING_TAG} ${MAJOR_VER_FLOATING_TAG} ${MINOR_VER_FLOATING_TAG}"
 }
 
-doStackBuild() {
+do_stack_build() {
     local -r scriptName="${1}.sh"
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
     local -r buildDir=${scriptDir}/build/
@@ -111,6 +111,30 @@ doStackBuild() {
 
     popd > /dev/null
     popd > /dev/null
+}
+
+test_stack() {
+    local -r stack_archive_file=$1
+
+    if [ ! -f "${stack_archive_file}" ]; then
+        echo -e "${RED}Can't find file ${BLUE}${stack_archive_file}${NC}"
+        exit 1
+    fi
+
+    mkdir exploded_stack
+    cd exploded_stack
+
+    echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
+    tar -xvf "${stack_archive_file}"
+
+    echo -e "${GREEN}Starting stack${NC}"
+    # If the stack is unhealthy then start should exit with a non-zero code.
+    ./start.sh
+
+    # Just in case, run the health script
+    ./health.sh
+
+    ./stop.sh
 }
 
 main() {
@@ -134,26 +158,35 @@ main() {
             #This is a stroom-nginx release, so do a docker build/push
             echo -e "${GREEN}Performing a stroom-nginx release to dockerhub${NC}"
 
-            deriveDockerTags
+            derive_docker_tags
             
             #build and release the image to dockerhub
-            releaseTodockerHub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
+            release_to_docker_hub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
             echo -e "${GREEN}Performing a stroom_core stack release to github${NC}"
 
-            doStackBuild buildCore
+            do_stack_build buildCore
+
+            test_stack ./build/*.tar.gz
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
             echo -e "${GREEN}Performing a stroom_full stack release to github${NC}"
 
-            doStackBuild buildFull
+            do_stack_build buildFull
+
+            test_stack ./build/*.tar.gz
         fi
     else
         #No tag so finish
-        echo -e "Not a tagged build so doing nothing"
+        echo -e "Not a tagged build so just build the stack and test it"
+
+        # TODO need to also do the full stack at some point.
+        do_stack_build buildCore
+
+        test_stack ./build/*.tar.gz
     fi
 }
 
