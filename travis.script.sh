@@ -132,8 +132,7 @@ test_stack() {
     echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
     tar -xvf "../${stack_archive_file}"
 
-    echo -e "${GREEN}Installing ${BLUE}jq${GREEN} for the health check script${NC}"
-    sudo apt-get install -y jq
+    # jq is installed by default on travis so no need to install it
 
     echo -e "${GREEN}Starting stack${NC}"
     # If the stack is unhealthy then start should exit with a non-zero code.
