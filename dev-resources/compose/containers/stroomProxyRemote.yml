@@ -23,6 +23,12 @@ services:
       - "${STROOM_PROXY_REMOTE_APP_PORT:-9090}:${STROOM_PROXY_APP_PORT:-8090}"
       #- "${STROOM_PROXY_APP_PORT_HTTPS:-8543}:${STROOM_PROXY_APP_PORT_HTTPS:-8543}"
       - "${STROOM_PROXY_REMOTE_ADMIN_PORT:-9091}:${STROOM_PROXY_ADMIN_PORT:-8091}"
+    healthcheck:
+      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_PROXY_ADMIN_PORT}/proxyAdmin/healthcheck || exit 1
+      start_period: 30s 
+      interval: 1m
+      timeout: 5s
+      retries: 3
     volumes:
       - type: volume
         source: stroom-proxy-remote_config

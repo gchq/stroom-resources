@@ -8,7 +8,7 @@ create_script() {
   local script_name=$1
   local SCRIPT_PATH="$WORKING_DIRECTORY/$script_name.sh"
   sed "s/<STACK_NAME>/$STACK_NAME/g" "$LIB_DIRECTORY/template_$script_name.sh" > "$SCRIPT_PATH"
-  chmod +x "$SCRIPT_PATH"
+  chmod u+x "$SCRIPT_PATH"
 }
 
 main() {
@@ -30,15 +30,17 @@ main() {
     create_script start
     create_script status
     create_script stop
+    create_script info
+    create_script send_data
+
+    cp lib/README.md "$WORKING_DIRECTORY"
 
     # Copy libs to build
     local -r DEST_LIB="$WORKING_DIRECTORY/lib"
     mkdir -p "$DEST_LIB"
-    cp lib/shell_utils.sh "$DEST_LIB"
-    cp lib/network_utils.sh "$DEST_LIB"
-    cp lib/README.md "$WORKING_DIRECTORY"
     cp lib/banner.txt "$DEST_LIB"
-
+    cp lib/network_utils.sh "$DEST_LIB"
+    cp lib/shell_utils.sh "$DEST_LIB"
 }
 
 main "$@"

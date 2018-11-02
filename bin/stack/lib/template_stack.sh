@@ -2,7 +2,7 @@
 #
 # A single script interface to manage the stack
 
-NO_ARGUMENT_MESSAGE="Please supply an argument: either ${YELLOW}start${NC}, ${YELLOW}stop${NC}, ${YELLOW}restart${NC}, ${YELLOW}logs${NC}, ${YELLOW}status${NC}, ${YELLOW}ctop${NC}, or ${YELLOW}remove${NC}."
+NO_ARGUMENT_MESSAGE="Please supply an argument: either ${YELLOW}start${NC}, ${YELLOW}stop${NC}, ${YELLOW}restart${NC}, ${YELLOW}logs${NC}, ${YELLOW}status${NC}, ${YELLOW}health${NC}, ${YELLOW}info${NC}, ${YELLOW}ctop${NC}, or ${YELLOW}remove${NC}."
 # Check script's params
 if [ $# -ne 1 ]; then
     err $NO_ARGUMENT_MESSAGE
@@ -33,5 +33,11 @@ case $1 in
     ;;
     remove)
         source remove.sh
+    ;;
+    health)
+        source health.sh
+    ;;
+    info)
+        source info.sh
     ;;
 esac

@@ -77,6 +77,12 @@ services:
       - "${STROOM_APP_PORT:-8080}:${STROOM_APP_PORT:-8080}"
       - "${STROOM_ADMIN_PORT:-8081}:${STROOM_ADMIN_PORT:-8081}"
       - "${STROOM_DEBUG_PORT:-10765}:${STROOM_DEBUG_PORT:-10765}"
+    healthcheck:
+      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
+      start_period: 1m30s
+      interval: 1m
+      timeout: 5s
+      retries: 3
     volumes:
       - type: volume
         source: stroom_logs
