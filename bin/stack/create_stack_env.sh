@@ -35,13 +35,35 @@ add_params() {
 
     # OUTPUT_FILE contains stuff like STROOM_TAG=v6.0-LATEST, i.e. development
     # docker tags, so we need to replace them with fixed versions from 
-    # CONTAINER_VERSIONS_FILE. The sed command below finds all _TAG entries
-    # in OUTPUT_FILE and replaces them with the output of grepping the
-    # CONTAINER_VERSIONS_FILE for that _TAG entry. The 'e' flag executes the 
-    # result of the repalcement.
+    # CONTAINER_VERSIONS_FILE. 
 
-    # NOTE if this cmd fails it is probably because you don't have GNU sed. 
-    sed -i'' -E "s#(export .*_TAG).*#grep \"\1\" ${CONTAINER_VERSIONS_FILE}#e" ${OUTPUT_FILE}
+    echo -e "${GREEN}Setting container versions${NC}"
+    # Sub shell so we don't pollute ours
+    (
+        # read all the exports
+        source ${CONTAINER_VERSIONS_FILE}
+
+        grep -E "^\s*export.*" ${CONTAINER_VERSIONS_FILE} | while read line; do
+            local var_name="$(echo "${line}" | sed -E 's/^.*export\s+([A-Z_]+)=.*/\1/')"
+            local version="$(echo "${line}" | sed -E 's/^.*export\s+[A-Z_]+=(.*)/\1/')"
+
+            # Support lines like:
+            # export STROOM_PROXY_TAG="${STROOM_TAG}"
+            if [[ "${version}" =~ .*\$\{.*\}.* ]]; then
+                # Use bash indirect expansion ('!') to read the value of a variable with a given name
+                expanded_version="${!var_name}"
+                echo -e "  Expanding ${BLUE}${var_name}${NC} from ${BLUE}${version}${NC} to ${BLUE}${expanded_version}${NC}"
+                version="${expanded_version}"
+            fi
+
+            # check if file contains the var or interest
+            if grep -E --silent "\s*${var_name}=" ${OUTPUT_FILE}; then
+                echo -e "  Changing ${BLUE}${var_name}${NC} to ${BLUE}${version}${NC}"
+                # repalce var in OUTPUT_FILE with our CONTAINER_VERSIONS_FILE one
+                sed -i'' -E "s#^export\s+${var_name}=.*#export ${var_name}=${version}#g" ${OUTPUT_FILE}
+            fi
+        done
+    )
 
     # If there is a <stack_name>.override.env file in ./overrides then replace any matching env
     # vars found in the OUTPUT_FILE with the values from the override file.
