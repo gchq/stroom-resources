@@ -11,6 +11,8 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Colour 
 
+DOCKER_COMPOSE_VERSION=1.23.1
+
 sudo bash -c "echo '127.0.0.1 kafka' >> /etc/hosts"
 sudo bash -c "echo '127.0.0.1 hbase' >> /etc/hosts"
 
@@ -25,6 +27,12 @@ echo -e "${GREEN}Installing docker-compose ${BLUE}${DOCKER_COMPOSER_VERSION}${NC
 curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
 chmod +x docker-compose
 sudo mv docker-compose /usr/local/bin
+
+echo -e "${GREEN}Verifying docker version:${NC}"
+echo -e "${BLUE}$(docker -v)${NC}"
+
+echo -e "${GREEN}Verifying docker-compose version:${NC}"
+echo -e "${BLUE}$(docker-compose -v)${NC}"
 
 echo -e "${GREEN}Finished running ${BLUE}before_script${NC}"
 
