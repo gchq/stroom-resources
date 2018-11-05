@@ -15,6 +15,23 @@
 #   S	        Save current configuration to file
 #   q	        Quit ctop
 
-docker run -ti --name ctop --rm \
-   -v /var/run/docker.sock:/var/run/docker.sock \
-   quay.io/vektorlab/ctop:latest
+set -e
+
+# We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
+# give the directory relative to the lib script, not this script.
+readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+#readonly HOST_IP=$(determine_host_address)
+
+# Read the file containing all the env var exports to make them
+# available to docker-compose
+source "$DIR"/config/<STACK_NAME>.env
+
+# The env vars are defined in ./config/*.env
+# See create_stack_env.sh for how they get into the .env file in the stack build
+docker run \
+    -ti \
+    --name ctop \
+    --rm \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    ${CTOP_DOCKER_REPO:-quay.io/vektorlab/ctop}:${CTOP_TAG:-latest}
