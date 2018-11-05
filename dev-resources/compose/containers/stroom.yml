@@ -6,7 +6,7 @@ services:
     container_name: stroom
     image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
-      - JAVA_OPTS=${STROOM_JAVA_OPTS:-}
+      - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m }
       - STROOM_APP_PORT=${STROOM_APP_PORT:-8080}
       - STROOM_ADMIN_PORT=${STROOM_ADMIN_PORT:-8081}
       - STROOM_NODE=${STROOM_NODE:-node1a}
