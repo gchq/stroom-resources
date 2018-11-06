@@ -62,11 +62,10 @@ release_to_docker_hub() {
 
     #The username and password are configured in the travis gui
     echo -e "Logging in to DockerHub"
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" >/dev/null 2>&1
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin >/dev/null 2>&1 
 
-    docker build ${allTagArgs} ${contextRoot} >/dev/null 2>&1
     echo -e "Pushing to DockerHub"
-    #docker push ${dockerRepo} >/dev/null 2>&1
+    docker push ${dockerRepo} >/dev/null 2>&1
 }
 
 derive_docker_tags() {
