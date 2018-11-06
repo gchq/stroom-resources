@@ -55,6 +55,6 @@ services:
     volumes:
       - type: volume
         source: stroom-auth-service_logs
-        target: /usr/stroom-auth-service/logs
+        target: /stroom-auth-service/logs
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
