@@ -75,7 +75,7 @@ main() {
     echo
     echo -e "The Stroom user interface can be accessed at the following URL"
     echo
-    echo_info_line "${padding}" "Stroom UI" "http://localhost/stroom"
+    echo_info_line "${padding}" "Stroom UI" "https://localhost/stroom"
     echo
     echo -e "  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})"
     echo
