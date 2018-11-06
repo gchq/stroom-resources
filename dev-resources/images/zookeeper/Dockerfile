@@ -15,15 +15,24 @@ ARG URL="$MIRROR/zookeeper/zookeeper-$VERSION/zookeeper-$VERSION.tar.gz"
 
 WORKDIR /
 
+# Download the ZK archive and extract it
+# Rename the directory
+# Remove all the windows executables
+# Make a config file from the default
+# Change the dataDir prop
+# Cat the config file to check the change was made
 RUN \
     echo "Downloading $VERSION from $MIRROR" && \
     echo "URL: $URL" && \
     apk add --no-cache wget && \
     wget -q -O - $URL | tar -xzf -  && \
     mv /zookeeper-$VERSION /zookeeper && \
+    rm /zookeeper/bin/*.cmd && \
     cp /zookeeper/conf/zoo_sample.cfg /zookeeper/conf/zoo.cfg && \
     sed -i'' 's#dataDir=.*#dataDir=/var/lib/zookeeper#' /zookeeper/conf/zoo.cfg && \
     cat /zookeeper/conf/zoo.cfg | grep "dataDir="
+
+COPY ./entrypoint.sh /zookeeper/bin/
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -49,13 +58,17 @@ EXPOSE 2181 2888 3888
 # Use a volume for ZKs dataDir
 VOLUME ["/var/lib/zookeeper"]
 
-ENTRYPOINT ["/opt/zookeeper/bin/zkServer.sh"]
+#ENTRYPOINT ["./bin/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/opt/zookeeper/bin/entrypoint.sh"]
+#ENTRYPOINT ["/bin/bash", "-c", "echo \"JVMFLAGS: [${JVMFLAGS}]\"; echo \"cmd: [$@]\"; /opt/zookeeper/bin/zkServer.sh $@"]
 
 #default command for ENTRYPOINT
 CMD ["start-foreground"]
 
 RUN \
-    apk add --no-cache bash && \
+    apk add --no-cache \
+        bash \
+        tini && \
     mkdir -p /opt/zookeeper && \
     mkdir -p /var/lib/zookeeper
 
