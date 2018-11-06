@@ -108,7 +108,11 @@ do_stack_build() {
 
     local -r fileName="$(ls -1 *.tar.gz)"
     # Add the version into the filename
-    local -r newFileName="${fileName/\.tar\.gz/-${BUILD_VERSION}.tar.gz}"
+    if [ -n "$TRAVIS_TAG" ]; then
+        local newFileName="${TRAVIS_TAG}.tar.gz"
+    else
+        local newFileName="${fileName/\.tar\.gz/-${BUILD_VERSION}.tar.gz}"
+    fi
 
     echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
     mv "${fileName}" "${newFileName}"  
@@ -152,10 +156,14 @@ test_stack() {
 
 create_get_stroom_script() {
     local -r get_stroom_filename=get_stroom.sh
-    local -r get_stroom_source_file=${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}
-    local -r get_stroom_dest_file=${TRAVIS_BUILD_DIR}/build/${get_stroom_filename}
 
-    echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${NC}"
+    local -r script_build_dir=${TRAVIS_BUILD_DIR}/build
+    local -r get_stroom_source_file=${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}
+    local -r get_stroom_dest_file=${script_build_dir}/${get_stroom_filename}
+
+    mkdir -p "${script_build_dir}"
+
+    echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a copy of ${BLUE}${get_stroom_source_file}${NC}"
 
     cp ${get_stroom_source_file} ${get_stroom_dest_file}
 
