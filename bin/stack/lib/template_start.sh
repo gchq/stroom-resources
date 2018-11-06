@@ -38,13 +38,7 @@ echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quic
 wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
 
 # Stroom is now up or we have given up waiting so check the health
-
-# If jq binary is available run the health script
-if command -v jq 1>/dev/null; then
-    ./health.sh
-else
-    echo -e "WARN: Unable to check system health, please install ${GREEN}jq${NC} (${BLUE}https://stedolan.github.io/jq/${NC})"
-fi
+./health.sh
 
 # Display the banner, URLs and login details
 ./info.sh
