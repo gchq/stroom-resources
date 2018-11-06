@@ -23,7 +23,7 @@ RUN \
     mv /zookeeper-$VERSION /zookeeper && \
     cp /zookeeper/conf/zoo_sample.cfg /zookeeper/conf/zoo.cfg && \
     sed -i'' 's#dataDir=.*#dataDir=/var/lib/zookeeper#' /zookeeper/conf/zoo.cfg && \
-    cat /zookeeper/conf/zoo.cfg 
+    cat /zookeeper/conf/zoo.cfg | grep "dataDir="
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

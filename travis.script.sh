@@ -11,12 +11,17 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Colour 
 
+# Prefixes for git tags that determine what the build does
 TAG_PREFIX_STROOM_NGINX="stroom-nginx"
+TAG_PREFIX_STROOM_ZOOKEEPER="stroom-zookeeper"
 TAG_PREFIX_STROOM_STROOM_CORE="stroom_core"
 TAG_PREFIX_STROOM_STROOM_FULL="stroom_full"
 
 DOCKER_REPO_STROOM_NGINX="gchq/stroom-nginx"
+DOCKER_REPO_STROOM_ZOOKEEPER="gchq/stroom-zookeeper"
+
 DOCKER_CONTEXT_ROOT_STROOM_NGINX="stroom-nginx/."
+DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER="stroom-zookeeper/."
 
 VERSION_FIXED_TAG=""
 SNAPSHOT_FLOATING_TAG=""
@@ -180,23 +185,32 @@ main() {
 
         if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
             #This is a stroom-nginx release, so do a docker build/push
-            echo -e "${GREEN}Performing a stroom-nginx release to dockerhub${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom-nginx${GREEN} release to dockerhub${NC}"
 
             derive_docker_tags
             
             #build and release the image to dockerhub
             release_to_docker_hub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
 
+        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
+            #This is a stroom-nginx release, so do a docker build/push
+            echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release to dockerhub${NC}"
+
+            derive_docker_tags
+            
+            #build and release the image to dockerhub
+            release_to_docker_hub "${DOCKER_REPO_STROOM_ZOOKEEPER}" "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" ${allDockerTags}
+
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
-            echo -e "${GREEN}Performing a stroom_core stack release to github${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom_core${GREEN} stack release to github${NC}"
 
             do_stack_build buildCore
             create_get_stroom_script
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
-            echo -e "${GREEN}Performing a stroom_full stack release to github${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom_full${GREEN} stack release to github${NC}"
 
             do_stack_build buildFull
             create_get_stroom_script
