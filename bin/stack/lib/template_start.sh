@@ -21,6 +21,9 @@ setup_echo_colours
 source "$DIR"/config/<STACK_NAME>.env
 
 check_installed_binaries() {
+    # The version numbers mentioned here are mostly governed by the docker compose syntax version that 
+    # we use in the yml files, currently 2.4, see https://docs.docker.com/compose/compose-file/compose-versioning/
+
     if ! command -v docker 1>/dev/null; then 
         echo -e "${RED}ERROR${NC}: Docker CE is not installed!"
         echo -e "See ${BLUE}https://docs.docker.com/install/#supported-platforms${NC} for details on how to install it"
