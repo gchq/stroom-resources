@@ -104,7 +104,7 @@ do_stack_build() {
 
     local -r fileName="$(ls -1 *.tar.gz)"
     # Add the version into the filename
-    local -r newFileName="${fileName/\.tar\.gz/_${BUILD_VERSION}.tar.gz}"
+    local -r newFileName="${fileName/\.tar\.gz/-${BUILD_VERSION}.tar.gz}"
 
     echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
     mv "${fileName}" "${newFileName}"  
@@ -143,7 +143,21 @@ test_stack() {
 
     ./stop.sh
 
-    popd
+    popd > /dev/null
+}
+
+create_get_stroom_script() {
+    local -r get_stroom_filename=get_stroom.sh
+    local -r get_stroom_source_file=${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}
+    local -r get_stroom_dest_file=${TRAVIS_BUILD_DIR}/build/${get_stroom_filename}
+
+    echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${NC}"
+
+    cp ${get_stroom_source_file} ${get_stroom_dest_file}
+
+    echo -e "${GREEN}Substituting tag ${BLUE}${TRAVIS_TAG}${GREEN} into ${BLUE}${get_stroom_dest_file}${NC}"
+
+    sed -i "s/<STACK_VERSION>/${TRAVIS_TAG}/" ${get_stroom_dest_file}
 }
 
 main() {
@@ -178,12 +192,14 @@ main() {
             echo -e "${GREEN}Performing a stroom_core stack release to github${NC}"
 
             do_stack_build buildCore
+            create_get_stroom_script
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
             echo -e "${GREEN}Performing a stroom_full stack release to github${NC}"
 
             do_stack_build buildFull
+            create_get_stroom_script
         fi
     else
         BUILD_VERSION="SNAPSHOT"

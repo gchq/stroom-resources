@@ -17,6 +17,7 @@ deploy:
     file_glob: true # this needs to be turned on for wildcards to work
     file:
       - bin/stack/build/stroom*.tar.gz
+      - build/get_stroom.sh
     skip_cleanup: true
     on:
       tags: true
