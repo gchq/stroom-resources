@@ -23,6 +23,20 @@ main() {
         exit 1
     fi
 
+    echo -e "${GREEN}This script will create directory ${BLUE}${install_dir}${GREEN} and download${NC}"
+    echo -e "${GREEN}Stroom stack ${BLUE}${stack_version}${GREEN} into it.${NC}"
+
+    echo
+    read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
+
+    if [ "${keyPressed}" = 'y' ] || [ "${keyPressed}" = 'Y' ]; then
+        echo
+    else
+        echo
+        echo "Exiting"
+        exit 0
+    fi
+
     echo
     echo -e "${GREEN}Creating directory ${BLUE}${install_dir}${NC}"
 
@@ -35,7 +49,8 @@ main() {
         | tar xz -C "${install_dir}"
 
     echo
-    echo -e "${GREEN}To start Stroom run ${BLUE}start.sh${GREEN} in ${BLUE}${install_dir}${GREEN} or read the ${BLUE}README.md${NC}"
+    echo -e "${GREEN}Start Stroom using ${BLUE}start.sh${GREEN} in ${BLUE}${install_dir}${NC}"
+    echo -e "${GREEN}or read the ${BLUE}README.md${GREEN} file.${NC}"
     echo
 }
 
