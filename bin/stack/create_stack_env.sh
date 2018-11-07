@@ -78,7 +78,7 @@ add_params() {
 
             # Extract the existing variable value from the env file
             local curr_line="$(grep -E "${var_name}=.*" ${OUTPUT_FILE})"
-            local curr_value="$(echo "${curr_line}" | sed -E "s/${var_name}=(.*)/\1/")"
+            local curr_value="$(echo "${curr_line}" | sed -E "s/.*\s*${var_name}=(.*)/\1/")"
 
             echo
             echo -e "  Overriding ${DGREY}${var_name}=${curr_value}${NC}"
