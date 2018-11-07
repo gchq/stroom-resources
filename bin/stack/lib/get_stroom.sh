@@ -13,7 +13,7 @@ DGREY='\e[90m'
 NC='\033[0m' # No Color
 
 main() {
-    # <STACK_VERSION> will be replaced by travis at build time
+    # stack_version will be hard coded by TravisCI at build time
     local -r stack_version="<STACK_VERSION>"
     local -r install_dir="./${stack_version}"
     local -r url="https://github.com/gchq/stroom-resources/releases/download/${stack_version}/${stack_version}.tar.gz"
@@ -38,7 +38,6 @@ main() {
         exit 0
     fi
 
-    echo
     echo -e "${GREEN}Creating directory ${BLUE}${install_dir}${NC}"
 
     mkdir -p "${stack_version}"
@@ -46,7 +45,8 @@ main() {
     echo
     echo -e "${GREEN}Downloading and unpacking stack ${BLUE}${url}${NC}"
 
-    curl -sL "${url}" \
+    # Download the stack archive file and extract it into the install directory
+    curl --silent --location "${url}" \
         | tar xz -C "${install_dir}"
 
     echo
