@@ -31,6 +31,9 @@ VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
 
+# The dir used to hold content for deploying to github pages, i.e. https://gchq.github.io/stroom-resources
+GH_PAGES_DIR="${TRAVIS_BUILD_DIR}/gh-pages"
+
 #args: dockerRepo contextRoot tag1VersionPart tag2VersionPart ... tagNVersionPart
 release_to_docker_hub() {
     #echo "releaseToDockerHub called with args [$@]"
@@ -68,6 +71,7 @@ release_to_docker_hub() {
     docker push ${dockerRepo} >/dev/null 2>&1
 }
 
+
 derive_docker_tags() {
     #This is a tagged commit, so create a docker image with that tag
     VERSION_FIXED_TAG="${BUILD_VERSION}"
@@ -93,6 +97,7 @@ derive_docker_tags() {
     #which is incorrect, hopefully this course of events is unlikely to happen
     allDockerTags="${VERSION_FIXED_TAG} ${SNAPSHOT_FLOATING_TAG} ${MAJOR_VER_FLOATING_TAG} ${MINOR_VER_FLOATING_TAG}"
 }
+
 
 do_stack_build() {
     local -r scriptName="${1}.sh"
@@ -123,6 +128,7 @@ do_stack_build() {
     popd > /dev/null
     popd > /dev/null
 }
+
 
 test_stack() {
     local -r stack_archive_file=$1
@@ -164,12 +170,14 @@ create_get_stroom_script() {
     mkdir -p "${script_build_dir}"
 
     echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a copy of ${BLUE}${get_stroom_source_file}${NC}"
-
     cp ${get_stroom_source_file} ${get_stroom_dest_file}
 
     echo -e "${GREEN}Substituting tag ${BLUE}${TRAVIS_TAG}${GREEN} into ${BLUE}${get_stroom_dest_file}${NC}"
-
     sed -i "s/<STACK_VERSION>/${TRAVIS_TAG}/" ${get_stroom_dest_file}
+
+    # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
+    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to ${BLUE}${GH_PAGES_DIR}/${NC}"
+    cp ${get_stroom_dest_file} ${GH_PAGES_DIR}/
 }
 
 main() {
