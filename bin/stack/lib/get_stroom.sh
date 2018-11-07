@@ -23,6 +23,7 @@ main() {
         exit 1
     fi
 
+    echo
     echo -e "${GREEN}This script will create directory ${BLUE}${install_dir}${GREEN} and download${NC}"
     echo -e "${GREEN}Stroom stack ${BLUE}${stack_version}${GREEN} into it.${NC}"
 
