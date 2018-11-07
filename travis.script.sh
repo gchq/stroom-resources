@@ -177,6 +177,7 @@ create_get_stroom_script() {
 
     # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
     echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to ${BLUE}${GH_PAGES_DIR}/${NC}"
+    mkdir -p ${GH_PAGES_DIR}
     cp ${get_stroom_dest_file} ${GH_PAGES_DIR}/
 }
 
