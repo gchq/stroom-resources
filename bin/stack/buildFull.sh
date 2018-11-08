@@ -5,6 +5,6 @@
 set -e
 
 readonly STACK_NAME="stroom_full"
-readonly SERVICES="stroom stroomAllDbs stroomAuthService stroomAuthUi nginx elasticsearch hbase hdfs kafka kibana stroomAnnotationsService stroomAnnotationsUi stroomProxy stroomQueryElasticService stroomQueryElasticUi stroomStats zookeeper"
+readonly SERVICES="stroom stroomProxyLocal stroomAllDbs stroomAuthService stroomAuthUi nginx elasticsearch hbase hdfs kafka kibana stroomAnnotationsService stroomAnnotationsUi stroomProxy stroomQueryElasticService stroomQueryElasticUi stroomStats zookeeper"
 
 ./build.sh $STACK_NAME $SERVICES

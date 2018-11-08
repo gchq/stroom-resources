@@ -12,4 +12,4 @@ setup_echo_colours
 echo -e "${GREEN}Stopping the docker containers${NC}"
 echo
 
-docker-compose -f "$DIR"/config/<STACK_NAME>.yml stop
+docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml stop

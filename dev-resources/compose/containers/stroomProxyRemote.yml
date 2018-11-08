@@ -1,0 +1,46 @@
+version: '2.4'
+
+services: 
+
+  stroom-proxy-remote:
+    container_name: stroom-proxy-remote
+    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
+    environment:
+      - JAVA_OPTS=${STROOM_PROXY_REMOTE_JAVA_OPTS:- -Xms50m -Xmx1024m }
+      #- STROOM_PROXY_APP_PORT=${STROOM_PROXY_REMOTE_APP_PORT:-9090}
+      - STROOM_PROXY_APP_PORT=8090
+      #- STROOM_PROXY_ADMIN_PORT=${STROOM_PROXY_REMOTE_ADMIN_PORT:-9091}
+      - STROOM_PROXY_ADMIN_PORT=8091
+      - RECEIPT_POLICY_UUID=${STROOM_PROXY_REMOTE_RECEIPT_POLICY_UUID:-}
+      - FORWARDING_ENABLED=${STROOM_PROXY_REMOTE_FORWARDING_ENABLED:-true}
+      - STORING_ENABLED=${STROOM_PROXY_REMOTE_STORING_ENABLED:-true}
+      - CONTENT_SYNC_ENABLED=${STROOM_PROXY_REMOTE_CONTENT_SYNC_ENABLED:-true}
+      - FORWARD_URL=${STROOM_PROXY_REMOTE_FORWARD_URL:-http://stroom-proxy-local:8090/stroom/datafeed}
+      - UPSTREAM_RULE_URL=${STROOM_PROXY_REMOTE_UPSTREAM_RULE_URL:-http://stroom-proxy-local:8090/api/ruleset/v1}
+      - UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_REMOTE_UPSTREAM_DICTIONARY_URL:-http://stroom-proxy-local:8090/api/dictionary/v1}
+      #- SYNC_API_KEY=${STROOM_PROXY_REMOTE_SYNC_API_KEY:-http://stroom:8080/api/dictionary/v1}
+    ports:
+      - "${STROOM_PROXY_REMOTE_APP_PORT:-9090}:${STROOM_PROXY_APP_PORT:-8090}"
+      #- "${STROOM_PROXY_APP_PORT_HTTPS:-8543}:${STROOM_PROXY_APP_PORT_HTTPS:-8543}"
+      - "${STROOM_PROXY_REMOTE_ADMIN_PORT:-9091}:${STROOM_PROXY_ADMIN_PORT:-8091}"
+    healthcheck:
+      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_PROXY_ADMIN_PORT}/proxyAdmin/healthcheck || exit 1
+      start_period: 30s 
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      - type: volume
+        source: stroom-proxy-remote_config
+        target: /stroom-proxy/config
+      - type: volume
+        source: stroom-proxy-remote_content
+        target: /stroom-proxy/content
+      - type: volume
+        source: stroom-proxy-remote_logs
+        target: /stroom-proxy/logs
+      - type: volume
+        source: stroom-proxy-remote_repo
+        target: /stroom-proxy/repo
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

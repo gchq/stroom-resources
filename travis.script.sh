@@ -11,12 +11,17 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Colour 
 
+# Prefixes for git tags that determine what the build does
 TAG_PREFIX_STROOM_NGINX="stroom-nginx"
+TAG_PREFIX_STROOM_ZOOKEEPER="stroom-zookeeper"
 TAG_PREFIX_STROOM_STROOM_CORE="stroom_core"
 TAG_PREFIX_STROOM_STROOM_FULL="stroom_full"
 
 DOCKER_REPO_STROOM_NGINX="gchq/stroom-nginx"
+DOCKER_REPO_STROOM_ZOOKEEPER="gchq/stroom-zookeeper"
+
 DOCKER_CONTEXT_ROOT_STROOM_NGINX="stroom-nginx/."
+DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER="dev-resources/images/zookeeper/."
 
 VERSION_FIXED_TAG=""
 SNAPSHOT_FLOATING_TAG=""
@@ -26,8 +31,11 @@ VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
 
+# The dir used to hold content for deploying to github pages, i.e. https://gchq.github.io/stroom-resources
+GH_PAGES_DIR="${TRAVIS_BUILD_DIR}/gh-pages"
+
 #args: dockerRepo contextRoot tag1VersionPart tag2VersionPart ... tagNVersionPart
-releaseToDockerHub() {
+release_to_docker_hub() {
     #echo "releaseToDockerHub called with args [$@]"
 
     if [ $# -lt 3 ]; then
@@ -57,14 +65,14 @@ releaseToDockerHub() {
 
     #The username and password are configured in the travis gui
     echo -e "Logging in to DockerHub"
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" >/dev/null 2>&1
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin >/dev/null 2>&1 
 
-    docker build ${allTagArgs} ${contextRoot} >/dev/null 2>&1
     echo -e "Pushing to DockerHub"
-    #docker push ${dockerRepo} >/dev/null 2>&1
+    docker push ${dockerRepo} >/dev/null 2>&1
 }
 
-deriveDockerTags() {
+
+derive_docker_tags() {
     #This is a tagged commit, so create a docker image with that tag
     VERSION_FIXED_TAG="${BUILD_VERSION}"
 
@@ -90,7 +98,8 @@ deriveDockerTags() {
     allDockerTags="${VERSION_FIXED_TAG} ${SNAPSHOT_FLOATING_TAG} ${MAJOR_VER_FLOATING_TAG} ${MINOR_VER_FLOATING_TAG}"
 }
 
-doStackBuild() {
+
+do_stack_build() {
     local -r scriptName="${1}.sh"
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
     local -r buildDir=${scriptDir}/build/
@@ -104,56 +113,132 @@ doStackBuild() {
 
     local -r fileName="$(ls -1 *.tar.gz)"
     # Add the version into the filename
-    local -r newFileName="${fileName/\.tar\.gz/_${BUILD_VERSION}.tar.gz}"
+    if [ -n "$TRAVIS_TAG" ]; then
+        local newFileName="${TRAVIS_TAG}.tar.gz"
+    else
+        local newFileName="${fileName/\.tar\.gz/-${BUILD_VERSION}.tar.gz}"
+    fi
 
     echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
     mv "${fileName}" "${newFileName}"  
+
+    # Now spin up the stack to make sure it all works
+    test_stack "${newFileName}"
 
     popd > /dev/null
     popd > /dev/null
 }
 
+
+test_stack() {
+    local -r stack_archive_file=$1
+
+    if [ ! -f "${stack_archive_file}" ]; then
+        echo -e "${RED}Can't find file ${BLUE}${stack_archive_file}${NC}"
+        exit 1
+    fi
+
+    # Although the stack was already exploded when it was built, we want to
+    # make sure the tar.gz has everything in it.
+    mkdir exploded_stack
+    pushd exploded_stack > /dev/null
+
+    echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
+    tar -xvf "../${stack_archive_file}"
+
+    # jq is installed by default on travis so no need to install it
+
+    echo -e "${GREEN}Starting stack${NC}"
+    # If the stack is unhealthy then start should exit with a non-zero code.
+    ./start.sh
+
+    # Just in case, run the health script
+    ./health.sh
+
+    ./stop.sh
+
+    popd > /dev/null
+}
+
+create_get_stroom_script() {
+    local -r get_stroom_filename=get_stroom.sh
+
+    local -r script_build_dir=${TRAVIS_BUILD_DIR}/build
+    local -r get_stroom_source_file=${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}
+    local -r get_stroom_dest_file=${script_build_dir}/${get_stroom_filename}
+
+    mkdir -p "${script_build_dir}"
+
+    echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a copy of ${BLUE}${get_stroom_source_file}${NC}"
+    cp ${get_stroom_source_file} ${get_stroom_dest_file}
+
+    echo -e "${GREEN}Substituting tag ${BLUE}${TRAVIS_TAG}${GREEN} into ${BLUE}${get_stroom_dest_file}${NC}"
+    sed -i "s/<STACK_VERSION>/${TRAVIS_TAG}/" ${get_stroom_dest_file}
+
+    # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
+    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to ${BLUE}${GH_PAGES_DIR}/${NC}"
+    mkdir -p ${GH_PAGES_DIR}
+    cp ${get_stroom_dest_file} ${GH_PAGES_DIR}/
+}
+
 main() {
+    #Dump all the travis env vars to the console for debugging, aligned with
+    # the ones above
+    echo -e "TRAVIS_BUILD_NUMBER:       [${GREEN}${TRAVIS_BUILD_NUMBER}${NC}]"
+    echo -e "TRAVIS_COMMIT:             [${GREEN}${TRAVIS_COMMIT}${NC}]"
+    echo -e "TRAVIS_BRANCH:             [${GREEN}${TRAVIS_BRANCH}${NC}]"
+    echo -e "TRAVIS_TAG:                [${GREEN}${TRAVIS_TAG}${NC}]"
+    echo -e "TRAVIS_PULL_REQUEST:       [${GREEN}${TRAVIS_PULL_REQUEST}${NC}]"
+    echo -e "TRAVIS_EVENT_TYPE:         [${GREEN}${TRAVIS_EVENT_TYPE}${NC}]"
+
     #establish what version we are building
     if [ -n "$TRAVIS_TAG" ] && [[ "$TRAVIS_TAG" =~ ${RELEASE_VERSION_REGEX} ]] ; then
 
         #Tagged commit so use that as our build version, e.g. v6.0.0
         BUILD_VERSION="$(echo "${TRAVIS_TAG}" | grep -oP "${VERSION_PART_REGEX}")"
 
-        #Dump all the travis env vars to the console for debugging, aligned with
-        # the ones above
-        echo -e "TRAVIS_BUILD_NUMBER:       [${GREEN}${TRAVIS_BUILD_NUMBER}${NC}]"
-        echo -e "TRAVIS_COMMIT:             [${GREEN}${TRAVIS_COMMIT}${NC}]"
-        echo -e "TRAVIS_BRANCH:             [${GREEN}${TRAVIS_BRANCH}${NC}]"
-        echo -e "TRAVIS_TAG:                [${GREEN}${TRAVIS_TAG}${NC}]"
-        echo -e "TRAVIS_PULL_REQUEST:       [${GREEN}${TRAVIS_PULL_REQUEST}${NC}]"
-        echo -e "TRAVIS_EVENT_TYPE:         [${GREEN}${TRAVIS_EVENT_TYPE}${NC}]"
         echo -e "BUILD_VERSION:             [${GREEN}${BUILD_VERSION}${NC}]"
 
         if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
             #This is a stroom-nginx release, so do a docker build/push
-            echo -e "${GREEN}Performing a stroom-nginx release to dockerhub${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom-nginx${GREEN} release to dockerhub${NC}"
 
-            deriveDockerTags
+            derive_docker_tags
             
             #build and release the image to dockerhub
-            releaseTodockerHub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
+            release_to_docker_hub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
+
+        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
+            #This is a stroom-nginx release, so do a docker build/push
+            echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release to dockerhub${NC}"
+
+            derive_docker_tags
+            
+            #build and release the image to dockerhub
+            release_to_docker_hub "${DOCKER_REPO_STROOM_ZOOKEEPER}" "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" ${allDockerTags}
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
-            echo -e "${GREEN}Performing a stroom_core stack release to github${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom_core${GREEN} stack release to github${NC}"
 
-            doStackBuild buildCore
+            do_stack_build buildCore
+            create_get_stroom_script
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
-            echo -e "${GREEN}Performing a stroom_full stack release to github${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom_full${GREEN} stack release to github${NC}"
 
-            doStackBuild buildFull
+            do_stack_build buildFull
+            create_get_stroom_script
         fi
     else
+        BUILD_VERSION="SNAPSHOT"
+
         #No tag so finish
-        echo -e "Not a tagged build so doing nothing"
+        echo -e "Not a tagged build so just build the stack and test it"
+
+        # TODO need to also do the full stack at some point.
+        do_stack_build buildCore
     fi
 }
 

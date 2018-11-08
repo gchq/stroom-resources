@@ -39,13 +39,12 @@ check_for_installed_binaries() {
 
 main(){
 
-    [ $# -eq 1 ] || error_exit "${RED}Invalid arguments. ${BLUE}Usage: getStack.sh /new/path/to/create/stack/in${NC}"
+    [ $# -eq 1 ] || error_exit "${RED}Invalid arguments. \n${NC}Usage: ${BLUE}getReleasedStack.sh /new/path/to/create/stack/in${NC}\ne.g. ${BLUE}getReleasedStack.sh /tmp${NC}"
 
     check_for_installed_binaries
 
     install_dir="$1"
 
-    [ ! -d ${install_dir} ] || error_exit "${RED}Directory ${GREEN}${install_dir}${RED} already exists"
 
     mkdir -p "${install_dir}"
 
@@ -59,6 +58,13 @@ main(){
         fzf)
 
     [ $? -eq 0 ] || error_exit "Something went wrong looking up the tag"
+
+    stack_dir="${install_dir}/${tag}"
+
+    [ ! -d ${stack_dir} ] || error_exit "${RED}Directory ${BLUE}${stack_dir}${RED} already exists"
+
+    mkdir -p "${stack_dir}"
+    cd "${stack_dir}"
 
     local url=$( \
         http https://api.github.com/repos/gchq/stroom-resources/releases/tags/${tag} | 
@@ -76,7 +82,7 @@ main(){
     
     echo -e "${GREEN}Downloading file ${BLUE}${file}${NC}"
     echo -e "${GREEN}From ${BLUE}${url}${NC}"
-    echo -e "${GREEN}Deploying to ${BLUE}${install_dir}${NC}"
+    echo -e "${GREEN}Deploying to ${BLUE}${stack_dir}${NC}"
 
     wget -q ${url}
 
@@ -88,6 +94,10 @@ main(){
 
     echo -e "${GREEN}Deleting downloaded file ${BLUE}${file}${NC}"
     rm ${file}
+
+    echo
+    echo -e "${GREEN}Stroom stack ${BLUE}${tag} ${GREEN}is now available at ${BLUE}${stack_dir}${NC}"
+    echo
 }
 
 main $@

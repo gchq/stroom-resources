@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2.4'
 
 services:
 
@@ -19,10 +19,9 @@ services:
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
       - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
     volumes:
-      # Shared certs volume: TODO: move it to the top level
-      - ../../../dev-resources/certs/server:/etc/nginx/certs
+      - ../../../dev-resources/certs/server:/etc/nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
-      - ../../../stroom-microservice-ui/template:/etc/nginx/template
+      - ../../../stroom-microservice-ui/template:/etc/nginx/template:ro
     ports:
       - 5002:5002
       - 9445:9445

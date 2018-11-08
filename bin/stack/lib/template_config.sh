@@ -22,4 +22,4 @@ echo -e "Using IP: ${BLUE}${HOST_IP}${NC}"
 # available to docker-compose
 source "$DIR"/config/<STACK_NAME>.env
 
-docker-compose -f "$DIR"/config/<STACK_NAME>.yml config
+docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml config

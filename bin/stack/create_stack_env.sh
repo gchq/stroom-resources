@@ -24,24 +24,46 @@ add_params() {
         grep -Po "(?<=\\$\\{).*?(?=\\})" |
         # Replaces ':-' with '='
         sed "s/:-/=\"/g" |
-        # Adds a closing single quote to the end of the line
+        # Adds a closing double quote to the end of the line
         sed "s/$/\"/g" |
         # Adds 'export' to the start of the line
         sed "s/^/export /" | 
         # Add in the stack name
-        sed "s/<STACK_NAME>/${STACK_NAME}/g" )
+        sed "s/<STACK_NAME>/${BUILD_STACK_NAME}/g" )
 
     echo "${params}" >> "${OUTPUT_FILE}"
 
     # OUTPUT_FILE contains stuff like STROOM_TAG=v6.0-LATEST, i.e. development
     # docker tags, so we need to replace them with fixed versions from 
-    # CONTAINER_VERSIONS_FILE. The sed command below finds all _TAG entries
-    # in OUTPUT_FILE and replaces them with the output of grepping the
-    # CONTAINER_VERSIONS_FILE for that _TAG entry. The 'e' flag executes the 
-    # result of the repalcement.
+    # CONTAINER_VERSIONS_FILE. 
 
-    # NOTE if this cmd fails it is probably because you don't have GNU sed. 
-    sed -i'' -E "s#(export .*_TAG).*#grep \"\1\" ${CONTAINER_VERSIONS_FILE}#e" ${OUTPUT_FILE}
+    echo -e "${GREEN}Setting container versions${NC}"
+    # Sub shell so we don't pollute ours
+    (
+        # read all the exports
+        source ${CONTAINER_VERSIONS_FILE}
+
+        grep -E "^\s*export.*" ${CONTAINER_VERSIONS_FILE} | while read line; do
+            local var_name="$(echo "${line}" | sed -E 's/^.*export\s+([A-Z_]+)=.*/\1/')"
+            local version="$(echo "${line}" | sed -E 's/^.*export\s+[A-Z_]+=(.*)/\1/')"
+
+            # Support lines like:
+            # export STROOM_PROXY_TAG="${STROOM_TAG}"
+            if [[ "${version}" =~ .*\$\{.*\}.* ]]; then
+                # Use bash indirect expansion ('!') to read the value of a variable with a given name
+                expanded_version="${!var_name}"
+                echo -e "  Expanding ${BLUE}${var_name}${NC} from ${BLUE}${version}${NC} to ${BLUE}${expanded_version}${NC}"
+                version="${expanded_version}"
+            fi
+
+            # check if file contains the var or interest
+            if grep -E --silent "\s*${var_name}=" ${OUTPUT_FILE}; then
+                echo -e "  Changing ${BLUE}${var_name}${NC} to ${BLUE}${version}${NC}"
+                # repalce var in OUTPUT_FILE with our CONTAINER_VERSIONS_FILE one
+                sed -i'' -E "s#^export\s+${var_name}=.*#export ${var_name}=${version}#g" ${OUTPUT_FILE}
+            fi
+        done
+    )
 
     # If there is a <stack_name>.override.env file in ./overrides then replace any matching env
     # vars found in the OUTPUT_FILE with the values from the override file.
@@ -56,28 +78,61 @@ add_params() {
 
             # Extract the existing variable value from the env file
             local curr_line="$(grep -E "${var_name}=.*" ${OUTPUT_FILE})"
-            local curr_value="$(echo "${curr_line}" | sed -E "s/${var_name}=(.*)/\1/")"
+            local curr_value="$(echo "${curr_line}" | sed -E "s/.*\s*${var_name}=(.*)/\1/")"
 
             echo
             echo -e "  Overriding ${DGREY}${var_name}=${curr_value}${NC}"
             echo -e "  With       ${YELLOW}${var_name}${NC}=${BLUE}${override_value}${NC}"
 
             # Replace the current value with the override
-            sed -i'' -E "s/(${var_name})=.*/\1=${override_value}/g" ${OUTPUT_FILE}
+            # This line may break if the sed delimiter (currently |) appears in ${override_value}
+            sed -i'' -E "s|(${var_name})=.*|\1=${override_value}|g" ${OUTPUT_FILE}
         done
     fi
+}
 
-    # Dump all the container tag variables to a file that will end up in the tar.gz
-    cat ${OUTPUT_FILE} | 
-        grep -E "export .*_TAG.*" > ${BUILD_FOLDER}/${STACK_NAME}/VERSIONS.txt
+add_additional_env_vars() {
+    # TODO if we get loads of these they should be moved out into a separate
+    # config file
+
+    # Required to allow the configuration of the docker repo for ctop
+    echo "export CTOP_DOCKER_REPO=\"quay.io/vektorlab/ctop\"" >> ${OUTPUT_FILE}
+    echo "export CTOP_TAG=\"latest\"" >> ${OUTPUT_FILE}
+}
+
+create_versions_file() {
+
+    # Produce a list of fully qualified docker image tags by sourcing the OUTPUT_FILE
+    # that contains all the env vars and using their values to do variable substitution
+    # against the image definitions obtained from the yml (INPUT_FILE)
+    # Source the env file in a subshell to avoid poluting ours
+    ( 
+        source ${OUTPUT_FILE}
+        
+        # Find all image: lines in the yml and turn them into echo statements so we can
+        # eval them so bash does its variable substitution. Bit hacky using eval.
+        cat ${INPUT_FILE} | 
+            grep "image:" | 
+            sed -e 's/\s*image:\s*/echo /g' | 
+            while read line; do
+
+                echo "$(eval $line)"
+        done
+    ) | sort > ${VERSIONS_FILE}
 
     echo -e "${GREEN}Using container versions:${NC}"
-    cat ${BUILD_FOLDER}/${STACK_NAME}/VERSIONS.txt | sed 's/export //g' | while read line; do
-        local var_name="$(echo "${line}" | sed -E 's/([A-Z_]*)=.*/\1/')"
-        local value="$(echo "${line}" | sed -E 's/[A-Z_]*="(.*)"/\1/')"
 
-        echo -e "  ${YELLOW}${var_name}${NC}: ${BLUE}${value}${NC}"
+    cat ${VERSIONS_FILE} | while read line; do
+        echo -e "  ${BLUE}${line}${NC}"
     done
+
+
+    # TODO validate tags
+    #if docker_tag_exists library/nginx 1.7.5; then
+        #echo exist
+    #else 
+        #echo not exists
+    #fi
 }
 
 main() {
@@ -85,18 +140,22 @@ main() {
 
     echo -e "${GREEN}Creating configuration${NC}"
 
-    local -r STACK_NAME=$1
+    local -r BUILD_STACK_NAME=$1
     local -r BUILD_FOLDER='build'
-    local -r WORKING_DIRECTORY="${BUILD_FOLDER}/${STACK_NAME}/config"
+    local -r WORKING_DIRECTORY="${BUILD_FOLDER}/${BUILD_STACK_NAME}/config"
     mkdir -p ${WORKING_DIRECTORY}
-    local -r INPUT_FILE="${WORKING_DIRECTORY}/${STACK_NAME}.yml"
-    local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${STACK_NAME}.env"
-    local -r OVERRIDE_FILE="overrides/${STACK_NAME}.override.env"
+    local -r INPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
+    local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
+    local -r OVERRIDE_FILE="overrides/${BUILD_STACK_NAME}.override.env"
+    local -r VERSIONS_FILE="${BUILD_FOLDER}/${BUILD_STACK_NAME}/VERSIONS.txt"
 
     create_config
     add_params
+    add_additional_env_vars
+
     # Sort and de-duplicate param list before we do anything else with the file
     sort -o "${OUTPUT_FILE}" -u "${OUTPUT_FILE}"
+    create_versions_file
 }
 
 main "$@"

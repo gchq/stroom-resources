@@ -1,9 +1,13 @@
-version: '2.1'
+version: '2.4'
 
 services: 
 
   stroom-all-dbs:
-    image: "${MYSQL_DOCKER_REPO:-mysql}:5.6"
+    # NB: stroom-auth uses a MySQL testcontainer (https://www.testcontainers.org/). This allows the 
+    # integration tests to run without an external database, i.e. without stroom-resources. 
+    # But this does mean that if you change the MySQL version _here_ you should also change it _there_:
+    # https://github.com/gchq/stroom-auth/blob/master/stroom-auth-svc/src/integration-test/java/stroom/auth/service/resources/support/Database_IT.java#L35
+    image: "${MYSQL_DOCKER_REPO:-mysql}:${MYSQL_TAG:-5.6.41}"
     container_name: stroom-all-dbs
     ports:
       - "3307:3306"
@@ -16,9 +20,6 @@ services:
       # dynamically rather than having a static file in a volume.
       sh -c "
           echo \"\" > /docker-entrypoint-initdb.d/init.sql;
-
-          echo \"SELECT USER();\" >> /docker-entrypoint-initdb.d/init.sql;
-          echo \"SELECT DATABASE();\" >> /docker-entrypoint-initdb.d/init.sql;
 
           echo \"CREATE DATABASE IF NOT EXISTS annotations;\" >> /docker-entrypoint-initdb.d/init.sql;
           echo 'CREATE USER \"${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
@@ -48,15 +49,23 @@ services:
           echo 'CREATE USER \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\" IDENTIFIED BY \"${STROOM_DB_PASSWORD:-stroompassword1}\";' >> /docker-entrypoint-initdb.d/init.sql;
           echo 'GRANT ALL ON stroom.* TO \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\";' >> /docker-entrypoint-initdb.d/init.sql;
 
-          echo \"show databases;\" >> /docker-entrypoint-initdb.d/init.sql;
-          echo \"SELECT User, Host FROM mysql.user;\" >> /docker-entrypoint-initdb.d/init.sql;
-          echo \"Dumping contents of /docker-entrypoint-initdb.d/init.sql\n\"
-          echo \"--------------------------------------------------------------\n\";
-          cat /docker-entrypoint-initdb.d/init.sql;
-          echo \"--------------------------------------------------------------\n\";
           /usr/local/bin/docker-entrypoint.sh mysqld"
     volumes:
-      - ${STROOM_DB_DATA_VOLUME:-../volumes/stroom-all-dbs}:/var/lib/mysql
+      - type: volume
+        source: stroom-all-dbs_data
+        target: /var/lib/mysql
+      - type: volume
+        source: stroom-all-dbs_logs
+        target: /var/log/mysql
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
 
+
+#         The following can be add before the line /usr/local/bin/docker-entrypoint.sh mysqld
+#         to help with debugging
+#         echo \"show databases;\" >> /docker-entrypoint-initdb.d/init.sql;
+#         echo \"SELECT User, Host FROM mysql.user;\" >> /docker-entrypoint-initdb.d/init.sql;
+#         echo \"Dumping contents of /docker-entrypoint-initdb.d/init.sql\n\"
+#         echo \"--------------------------------------------------------------\n\";
+#         cat /docker-entrypoint-initdb.d/init.sql;
+#         echo \"--------------------------------------------------------------\n\";

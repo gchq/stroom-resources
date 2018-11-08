@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2.4'
 
 services:
     
@@ -6,16 +6,17 @@ services:
     container_name: stroom
     image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
+      - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m }
       - STROOM_APP_PORT=${STROOM_APP_PORT:-8080}
       - STROOM_ADMIN_PORT=${STROOM_ADMIN_PORT:-8081}
       - STROOM_NODE=${STROOM_NODE:-node1a}
       - STROOM_RACK=${STROOM_RACK:-rack}
       - STROOM_JPA_DIALECT=org.hibernate.dialect.MySQLInnoDBDialect
-      - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
       - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}:${STROOM_DB_PORT:-3307}/stroom?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
       - STROOM_JDBC_DRIVER_USERNAME=${STROOM_DB_USERNAME:-stroomuser}
-      - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
+      - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-$HOST_IP}:${STROOM_STATS_DB_PORT:-3307}/stats?useUnicode=yes&characterEncoding=UTF-8
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=${STROOM_STATS_DB_USERNAME:-statsuser}
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
@@ -62,9 +63,38 @@ services:
       - STROOM_DOCREF_URL_SERVICE__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_SERVICE_URL:-http://$HOST_IP/queryElasticService}
       - STROOM_DOCREF_URL_UI__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_UI_URL:-http://$HOST_IP/annotations}
       - STROOM_DOCREF_URL_UI__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP/query-elastic}
+      - STROOM_PROXY_DIR=${STROOM_STROOM_PROXY_DIR:-/tmp/proxy}
+      - LOGS_EVENT_FEED_NAME=${STROOM_LOGS_EVENT_FEED_NAME:-STROOM_EVENT_LOG}
+      - LOGS_ACCESS_FEED_NAME=${STROOM_LOGS_ACCESS_FEED_NAME:-STROOM_ACCESS_LOG}
+      - LOGS_APP_FEED_NAME=${STROOM_LOGS_APP_FEED_NAME:-STROOM_APP_LOG}
+      - LOGS_SYSTEM=${STROOM_LOGS_SYSTEM:-Stroom}
+      - LOGS_ENV=${STROOM_LOGS_ENV:-Dev}
+      - LOGS_STROOM_URL=${STROOM_LOGS_STROOM_URL:-http://localhost:8080/stroom/datafeed}
+      - LOGS_CRONTAB=${STROOM_LOGS_CRONTAB:-* * * * *}
+      - LOGS_MAX_SLEEP=${STROOM_LOGS_MAX_SLEEP:-10}
+      - LOGS_SECURE=${STROOM_LOGS_SECURE:-true}
     ports:
       - "${STROOM_APP_PORT:-8080}:${STROOM_APP_PORT:-8080}"
       - "${STROOM_ADMIN_PORT:-8081}:${STROOM_ADMIN_PORT:-8081}"
       - "${STROOM_DEBUG_PORT:-10765}:${STROOM_DEBUG_PORT:-10765}"
+    healthcheck:
+      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
+      start_period: 1m30s
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      - type: volume
+        source: stroom_logs
+        target: /stroom/logs
+      - type: volume
+        source: stroom_output
+        target: /stroom/output
+      - type: volume
+        source: stroom-proxy-local_repo
+        target: /stroom/proxy-repo
+      - type: volume
+        source: stroom_volumes
+        target: /stroom/volumes
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

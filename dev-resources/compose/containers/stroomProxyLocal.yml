@@ -1,0 +1,65 @@
+version: '2.4'
+
+services: 
+
+  stroom-proxy-local:
+    container_name: stroom-proxy-local
+    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
+    environment:
+      - CONTENT_SYNC_ENABLED=${STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED:-true}
+      - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
+      - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-http://stroom:8080/stroom/datafeed}
+      - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:- -Xms50m -Xmx1024m }
+      - LOGS_ACCESS_FEED_NAME=${STROOM_PROXY_LOGS_ACCESS_FEED_NAME:-STROOM_PROXY_ACCESS_LOG}
+      - LOGS_APP_FEED_NAME=${STROOM_PROXY_LOGS_APP_FEED_NAME:-STROOM_PROXY_APP_LOG}
+      - LOGS_CRONTAB=${STROOM_PROXY_LOGS_CRONTAB:-* * * * *}
+      - LOGS_ENV=${STROOM_PROXY_LOGS_ENV:-Dev}
+      - LOGS_MAX_SLEEP=${STROOM_PROXY_LOGS_MAX_SLEEP:-10}
+      - LOGS_RECEIVE_FEED_NAME=${STROOM_PROXY_LOGS_RECEIVE_FEED_NAME:-STROOM_PROXY_RECEIVE_LOG}
+      - LOGS_SECURE=${STROOM_PROXY_LOGS_SECURE:-true}
+      - LOGS_SEND_FEED_NAME=${STROOM_PROXY_LOGS_SEND_FEED_NAME:-STROOM_PROXY_SEND_LOG}
+      - LOGS_STROOM_URL=${STROOM_PROXY_LOGS_STROOM_URL:-http://stroom:8080/stroom/datafeed}
+      - LOGS_SYSTEM=${STROOM_PROXY_LOGS_SYSTEM:-Stroom-Proxy}
+      - RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
+      - STORING_ENABLED=${STROOM_PROXY_LOCAL_STORING_ENABLED:-true}
+      - STROOM_PROXY_ADMIN_PORT=${STROOM_PROXY_ADMIN_PORT:-8091}
+      - STROOM_PROXY_APP_PORT=${STROOM_PROXY_APP_PORT:-8090}
+      - STROOM_PROXY_HTTPS_APP_PORT=${STROOM_PROXY_HTTPS_APP_PORT:-8543}
+      - STROOM_PROXY_HTTPS_KEYSTORE_PASSWORD=${STROOM_PROXY_HTTPS_KEYSTORE_PASSWORD:-password}
+      - STROOM_PROXY_HTTPS_KEYSTORE_PATH=${STROOM_PROXY_HTTPS_KEYSTORE_PATH:-/stroom-proxy/certs/server.jks}
+      - STROOM_PROXY_HTTPS_KEYSTORE_TYPE=${STROOM_PROXY_HTTPS_KEYSTORE_TYPE:-JKS}
+      - STROOM_PROXY_HTTPS_NEED_CLIENT_AUTH=${STROOM_PROXY_HTTPS_NEED_CLIENT_AUTH:-true}
+      - STROOM_PROXY_HTTPS_SUPPORTED_PROTOCOLS=${STROOM_PROXY_HTTPS_SUPPORTED_PROTOCOLS:-TLSv1.2}
+      - STROOM_PROXY_HTTPS_TRUSTSTORE_PASSWORD=${STROOM_PROXY_HTTPS_TRUSTSTORE_PASSWORD:-password}
+      - STROOM_PROXY_HTTPS_TRUSTSTORE_PATH=${STROOM_PROXY_HTTPS_TRUSTSTORE_PATH:-/stroom-proxy/certs/ca.jks}
+      - STROOM_PROXY_HTTPS_TRUSTSTORE_TYPE=${STROOM_PROXY_HTTPS_TRUSTSTORE_TYPE:-JKS}
+      - STROOM_PROXY_HTTPS_WANT_CLIENT_AUTH=${STROOM_PROXY_HTTPS_WANT_CLIENT_AUTH:-true}
+        #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-http://stroom:8080/api/dictionary/v1}
+      - UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-http://stroom:8080/api/dictionary/v1}
+      - UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
+    ports:
+      - "${STROOM_PROXY_APP_PORT:-8090}:${STROOM_PROXY_APP_PORT:-8090}"
+      - "${STROOM_PROXY_HTTPS_APP_PORT:-8543}:${STROOM_PROXY_HTTPS_APP_PORT:-8543}"
+      - "${STROOM_PROXY_ADMIN_PORT:-8091}:${STROOM_PROXY_ADMIN_PORT:-8091}"
+    healthcheck:
+      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_PROXY_ADMIN_PORT:-8091}/proxyAdmin/healthcheck || exit 1
+      start_period: 30s 
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${STROOM_PROXY_LOCAL_VOLUME_CERTS:-../volumes/stroom-proxy/certs}:/stroom-proxy/certs:ro
+      - type: volume
+        source: stroom-proxy-local_config
+        target: /stroom-proxy/config
+      - type: volume
+        source: stroom-proxy-local_content
+        target: /stroom-proxy/content
+      - type: volume
+        source: stroom-proxy-local_logs
+        target: /stroom-proxy/logs
+      - type: volume
+        source: stroom-proxy-local_repo
+        target: /stroom-proxy/repo
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"

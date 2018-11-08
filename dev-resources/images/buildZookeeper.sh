@@ -22,7 +22,7 @@ set -e
 DOCKER_REPO=gchq/stroom-zookeeper
 
 if [ $# -ne 1 ]; then
-    echo "Must supply the version as the first argument, e.g. $0 v1.0.0_zk-v3.4.5"
+    echo "Must supply the version as the first argument, e.g. $0 v1.0.0_zk-v3.4.5 or dev-SNAPSHOT"
     exit 1
 fi
 
@@ -30,6 +30,3 @@ fi
 ver="$1"
 
 docker build --tag ${DOCKER_REPO}:${ver} ./zookeeper/
-
-# This assumes you have authenticated with docker using 'docker login', else it will fail
-docker push ${DOCKER_REPO}:${ver}

@@ -1,27 +1,13 @@
-# Dev certs
-These certs may be used to test SSL termination in NGINX.
+# Re-creating the dev certificates
 
-The `all` directory contains all the self-signed certificates and keys and CSRs. The `server` directory contains the certificates and key needed for serving files over HTTPS.
+To re-create all the dev certificates run the following script:
 
-## Using HTTPie to test
+`./createCerts.sh`
 
-When using self-signed certificates, like we are here, HTTPie needs to be passed `--verify=no`, otherwise it'll fail. For example:
+This will delete existing certificates, CSRs, keys and keystores in the following directories then regenerate them all.
 
-```
-http --cert=client.pem.crt --cert-key=client.unencrypted.key https://localhost/login --verify=no
+`certificate-authority`
+`client`
+`server`
 
-```
-
-Conversely, if NGINX doesn't specify `ssl_verify_client on;`, then it won't extract the DN from the client's certificate. Stroom and friends need the DN to identify the user.
-
-## References
-
-[How to generate client certificates](http://nategood.com/client-side-certificate-authentication-in-ngi)
-
-[How to remove a pass phrase from a certificate](http://www.insivia.com/removing-a-pass-phrase-from-a-ssl-certificate/)
-
-[Useful OpenSSL commands](https://www.sslshopper.com/article-most-common-openssl-commands.html)
-
-[More useful OpenSSL commands](https://support.asperasoft.com/hc/en-us/articles/216128468-OpenSSL-commands-to-check-and-verify-your-SSL-certificate-key-and-CSR)
-
-[Converting PEM to DER](https://support.ssl.com/Knowledgebase/Article/View/19/0/der-vs-crt-vs-cer-vs-pem-certificates-and-how-to-convert-them)
+NOTE: The generated files are for development/testing purposes only and are NOT for any form of produuction use.

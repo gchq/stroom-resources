@@ -1,11 +1,11 @@
-version: '2.1'
+version: "2.4"
 
 services:
-
   stroom-auth-service:
     container_name: stroom-auth-service
     image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v1.0-LATEST}"
     environment:
+      - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:- -Xms50m -Xmx1024m }
       - STROOM_AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
       - STROOM_AUTH_SERVICE_ADMIN_PORT=${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}
       - DB_USER=${STROOM_AUTH_DB_USERNAME:-authuser}
@@ -22,6 +22,7 @@ services:
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes
+      - FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN=${STROOM_AUTH_FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN:-true}
       - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-TODO}
       - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-Stroom User Accounts}
       - EMAIL_RESET_SUBJECT=${EMAIL_RESET_SUBJECT:-Password reset for Stroom}
@@ -33,9 +34,27 @@ services:
       - EMAIL_SMTP_USERNAME=${EMAIL_SMTP_USERNAME:-TODO}
       - EMAIL_SMTP_PASSWORD=${EMAIL_SMTP_PASSWORD:-TODO}
       - OWN_PATH=${STROOM_AUTH_SERVICE:-authentication}
+      - LOGS_EVENT_FEED_NAME=${STROOM_AUTH_LOGS_EVENT_FEED_NAME:-AUTH_EVENT_LOG}
+      - LOGS_ACCESS_FEED_NAME=${STROOM_AUTH_LOGS_ACCESS_FEED_NAME:-AUTH_ACCESS_LOG}
+      - LOGS_APP_FEED_NAME=${STROOM_AUTH_LOGS_APP_FEED_NAME:-AUTH_APP_LOG}
+      - LOGS_SYSTEM=${STROOM_AUTH_LOGS_SYSTEM:-StroomAuth}
+      - LOGS_ENV=${STROOM_AUTH_LOGS_ENV:-Dev}
+      - LOGS_STROOM_URL=${STROOM_AUTH_LOGS_STROOM_URL:-http://stroom:8080/stroom/datafeed}
+      - LOGS_CRONTAB=${STROOM_AUTH_LOGS_CRONTAB:-* * * * *}
+      - LOGS_MAX_SLEEP=${STROOM_LOGS_MAX_SLEEP:-10}
+      - LOGS_SECURE=${STROOM_LOGS_SECURE:-true}
     ports:
       - "${STROOM_AUTH_SERVICE_PORT:-8099}:${STROOM_AUTH_SERVICE_PORT:-8099}"
       - "${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}"
-    entrypoint: java -jar stroom-auth-service-all.jar server config.yml
+    healthcheck:
+      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}/authenticationServiceAdmin/healthcheck || exit 1
+      start_period: 1m
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      - type: volume
+        source: stroom-auth-service_logs
+        target: /stroom-auth-service/logs
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
