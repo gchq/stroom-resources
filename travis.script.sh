@@ -122,6 +122,11 @@ do_stack_build() {
     echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
     mv "${fileName}" "${newFileName}"  
 
+    # Now create an MD5 hash of the stack file
+    local md5File="${newFileName}.md5"
+    echo -e "Creating MD5 hash file ${GREEN}${md5File}${NC}"
+    md5sum "${newFileName}" > "${md5File}"
+
     # Now spin up the stack to make sure it all works
     test_stack "${newFileName}"
 
