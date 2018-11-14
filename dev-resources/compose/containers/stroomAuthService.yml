@@ -28,6 +28,7 @@ services:
       - EMAIL_RESET_SUBJECT=${EMAIL_RESET_SUBJECT:-Password reset for Stroom}
       - EMAIL_RESET_TEXT=${EMAIL_RESET_TEXT:-A password reset has been requested for this email address. Please visit the following URL to reset your password -- %s.}
       - EMAIL_RESET_TOKEN_VALIDITY_IN_MINUTES=${EMAIL_RESET_TOKEN_VALIDITY_IN_MINUTES:-60}
+      - EMAIL_RESET_URL=${EMAIL_RESET_URL:-http://$HOST_IP/resetPassword/?token=%s}
       - EMAIL_SMTP_HOST=${EMAIL_SMTP_HOST:-TODO}
       - EMAIL_SMTP_PORT=${EMAIL_SMTP_PORT:-587}
       - EMAIL_SMTP_TRANSPORT=${EMAIL_SMTP_TRANSPORT:-TLS}
