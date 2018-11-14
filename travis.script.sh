@@ -120,6 +120,7 @@ build_dev_stroom_images() {
     echo -e "${GREEN}Checking out ${ACTIVE_STROOM_BRANCH} branch${NC}"
     pushd stroom > /dev/null
     git checkout ${ACTIVE_STROOM_BRANCH}
+    echo -e "stroom HEAD commit [${GREEN}$(git --no-pager log -n 1 --pretty=format:"%H")${NC}]"
 
     echo -e "${GREEN}Building images${NC}"
     ./buildDockerImages.sh
@@ -133,6 +134,7 @@ build_dev_stroom_images() {
     echo -e "${GREEN}Checking out ${ACTIVE_STROOM_AUTH_BRANCH} branch${NC}"
     pushd stroom-auth > /dev/null
     git checkout ${ACTIVE_STROOM_AUTH_BRANCH}
+    echo -e "stroom-auth HEAD commit [${GREEN}$(git --no-pager log -n 1 --pretty=format:"%H")${NC}]"
 
     echo -e "${GREEN}Building service image${NC}"
     ./docker.sh build service dev-SNAPSHOT
