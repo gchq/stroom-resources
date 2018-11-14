@@ -111,7 +111,7 @@ build_dev_stroom_images() {
 
     echo "${GREEN}Checking out ${ACTIVE_STROOM_BRANCH} branch${NC}"
     pushd stroom > /dev/null
-    gco ${ACTIVE_STROOM_BRANCH}
+    git checkout ${ACTIVE_STROOM_BRANCH}
 
     echo "${GREEN}Building images${NC}"
     ./buildDockerImages.sh
@@ -124,7 +124,7 @@ build_dev_stroom_images() {
 
     echo "${GREEN}Checking out ${ACTIVE_STROOM_AUTH_BRANCH} branch${NC}"
     pushd stroom-auth > /dev/null
-    gco ${ACTIVE_STROOM_AUTH_BRANCH}
+    git checkout ${ACTIVE_STROOM_AUTH_BRANCH}
 
     echo "${GREEN}Building service image${NC}"
     ./docker.sh build service dev-SNAPSHOT
@@ -142,7 +142,15 @@ do_snapshot_stack_build() {
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
     local -r buildDir=${scriptDir}/build/
     local -r containerVersionFile=${scriptDir}/container_versions.env
+
+    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    echo -e "${GREEN}Building and testing dev-SNAPSHOT stack${NC}"
+    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+
     pushd ${scriptDir} > /dev/null
+
+    # Ensure there is no buildDir from a previous build
+    rm -rf ${buildDir}
 
     echo "${GREEN}Setting container versions to dev-SNAPSHOT${NC}"
 
@@ -175,7 +183,15 @@ do_versioned_stack_build() {
     local -r scriptName="${1}.sh"
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
     local -r buildDir=${scriptDir}/build/
+
+    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    echo -e "${GREEN}Building and testing versioned stack${NC}"
+    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+
     pushd ${scriptDir} > /dev/null
+
+    # Ensure there is no buildDir from a previous build
+    rm -rf ${buildDir}
 
     echo "Running ${scriptName} in ${scriptDir}"
 
@@ -333,7 +349,11 @@ main() {
         # TODO need to also do the full stack at some point.
 
         # This is just a snapshot build so build and test a snapshot of the stack and
-        # stroom/proxy/auth images
+        # stroom/proxy/auth images, plus a versioned stack
+
+        # NOTE the versioned one should come first as the snapshot build mutates the versions file
+        do_versioned_stack_build buildCore
+
         do_snapshot_stack_build buildCore
     fi
 }
