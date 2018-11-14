@@ -106,6 +106,14 @@ build_dev_stroom_images() {
     mkdir -p ${git_work_dir}
     pushd ${git_work_dir} > /dev/null
 
+    #Currently needed for the hadoop-command and hadoop-hdfs shaded libs
+    echo -e "${GREEN}Clone build and publish our urlDependencies plugin${NC}"
+    git clone https://github.com/gchq/urlDependencies-plugin.git
+    pushd urlDependencies-plugin > /dev/null
+    ./gradlew clean build publishToMavenLocal
+    popd > /dev/null
+
+
     echo -e "${GREEN}Cloning stroom repo${NC}"
     git clone https://github.com/gchq/stroom.git
 
