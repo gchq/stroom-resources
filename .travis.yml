@@ -1,5 +1,7 @@
-language: bash
+language: java
 dist: trusty
+group: edge
+jdk: openjdk8
 sudo: required
 
 services:

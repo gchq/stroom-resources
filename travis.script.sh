@@ -106,30 +106,30 @@ build_dev_stroom_images() {
     mkdir -p ${git_work_dir}
     pushd ${git_work_dir} > /dev/null
 
-    echo "${GREEN}Cloning stroom repo${NC}"
+    echo -e "${GREEN}Cloning stroom repo${NC}"
     git clone https://github.com/gchq/stroom.git
 
-    echo "${GREEN}Checking out ${ACTIVE_STROOM_BRANCH} branch${NC}"
+    echo -e "${GREEN}Checking out ${ACTIVE_STROOM_BRANCH} branch${NC}"
     pushd stroom > /dev/null
     git checkout ${ACTIVE_STROOM_BRANCH}
 
-    echo "${GREEN}Building images${NC}"
+    echo -e "${GREEN}Building images${NC}"
     ./buildDockerImages.sh
 
     popd > /dev/null
 
 
-    echo "${GREEN}Cloning stroom-auth repo${NC}"
+    echo -e "${GREEN}Cloning stroom-auth repo${NC}"
     git clone https://github.com/gchq/stroom-auth.git
 
-    echo "${GREEN}Checking out ${ACTIVE_STROOM_AUTH_BRANCH} branch${NC}"
+    echo -e "${GREEN}Checking out ${ACTIVE_STROOM_AUTH_BRANCH} branch${NC}"
     pushd stroom-auth > /dev/null
     git checkout ${ACTIVE_STROOM_AUTH_BRANCH}
 
-    echo "${GREEN}Building service image${NC}"
+    echo -e "${GREEN}Building service image${NC}"
     ./docker.sh build service dev-SNAPSHOT
 
-    echo "${GREEN}Building ui image${NC}"
+    echo -e "${GREEN}Building ui image${NC}"
     ./docker.sh build ui dev-SNAPSHOT
 
     popd > /dev/null
@@ -152,16 +152,16 @@ do_snapshot_stack_build() {
     # Ensure there is no buildDir from a previous build
     rm -rf ${buildDir}
 
-    echo "${GREEN}Setting container versions to dev-SNAPSHOT${NC}"
+    echo -e "${GREEN}Setting container versions to dev-SNAPSHOT${NC}"
 
     sed -i'' 's/^export STROOM_TAG=.*/export STROOM_TAG="dev-SNAPSHOT"/g' ${containerVersionFile}
     sed -i'' 's/^export STROOM_AUTH_SERVICE_TAG=.*/export STROOM_AUTH_SERVICE_TAG="dev-SNAPSHOT"/g' ${containerVersionFile}
 
-    echo "${GREEN}Dumping ${containerVersionFile}${NC}"
+    echo -e "${GREEN}Dumping ${containerVersionFile}${NC}"
 
     cat ${containerVersionFile}
 
-    echo "Running ${scriptName} in ${scriptDir}"
+    echo -e "Running ${scriptName} in ${scriptDir}"
 
     ./${scriptName}
 
@@ -193,7 +193,7 @@ do_versioned_stack_build() {
     # Ensure there is no buildDir from a previous build
     rm -rf ${buildDir}
 
-    echo "Running ${scriptName} in ${scriptDir}"
+    echo -e "Running ${scriptName} in ${scriptDir}"
 
     ./${scriptName}
 
