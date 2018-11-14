@@ -241,7 +241,7 @@ test_stack() {
 
     # Test the remove script
     echo -e "${GREEN}Running remove script${NC}"
-    ./remove.sh
+    ./remove.sh -y
 
     # Clear out all docker images/volumes/containers
     echo -e "${GREEN}Clearing out docker images/containers/volumes${NC}"
