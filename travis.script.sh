@@ -31,6 +31,9 @@ VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
 
+ACTIVE_STROOM_BRANCH="6.0"
+ACTIVE_STROOM_AUTH_BRANCH="1.0"
+
 # The dir used to hold content for deploying to github pages, i.e. https://gchq.github.io/stroom-resources
 GH_PAGES_DIR="${TRAVIS_BUILD_DIR}/gh-pages"
 
@@ -71,7 +74,6 @@ release_to_docker_hub() {
     docker push ${dockerRepo} >/dev/null 2>&1
 }
 
-
 derive_docker_tags() {
     #This is a tagged commit, so create a docker image with that tag
     VERSION_FIXED_TAG="${BUILD_VERSION}"
@@ -98,8 +100,78 @@ derive_docker_tags() {
     allDockerTags="${VERSION_FIXED_TAG} ${SNAPSHOT_FLOATING_TAG} ${MAJOR_VER_FLOATING_TAG} ${MINOR_VER_FLOATING_TAG}"
 }
 
+build_dev_stroom_images() {
 
-do_stack_build() {
+    local git_work_dir=${TRAVIS_BUILD_DIR}/git_work
+    mkdir -p ${git_work_dir}
+    pushd ${git_work_dir} > /dev/null
+
+    echo "${GREEN}Cloning stroom repo${NC}"
+    git clone https://github.com/gchq/stroom.git
+
+    echo "${GREEN}Checking out ${ACTIVE_STROOM_BRANCH} branch${NC}"
+    pushd stroom > /dev/null
+    gco ${ACTIVE_STROOM_BRANCH}
+
+    echo "${GREEN}Building images${NC}"
+    ./buildDockerImages.sh
+
+    popd > /dev/null
+
+
+    echo "${GREEN}Cloning stroom-auth repo${NC}"
+    git clone https://github.com/gchq/stroom-auth.git
+
+    echo "${GREEN}Checking out ${ACTIVE_STROOM_AUTH_BRANCH} branch${NC}"
+    pushd stroom-auth > /dev/null
+    gco ${ACTIVE_STROOM_AUTH_BRANCH}
+
+    echo "${GREEN}Building service image${NC}"
+    ./docker.sh build service dev-SNAPSHOT
+
+    echo "${GREEN}Building ui image${NC}"
+    ./docker.sh build ui dev-SNAPSHOT
+
+    popd > /dev/null
+
+    popd > /dev/null
+}
+
+do_snapshot_stack_build() {
+    local -r scriptName="${1}.sh"
+    local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
+    local -r buildDir=${scriptDir}/build/
+    local -r containerVersionFile=${scriptDir}/container_versions.env
+    pushd ${scriptDir} > /dev/null
+
+    echo "${GREEN}Setting container versions to dev-SNAPSHOT${NC}"
+
+    sed -i'' 's/^export STROOM_TAG=.*/export STROOM_TAG="dev-SNAPSHOT"/g' ${containerVersionFile}
+    sed -i'' 's/^export STROOM_AUTH_SERVICE_TAG=.*/export STROOM_AUTH_SERVICE_TAG="dev-SNAPSHOT"/g' ${containerVersionFile}
+
+    echo "${GREEN}Dumping ${containerVersionFile}${NC}"
+
+    cat ${containerVersionFile}
+
+    echo "Running ${scriptName} in ${scriptDir}"
+
+    ./${scriptName}
+
+    pushd ${buildDir} > /dev/null
+
+    local -r fileName="$(ls -1 *.tar.gz)"
+
+    build_dev_stroom_images
+
+    # Now spin up the stack to make sure it all works
+    test_stack_archive "${fileName}"
+
+    popd > /dev/null
+    popd > /dev/null
+
+}
+
+do_versioned_stack_build() {
     local -r scriptName="${1}.sh"
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
     local -r buildDir=${scriptDir}/build/
@@ -128,14 +200,39 @@ do_stack_build() {
     md5sum "${newFileName}" > "${md5File}"
 
     # Now spin up the stack to make sure it all works
-    test_stack "${newFileName}"
+    test_stack_archive "${newFileName}"
 
     popd > /dev/null
     popd > /dev/null
 }
 
-
 test_stack() {
+    # Tests an exploded stack in the current directory
+
+    # jq is installed by default on travis so no need to install it
+
+    echo -e "${GREEN}Running start script${NC}"
+    # If the stack is unhealthy then start should exit with a non-zero code.
+    ./start.sh
+
+    # Just in case, run the health script
+    echo -e "${GREEN}Running health script${NC}"
+    ./health.sh
+
+    # Test the stop script
+    echo -e "${GREEN}Running stop script${NC}"
+    ./stop.sh
+
+    # Test the remove script
+    echo -e "${GREEN}Running remove script${NC}"
+    ./remove.sh
+
+    # Clear out all docker images/volumes/containers
+    echo -e "${GREEN}Clearing out docker images/containers/volumes${NC}"
+    ${TRAVIS_BUILD_DIR}/bin/clean.sh
+}
+
+test_stack_archive() {
     local -r stack_archive_file=$1
 
     if [ ! -f "${stack_archive_file}" ]; then
@@ -151,16 +248,7 @@ test_stack() {
     echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
     tar -xvf "../${stack_archive_file}"
 
-    # jq is installed by default on travis so no need to install it
-
-    echo -e "${GREEN}Starting stack${NC}"
-    # If the stack is unhealthy then start should exit with a non-zero code.
-    ./start.sh
-
-    # Just in case, run the health script
-    ./health.sh
-
-    ./stop.sh
+    test_stack
 
     popd > /dev/null
 }
@@ -226,14 +314,14 @@ main() {
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
             echo -e "${GREEN}Performing a ${BLUE}stroom_core${GREEN} stack release to github${NC}"
 
-            do_stack_build buildCore
+            do_versioned_stack_build buildCore
             create_get_stroom_script
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
             echo -e "${GREEN}Performing a ${BLUE}stroom_full${GREEN} stack release to github${NC}"
 
-            do_stack_build buildFull
+            do_versioned_stack_build buildFull
             create_get_stroom_script
         fi
     else
@@ -243,7 +331,10 @@ main() {
         echo -e "Not a tagged build so just build the stack and test it"
 
         # TODO need to also do the full stack at some point.
-        do_stack_build buildCore
+
+        # This is just a snapshot build so build and test a snapshot of the stack and
+        # stroom/proxy/auth images
+        do_snapshot_stack_build buildCore
     fi
 }
 
