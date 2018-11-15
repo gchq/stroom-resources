@@ -31,9 +31,6 @@ VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
 
-ACTIVE_STROOM_BRANCH="6.0"
-ACTIVE_STROOM_AUTH_BRANCH="1.0"
-
 # The dir used to hold content for deploying to github pages, i.e. https://gchq.github.io/stroom-resources
 GH_PAGES_DIR="${TRAVIS_BUILD_DIR}/gh-pages"
 
@@ -98,95 +95,6 @@ derive_docker_tags() {
     #If say the build for v6.0.1 is re-run after the build for v6.0.2 has run then v6.0-LATEST will point to v6.0.1
     #which is incorrect, hopefully this course of events is unlikely to happen
     allDockerTags="${VERSION_FIXED_TAG} ${SNAPSHOT_FLOATING_TAG} ${MAJOR_VER_FLOATING_TAG} ${MINOR_VER_FLOATING_TAG}"
-}
-
-build_dev_stroom_images() {
-
-    local git_work_dir=${TRAVIS_BUILD_DIR}/git_work
-    mkdir -p ${git_work_dir}
-    pushd ${git_work_dir} > /dev/null
-
-    #Currently needed for the hadoop-command and hadoop-hdfs shaded libs
-    echo -e "${GREEN}Clone build and publish our urlDependencies plugin${NC}"
-    git clone https://github.com/gchq/urlDependencies-plugin.git
-    pushd urlDependencies-plugin > /dev/null
-    ./gradlew clean build publishToMavenLocal
-    popd > /dev/null
-
-
-    echo -e "${GREEN}Cloning stroom repo${NC}"
-    git clone https://github.com/gchq/stroom.git
-
-    echo -e "${GREEN}Checking out ${ACTIVE_STROOM_BRANCH} branch${NC}"
-    pushd stroom > /dev/null
-    git checkout ${ACTIVE_STROOM_BRANCH}
-    echo -e "stroom HEAD commit [${GREEN}$(git --no-pager log -n 1 --pretty=format:"%H")${NC}]"
-
-    echo -e "${GREEN}Building images${NC}"
-    ./buildDockerImages.sh
-
-    popd > /dev/null
-
-
-    echo -e "${GREEN}Cloning stroom-auth repo${NC}"
-    git clone https://github.com/gchq/stroom-auth.git
-
-    echo -e "${GREEN}Checking out ${ACTIVE_STROOM_AUTH_BRANCH} branch${NC}"
-    pushd stroom-auth > /dev/null
-    git checkout ${ACTIVE_STROOM_AUTH_BRANCH}
-    echo -e "stroom-auth HEAD commit [${GREEN}$(git --no-pager log -n 1 --pretty=format:"%H")${NC}]"
-
-    echo -e "${GREEN}Building service image${NC}"
-    ./docker.sh build service dev-SNAPSHOT
-
-    echo -e "${GREEN}Building ui image${NC}"
-    ./docker.sh build ui dev-SNAPSHOT
-
-    popd > /dev/null
-
-    popd > /dev/null
-}
-
-do_snapshot_stack_build() {
-    local -r scriptName="${1}.sh"
-    local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
-    local -r buildDir=${scriptDir}/build/
-    local -r containerVersionFile=${scriptDir}/container_versions.env
-
-    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-    echo -e "${GREEN}Building and testing dev-SNAPSHOT stack${NC}"
-    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-
-    pushd ${scriptDir} > /dev/null
-
-    # Ensure there is no buildDir from a previous build
-    rm -rf ${buildDir}
-
-    echo -e "${GREEN}Setting container versions to dev-SNAPSHOT${NC}"
-
-    sed -i'' 's/^export STROOM_TAG=.*/export STROOM_TAG="dev-SNAPSHOT"/g' ${containerVersionFile}
-    sed -i'' 's/^export STROOM_AUTH_SERVICE_TAG=.*/export STROOM_AUTH_SERVICE_TAG="dev-SNAPSHOT"/g' ${containerVersionFile}
-
-    echo -e "${GREEN}Dumping ${containerVersionFile}${NC}"
-
-    cat ${containerVersionFile}
-
-    echo -e "Running ${scriptName} in ${scriptDir}"
-
-    ./${scriptName}
-
-    pushd ${buildDir} > /dev/null
-
-    local -r fileName="$(ls -1 *.tar.gz)"
-
-    build_dev_stroom_images
-
-    # Now spin up the stack to make sure it all works
-    test_stack_archive "${fileName}"
-
-    popd > /dev/null
-    popd > /dev/null
-
 }
 
 do_versioned_stack_build() {
@@ -358,13 +266,7 @@ main() {
 
         # TODO need to also do the full stack at some point.
 
-        # This is just a snapshot build so build and test a snapshot of the stack and
-        # stroom/proxy/auth images, plus a versioned stack
-
-        # NOTE the versioned one should come first as the snapshot build mutates the versions file
         do_versioned_stack_build buildCore
-
-        do_snapshot_stack_build buildCore
     fi
 }
 

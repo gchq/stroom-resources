@@ -22,7 +22,7 @@ set -e
 DOCKER_REPO=gchq/stroom-zookeeper
 
 if [ $# -ne 1 ]; then
-    echo "Must supply the version as the first argument, e.g. $0 v1.0.0_zk-v3.4.5 or dev-SNAPSHOT"
+    echo "Must supply the version as the first argument, e.g. $0 v1.0.0_zk-v3.4.5 or local-SNAPSHOT"
     exit 1
 fi
 
