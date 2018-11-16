@@ -13,5 +13,8 @@ services:
       - type: volume
         source: zookeeper_data
         target: /var/lib/zookeeper
+    logging:
+      options:
+        max-size: "${STROOM_ZOOKEEPER_STD_OUT_LOGS_MAX_SIZE:-10m}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

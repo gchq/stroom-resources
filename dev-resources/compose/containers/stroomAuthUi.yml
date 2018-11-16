@@ -30,5 +30,8 @@ services:
     ports:
       - 5000:5000
       - 9443:9443
+    logging:
+      options:
+        max-size: "${STROOM_AUTH_UI_STD_OUT_LOGS_MAX_SIZE:-10m}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

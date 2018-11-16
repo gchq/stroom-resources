@@ -97,5 +97,8 @@ services:
       - type: volume
         source: stroom_volumes
         target: /stroom/volumes
+    logging:
+      options:
+        max-size: "${STROOM_STD_OUT_LOGS_MAX_SIZE:-10m}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

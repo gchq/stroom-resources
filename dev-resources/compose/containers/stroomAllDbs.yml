@@ -57,6 +57,9 @@ services:
       - type: volume
         source: stroom-all-dbs_logs
         target: /var/log/mysql
+    logging:
+      options:
+        max-size: "${MYSQL_STD_OUT_LOGS_MAX_SIZE:-10m}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
 

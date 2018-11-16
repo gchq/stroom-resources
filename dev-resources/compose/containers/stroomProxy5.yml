@@ -20,5 +20,8 @@ services:
       - type: volume
         source: stroom-proxy-local_repo
         target: /stroom-proxy/repo
+    logging:
+      options:
+        max-size: "${STROOM_PROXY_STD_OUT_LOGS_MAX_SIZE:-10m}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

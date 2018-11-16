@@ -56,5 +56,8 @@ services:
       - type: volume
         source: stroom-auth-service_logs
         target: /stroom-auth-service/logs
+    logging:
+      options:
+        max-size: "${STROOM_AUTH_SERVICE_STD_OUT_LOGS_MAX_SIZE:-10m}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
