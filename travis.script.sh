@@ -12,14 +12,19 @@ BLUE='\033[1;34m'
 NC='\033[0m' # No Colour 
 
 # Prefixes for git tags that determine what the build does
+# Docker image prefixes
+TAG_PREFIX_STROOM_LOG_SENDER="stroom-log-sender"
 TAG_PREFIX_STROOM_NGINX="stroom-nginx"
 TAG_PREFIX_STROOM_ZOOKEEPER="stroom-zookeeper"
+# Stack prefixes
 TAG_PREFIX_STROOM_STROOM_CORE="stroom_core"
 TAG_PREFIX_STROOM_STROOM_FULL="stroom_full"
 
+DOCKER_REPO_STROOM_LOG_SENDER="gchq/stroom-log-sender"
 DOCKER_REPO_STROOM_NGINX="gchq/stroom-nginx"
 DOCKER_REPO_STROOM_ZOOKEEPER="gchq/stroom-zookeeper"
 
+DOCKER_CONTEXT_ROOT_STROOM_LOG_SENDER="stroom-log-sender/."
 DOCKER_CONTEXT_ROOT_STROOM_NGINX="stroom-nginx/."
 DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER="dev-resources/images/zookeeper/."
 
@@ -235,8 +240,17 @@ main() {
             #build and release the image to dockerhub
             release_to_docker_hub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
 
+        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_LOG_SENDER} ]]; then
+            #This is a stroom-log-sender release, so do a docker build/push
+            echo -e "${GREEN}Performing a ${BLUE}stroom-log-sender${GREEN} release to dockerhub${NC}"
+
+            derive_docker_tags
+            
+            #build and release the image to dockerhub
+            release_to_docker_hub "${DOCKER_REPO_STROOM_LOG_SENDER}" "${DOCKER_CONTEXT_ROOT_STROOM_LOG_SENDER}" ${allDockerTags}
+
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
-            #This is a stroom-nginx release, so do a docker build/push
+            #This is a stroom-zookeeper release, so do a docker build/push
             echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release to dockerhub${NC}"
 
             derive_docker_tags
