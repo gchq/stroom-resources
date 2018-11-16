@@ -66,14 +66,22 @@ release_to_docker_hub() {
     echo -e "contextRoot:                   [${GREEN}${contextRoot}${NC}]"
     echo -e "allTags:                       [${GREEN}${allTagArgs}${NC}]"
 
-    docker build ${allTagArgs} ${contextRoot}
+    # If we have a TRAVIS_TAG (git tag) then use that, else use the floating tag
+    docker build \
+        ${allTagArgs} \
+        --build-arg GIT_COMMIT=${TRAVIS_COMMIT} \
+        --build-arg GIT_TAG=${TRAVIS_TAG:-${SNAPSHOT_FLOATING_TAG}} \
+        ${contextRoot}
 
     #The username and password are configured in the travis gui
     echo -e "Logging in to DockerHub"
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin >/dev/null 2>&1 
 
-    echo -e "Pushing to DockerHub"
+    echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC} with tags: ${GREEN}${allTagArgs}${NC}"
     docker push ${dockerRepo} >/dev/null 2>&1
+
+    echo -e "Logging out of Docker"
+    docker logout >/dev/null 2>&1
 }
 
 derive_docker_tags() {

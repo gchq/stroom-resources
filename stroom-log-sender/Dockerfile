@@ -72,3 +72,10 @@ COPY --chown=sender:sender --from=send-logs-scripts-stage /scripts /stroom-log-s
 
 # Copy in the scripts for running the container
 COPY --chown=sender:sender docker-entrypoint.sh /stroom-log-sender/
+
+# Label the image so we can see what commit/tag it came from
+ARG GIT_COMMIT=unspecified
+ARG GIT_TAG=unspecified
+LABEL \
+    git_commit="$GIT_COMMIT" \
+    git_tag="$GIT_TAG"
