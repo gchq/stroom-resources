@@ -125,6 +125,11 @@ services:
           file: ./containers/stroomAllDbs.yml
           service: stroom-all-dbs
 
+  stroom-log-sender:
+      extends:
+          file: ./containers/stroomLogSender.yml
+          service: stroom-log-sender
+
   zookeeper:
       extends:
           file: ./containers/zookeeper.yml

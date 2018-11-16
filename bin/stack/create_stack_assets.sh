@@ -33,6 +33,7 @@ main() {
     local -r SRC_NGINX_CONF_DIRECTORY="../../stroom-nginx/template"
     local -r SRC_ELASTIC_CONF_DIRECTORY="../compose/volumes/elasticsearch/conf"
     local -r SRC_KIBANA_CONF_DIRECTORY="../compose/volumes/kibana/conf"
+    local -r SRC_STROOM_LOG_SENDER_CONF_DIRECTORY="../compose/volumes/stroom-log-sender/conf"
     local -r SRC_AUTH_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
     local -r SEND_TO_STROOM_VERSION="send-to-stroom-v1.2.1"
     local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
@@ -85,6 +86,13 @@ main() {
     fi
 
     # If kibana is in the list of services add its volume
+    if [[ " ${services[@]} " =~ " stroomLogSender " ]]; then
+        local -r DEST_STROOM_LOG_SENDER_CONF_DIRECTORY="${WORKING_DIRECTORY}/volumes/stroom-log-sender/conf"
+        mkdir -p "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
+        cp ${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/* ${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}
+    fi
+
+    # If stroom-log-sender is in the list of services add its volume
     if [[ " ${services[@]} " =~ " kibana " ]]; then
         local -r DEST_KIBANA_CONF_DIRECTORY="${WORKING_DIRECTORY}/volumes/kibana/conf"
         mkdir -p "${DEST_KIBANA_CONF_DIRECTORY}"
