@@ -68,11 +68,11 @@ main(){
 
     local url=$( \
         http https://api.github.com/repos/gchq/stroom-resources/releases/tags/${tag} | 
-        jq -r '.assets[0].browser_download_url')
+        jq -r '.assets[] | select(.content_type == "application/gzip") | .browser_download_url')
 
     local file=$( \
         http https://api.github.com/repos/gchq/stroom-resources/releases/tags/${tag} | 
-        jq -r '.assets[0].name')
+        jq -r '.assets[] | select(.content_type == "application/gzip") | .name')
 
     [ $? -eq 0 ] || error_exit "Something went wrong getting the asset url"
 
@@ -90,7 +90,7 @@ main(){
 
     [ -f ${file} ] || error_exit "${RED}File ${GREEN}${file}${RED} doesn't exist, it should as we just downloaded it${NC}"
 
-    tar -xvf ${file}
+    tar -xf ${file}
 
     echo -e "${GREEN}Deleting downloaded file ${BLUE}${file}${NC}"
     rm ${file}

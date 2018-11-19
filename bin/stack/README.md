@@ -2,6 +2,24 @@
 
 This directory contains a set of shell scripts for creating a pre-canned stroom stack to be run in docker.
 
+## Running a pre-canned stack
+
+Open the tar file using something like this:
+
+```bash
+mkdir ./myStack
+cd myStack
+tar -xvf ~/Downloads/stroom_core*.tar.gz
+```
+
+To start the stack do:
+
+```bash
+./start.sh
+```
+
+For more details on managing the stack see the README file in the stack tar file.
+
 ## Creating a stack
 
 There are two forms of the stack, _core_ and _full_.
@@ -25,21 +43,3 @@ To create a new release of the stack do the following:
     1. `git push origin stroom_core-v6.0-beta.3`
 1. Travis will now build the stack and release it to GitHub at [github.com/gchq/stroom-resources/releases](https://github.com/gchq/stroom-resources/releases).
 
-## Running a pre-canned stack
-
-Open the tar file using something like this:
-
-```bash
-mkdir ./myStack
-cd myStack
-tar -xvf ~/Downloads/stroom_core*.tar.gz
-```
-
-To start the stack do:
-
-
-```bash
-./start.sh
-```
-
-For more details on managing the stack see the README file in the stack tar file.

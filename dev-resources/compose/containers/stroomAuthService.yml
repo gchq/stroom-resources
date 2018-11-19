@@ -5,7 +5,7 @@ services:
     container_name: stroom-auth-service
     image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v1.0-LATEST}"
     environment:
-      - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:-}
+      - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:- -Xms50m -Xmx1024m }
       - STROOM_AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
       - STROOM_AUTH_SERVICE_ADMIN_PORT=${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}
       - DB_USER=${STROOM_AUTH_DB_USERNAME:-authuser}
@@ -35,9 +35,9 @@ services:
       - EMAIL_SMTP_USERNAME=${EMAIL_SMTP_USERNAME:-TODO}
       - EMAIL_SMTP_PASSWORD=${EMAIL_SMTP_PASSWORD:-TODO}
       - OWN_PATH=${STROOM_AUTH_SERVICE:-authentication}
-      - LOGS_EVENT_FEED_NAME=${STROOM_AUTH_LOGS_EVENT_FEED_NAME:-AUTH_EVENT_LOG}
-      - LOGS_ACCESS_FEED_NAME=${STROOM_AUTH_LOGS_ACCESS_FEED_NAME:-AUTH_ACCESS_LOG}
-      - LOGS_APP_FEED_NAME=${STROOM_AUTH_LOGS_APP_FEED_NAME:-AUTH_APP_LOG}
+      - LOGS_EVENT_FEED_NAME=${STROOM_AUTH_LOGS_EVENT_FEED_NAME:-STROOM_AUTH-USER-EVENTS}
+      - LOGS_ACCESS_FEED_NAME=${STROOM_AUTH_LOGS_ACCESS_FEED_NAME:-STROOM_AUTH-ACCESS-EVENTS}
+      - LOGS_APP_FEED_NAME=${STROOM_AUTH_LOGS_APP_FEED_NAME:-STROOM_AUTH-APP-EVENTS}
       - LOGS_SYSTEM=${STROOM_AUTH_LOGS_SYSTEM:-StroomAuth}
       - LOGS_ENV=${STROOM_AUTH_LOGS_ENV:-Dev}
       - LOGS_STROOM_URL=${STROOM_AUTH_LOGS_STROOM_URL:-http://stroom:8080/stroom/datafeed}
@@ -56,6 +56,10 @@ services:
     volumes:
       - type: volume
         source: stroom-auth-service_logs
-        target: /usr/stroom-auth-service/logs
+        target: /stroom-auth-service/logs
+    logging:
+      options:
+        max-size: "${STROOM_AUTH_SERVICE_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_AUTH_SERVICE_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

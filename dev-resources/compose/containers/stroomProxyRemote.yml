@@ -6,7 +6,7 @@ services:
     container_name: stroom-proxy-remote
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
     environment:
-      - JAVA_OPTS=${STROOM_PROXY_REMOTE_JAVA_OPTS:-}
+      - JAVA_OPTS=${STROOM_PROXY_REMOTE_JAVA_OPTS:- -Xms50m -Xmx1024m }
       #- STROOM_PROXY_APP_PORT=${STROOM_PROXY_REMOTE_APP_PORT:-9090}
       - STROOM_PROXY_APP_PORT=8090
       #- STROOM_PROXY_ADMIN_PORT=${STROOM_PROXY_REMOTE_ADMIN_PORT:-9091}
@@ -42,5 +42,9 @@ services:
       - type: volume
         source: stroom-proxy-remote_repo
         target: /stroom-proxy/repo
+    logging:
+      options:
+        max-size: "${STROOM_PROXY_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_PROXY_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

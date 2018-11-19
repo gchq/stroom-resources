@@ -6,7 +6,7 @@ services:
     container_name: stroom
     image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
-      - JAVA_OPTS=${STROOM_JAVA_OPTS:-}
+      - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m }
       - STROOM_APP_PORT=${STROOM_APP_PORT:-8080}
       - STROOM_ADMIN_PORT=${STROOM_ADMIN_PORT:-8081}
       - STROOM_NODE=${STROOM_NODE:-node1a}
@@ -64,9 +64,10 @@ services:
       - STROOM_DOCREF_URL_UI__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_UI_URL:-http://$HOST_IP/annotations}
       - STROOM_DOCREF_URL_UI__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP/query-elastic}
       - STROOM_PROXY_DIR=${STROOM_STROOM_PROXY_DIR:-/tmp/proxy}
-      - LOGS_EVENT_FEED_NAME=${STROOM_LOGS_EVENT_FEED_NAME:-STROOM_EVENT_LOG}
-      - LOGS_ACCESS_FEED_NAME=${STROOM_LOGS_ACCESS_FEED_NAME:-STROOM_ACCESS_LOG}
-      - LOGS_APP_FEED_NAME=${STROOM_LOGS_APP_FEED_NAME:-STROOM_APP_LOG}
+      - STROOM_HELP_URL=${STROOM_HELP_URL:-https://gchq.github.io/stroom-docs/}
+      - LOGS_EVENT_FEED_NAME=${STROOM_LOGS_EVENT_FEED_NAME:-STROOM-USER-EVENTS}
+      - LOGS_ACCESS_FEED_NAME=${STROOM_LOGS_ACCESS_FEED_NAME:-STROOM-ACCESS-EVENTS}
+      - LOGS_APP_FEED_NAME=${STROOM_LOGS_APP_FEED_NAME:-STROOM-APP-EVENTS}
       - LOGS_SYSTEM=${STROOM_LOGS_SYSTEM:-Stroom}
       - LOGS_ENV=${STROOM_LOGS_ENV:-Dev}
       - LOGS_STROOM_URL=${STROOM_LOGS_STROOM_URL:-http://localhost:8080/stroom/datafeed}
@@ -96,5 +97,9 @@ services:
       - type: volume
         source: stroom_volumes
         target: /stroom/volumes
+    logging:
+      options:
+        max-size: "${STROOM_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

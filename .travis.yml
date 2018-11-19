@@ -17,7 +17,21 @@ deploy:
     file_glob: true # this needs to be turned on for wildcards to work
     file:
       - bin/stack/build/stroom*.tar.gz
+      - bin/stack/build/stroom*.tar.gz.md5
+      - build/get_stroom.sh
     skip_cleanup: true
     on:
       tags: true
-      condition: $TRAVIS_TAG =~ ^stroom_core|stroom_full$
+      condition: $TRAVIS_TAG =~ ^(stroom_core|stroom_full)
+    # Push the get_stroom.sh script to GitHub Pages so we can do 
+    # Only pushed for a core stack build
+    # bash <(curl https://gchq.github.io/stroom-resources/get_stroom.sh)
+    # GITHUB_TOKEN set in travis UI settings page, using github personal access token
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    local_dir: gh-pages
+    target_branch: gh-pages
+    on:
+      tags: true
+      condition: $TRAVIS_TAG =~ ^stroom_core

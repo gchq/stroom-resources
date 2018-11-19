@@ -33,5 +33,9 @@ services:
     ports:
       - 8086:8086 # app
       - 8087:8087 # admin
+    logging:
+      options:
+        max-size: "${STROOM_STATS_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_STATS_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"

@@ -11,12 +11,17 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Colour 
 
+# Prefixes for git tags that determine what the build does
 TAG_PREFIX_STROOM_NGINX="stroom-nginx"
+TAG_PREFIX_STROOM_ZOOKEEPER="stroom-zookeeper"
 TAG_PREFIX_STROOM_STROOM_CORE="stroom_core"
 TAG_PREFIX_STROOM_STROOM_FULL="stroom_full"
 
 DOCKER_REPO_STROOM_NGINX="gchq/stroom-nginx"
+DOCKER_REPO_STROOM_ZOOKEEPER="gchq/stroom-zookeeper"
+
 DOCKER_CONTEXT_ROOT_STROOM_NGINX="stroom-nginx/."
+DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER="dev-resources/images/zookeeper/."
 
 VERSION_FIXED_TAG=""
 SNAPSHOT_FLOATING_TAG=""
@@ -25,6 +30,9 @@ MINOR_VER_FLOATING_TAG=""
 VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
+
+# The dir used to hold content for deploying to github pages, i.e. https://gchq.github.io/stroom-resources
+GH_PAGES_DIR="${TRAVIS_BUILD_DIR}/gh-pages"
 
 #args: dockerRepo contextRoot tag1VersionPart tag2VersionPart ... tagNVersionPart
 release_to_docker_hub() {
@@ -57,11 +65,10 @@ release_to_docker_hub() {
 
     #The username and password are configured in the travis gui
     echo -e "Logging in to DockerHub"
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" >/dev/null 2>&1
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin >/dev/null 2>&1 
 
-    docker build ${allTagArgs} ${contextRoot} >/dev/null 2>&1
     echo -e "Pushing to DockerHub"
-    #docker push ${dockerRepo} >/dev/null 2>&1
+    docker push ${dockerRepo} >/dev/null 2>&1
 }
 
 derive_docker_tags() {
@@ -90,13 +97,21 @@ derive_docker_tags() {
     allDockerTags="${VERSION_FIXED_TAG} ${SNAPSHOT_FLOATING_TAG} ${MAJOR_VER_FLOATING_TAG} ${MINOR_VER_FLOATING_TAG}"
 }
 
-do_stack_build() {
+do_versioned_stack_build() {
     local -r scriptName="${1}.sh"
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
     local -r buildDir=${scriptDir}/build/
+
+    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    echo -e "${GREEN}Building and testing versioned stack${NC}"
+    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+
     pushd ${scriptDir} > /dev/null
 
-    echo "Running ${scriptName} in ${scriptDir}"
+    # Ensure there is no buildDir from a previous build
+    rm -rf ${buildDir}
+
+    echo -e "Running ${scriptName} in ${scriptDir}"
 
     ./${scriptName}
 
@@ -104,19 +119,54 @@ do_stack_build() {
 
     local -r fileName="$(ls -1 *.tar.gz)"
     # Add the version into the filename
-    local -r newFileName="${fileName/\.tar\.gz/_${BUILD_VERSION}.tar.gz}"
+    if [ -n "$TRAVIS_TAG" ]; then
+        local newFileName="${TRAVIS_TAG}.tar.gz"
+    else
+        local newFileName="${fileName/\.tar\.gz/-${BUILD_VERSION}.tar.gz}"
+    fi
 
     echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
     mv "${fileName}" "${newFileName}"  
 
+    # Now create an MD5 hash of the stack file
+    local md5File="${newFileName}.md5"
+    echo -e "Creating MD5 hash file ${GREEN}${md5File}${NC}"
+    md5sum "${newFileName}" > "${md5File}"
+
     # Now spin up the stack to make sure it all works
-    test_stack "${newFileName}"
+    test_stack_archive "${newFileName}"
 
     popd > /dev/null
     popd > /dev/null
 }
 
 test_stack() {
+    # Tests an exploded stack in the current directory
+
+    # jq is installed by default on travis so no need to install it
+
+    echo -e "${GREEN}Running start script${NC}"
+    # If the stack is unhealthy then start should exit with a non-zero code.
+    ./start.sh
+
+    # Just in case, run the health script
+    echo -e "${GREEN}Running health script${NC}"
+    ./health.sh
+
+    # Test the stop script
+    echo -e "${GREEN}Running stop script${NC}"
+    ./stop.sh
+
+    # Test the remove script
+    echo -e "${GREEN}Running remove script${NC}"
+    ./remove.sh -y
+
+    # Clear out all docker images/volumes/containers
+    echo -e "${GREEN}Clearing out docker images/containers/volumes${NC}"
+    ${TRAVIS_BUILD_DIR}/bin/clean.sh
+}
+
+test_stack_archive() {
     local -r stack_archive_file=$1
 
     if [ ! -f "${stack_archive_file}" ]; then
@@ -132,18 +182,30 @@ test_stack() {
     echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
     tar -xvf "../${stack_archive_file}"
 
-    # jq is installed by default on travis so no need to install it
+    test_stack
 
-    echo -e "${GREEN}Starting stack${NC}"
-    # If the stack is unhealthy then start should exit with a non-zero code.
-    ./start.sh
+    popd > /dev/null
+}
 
-    # Just in case, run the health script
-    ./health.sh
+create_get_stroom_script() {
+    local -r get_stroom_filename=get_stroom.sh
 
-    ./stop.sh
+    local -r script_build_dir=${TRAVIS_BUILD_DIR}/build
+    local -r get_stroom_source_file=${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}
+    local -r get_stroom_dest_file=${script_build_dir}/${get_stroom_filename}
 
-    popd
+    mkdir -p "${script_build_dir}"
+
+    echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a copy of ${BLUE}${get_stroom_source_file}${NC}"
+    cp ${get_stroom_source_file} ${get_stroom_dest_file}
+
+    echo -e "${GREEN}Substituting tag ${BLUE}${TRAVIS_TAG}${GREEN} into ${BLUE}${get_stroom_dest_file}${NC}"
+    sed -i "s/<STACK_VERSION>/${TRAVIS_TAG}/" ${get_stroom_dest_file}
+
+    # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
+    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to ${BLUE}${GH_PAGES_DIR}/${NC}"
+    mkdir -p ${GH_PAGES_DIR}
+    cp ${get_stroom_dest_file} ${GH_PAGES_DIR}/
 }
 
 main() {
@@ -166,24 +228,35 @@ main() {
 
         if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
             #This is a stroom-nginx release, so do a docker build/push
-            echo -e "${GREEN}Performing a stroom-nginx release to dockerhub${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom-nginx${GREEN} release to dockerhub${NC}"
 
             derive_docker_tags
             
             #build and release the image to dockerhub
             release_to_docker_hub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
 
+        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
+            #This is a stroom-nginx release, so do a docker build/push
+            echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release to dockerhub${NC}"
+
+            derive_docker_tags
+            
+            #build and release the image to dockerhub
+            release_to_docker_hub "${DOCKER_REPO_STROOM_ZOOKEEPER}" "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" ${allDockerTags}
+
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
-            echo -e "${GREEN}Performing a stroom_core stack release to github${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom_core${GREEN} stack release to github${NC}"
 
-            do_stack_build buildCore
+            do_versioned_stack_build buildCore
+            create_get_stroom_script
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
-            echo -e "${GREEN}Performing a stroom_full stack release to github${NC}"
+            echo -e "${GREEN}Performing a ${BLUE}stroom_full${GREEN} stack release to github${NC}"
 
-            do_stack_build buildFull
+            do_versioned_stack_build buildFull
+            create_get_stroom_script
         fi
     else
         BUILD_VERSION="SNAPSHOT"
@@ -192,7 +265,8 @@ main() {
         echo -e "Not a tagged build so just build the stack and test it"
 
         # TODO need to also do the full stack at some point.
-        do_stack_build buildCore
+
+        do_versioned_stack_build buildCore
     fi
 }
 
