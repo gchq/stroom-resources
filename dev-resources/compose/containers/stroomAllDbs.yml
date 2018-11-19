@@ -60,6 +60,7 @@ services:
     logging:
       options:
         max-size: "${MYSQL_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${MYSQL_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
 
