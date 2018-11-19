@@ -100,6 +100,6 @@ services:
     logging:
       options:
         max-size: "${STROOM_STD_OUT_LOGS_MAX_SIZE:-10m}"
-        max-file: 2
+        max-file: "${STROOM_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
