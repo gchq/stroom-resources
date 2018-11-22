@@ -18,7 +18,7 @@ showUsage() {
 main() {
 
     local requireConfirmation=true
-    local optspec="y"
+    local optspec=":y"
 
     while getopts "$optspec" optchar; do
         case "${optchar}" in
