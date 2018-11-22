@@ -22,7 +22,8 @@ VOLUME [ "/etc/nginx/certs" ]
 VOLUME [ "/etc/nginx/template" ]
 
 # Add bash in case we want to shell onto the container
-RUN apk add --no-cache bash
+RUN apk add --no-cache \
+    bash
 
 # We need to create nginx.conf from nginx.conf.template, substituting NGINX_ADVERTISED_HOST from its environment variable
 # As nginx.conf contains stuff like '$proxy_add_x_forwarded_for', we need to give envsubst a specific list of variables
@@ -31,6 +32,8 @@ CMD [ "/bin/bash", "-c", "envsubst ' \
     ${NGINX_ADVERTISED_HOST} \
     ${STROOM_HOST} \
     ${STROOM_PORT} \
+    ${STROOM_PROXY_HOST} \
+    ${STROOM_PROXY_PORT} \
     ${AUTH_SERVICE_HOST} \
     ${AUTH_SERVICE_PORT} \
     ${AUTH_UI_URL} \
