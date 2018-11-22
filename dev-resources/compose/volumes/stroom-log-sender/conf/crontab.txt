@@ -1,18 +1,24 @@
 # Here for debugging
-#* * * * * echo "Cron running" > /dev/stdout
+#* * * * * source /stroom-log-sender/config/crontab.env; echo "${DATAFEED_URL}Cron running" >> /stroom-log-sender/cron.out
 
-# stroom logs
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom/access STROOM-ACCESS-EVENTS Stroom Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom/app STROOM-APP-EVENTS Stroom Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom/user STROOM-USER-EVENTS Stroom Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
+# All of the entries here first source the crontab.env file. The cron implementation in alpine
+# doesn't seem to support env vars in the crontab itself.  The env file allows reuse of the values, and makes it easier to change values by chamnging them in one place.
 
-# stroom-auth logs
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom-auth-service/access STROOM_AUTH-ACCESS-EVENTS StroomAuth Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom-auth-service/app STROOM_AUTH-APP-EVENTS StroomAuth Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom-auth-service/user STROOM_AUTH-USER-EVENTS StroomAuth Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
+# NOTE: Any changes to this crontab.txt file or the crontab.env file will require the container
+# to be restarted.
+
+## stroom logs
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom/access STROOM-ACCESS-EVENTS STROOM ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom/app    STROOM-APP-EVENTS    STROOM ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom/user   STROOM-USER-EVENTS   STROOM ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
+
+## stroom-auth logs
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom-auth/access STROOM_AUTH-ACCESS-EVENTS STROOM-AUTH ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom-auth/app    STROOM_AUTH-APP-EVENTS    STROOM-AUTH ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom-auth/user   STROOM_AUTH-USER-EVENTS   STROOM-AUTH ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
 
 # stroom-proxy logs
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom-proxy/access STROOM_PROXY-ACCESS-EVENTS Stroom-Proxy Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom-proxy/app STROOM_PROXY-APP-EVENTS Stroom-Proxy Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom-proxy/receive STROOM_PROXY-RECEIVE-EVENTS Stroom-Proxy Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
-* * * * * /stroom-log-sender/send_to_stroom.sh /stroom-log-sender/log-volumes/stroom-proxy/send STROOM_PROXY-SEND-EVENTS Stroom-Proxy Dev http://stroom:8080/stroom/datafeed --file-regex '.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log' -m 15 --delete-after-sending --secure > /dev/stdout
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom-proxy/access  STROOM_PROXY-ACCESS-EVENTS  STROOM-PROXY ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom-proxy/app     STROOM_PROXY-APP-EVENTS     STROOM-PROXY ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom-proxy/send    STROOM_PROXY-SEND-EVENTS    STROOM-PROXY ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout
+* * * * * source /stroom-log-sender/config/crontab.env; ${LOG_SENDER_SCRIPT} ${ROOT_LOGS_DIR}/stroom-proxy/receive STROOM_PROXY-RECEIVE-EVENTS STROOM-PROXY ${DEFAULT_ENVIRONMENT} ${DATAFEED_URL} --file-regex "${DEFAULT_FILE_REGEX}" -m ${MAX_DELAY_SECS} --key ${PRIVATE_KEY_FILE} --cert ${CERT_FILE} --cacert ${CA_CERT_FILE} --delete-after-sending --no-secure > /dev/stdout

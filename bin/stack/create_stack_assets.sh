@@ -85,12 +85,19 @@ main() {
 
     # If stroom-log-sender is in the list of services add its volume
     if [[ " ${services[@]} " =~ " stroomLogSender " ]]; then
+
+        local -r DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY="${WORKING_DIRECTORY}/volumes/stroom-log-sender/certs"
+        mkdir -p "${DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY}"
+        cp ${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt ${DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY}
+        cp ${SRC_CERTS_DIRECTORY}/client/client.pem.crt ${DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY}
+        cp ${SRC_CERTS_DIRECTORY}/client/client.unencrypted.key ${DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY}
+
         local -r DEST_STROOM_LOG_SENDER_CONF_DIRECTORY="${WORKING_DIRECTORY}/volumes/stroom-log-sender/conf"
         mkdir -p "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
         cp ${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/* ${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}
     fi
 
-    # If stroom-log-sender is in the list of services add its volume
+    # If kibana is in the list of services add its volume
     if [[ " ${services[@]} " =~ " kibana " ]]; then
         local -r DEST_KIBANA_CONF_DIRECTORY="${WORKING_DIRECTORY}/volumes/kibana/conf"
         mkdir -p "${DEST_KIBANA_CONF_DIRECTORY}"
