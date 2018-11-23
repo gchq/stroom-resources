@@ -17,9 +17,6 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
-# We never want to control the contents of these folders
-dev-resources/compose/volumes/**
-
 # IntelliJ
 # Note: Deciding what IntelliJ files should be ignored is over-complicated and boring.
 # Here we ignore everything and create exceptions for what we want to share.

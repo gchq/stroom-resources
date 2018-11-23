@@ -16,7 +16,7 @@ services:
       - QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP:5002}
       - STROOM_HOST=${STROOM_HOST:-$HOST_IP}
       - STROOM_PORT=${STROOM_APP_PORT:-8080}
-      - AUTH_SERVICE_HOST=${AUTH_SERVICE_HOST:-$HOST_IP}
+      - AUTH_SERVICE_HOST=${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
     volumes:
       - ${NGINX_VOLUME_CERTS:-../volumes/nginx/certs}:/etc/nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts

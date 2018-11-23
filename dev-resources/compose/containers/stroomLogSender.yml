@@ -1,0 +1,33 @@
+version: '2.4'
+
+services:
+    
+  stroom-log-sender:
+    container_name: stroom-log-sender
+    image: "${STROOM_LOG_SENDER_DOCKER_REPO:-gchq/stroom-log-sender}:${STROOM_LOG_SENDER_TAG:-local-SNAPSHOT}"
+#    healthcheck:
+#      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
+#      start_period: 1m30s
+#      interval: 1m
+#      timeout: 5s
+#      retries: 3
+    volumes:
+      # Volume for the crontab configuration
+      - ${STROOM_LOG_SENDER_VOLUME_CONF:-../volumes/stroom-log-sender/conf}:/stroom-log-sender/config/:ro
+      # A volume for each of the services that this container will ship logs for
+      - type: volume
+        source: stroom_logs
+        target: /stroom-log-sender/log-volumes/stroom
+      - type: volume
+        source: stroom-auth-service_logs
+        target: /stroom-log-sender/log-volumes/stroom-auth-service
+      - type: volume
+        source: stroom-proxy-local_logs
+        target: /stroom-log-sender/log-volumes/stroom-proxy
+    logging:
+      options:
+        max-size: "${STROOM_LOG_SENDER_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_LOG_SENDER_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+
