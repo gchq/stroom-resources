@@ -20,7 +20,7 @@ error_exit() {
 
 check_for_installed_binary() {
     local -r binary_name=$1
-    command -v fzf $1>/dev/null || error_exit "${GREEN}${binary_name}${RED} is not installed"
+    command -v ${binary_name} 1>/dev/null || error_exit "${GREEN}${binary_name}${RED} is not installed"
 }
 
 check_for_installed_binaries() {
