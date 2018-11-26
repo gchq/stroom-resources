@@ -5,12 +5,6 @@ services:
   stroom-log-sender:
     container_name: stroom-log-sender
     image: "${STROOM_LOG_SENDER_DOCKER_REPO:-gchq/stroom-log-sender}:${STROOM_LOG_SENDER_TAG:-local-SNAPSHOT}"
-#    healthcheck:
-#      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
-#      start_period: 1m30s
-#      interval: 1m
-#      timeout: 5s
-#      retries: 3
     volumes:
       # Volume for the crontab configuration
       - ${STROOM_LOG_SENDER_VOLUME_CONF:-../volumes/stroom-log-sender/conf}:/stroom-log-sender/config/:ro
