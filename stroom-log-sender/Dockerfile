@@ -23,7 +23,7 @@
 FROM alpine:3.8 as send-logs-scripts-stage
 WORKDIR /scripts
 
-ARG SEND_TO_STROOM_VERSION=send-to-stroom-v1.3
+ARG SEND_TO_STROOM_VERSION=send-to-stroom-v1.7
 
 ADD https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash/send_to_stroom.sh .
 ADD https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash/send_to_stroom_args.sh .
@@ -44,11 +44,16 @@ WORKDIR /stroom-log-sender
 # This is where the crontab file is placed to be loaded into cron on each boot
 VOLUME /stroom-log-sender/config/
 
+# This is where the various certificates and keys are placed
+VOLUME /stroom-log-sender/certs/
+
 # run entrypoint script inside tini for better unix process handling, 
 # see https://github.com/krallin/tini/issues/8
 ENTRYPOINT ["/sbin/tini", "--", "/stroom-log-sender/docker-entrypoint.sh"]
 
-# bash/curl required for sending logs
+# bash required for send_to_stroom.sh
+# coreutils required for 'date' command to output millis
+# curl required for sending logs
 # tini required for process control in the entrypoint
 # procps needed for a richer 'ps' command as used in send_to_stroom.sh
 # Create a user with no home and no shell
@@ -57,6 +62,7 @@ RUN echo "http_proxy: $http_proxy" && \
     echo "https_proxy: $https_proxy" && \
     apk add --no-cache \
         bash \
+        coreutils \
         curl \
         procps \
         tini && \
@@ -64,6 +70,7 @@ RUN echo "http_proxy: $http_proxy" && \
     adduser -u 1000 -S -s /bin/false -D -G sender sender && \
     mkdir -p /stroom-log-sender && \
     mkdir -p /stroom-log-sender/config && \
+    mkdir -p /stroom-log-sender/certs && \
     mkdir -p /stroom-log-sender/log-volumes && \
     chown -R sender:sender /stroom-log-sender
 

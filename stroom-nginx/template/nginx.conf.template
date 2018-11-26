@@ -12,9 +12,25 @@ http {
     # Upstream servers #
     ####################
 
-    upstream authService {
+    upstream auth_service_upstream_sticky {
         ip_hash; # Upstream determined by a hash of the clients IP address -- effectively enabling sticky sessions
         server ${AUTH_SERVICE_HOST}:${AUTH_SERVICE_PORT};
+        # Can add other servers below
+    }
+
+    upstream stroom_upstream_sticky {
+        ip_hash; # Upstream determined by a hash of the clients IP address -- effectively enabling sticky sessions
+        server ${STROOM_HOST}:${STROOM_PORT};
+        # Can add other servers below
+    }
+
+    upstream stroom_upstream {
+        server ${STROOM_HOST}:${STROOM_PORT};
+        # Can add other servers below
+    }
+
+    upstream stroom_proxy_upstream {
+        server ${STROOM_PROXY_HOST}:${STROOM_PROXY_PORT};
         # Can add other servers below
     }
 
@@ -23,7 +39,7 @@ http {
     # Upstream redirects #
     ######################
     ### USERS ###
-    upstream users {
+    upstream users_upstream {
         server 127.0.0.1:46011;
         #server 127.0.0.1:46012;
     }
@@ -33,7 +49,7 @@ http {
     }
 
     ### LOGIN ###
-    upstream login {
+    upstream login_upstream {
         server 127.0.0.1:46021;
         #server 127.0.0.1:46012;
     }
@@ -43,7 +59,7 @@ http {
     }
 
     ### TOKENS ###
-    upstream tokens {
+    upstream tokens_upstream {
         server 127.0.0.1:46031;
         #server 127.0.0.1:46012;
     }
@@ -53,7 +69,7 @@ http {
     }
 
     ### CHANGEPASSWORD ###
-    upstream changepassword {
+    upstream change_password_upstream {
         server 127.0.0.1:46041;
         #server 127.0.0.1:46012;
     }
@@ -63,7 +79,7 @@ http {
     }
 
     ### AUTHUI ###
-    upstream authUi {
+    upstream auth_ui_upstream {
         server 127.0.0.1:46051;
         #server 127.0.0.1:46012;
     }
@@ -73,7 +89,7 @@ http {
     }
 
     ### ANNOTATIONS ###
-    upstream annotations {
+    upstream annotations_upstream {
         server 127.0.0.1:46061;
         #server 127.0.0.1:46012;
     }
@@ -83,7 +99,7 @@ http {
     }
 
     ### QUERY-ELASTIC ###
-    upstream queryElastic {
+    upstream query_elastic_upstream {
         server 127.0.0.1:46071;
         #server 127.0.0.1:46012;
     }
@@ -96,6 +112,10 @@ http {
     index index.html index.htm;
 
     server {
+        #rewrite_log on;
+	#log_not_found on;
+        #log_subrequest on;
+
         root /usr/share/nginx/html;
 
         listen                      80;
@@ -189,7 +209,7 @@ http {
         # It's needed for the Swagger client's baseUrl.
         location /authService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://authService/;
+            proxy_pass http://auth_service_upstream_sticky/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -199,7 +219,7 @@ http {
 
         location /authenticationService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://authService/authentication/;
+            proxy_pass http://auth_service_upstream_sticky/authentication/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -209,7 +229,7 @@ http {
 
         location /userService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://authService/user/;
+            proxy_pass http://auth_service_upstream_sticky/user/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -219,7 +239,7 @@ http {
 
         location /tokenService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://authService/token/;
+            proxy_pass http://auth_service_upstream_sticky/token/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
@@ -229,7 +249,7 @@ http {
 
         location /authorisationService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${STROOM_HOST}:${STROOM_PORT}/api/authorisation/;
+            proxy_pass http://stroom_upstream/api/authorisation/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -248,7 +268,7 @@ http {
         #Lucene index query service on Stroom
         location /indexService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_PORT}/api/stroom-index/;
+            proxy_pass http://stroom_upstream_sticky/api/stroom-index/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -258,7 +278,7 @@ http {
         #SQL Statistics query service on Stroom
         location /sqlstatisticsService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${NGINX_ADVERTISED_HOST}:${STROOM_PORT}/api/sqlstatistics/;
+            proxy_pass http://stroom_upstream_sticky/api/sqlstatistics/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -284,9 +304,45 @@ http {
             proxy_pass_request_headers on;
         }
 
-        location /datafeedService/ {
+        # TODO may also need location = /stroom/datafeeddirect
+        # see http://nginx.org/en/docs/http/ngx_http_core_module.html#location
+
+        # datafeed direct into stroom with no prxoy aggregation
+        location /stroom/datafeeddirect/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${STROOM_HOST}:${STROOM_PORT}/stroom/datafeed/;
+            proxy_pass http://stroom_upstream/stroom/datafeed/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
+        # datafeed direct into stroom with no prxoy aggregation (exact match)
+        location = /stroom/datafeeddirect {
+            proxy_ssl_server_name on;
+            proxy_pass http://stroom_upstream/stroom/datafeed/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
+        # datafeed into proxy
+        location /stroom/datafeed/ {
+            proxy_ssl_server_name on;
+            proxy_pass http://stroom_proxy_upstream/stroom/datafeed/;
+            proxy_pass_header Set-Cookie;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body on;
+            proxy_pass_request_headers on;
+        }
+
+        # datafeed into proxy (exact match)
+        location = /stroom/datafeed {
+            proxy_ssl_server_name on;
+            proxy_pass http://stroom_proxy_upstream/stroom/datafeed/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -295,7 +351,7 @@ http {
 
         location /streamTaskService/ {
             proxy_ssl_server_name on;
-            proxy_pass http://${STROOM_HOST}:${STROOM_PORT}/api/streamtasks/;
+            proxy_pass http://stroom_upstream/api/streamtasks/;
             proxy_pass_header Set-Cookie;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body on;
@@ -330,34 +386,34 @@ http {
         ## ROUTING FOR OTHER UI
 
         location /login {
-            proxy_pass http://login;
+            proxy_pass http://login_upstream;
         }
 
         location /users {
-            proxy_pass http://users;
+            proxy_pass http://users_upstream;
         }
 
         location /tokens {
-            proxy_pass http://tokens;
+            proxy_pass http://tokens_upstream;
         }
 
         location /changepassword {
-            proxy_pass http://changepassword;
+            proxy_pass http://change_password_upstream;
         }
 
         # TODO: We don't really want this path. Auth has several responsibilities.
         # Some of them are mapped to more helpful locations, as above, but really 
         # should be non-root. E.g. passwordReset is root, so we need this location.
         location /authui {
-            proxy_pass http://authUi;
+            proxy_pass http://auth_ui_upstream;
         }
 
         location /annotations {
-            proxy_pass http://annotations;
+            proxy_pass http://annotations_upstream;
         }
 
         location /query-elastic {
-            proxy_pass http://queryElastic;
+            proxy_pass http://query_elastic_upstream;
         }
     }
 }
