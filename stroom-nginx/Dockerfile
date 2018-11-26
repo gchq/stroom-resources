@@ -45,3 +45,10 @@ CMD [ "/bin/bash", "-c", "envsubst ' \
     ${NGINX_SSL_CLIENT_CERTIFICATE} \
     ${NGINX_CLIENT_BODY_BUFFER_SIZE} \
     ' < /etc/nginx/template/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]
+
+# Label the image so we can see what commit/tag it came from
+ARG GIT_COMMIT=unspecified
+ARG GIT_TAG=unspecified
+LABEL \
+    git_commit="$GIT_COMMIT" \
+    git_tag="$GIT_TAG"
