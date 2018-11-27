@@ -13,6 +13,9 @@ services:
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
       - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+        # Enabling NGINX_SSL_VERIFY_CLIENT means we can capture the DN and cert expiry
+        # in the datafeed but means the client cert must be imported into the browser
+        # so keep it set to off to avoid adding complexity to the stack.
       - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-off}
       - QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP:5002}
       - STROOM_HOST=${STROOM_HOST:-$HOST_IP}
