@@ -45,7 +45,7 @@ http {
     }
     server {
         listen 46011;
-        return 301 https://${AUTH_UI_URL}/userSearch/;
+        return 302 https://${AUTH_UI_URL}/userSearch/;
     }
 
     ### LOGIN ###
@@ -55,7 +55,7 @@ http {
     }
     server {
         listen 46021;
-        return 301 https://${AUTH_UI_URL}/login/;
+        return 302 https://${AUTH_UI_URL}/login/;
     }
 
     ### TOKENS ###
@@ -65,7 +65,7 @@ http {
     }
     server {
         listen 46031;
-        return 301 https://${AUTH_UI_URL}/tokens/;
+        return 302 https://${AUTH_UI_URL}/tokens/;
     }
 
     ### CHANGEPASSWORD ###
@@ -75,7 +75,7 @@ http {
     }
     server {
         listen 46041;
-        return 301 https://${AUTH_UI_URL}/changepassword/;
+        return 302 https://${AUTH_UI_URL}/changepassword/;
     }
 
     ### AUTHUI ###
@@ -85,7 +85,7 @@ http {
     }
     server {
         listen 46051;
-        return 301 https://${AUTH_UI_URL}/;
+        return 302 https://${AUTH_UI_URL}/;
     }
 
     ### ANNOTATIONS ###
@@ -95,7 +95,7 @@ http {
     }
     server {
         listen 46061;
-        return 301 ${ANNOTATIONS_UI_URL}/;
+        return 302 ${ANNOTATIONS_UI_URL}/;
     }
 
     ### QUERY-ELASTIC ###
@@ -105,7 +105,7 @@ http {
     }
     server {
         listen 46071;
-        return 301 ${QUERY_ELASTIC_UI_URL}/;
+        return 302 ${QUERY_ELASTIC_UI_URL}/;
     }
 
 
@@ -368,7 +368,7 @@ http {
 
         # This is an exact match that directs '/stroom' to the Stroom UI...
         location ~ /stroom$ {
-             return 301 https://${STROOM_HOST}/stroom/ui;
+             return 302 https://${STROOM_HOST}/stroom/ui;
         }
 
         location ~ .*/clustercall.rpc$ {
