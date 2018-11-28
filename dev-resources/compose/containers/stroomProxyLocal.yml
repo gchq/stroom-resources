@@ -48,7 +48,7 @@ services:
       timeout: 5s
       retries: 3
     volumes:
-      - ${STROOM_PROXY_LOCAL_VOLUME_CERTS:-../volumes/stroom-proxy/certs}:/stroom-proxy/certs:ro
+      - ${STROOM_PROXY_LOCAL_VOLUME_CERTS:-../../volumes/stroom-proxy/certs}:/stroom-proxy/certs:ro
       - type: volume
         source: stroom-proxy-local_config
         target: /stroom-proxy/config

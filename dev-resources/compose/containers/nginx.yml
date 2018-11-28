@@ -23,9 +23,9 @@ services:
       - STROOM_PROXY_HOST=${STROOM_PROXY_HOST:-$HOST_IP}
       - STROOM_PROXY_PORT=${STROOM_PROXY_APP_PORT:-8090}
     volumes:
-      - ${NGINX_VOLUME_CERTS:-../volumes/nginx/certs}:/etc/nginx/certs:ro
+      - ${NGINX_VOLUME_CERTS:-../../volumes/nginx/certs}:/etc/nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
-      - ${NGINX_VOLUME_CONF:-../volumes/nginx/conf}:/etc/nginx/template:ro
+      - ${NGINX_VOLUME_CONF:-../../volumes/nginx/conf}:/etc/nginx/template:ro
     ports:
       - "80:80"
       - "443:443"
