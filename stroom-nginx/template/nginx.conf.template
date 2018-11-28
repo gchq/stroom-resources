@@ -22,6 +22,9 @@ events {
 #
 #LogFormat "%h %l \"%u\" %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
 
+# A-Z index of nginx variables
+# http://nginx.org/en/docs/varindex.html
+
 http {
 
     ####################
