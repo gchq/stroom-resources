@@ -4,7 +4,12 @@
 
 set -e
 
-readonly STACK_NAME="stroom_full"
-readonly SERVICES="stroom stroomProxyLocal stroomAllDbs stroomAuthService stroomAuthUi stroomLogSender nginx elasticsearch hbase hdfs kafka kibana stroomAnnotationsService stroomAnnotationsUi stroomProxy stroomQueryElasticService stroomQueryElasticUi stroomStats zookeeper"
+main() {
+    local -r VERSION=$1
+    local -r BUILD_STACK_NAME="stroom_full"
+    local -r SERVICES="stroom stroomProxyLocal stroomAllDbs stroomAuthService stroomAuthUi stroomLogSender nginx elasticsearch hbase hdfs kafka kibana stroomAnnotationsService stroomAnnotationsUi stroomProxy stroomQueryElasticService stroomQueryElasticUi stroomStats zookeeper"
 
-./build.sh $STACK_NAME $SERVICES
+    ./build.sh ${BUILD_STACK_NAME} ${VERSION:-SNAPSHOT} ${SERVICES}
+}
+
+main "$@"

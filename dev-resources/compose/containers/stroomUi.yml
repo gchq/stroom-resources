@@ -21,9 +21,9 @@ services:
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
       - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
     volumes:
-      - ${STROOM_UI_VOLUME_CERTS:-../volumes/stroom-ui/certs}:/etc/nginx/certs:ro
+      - ${STROOM_UI_VOLUME_CERTS:-../../volumes/stroom-ui/certs}:/etc/nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
-      - ${STROOM_UI_VOLUME_CONF:-../volumes/stroom-ui/conf}:/etc/nginx/template:ro
+      - ${STROOM_UI_VOLUME_CONF:-../../volumes/stroom-ui/conf}:/etc/nginx/template:ro
     ports:
       - 5001:5001
       - 9444:9444

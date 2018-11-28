@@ -10,7 +10,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 LGREY='\e[37m'
 DGREY='\e[90m'
-NC='\033[0m' # No Color
+NC='\033[0m' # No Colour
 
 main() {
     # stack_version will be hard coded by TravisCI at build time
@@ -18,14 +18,16 @@ main() {
     local -r install_dir="./${stack_version}"
     local -r url="https://github.com/gchq/stroom-resources/releases/download/${stack_version}/${stack_version}.tar.gz"
 
-    if [ -d "${install_dir}" ]; then
-        echo -e "${RED}ERROR${NC}: Directory ${BLUE}${install_dir}${NC} already exists!${NC}"
-        exit 1
+    if [ "$(find . -name "stroom_*" | wc -l)" -gt 0 ] || [ -d ./volumes ]; then
+        echo -e "${YELLOW}ERROR${NC}: It looks like you already have an existing stack installed."
+        echo -e "If you proceed, your configuration will be replaced/updated but data will be left as is."
+        echo -e "If the existing stack is running, you should stop it first"
+        echo
     fi
 
     echo
-    echo -e "${GREEN}This script will create directory ${BLUE}${install_dir}${GREEN} and download${NC}"
-    echo -e "${GREEN}Stroom stack ${BLUE}${stack_version}${GREEN} into it.${NC}"
+    echo -e "${GREEN}This script will download the Stroom stack ${BLUE}${stack_version}${NC}"
+    echo -e "${GREEN}into the current directory.${NC}"
 
     echo
     read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
@@ -47,7 +49,7 @@ main() {
 
     # Download the stack archive file and extract it into the install directory
     curl --silent --location "${url}" \
-        | tar xz -C "${install_dir}"
+        | tar xz 
 
     echo
     echo -e "${GREEN}Start Stroom using ${BLUE}start.sh${GREEN} in ${BLUE}${install_dir}${NC}"

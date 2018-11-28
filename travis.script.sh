@@ -154,7 +154,8 @@ do_versioned_stack_build() {
 }
 
 test_stack() {
-    # Tests an exploded stack in the current directory
+    # Bit nasty but there should only be one match in there in both cases
+    pushd ./stroom_*/stroom_* > /dev/null
 
     # jq is installed by default on travis so no need to install it
 
@@ -177,6 +178,8 @@ test_stack() {
     # Clear out all docker images/volumes/containers
     echo -e "${GREEN}Clearing out docker images/containers/volumes${NC}"
     ${TRAVIS_BUILD_DIR}/bin/clean.sh
+
+    popd > /dev/null
 }
 
 test_stack_archive() {

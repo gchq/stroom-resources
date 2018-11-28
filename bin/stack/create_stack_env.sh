@@ -4,6 +4,8 @@
 # including the default values. This can be used to make sure the 
 # configuration is always complete.
 
+set -e
+
 source lib/shell_utils.sh
 source lib/network_utils.sh
 
@@ -14,7 +16,7 @@ create_config() {
 }
 
 add_params() {
-    readonly CONTAINER_VERSIONS_FILE="container_versions.env"
+    local -r CONTAINER_VERSIONS_FILE="container_versions.env"
 
     # Scan the yml file to extract the default value to build an env file
     params=$( \
@@ -141,13 +143,14 @@ main() {
     echo -e "${GREEN}Creating configuration${NC}"
 
     local -r BUILD_STACK_NAME=$1
-    local -r BUILD_FOLDER='build'
-    local -r WORKING_DIRECTORY="${BUILD_FOLDER}/${BUILD_STACK_NAME}/config"
+    local -r VERSION=$2
+    local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
+    local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}/config"
     mkdir -p ${WORKING_DIRECTORY}
     local -r INPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
     local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
     local -r OVERRIDE_FILE="overrides/${BUILD_STACK_NAME}.override.env"
-    local -r VERSIONS_FILE="${BUILD_FOLDER}/${BUILD_STACK_NAME}/VERSIONS.txt"
+    local -r VERSIONS_FILE="${WORKING_DIRECTORY}/../VERSIONS.txt"
 
     create_config
     add_params

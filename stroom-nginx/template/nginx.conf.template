@@ -6,6 +6,25 @@ events {
     worker_connections  1024;
 }
 
+
+# TODO change the log format to replicate this apache format
+#Standard Apache Format 
+#
+#%h - host name should be ok without quotes
+#%l - Remote logname (from identd, if supplied). This will return a dash unless IdentityCheck is set On.
+#\"%u\" - user name should be quoted to deal with DNs
+#%t - time is added in square brackets so is contained for parsing purposes
+#\"%r\" - URL is quoted
+#%>s - Response code doesn't need to be quoted as it is a single number
+#%b - The size in bytes of the response sent to the client
+#\"%{Referer}i\" - Referrer is quoted so that's ok
+#\"%{User-Agent}i\" - User agent is quoted so also ok
+#
+#LogFormat "%h %l \"%u\" %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+
+# A-Z index of nginx variables
+# http://nginx.org/en/docs/varindex.html
+
 http {
 
     ####################

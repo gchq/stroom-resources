@@ -4,7 +4,12 @@
 
 set -e
 
-readonly STACK_NAME="stroom_core"
-readonly SERVICES="stroom stroomProxyLocal stroomAllDbs stroomAuthService stroomAuthUi stroomLogSender nginx"
+main() {
+    local -r VERSION=$1
+    local -r BUILD_STACK_NAME="stroom_core"
+    local -r SERVICES="stroom stroomProxyLocal stroomAllDbs stroomAuthService stroomAuthUi stroomLogSender nginx"
 
-./build.sh $STACK_NAME $SERVICES
+    ./build.sh ${BUILD_STACK_NAME} ${VERSION:-SNAPSHOT} ${SERVICES}
+}
+
+main "$@"
