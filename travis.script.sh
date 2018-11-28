@@ -126,7 +126,7 @@ do_versioned_stack_build() {
 
     echo -e "Running ${scriptName} in ${scriptDir}"
 
-    ./${scriptName} "${TRAVIS_TAG:-${BUILD_VERSION}}"
+    ./${scriptName} "${BUILD_VERSION}"
 
     pushd ${buildDir} > /dev/null
 
