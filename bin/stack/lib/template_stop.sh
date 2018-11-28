@@ -41,6 +41,9 @@ main() {
     # In case we have missed any stop the whole project
     echo -e "${GREEN}Stopping any remaining containers in the stack${NC}"
     docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml stop
+
+    echo
+    echo -e "${GREEN}Done${NC}"
 }
 
 main
