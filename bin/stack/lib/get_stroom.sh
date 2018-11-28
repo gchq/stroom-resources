@@ -40,14 +40,10 @@ main() {
         exit 0
     fi
 
-    echo -e "${GREEN}Creating directory ${BLUE}${install_dir}${NC}"
-
-    mkdir -p "${stack_version}"
-
     echo
     echo -e "${GREEN}Downloading and unpacking stack ${BLUE}${url}${NC}"
 
-    # Download the stack archive file and extract it into the install directory
+    # Download the stack archive file and extract it
     curl --silent --location "${url}" | tar xz 
 
     echo
