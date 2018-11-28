@@ -126,28 +126,19 @@ do_versioned_stack_build() {
 
     echo -e "Running ${scriptName} in ${scriptDir}"
 
-    ./${scriptName}
+    ./${scriptName} "${TRAVIS_TAG:-${BUILD_VERSION}}"
 
     pushd ${buildDir} > /dev/null
 
     local -r fileName="$(ls -1 *.tar.gz)"
-    # Add the version into the filename
-    if [ -n "$TRAVIS_TAG" ]; then
-        local newFileName="${TRAVIS_TAG}.tar.gz"
-    else
-        local newFileName="${fileName/\.tar\.gz/-${BUILD_VERSION}.tar.gz}"
-    fi
-
-    echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
-    mv "${fileName}" "${newFileName}"  
 
     # Now create an MD5 hash of the stack file
-    local md5File="${newFileName}.md5"
+    local md5File="${fileName}.md5"
     echo -e "Creating MD5 hash file ${GREEN}${md5File}${NC}"
-    md5sum "${newFileName}" > "${md5File}"
+    md5sum "${fileName}" > "${md5File}"
 
     # Now spin up the stack to make sure it all works
-    test_stack_archive "${newFileName}"
+    test_stack_archive "${fileName}"
 
     popd > /dev/null
     popd > /dev/null
