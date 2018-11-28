@@ -19,9 +19,9 @@ main() {
     local -r url="https://github.com/gchq/stroom-resources/releases/download/${stack_version}/${stack_version}.tar.gz"
 
     if [ "$(find . -name "stroom_*" | wc -l)" -gt 0 ] || [ -d ./volumes ]; then
-        echo -e "${YELLOW}ERROR${NC}: It looks like you already have an existing stack installed."
-        echo -e "If you proceed, your configuration will be replaced/updated but data will be left as is."
-        echo -e "If the existing stack is running, you should stop it first"
+        echo -e "${YELLOW}WARNING${GREEN}: It looks like you already have an existing stack installed.${NC}"
+        echo -e "${GREEN}If you proceed, your configuration will be replaced/updated but data will be left as is.${NC}"
+        echo -e "${GREEN}If the existing stack is running, you should stop it first${NC}"
         echo
     fi
 
@@ -48,8 +48,7 @@ main() {
     echo -e "${GREEN}Downloading and unpacking stack ${BLUE}${url}${NC}"
 
     # Download the stack archive file and extract it into the install directory
-    curl --silent --location "${url}" \
-        | tar xz 
+    curl --silent --location "${url}" | tar xz 
 
     echo
     echo -e "${GREEN}Start Stroom using ${BLUE}start.sh${GREEN} in ${BLUE}${install_dir}${NC}"
