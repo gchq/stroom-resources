@@ -14,37 +14,36 @@
 
 FROM nginx:1.13.8-alpine
 
-# We expect there to be
-# Copy our templated conf file in ready for substitution of the host name variables
-# COPY ./nginx.conf.template /tmp/
+# This is the root dir for all our files/scripts
+WORKDIR /stroom-nginx
 
-VOLUME [ "/etc/nginx/certs" ]
-VOLUME [ "/etc/nginx/template" ]
+# All certs/keys required for SSL
+VOLUME [ "/stroom-nginx/certs" ]
+
+# The location of the template configuration file to use as the base for generating
+# the actual nginx.conf file on container start and the cron configuration
+VOLUME [ "/stroom-nginx/config" ]
+
+# Volume for file based logs for collection by stroom-log-sender
+# Nginx will also log to /var/log/nginx/access.log|error.log which are sym links
+# to stdout|stderr so 'docker logs' can see them.
+VOLUME [ "/stroom-nginx/logs" ]
+
+ENTRYPOINT ["/stroom-nginx/docker-entrypoint.sh"]
+
+CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 
 # Add bash in case we want to shell onto the container
-RUN apk add --no-cache \
-    bash
+# logrotate for rotation of the file based access/app logs
+RUN \
+    apk add --no-cache \
+        bash \
+        logrotate && \
+    mkdir -p /stroom-nginx/logs && \
+    mkdir -p /stroom-nginx/certs && \
+    mkdir -p /stroom-nginx/config
 
-# We need to create nginx.conf from nginx.conf.template, substituting NGINX_ADVERTISED_HOST from its environment variable
-# As nginx.conf contains stuff like '$proxy_add_x_forwarded_for', we need to give envsubst a specific list of variables
-# to substitute, else it will breake the config
-CMD [ "/bin/bash", "-c", "envsubst ' \
-    ${NGINX_ADVERTISED_HOST} \
-    ${STROOM_HOST} \
-    ${STROOM_PORT} \
-    ${STROOM_PROXY_HOST} \
-    ${STROOM_PROXY_PORT} \
-    ${AUTH_SERVICE_HOST} \
-    ${AUTH_SERVICE_PORT} \
-    ${AUTH_UI_URL} \
-    ${ANNOTATIONS_UI_URL} \
-    ${QUERY_ELASTIC_UI_URL} \
-    ${NGINX_SSL_VERIFY_CLIENT} \
-    ${NGINX_SSL_CERTIFICATE} \
-    ${NGINX_SSL_CERTIFICATE_KEY} \
-    ${NGINX_SSL_CLIENT_CERTIFICATE} \
-    ${NGINX_CLIENT_BODY_BUFFER_SIZE} \
-    ' < /etc/nginx/template/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]
+COPY docker-entrypoint.sh /stroom-nginx/
 
 # Label the image so we can see what commit/tag it came from
 ARG GIT_COMMIT=unspecified
