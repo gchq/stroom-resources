@@ -7,6 +7,6 @@ services:
     ports:
       - "2525:25"
     volumes:
-      - ~/.stroom/fakemail:/var/mail
+      - ../../../dev-resources/volumes/fakesmtp:/var/mail
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
