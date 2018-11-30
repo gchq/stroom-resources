@@ -1,10 +1,16 @@
 /stroom-nginx/logs/access/access.log /stroom-nginx/logs/app/app.log {
-    compress
-    copytruncate
-    daily
+    #compress
+    create 0666 root root
+    #copytruncate
+    #daily
     dateext
+
+    # add seconds since epoch to the end to ensure uniqueness when we force a roll more
+    # frequently than daily
     dateformat -%Y%m%d-%s
     missingok
+    # Don't try to email old log files anywhere
+    nomail
     notifempty
     rotate 100
     sharedscripts

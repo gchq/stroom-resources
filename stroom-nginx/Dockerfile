@@ -29,17 +29,25 @@ VOLUME [ "/stroom-nginx/config" ]
 # to stdout|stderr so 'docker logs' can see them.
 VOLUME [ "/stroom-nginx/logs" ]
 
-ENTRYPOINT ["/stroom-nginx/docker-entrypoint.sh"]
+# Volume to hold any state/config for logrotate
+VOLUME [ "/stroom-nginx/logrotate" ]
+
+# run entrypoint script inside tini for better unix process handling, 
+# see https://github.com/krallin/tini/issues/8
+ENTRYPOINT ["/sbin/tini", "--", "/stroom-nginx/docker-entrypoint.sh"]
 
 CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 
-# Add bash in case we want to shell onto the container
+ #Add bash in case we want to shell onto the container
 # logrotate for rotation of the file based access/app logs
+# tini required for process control in the entrypoint
 RUN \
     apk add --no-cache \
-        bash \
-        logrotate && \
+        #bash \
+        logrotate \
+        tini && \
     mkdir -p /stroom-nginx/logs && \
+    mkdir -p /stroom-nginx/logrotate && \
     mkdir -p /stroom-nginx/certs && \
     mkdir -p /stroom-nginx/config
 

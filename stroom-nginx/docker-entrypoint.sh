@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 echo "Substituting variables to generate nginx.conf"
 
 # We need to create nginx.conf from nginx.conf.template, 
@@ -34,6 +36,19 @@ mkdir -p /stroom-nginx/logs/access
 mkdir -p /stroom-nginx/logs/app
 
 crontab_file=/stroom-nginx/config/crontab.txt
+logrotate_template_file=/stroom-nginx/config/logrotate.conf.template
+logrotate_conf_file=/stroom-nginx/logrotate/logrotate.conf
+
+if [ -f "${logrotate_template_file}" ]; then
+
+    echo "Creating ${logrotate_conf_file} from ${logrotate_template_file}"
+    cp "${logrotate_template_file}" "${logrotate_conf_file}"
+    # logrotate is fussy about the ownership/permissions of the conf file
+    chmod -R 400 "${logrotate_conf_file}"
+
+else
+    echo "WARN: logrotate template file ${logrotate_template_file} not found, nginx logs won't be rotated"
+fi
 
 if [ -f "${crontab_file}" ]; then
     echo "(Re-)setting crontab to:"
@@ -46,15 +61,22 @@ if [ -f "${crontab_file}" ]; then
     # we can run as non-root
     /usr/bin/crontab "${crontab_file}"
 
+
+
     # start crond as root
     echo "Starting crond in the background"
-    # TODO make it log to stdout/err
-    exec /usr/sbin/crond -l 8
+
+    /usr/sbin/crond -l 8 && \
+        echo "Starting CMD: [" "$@" "]" && \
+        exec "$@"
 else
-    echo "Warning: crontab file ${crontab_file} not found"
+    echo "WARN: crontab file ${crontab_file} not found, can't start cron, nginx logs won't be rotated"
+    # Now run the CMD
+    echo "Starting CMD: [" "$@" "]"
+    exec "$@"
 fi
 
-echo "Finished docker-entrypoint, about to run CMD"
+#echo "Finished docker-entrypoint, about to run CMD"
 
 # Now run the CMD
-exec "$@"
+#exec "$@"
