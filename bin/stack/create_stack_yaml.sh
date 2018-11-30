@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# Use this script to load a SQL database dump into a temporary database.
-# This is useful for testing database migrations.
+# Use this script to create a single YAML file from the existing services.
 
 set -e
 
+# shellcheck disable=SC1091
 source lib/shell_utils.sh
 
 validate_requested_services() {
@@ -50,7 +50,7 @@ main() {
     local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
     local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}/config"
 
-    mkdir -p $WORKING_DIRECTORY
+    mkdir -p "$WORKING_DIRECTORY"
     local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
     validate_requested_services "${@:3}"
 
