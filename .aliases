@@ -219,5 +219,8 @@ docker_volumes() {
 
 alias ds='docker_summary && docker_images && docker_volumes && docker_all_containers && docker_running_containers'
 
+alias dps='docker ps -a  --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}"'
+alias dpss='docker ps -a  --format "table {{.Names}}\t{{.Status}}"'
+
 # top for docker containers
 alias ctop='docker run --rm -ti --name=ctop -v /var/run/docker.sock:/var/run/docker.sock quay.io/vektorlab/ctop:latest'

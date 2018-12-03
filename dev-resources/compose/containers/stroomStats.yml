@@ -27,7 +27,7 @@ services:
       # Comma delimited list of hosts in the ZK quorum (no port or chroot), e.g. host1,host2,host3
       - STATS_HBASE_ZK_QUORUM_HOSTS=${HBASE_ZOOKEEPER_QUORUM_HOSTS:-zookeeper}
       - ADMIN_CONTEXT_PATH=/statsAdmin
-      - AUTHENTICATION_SERVICE_URL=http://${AUTH_SERVICE_HOST:-$HOST_IP}/authService
+      - AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authService
       - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-$HOST_IP}:8080/api/authorisation/v1
       - STATS_ADVERTISED_HOST_OR_IP=${STATS_ADVERTISED_HOST_OR_IP:-localhost}
     ports:
