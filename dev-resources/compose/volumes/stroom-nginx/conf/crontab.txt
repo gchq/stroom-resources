@@ -1,5 +1,5 @@
 # Here for debugging
-* * * * * echo "Cron running - $(date)" >> /stroom-nginx/logs/cron.log
+#* * * * * echo "Cron running - $(date)" >> /stroom-nginx/logs/cron.log
 
 # Rotate the logs every minute if there is anything in them
 * * * * * logrotate --force --verbose --state=/stroom-nginx/logrotate/logrotate.state /stroom-nginx/logrotate/logrotate.conf 1>/dev/stdout 2>/dev/stderr
