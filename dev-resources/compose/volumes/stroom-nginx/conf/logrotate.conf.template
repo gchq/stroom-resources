@@ -1,18 +1,33 @@
 /stroom-nginx/logs/access/access.log /stroom-nginx/logs/app/app.log {
-    #compress
+    # compress rotated log files with gzip
+    compress
+
+    # write new files with RW to everybody
     create 0666 root root
+
     #copytruncate
     #daily
+
+    # Add the date extension to rotated files
     dateext
 
     # add seconds since epoch to the end to ensure uniqueness when we force a roll more
     # frequently than daily
     dateformat -%Y%m%d-%s
+
+    # don't fail on missing files
     missingok
+
     # Don't try to email old log files anywhere
     nomail
+
+    # Don't rotate if the file is empty
     notifempty
+
+    # Keep x rotated files before deleting
     rotate 100
+
+    # Run the postrotate script once per config block
     sharedscripts
     postrotate
         [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid` &>/dev/null    
