@@ -11,7 +11,7 @@ download_file() {
     local -r url_base=$2
     local -r filename=$3
 
-    echo -e "    Downloading ${BLUE}${url_base}/${filename}${NC} to ${BLUE}${dest_dir}${NC}"
+    echo -e "    Downloading ${BLUE}${url_base}/${filename}${NC} ${YELLOW}=>${NC} ${BLUE}${dest_dir}${NC}"
     wget --quiet --directory-prefix="${dest_dir}" "${url_base}/${filename}"
     if [[ "${filename}" =~ .*\.sh$ ]]; then
         chmod u+x "${dest_dir}/${filename}"
@@ -32,7 +32,7 @@ contains_element () {
 copy_file() {
     local -r src=$1
     local -r dest_dir=$2
-    echo -e "    Copying ${BLUE}${src}${NC} to ${BLUE}${dest_dir}${NC}"
+    echo -e "    Copying ${BLUE}${src}${NC} ${YELLOW}=>${NC} ${BLUE}${dest_dir}${NC}"
     mkdir -p "${dest_dir}"
     cp "${src}" "${dest_dir}"
 }
@@ -53,8 +53,8 @@ main() {
     local -r VOLUMES_DIRECTORY="${BUILD_DIRECTORY}/volumes"
 
     local -r SRC_CERTS_DIRECTORY="../../dev-resources/certs"
-    local -r SRC_NGINX_CONF_DIRECTORY="../../stroom-nginx/template"
     local -r SRC_VOLUMES_DIRECTORY="../../dev-resources/compose/volumes"
+    local -r SRC_NGINX_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-nginx/conf"
     local -r SRC_ELASTIC_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/elasticsearch/conf"
     local -r SRC_KIBANA_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/kibana/conf"
     local -r SRC_STROOM_LOG_SENDER_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-log-sender/conf"
@@ -83,9 +83,11 @@ main() {
     copy_file "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" "${DEST_NGINX_CERTS_DIRECTORY}"
     copy_file "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" "${DEST_NGINX_CERTS_DIRECTORY}"
 
-    echo -e "  Copying ${YELLOW}nginx${NC} config file"
+    echo -e "  Copying ${YELLOW}nginx${NC} config files"
     local -r DEST_NGINX_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/conf"
     copy_file "${SRC_NGINX_CONF_DIRECTORY}/nginx.conf.template" "${DEST_NGINX_CONF_DIRECTORY}"
+    copy_file "${SRC_NGINX_CONF_DIRECTORY}/logrotate.conf.template" "${DEST_NGINX_CONF_DIRECTORY}"
+    copy_file "${SRC_NGINX_CONF_DIRECTORY}/crontab.txt" "${DEST_NGINX_CONF_DIRECTORY}"
 
     # Set up the client certs needed for the send_data script
     echo -e "  Copying ${YELLOW}client${NC} certificates"
