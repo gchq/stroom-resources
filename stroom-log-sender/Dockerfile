@@ -23,7 +23,7 @@
 FROM alpine:3.8 as send-logs-scripts-stage
 WORKDIR /scripts
 
-ARG SEND_TO_STROOM_VERSION=send-to-stroom-v1.8.1
+ARG SEND_TO_STROOM_VERSION=send-to-stroom-v2.0
 
 ADD https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash/send_to_stroom.sh .
 ADD https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash/send_to_stroom_args.sh .
