@@ -75,8 +75,3 @@ else
     echo "Starting CMD: [" "$@" "]"
     exec "$@"
 fi
-
-#echo "Finished docker-entrypoint, about to run CMD"
-
-# Now run the CMD
-#exec "$@"
