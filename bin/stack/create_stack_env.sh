@@ -75,12 +75,18 @@ add_params() {
 
         grep -o "[A-Z_]*=.*" ${OVERRIDE_FILE} | while read line; do
             # Extract the var name and value from the override file line
-            local var_name="$(echo "${line}" | sed -E 's/([A-Z_]*)=.*/\1/')"
-            local override_value="$(echo "${line}" | sed -E 's/[A-Z_]*=(.*)/\1/')"
+            local var_name="${line%%=*}"
+            local override_value="${line#*=}"
+            #echo "line [${line}], var_name [${var_name}], override_value [${override_value}]"
 
             # Extract the existing variable value from the env file
-            local curr_line="$(grep -E "${var_name}=.*" ${OUTPUT_FILE})"
-            local curr_value="$(echo "${curr_line}" | sed -E "s/.*\s*${var_name}=(.*)/\1/")"
+            # TODO - it is possible that there may be more that one use of the same
+            # variable so we just have to take the first one and assume they have the same
+            # default values.
+            local curr_line="$(grep -E "${var_name}=.*$" ${OUTPUT_FILE} | head -n1)"
+            local curr_value="${curr_line#*=}"
+
+            #echo "curr_line [${curr_line}], curr_value [${curr_value}]"
 
             echo
             echo -e "  Overriding ${DGREY}${var_name}=${curr_value}${NC}"
