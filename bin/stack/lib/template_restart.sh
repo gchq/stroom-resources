@@ -15,12 +15,12 @@ source "$DIR"/lib/stroom_utils.sh
 
 setup_echo_colours
 
+# This is needed in the docker compose yaml
+readonly HOST_IP=$(determine_host_address)
+
 # Read the file containing all the env var exports to make them
 # available to docker-compose
 source "$DIR"/config/<STACK_NAME>.env
-
-# This is needed in the docker compose yaml
-readonly HOST_IP=$(determine_host_address)
 
 main() {
 
@@ -28,7 +28,7 @@ main() {
 
     echo
 
-    start_stack "<STACK_NAME>" "$@"
+    start_stack "<STACK_NAME>"
 
     echo
     echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
@@ -42,4 +42,4 @@ main() {
     display_stack_info
 }
 
-main "$@"
+main

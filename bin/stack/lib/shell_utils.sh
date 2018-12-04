@@ -34,6 +34,16 @@ check_arg_count() {
     actual_count="$(( $# - 1 ))"
 
     if [[ "${actual_count}" -ne "${expected_count}" ]]; then
-        die "${RED}ERROR${NC}: Incorrect number of arguments"
+        die "${RED}ERROR${NC}: Incorrect number of arguments, expected ${expected_count}"
+    fi
+}
+
+check_arg_count_at_least() {
+    local expected_min_count="$1"
+    local actual_count
+    actual_count="$(( $# - 1 ))"
+
+    if [[ "${actual_count}" -lt "${expected_min_count}" ]]; then
+        die "${RED}ERROR${NC}: Incorrect number of arguments, expected at least ${expected_min_count}"
     fi
 }

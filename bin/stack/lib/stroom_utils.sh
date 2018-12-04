@@ -181,11 +181,11 @@ display_stack_info() {
 }
 
 start_stack() {
-    check_arg_count 1 "$@"
+    check_arg_count_at_least 1 "$@"
     local -r stack_name="$1"
     # These lines may help in debugging the config that is passed to the containers
-    env
-    docker-compose -f "$DIR"/config/"${stack_name}".yml config
+    #env
+    #docker-compose -f "$DIR"/config/"${stack_name}".yml config
 
     echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}"
     echo
@@ -207,7 +207,7 @@ stop_service_if_in_stack() {
         # shellcheck disable=SC2094
         docker-compose --project-name "${stack_name}" -f "$DIR"/config/"${stack_name}".yml stop "${service_name}"
     else
-        echo -e "  Container ${BLUE}${service_name}${NC} is not running"
+        echo -e "Container ${BLUE}${service_name}${NC} is not running"
     fi
 }
 

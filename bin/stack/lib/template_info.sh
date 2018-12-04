@@ -8,6 +8,7 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${DIR}"/lib/network_utils.sh
 source "${DIR}"/lib/shell_utils.sh
+source "${DIR}"/lib/stroom_utils.sh
 
 #readonly HOST_IP=$(determine_host_address)
 
