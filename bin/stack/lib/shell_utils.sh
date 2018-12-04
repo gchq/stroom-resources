@@ -4,6 +4,7 @@
 #
 # Re-usable shell functions 
 
+
 setup_echo_colours() {
     # Exit the script on any error
     set -e
@@ -25,4 +26,24 @@ err() {
 die () {
     echo -e "$@" >&2
     exit 1
+}
+
+check_arg_count() {
+    local expected_count="$1"
+    local actual_count
+    actual_count="$(( $# - 1 ))"
+
+    if [[ "${actual_count}" -ne "${expected_count}" ]]; then
+        die "${RED}ERROR${NC}: Incorrect number of arguments, expected ${expected_count}"
+    fi
+}
+
+check_arg_count_at_least() {
+    local expected_min_count="$1"
+    local actual_count
+    actual_count="$(( $# - 1 ))"
+
+    if [[ "${actual_count}" -lt "${expected_min_count}" ]]; then
+        die "${RED}ERROR${NC}: Incorrect number of arguments, expected at least ${expected_min_count}"
+    fi
 }
