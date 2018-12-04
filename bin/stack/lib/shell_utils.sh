@@ -47,3 +47,17 @@ check_arg_count_at_least() {
         die "${RED}ERROR${NC}: Incorrect number of arguments, expected at least ${expected_min_count}"
     fi
 }
+
+# Returns 0 if $1 is in the array of elements passed as subsequent args
+# e.g. 
+# arr=( "one" "two" "three" )
+# element_in "two" "${arr[@]}" # returns 0
+element_in () {
+    local element 
+    local match="$1"
+    shift
+    for element; do 
+        [[ "${element}" == "${match}" ]] && return 0
+    done
+    return 1
+}

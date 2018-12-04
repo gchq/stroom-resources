@@ -21,7 +21,7 @@ add_params() {
     # Scan the yml file to extract the default value to build an env file
     params=$( \
         # Bit of a fudge to ignore the echo lines in stroomAllDbs.yml
-        grep -v "\w* echo" ${INPUT_FILE} |
+        grep -v "\w* echo" "${INPUT_FILE}" |
         # Extracts the params
         grep -Po "(?<=\\$\\{).*?(?=\\})" |
         # Replaces ':-' with '='
@@ -46,8 +46,10 @@ add_params() {
         source ${CONTAINER_VERSIONS_FILE}
 
         grep -E "^\s*export.*" ${CONTAINER_VERSIONS_FILE} | while read line; do
-            local var_name="$(echo "${line}" | sed -E 's/^.*export\s+([A-Z_]+)=.*/\1/')"
-            local version="$(echo "${line}" | sed -E 's/^.*export\s+[A-Z_]+=(.*)/\1/')"
+            local var_name
+            local version
+            var_name="$(echo "${line}" | sed -E 's/^.*export\s+([A-Z_]+)=.*/\1/')"
+            version="$(echo "${line}" | sed -E 's/^.*export\s+[A-Z_]+=(.*)/\1/')"
 
             # Support lines like:
             # export STROOM_PROXY_TAG="${STROOM_TAG}"
@@ -59,10 +61,10 @@ add_params() {
             fi
 
             # check if file contains the var or interest
-            if grep -E --silent "\s*${var_name}=" ${OUTPUT_FILE}; then
+            if grep -E --silent "\s*${var_name}=" "${OUTPUT_FILE}"; then
                 echo -e "  Changing ${BLUE}${var_name}${NC} to ${BLUE}${version}${NC}"
                 # repalce var in OUTPUT_FILE with our CONTAINER_VERSIONS_FILE one
-                sed -i'' -E "s#^export\s+${var_name}=.*#export ${var_name}=${version}#g" ${OUTPUT_FILE}
+                sed -i'' -E "s#^export\s+${var_name}=.*#export ${var_name}=${version}#g" "${OUTPUT_FILE}"
             fi
         done
     )
@@ -70,21 +72,25 @@ add_params() {
     # If there is a <stack_name>.override.env file in ./overrides then replace any matching env
     # vars found in the OUTPUT_FILE with the values from the override file.
     # This allows a stack to differ slightly from the defaults taken from the yml
-    if [ -f ${OVERRIDE_FILE} ]; then
+    if [ -f "${OVERRIDE_FILE}" ]; then
         echo -e "${GREEN}Applying variable overrides${NC}"
 
-        grep -o "[A-Z_]*=.*" ${OVERRIDE_FILE} | while read line; do
+        grep -o "[A-Z_]*=.*" "${OVERRIDE_FILE}" | while read line; do
             # Extract the var name and value from the override file line
-            local var_name="${line%%=*}"
-            local override_value="${line#*=}"
+            local var_name
+            local override_value
+            local curr_line
+            local curr_value
+            var_name="${line%%=*}"
+            override_value="${line#*=}"
             #echo "line [${line}], var_name [${var_name}], override_value [${override_value}]"
 
             # Extract the existing variable value from the env file
             # TODO - it is possible that there may be more that one use of the same
             # variable so we just have to take the first one and assume they have the same
             # default values.
-            local curr_line="$(grep -E "${var_name}=.*$" ${OUTPUT_FILE} | head -n1)"
-            local curr_value="${curr_line#*=}"
+            curr_line="$(grep -E "${var_name}=.*$" "${OUTPUT_FILE}" | head -n1)"
+            curr_value="${curr_line#*=}"
 
             #echo "curr_line [${curr_line}], curr_value [${curr_value}]"
 
@@ -94,7 +100,7 @@ add_params() {
 
             # Replace the current value with the override
             # This line may break if the sed delimiter (currently |) appears in ${override_value}
-            sed -i'' -E "s|(${var_name})=.*|\1=${override_value}|g" ${OUTPUT_FILE}
+            sed -i'' -E "s|(${var_name})=.*|\1=${override_value}|g" "${OUTPUT_FILE}"
         done
     fi
 }
@@ -104,8 +110,8 @@ add_additional_env_vars() {
     # config file
 
     # Required to allow the configuration of the docker repo for ctop
-    echo "export CTOP_DOCKER_REPO=\"quay.io/vektorlab/ctop\"" >> ${OUTPUT_FILE}
-    echo "export CTOP_TAG=\"latest\"" >> ${OUTPUT_FILE}
+    echo "export CTOP_DOCKER_REPO=\"quay.io/vektorlab/ctop\"" >> "${OUTPUT_FILE}"
+    echo "export CTOP_TAG=\"latest\"" >> "${OUTPUT_FILE}"
 }
 
 create_versions_file() {
@@ -115,24 +121,22 @@ create_versions_file() {
     # against the image definitions obtained from the yml (INPUT_FILE)
     # Source the env file in a subshell to avoid poluting ours
     ( 
-        source ${OUTPUT_FILE}
+        source "${OUTPUT_FILE}"
         
         # Find all image: lines in the yml and turn them into echo statements so we can
         # eval them so bash does its variable substitution. Bit hacky using eval.
-        cat ${INPUT_FILE} | 
-            grep "image:" | 
+        grep "image:" "${INPUT_FILE}" | 
             sed -e 's/\s*image:\s*/echo /g' | 
             while read line; do
-
-                echo "$(eval $line)"
-        done
-    ) | sort > ${VERSIONS_FILE}
+                eval "${line}"
+            done 
+    ) | sort > "${VERSIONS_FILE}"
 
     echo -e "${GREEN}Using container versions:${NC}"
 
-    cat ${VERSIONS_FILE} | while read line; do
+    while read line; do
         echo -e "  ${BLUE}${line}${NC}"
-    done
+    done < "${VERSIONS_FILE}" 
 
 
     # TODO validate tags
@@ -152,7 +156,7 @@ main() {
     local -r VERSION=$2
     local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
     local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}/config"
-    mkdir -p ${WORKING_DIRECTORY}
+    mkdir -p "${WORKING_DIRECTORY}"
     local -r INPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
     local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
     local -r OVERRIDE_FILE="overrides/${BUILD_STACK_NAME}.override.env"
