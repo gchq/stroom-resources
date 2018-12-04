@@ -35,6 +35,7 @@ MINOR_VER_FLOATING_TAG=""
 VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
+STACK_NAME=""
 
 # The dir used to hold content for deploying to github pages, i.e. https://gchq.github.io/stroom-resources
 GH_PAGES_DIR="${TRAVIS_BUILD_DIR}/gh-pages"
@@ -69,8 +70,8 @@ release_to_docker_hub() {
     # If we have a TRAVIS_TAG (git tag) then use that, else use the floating tag
     docker build \
         ${allTagArgs} \
-        --build-arg GIT_COMMIT=${TRAVIS_COMMIT} \
-        --build-arg GIT_TAG=${TRAVIS_TAG:-${SNAPSHOT_FLOATING_TAG}} \
+        --build-arg GIT_COMMIT="${TRAVIS_COMMIT}" \
+        --build-arg GIT_TAG="${TRAVIS_TAG:-${SNAPSHOT_FLOATING_TAG}}" \
         ${contextRoot}
 
     #The username and password are configured in the travis gui
@@ -115,9 +116,9 @@ do_versioned_stack_build() {
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
     local -r buildDir=${scriptDir}/build/
 
-    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-    echo -e "${GREEN}Building and testing versioned stack${NC}"
-    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+    echo -e "${GREEN}Building and testing a versioned ${BLUE}${STACK_NAME}${GREEN} stack${NC}"
+    echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
 
     pushd ${scriptDir} > /dev/null
 
@@ -126,28 +127,19 @@ do_versioned_stack_build() {
 
     echo -e "Running ${scriptName} in ${scriptDir}"
 
-    ./${scriptName}
+    ./${scriptName} "${BUILD_VERSION}"
 
     pushd ${buildDir} > /dev/null
 
     local -r fileName="$(ls -1 *.tar.gz)"
-    # Add the version into the filename
-    if [ -n "$TRAVIS_TAG" ]; then
-        local newFileName="${TRAVIS_TAG}.tar.gz"
-    else
-        local newFileName="${fileName/\.tar\.gz/-${BUILD_VERSION}.tar.gz}"
-    fi
-
-    echo -e "Renaming file ${GREEN}${fileName}${NC} to ${GREEN}${newFileName}${NC}"
-    mv "${fileName}" "${newFileName}"  
 
     # Now create an MD5 hash of the stack file
-    local md5File="${newFileName}.md5"
+    local md5File="${fileName}.md5"
     echo -e "Creating MD5 hash file ${GREEN}${md5File}${NC}"
-    md5sum "${newFileName}" > "${md5File}"
+    md5sum "${fileName}" > "${md5File}"
 
     # Now spin up the stack to make sure it all works
-    test_stack_archive "${newFileName}"
+    test_stack_archive "${fileName}"
 
     popd > /dev/null
     popd > /dev/null
@@ -203,9 +195,16 @@ test_stack_archive() {
     popd > /dev/null
 }
 
+substitute_tag() {
+    local -r tag="$1"
+    local -r replacement="$2"
+    local -r file="$3"
+    echo -e "${GREEN}Substituting tag ${tag} with value ${BLUE}${replacement}${GREEN} in ${BLUE}${file}${NC}"
+    sed -i "s/${tag}/${replacement}/" "${get_stroom_dest_file}"
+}
+
 create_get_stroom_script() {
     local -r get_stroom_filename=get_stroom.sh
-
     local -r script_build_dir=${TRAVIS_BUILD_DIR}/build
     local -r get_stroom_source_file=${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}
     local -r get_stroom_dest_file=${script_build_dir}/${get_stroom_filename}
@@ -213,15 +212,16 @@ create_get_stroom_script() {
     mkdir -p "${script_build_dir}"
 
     echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a copy of ${BLUE}${get_stroom_source_file}${NC}"
-    cp ${get_stroom_source_file} ${get_stroom_dest_file}
+    cp "${get_stroom_source_file}" "${get_stroom_dest_file}"
 
-    echo -e "${GREEN}Substituting tag ${BLUE}${TRAVIS_TAG}${GREEN} into ${BLUE}${get_stroom_dest_file}${NC}"
-    sed -i "s/<STACK_VERSION>/${TRAVIS_TAG}/" ${get_stroom_dest_file}
+    substitute_tag "<STACK_NAME>" "${STACK_NAME}" "${get_stroom_dest_file}"
+    substitute_tag "<STACK_TAG>" "${TRAVIS_TAG}" "${get_stroom_dest_file}"
+    substitute_tag "<STACK_VERSION>" "${BUILD_VERSION}" "${get_stroom_dest_file}"
 
     # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
     echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to ${BLUE}${GH_PAGES_DIR}/${NC}"
-    mkdir -p ${GH_PAGES_DIR}
-    cp ${get_stroom_dest_file} ${GH_PAGES_DIR}/
+    mkdir -p "${GH_PAGES_DIR}"
+    cp "${get_stroom_dest_file}" "${GH_PAGES_DIR}"/
 }
 
 main() {
@@ -270,13 +270,15 @@ main() {
             release_to_docker_hub "${DOCKER_REPO_STROOM_ZOOKEEPER}" "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" ${allDockerTags}
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
+            STACK_NAME="${TAG_PREFIX_STROOM_STROOM_CORE}"
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
             echo -e "${GREEN}Performing a ${BLUE}stroom_core${GREEN} stack release to github${NC}"
 
             do_versioned_stack_build buildCore
             create_get_stroom_script
 
-        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
+        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_FULL} ]]; then
+            STACK_NAME="${TAG_PREFIX_STROOM_STROOM_FULL}"
             #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
             echo -e "${GREEN}Performing a ${BLUE}stroom_full${GREEN} stack release to github${NC}"
 

@@ -15,17 +15,21 @@ services:
       - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
         # Enabling NGINX_SSL_VERIFY_CLIENT means we can capture the DN and cert expiry
         # in the datafeed but means the client cert must be imported into the browser
-        # so keep it set to off to avoid adding complexity to the stack.
-      - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-off}
+        # so set it to 'optional' so that it asks the client for a cert and if it
+        # provides one it will inspect it
+      - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-optional}
       - QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP:5002}
       - STROOM_HOST=${STROOM_HOST:-$HOST_IP}
       - STROOM_PORT=${STROOM_APP_PORT:-8080}
       - STROOM_PROXY_HOST=${STROOM_PROXY_HOST:-$HOST_IP}
       - STROOM_PROXY_PORT=${STROOM_PROXY_APP_PORT:-8090}
     volumes:
-      - ${NGINX_VOLUME_CERTS:-../../volumes/nginx/certs}:/etc/nginx/certs:ro
+      - ${NGINX_VOLUME_CERTS:-../../volumes/nginx/certs}:/stroom-nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
-      - ${NGINX_VOLUME_CONF:-../../volumes/nginx/conf}:/etc/nginx/template:ro
+      - ${NGINX_VOLUME_CONF:-../../volumes/nginx/conf}:/stroom-nginx/config:ro
+      - type: volume
+        source: nginx_logs
+        target: /stroom-nginx/logs
     ports:
       - "80:80"
       - "443:443"
