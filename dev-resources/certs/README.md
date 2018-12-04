@@ -10,4 +10,4 @@ This will delete existing certificates, CSRs, keys and keystores in the followin
 `client`
 `server`
 
-NOTE: The generated files are for development/testing purposes only and are NOT for any form of produuction use.
+NOTE: The generated files are for development/testing purposes only and are NOT for any form of production use.
