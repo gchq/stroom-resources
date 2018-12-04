@@ -7,34 +7,39 @@
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
-#readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-#source "$DIR"/lib/network_utils.sh
-#source "$DIR"/lib/shell_utils.sh
+source "$DIR"/lib/network_utils.sh
+source "$DIR"/lib/shell_utils.sh
+source "$DIR"/lib/stroom_utils.sh
 
-#setup_echo_colours
+setup_echo_colours
 
-#readonly HOST_IP=$(determine_host_address)
+# Read the file containing all the env var exports to make them
+# available to docker-compose
+source "$DIR"/config/<STACK_NAME>.env
 
-#source "$DIR"/config/<STACK_NAME>.env
+# This is needed in the docker compose yaml
+readonly HOST_IP=$(determine_host_address)
 
-##echo -e "${GREEN}Restarting the docker containers${NC}"
-##echo
+main() {
 
-#source "${DIR}/start.sh"
+    stop_stack "<STACK_NAME>" 
 
-##docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml restart
-#docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml up -d
+    echo
 
-#echo
-#echo -e "${GREEN}Waiting for stroom to complete its restart.${NC}"
+    start_stack "<STACK_NAME>" "$@"
 
-#wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
+    echo
+    echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
 
-#echo
-#echo -e "${GREEN}Ready${NC}"
+    wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
 
+    # Stroom is now up or we have given up waiting so check the health
+    check_overall_health
 
-source ./stop.sh
+    # Display the banner, URLs and login details
+    display_stack_info
+}
 
-source ./start.sh
+main "$@"

@@ -11,7 +11,9 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "$DIR"/lib/network_utils.sh
 source "$DIR"/lib/shell_utils.sh
+source "$DIR"/lib/stroom_utils.sh
 
+# This is needed in the docker compose yaml
 readonly HOST_IP=$(determine_host_address)
 
 setup_echo_colours
@@ -42,15 +44,7 @@ check_installed_binaries() {
 main() {
     check_installed_binaries
 
-    # These lines may help in debugging the config that is passed to the containers
-    #env
-    #docker-compose -f "$DIR"/config/stroom_core.yml config
-
-    echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}"
-    #echo -e "${GREEN}Using IP address ${BLUE}${HOST_IP}${NC}"
-    echo
-
-    docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml up -d
+    start_stack "<STACK_NAME>" "$@"
 
     echo
     echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
@@ -60,10 +54,10 @@ main() {
     wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
 
     # Stroom is now up or we have given up waiting so check the health
-    ./health.sh
+    check_overall_health
 
     # Display the banner, URLs and login details
-    ./info.sh
+    display_stack_info
 }
 
-main $@
+main "$@"
