@@ -431,6 +431,15 @@ http {
             proxy_pass_request_headers on;
         }
 
+        location /exportService/ {
+            proxy_ssl_server_name      on;
+            proxy_pass                 http://stroom_upstream/api/export/;
+            proxy_pass_header          Set-Cookie;
+            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body    on;
+            proxy_pass_request_headers on;
+        }
+
         ##################
         # ROUTING FOR UI #
         ##################
