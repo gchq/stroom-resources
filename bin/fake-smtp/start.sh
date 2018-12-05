@@ -43,5 +43,5 @@ else
     exit 0
 fi
 
-docker-compose -f "${SCRIPT_DIR}/../compose/containers/fakeSmtp.yml" up -d
+docker-compose -f "${SCRIPT_DIR}/../compose/everything.yml" up -d fake-smtp
 

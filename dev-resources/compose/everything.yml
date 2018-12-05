@@ -163,7 +163,8 @@ volumes:
 
   kafka_data:
   kafka_logs:
-  
+
+  fake-smtp_mail:
 # If you want to have a docker managed/named volume but pointing to somewhere
 # other than /var/lib/docker/volumes/..... then you can do stuff like this.
 # Relative paths are not supported, but you can substitute env vars

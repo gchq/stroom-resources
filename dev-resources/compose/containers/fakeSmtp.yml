@@ -12,8 +12,3 @@ services:
         target: /var/mail
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
-
-# This volume is specified here instead of everything.yml because this file is used 
-# in a standalone fashion, as well as being part of the bounceIt.sh stack.
-volumes:
-  fake-smtp_mail:
