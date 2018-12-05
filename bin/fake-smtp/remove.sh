@@ -8,5 +8,3 @@ readonly SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 docker stop fake-smtp
 docker rm fake-smtp
-docker rmi munkyboy/fakesmtp:latest
-rm "${SCRIPT_DIR}/volume/*"
