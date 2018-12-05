@@ -7,7 +7,9 @@ This repository provides various shell scripts and docker-compose configuration 
 The build scripts in `./bin/stack` can be used to create a pre-canned stroom stack that will run in Docker.
 The released stacks are available on github at [github.com/gchq/stroom-resources/releases](https://github.com/gchq/stroom-resources/releases).
 
-For more details on the docker stacks see this [README](./bin/stack/README.md)
+For information on how to easily use the pre-canned Docker stacks see the instructions [here](https://github.com/gchq/stroom-docs/blob/master/dev-guide/docker-running.md).
+
+For more details on creating the docker stacks etc. see this [README](./bin/stack/README.md)
 
 ## Setting up a development environment
 If you want to clone all the git repositories that make up the Stroom ecosystem then run the following command from the directory where you want all the repositories cloned in to:

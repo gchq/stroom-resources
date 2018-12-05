@@ -2,19 +2,7 @@
 #
 # Re-usable network functions
 
-setup_echo_colours() {
-    # Exit the script on any error
-    set -e
-
-    #Shell Colour constants for use in 'echo -e'
-    RED='\033[1;31m'
-    GREEN='\033[1;32m'
-    YELLOW='\033[1;33m'
-    BLUE='\033[1;34m'
-    LGREY='\e[37m'
-    DGREY='\e[90m'
-    NC='\033[0m' # No Color
-}
+source "${DIR:-.}"/lib/shell_utils.sh
 
 determine_host_address() {
     if [ "$(uname)" == "Darwin" ]; then
@@ -46,7 +34,7 @@ wait_for_200_response() {
 
     n=0
     # Keep retrying for maxWaitSecs
-    until [ $n -ge ${maxWaitSecs} ]
+    until [ "$n" -ge "${maxWaitSecs}" ]
     do
         # OR with true to prevent the non-zero exit code from curl from stopping our script
         responseCode=$(curl -sL -w "%{http_code}\\n" "${url}" -o /dev/null || true)
@@ -55,12 +43,12 @@ wait_for_200_response() {
             break
         fi
         # print a simple unbounded progress bar, increasing every 2s
-        mod=$(($n%2))
+        mod=$(( n % 2 ))
         if [[ ${mod} -eq 0 ]]; then
             printf '.'
         fi
 
-        n=$[$n+1]
+        n=$(( n + 1 ))
         # sleep for two secs
         sleep 1
     done

@@ -59,7 +59,7 @@ main() {
     local -r SRC_KIBANA_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/kibana/conf"
     local -r SRC_STROOM_LOG_SENDER_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-log-sender/conf"
     local -r SRC_AUTH_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
-    local -r SEND_TO_STROOM_VERSION="send-to-stroom-v1.3"
+    local -r SEND_TO_STROOM_VERSION="send-to-stroom-v2.0"
     local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
 
     echo -e "  Copying ${YELLOW}stroom-proxy${NC} certificates"

@@ -9,10 +9,30 @@ source lib/shell_utils.sh
 
 validate_requested_services() {
     # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
-    local -r VALID_SERVICES='stroom stroomAllDbs zookeeper stroomStats stroomQueryElasticUi stroomQueryElasticService stroomProxyLocal stroomAuthUi stroomAuthService stroomAnnotationsUi stroomAnnotationsService stroomLogSender nginx kibana kafka hbase fakeSmtp elasticsearch hdfs'
+    local -r VALID_SERVICES=( \
+        "elasticsearch" \
+        "fakeSmtp" \
+        "hbase" \
+        "hdfs" \
+        "kafka" \
+        "kibana" \
+        "nginx" \
+        "stroom" \
+        "stroomAllDbs" \
+        "stroomAnnotationsService" \
+        "stroomAnnotationsUi" \
+        "stroomAuthService" \
+        "stroomAuthUi" \
+        "stroomLogSender" \
+        "stroomProxyLocal" \
+        "stroomQueryElasticService" \
+        "stroomQueryElasticUi" \
+        "stroomStats" \
+        "zookeeper" \
+        )
 
     for service in "${@}"; do
-        if [[ ${VALID_SERVICES} != *${service}* ]]; then
+        if ! element_in "${service}" "${VALID_SERVICES[@]}"; then
             services_are_valid=false
             err "${RED}'${service}'${NC} is not a valid service!"
             exit 1
@@ -62,7 +82,7 @@ main() {
         create_stack_from_services "${@:3}" > "${OUTPUT_FILE}"
         append_shared_volumes
     else
-        err "Please choose from the following services and try again: ${GREEN}${VALID_SERVICES}${NC}"
+        err "Please choose from the following services and try again: ${GREEN}" "${VALID_SERVICES[@]}" "${NC}"
         exit 1
     fi
 }

@@ -8,7 +8,7 @@ set -e
 # give the directory relative to the lib script, not this script.
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source ./lib/shell_utils.sh
+source "${DIR:-.}"/lib/shell_utils.sh
 
 # Read the file containing all the env var exports to make them
 # available to docker-compose
@@ -39,22 +39,22 @@ main() {
 
     local url=https://localhost:${port}/stroom/datafeed
 
-    if [ ! -d ${data_dir} ]; then
+    if [ ! -d "${data_dir}" ]; then
         die "${RED}ERROR:${GREEN} data directory ${BLUE}${data_dir}${GREEN} does not exist${NC}"
     fi
 
-    ./lib/send_to_stroom.sh \
+     "${DIR:-.}"/lib/send_to_stroom.sh \
         --no-secure \
         --pretty \
         --file-regex ".*/.*" \
         --key ./certs/client.unencrypted.key \
         --cert ./certs/client.pem.crt \
         --cacert ./certs/ca.pem.crt \
-        ${data_dir} \
-        ${feed_name} \
-        ${system_name} \
-        ${environment} \
-        ${url}
+        "${data_dir}" \
+        "${feed_name}" \
+        "${system_name}" \
+        "${environment}" \
+        "${url}"
 }
 
 # ~~~ Script starts here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
