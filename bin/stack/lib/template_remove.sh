@@ -16,7 +16,6 @@ showUsage() {
 }
 
 main() {
-
     local requireConfirmation=true
     local optspec=":y"
 
@@ -34,7 +33,7 @@ main() {
         esac
     done
 
-    if $requireConfirmation; then
+    if [ "$requireConfirmation" = true ]; then
 
         echo
         echo -e "${RED}WARNING:${NC} ${GREEN}This will remove all the Docker containers and volumes in the stack${NC}"
@@ -51,11 +50,12 @@ main() {
         fi
     fi
 
+    # We don't really care about shutdown order here as we are destroying the stack
     echo -e "${GREEN}Stopping and removing the Docker containers and volumes${NC}"
     echo
 
+    # shellcheck disable=SC2094
     docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml down -v
-
 }
 
-main $@
+main "$@"
