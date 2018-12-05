@@ -97,7 +97,8 @@ check_overall_health() {
     fi 
 
     check_service_health "stroom" "${host}" "${STROOM_ADMIN_PORT}" "stroomAdmin"
-    check_service_health "stroom-proxy" "${host}" "${STROOM_PROXY_ADMIN_PORT}" "proxyAdmin"
+    check_service_health "stroom-proxy-remote" "${host}" "${STROOM_PROXY_REMOTE_ADMIN_PORT}" "proxyAdmin"
+    check_service_health "stroom-proxy-local" "${host}" "${STROOM_PROXY_LOCAL_ADMIN_PORT}" "proxyAdmin"
     check_service_health "stroom-auth-service" "${host}" "${STROOM_AUTH_SERVICE_ADMIN_PORT}" "authenticationServiceAdmin"
     if [[ ! -z ${STROOM_STATS_SERVICE_ADMIN_PORT} ]]; then
         check_service_health "stroom-stats" "${host}" "${STROOM_STATS_SERVICE_ADMIN_PORT}" "statsAdmin"
@@ -219,6 +220,7 @@ stop_stack() {
 
     # Order is critical here for a graceful shutdown
     stop_service_if_in_stack "${stack_name}" "stroom-log-sender"
+    stop_service_if_in_stack "${stack_name}" "stroom-proxy-remote"
     stop_service_if_in_stack "${stack_name}" "stroom-proxy-local"
     stop_service_if_in_stack "${stack_name}" "nginx"
     stop_service_if_in_stack "${stack_name}" "stroom-auth-ui"
