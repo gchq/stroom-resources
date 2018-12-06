@@ -7,10 +7,10 @@ services:
     image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
       #- JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m }
-      - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${STROOM_DEBUG_PORT:-10765},suspend=n }
-      - STROOM_APP_PORT=${STROOM_APP_PORT:-8080}
-      - STROOM_ADMIN_PORT=${STROOM_ADMIN_PORT:-8081}
-      - STROOM_DEBUG_PORT=${STROOM_DEBUG_PORT:-10765}
+      - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10765,suspend=n }
+      - STROOM_APP_PORT=8080
+      - STROOM_ADMIN_PORT=8081
+      - STROOM_DEBUG_PORT=10765
       - STROOM_NODE=${STROOM_NODE:-node1a}
       - STROOM_RACK=${STROOM_RACK:-rack}
       - STROOM_JPA_DIALECT=org.hibernate.dialect.MySQLInnoDBDialect
@@ -77,9 +77,9 @@ services:
       - LOGS_MAX_SLEEP=${STROOM_LOGS_MAX_SLEEP:-10}
       - LOGS_SECURE=${STROOM_LOGS_SECURE:-true}
     ports:
-      - "${STROOM_APP_PORT:-8080}:${STROOM_APP_PORT:-8080}"
-      - "${STROOM_ADMIN_PORT:-8081}:${STROOM_ADMIN_PORT:-8081}"
-      - "${STROOM_DEBUG_PORT:-10765}:${STROOM_DEBUG_PORT:-10765}"
+      - "${STROOM_APP_PORT:-8080}:8080"
+      - "${STROOM_ADMIN_PORT:-8081}:8081"
+      - "${STROOM_DEBUG_PORT:-10765}:10765"
     healthcheck:
       test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
       start_period: 1m30s
