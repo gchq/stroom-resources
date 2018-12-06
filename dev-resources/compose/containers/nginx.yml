@@ -23,6 +23,8 @@ services:
       - STROOM_PORT=${STROOM_APP_PORT:-8080}
       - STROOM_PROXY_HOST=${STROOM_PROXY_HOST:-$HOST_IP}
       - STROOM_PROXY_PORT=${STROOM_PROXY_APP_PORT:-8090}
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
     volumes:
       - ${NGINX_VOLUME_CERTS:-../../volumes/nginx/certs}:/stroom-nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts

@@ -49,7 +49,8 @@ RUN \
     mkdir -p /stroom-nginx/certs && \
     mkdir -p /stroom-nginx/config
 
-COPY docker-entrypoint.sh /stroom-nginx/
+# Copy entrypoint and related shell scripts
+COPY *.sh /stroom-nginx/
 
 # Label the image so we can see what commit/tag it came from
 ARG GIT_COMMIT=unspecified
@@ -57,3 +58,5 @@ ARG GIT_TAG=unspecified
 LABEL \
     git_commit="$GIT_COMMIT" \
     git_tag="$GIT_TAG"
+# Pass the GIT_TAG through to the running container
+ENV GIT_TAG=$GIT_TAG

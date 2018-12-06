@@ -1,5 +1,10 @@
 #!/bin/sh
 
+BASE_DIR="/stroom-nginx"
+LOGS_DIR="${BASE_DIR}/logs"
+CONFIG_DIR="${BASE_DIR}/config"
+LOG_SENDER_HEADERS_FILE="${LOGS_DIR}/extra_headers.txt"
+
 set -e
 
 echo "Substituting variables to generate nginx.conf"
@@ -27,17 +32,20 @@ envsubst '
     ${NGINX_SSL_CLIENT_CERTIFICATE}
     ${NGINX_CLIENT_BODY_BUFFER_SIZE}
     ' \
-    < /stroom-nginx/config/nginx.conf.template \
+    < "${CONFIG_DIR}/nginx.conf.template" \
     > /etc/nginx/nginx.conf
 
 echo "Ensuring directories"
 # Ensure we have the sub-directories in our /nginx/logs/ volume
-mkdir -p /stroom-nginx/logs/access
-mkdir -p /stroom-nginx/logs/app
+mkdir -p "${LOGS_DIR}/access"
+mkdir -p "${LOGS_DIR}/app"
 
-crontab_file=/stroom-nginx/config/crontab.txt
-logrotate_template_file=/stroom-nginx/config/logrotate.conf.template
-logrotate_conf_file=/stroom-nginx/logrotate/logrotate.conf
+# shellcheck source=add_container_identity_headers.sh
+. "${BASE_DIR}/add_container_identity_headers.sh" "${LOG_SENDER_HEADERS_FILE}"
+
+crontab_file="${CONFIG_DIR}/crontab.txt"
+logrotate_template_file="${CONFIG_DIR}/logrotate.conf.template"
+logrotate_conf_file="${BASE_DIR}/logrotate/logrotate.conf"
 
 if [ -f "${logrotate_template_file}" ]; then
 
