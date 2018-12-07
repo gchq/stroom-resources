@@ -6,6 +6,8 @@ services:
     container_name: stroom
     image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       #- JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m }
       - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10765,suspend=n }
       - STROOM_APP_PORT=8080
