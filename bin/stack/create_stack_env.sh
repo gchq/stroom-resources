@@ -129,7 +129,7 @@ create_versions_file() {
             while read line; do
                 eval "${line}"
             done 
-    ) | sort > "${VERSIONS_FILE}"
+    ) | sort | uniq > "${VERSIONS_FILE}"
 
     echo -e "${GREEN}Using container versions:${NC}"
 
