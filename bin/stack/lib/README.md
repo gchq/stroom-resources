@@ -46,6 +46,7 @@ sudo firewall-cmd --zone=public --permanent --add-port=8080/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8081/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8090/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8091/tcp
+sudo firewall-cmd --zone=public --permanent --add-port=8443/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8543/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=5000/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=2888/tcp
@@ -95,6 +96,29 @@ or
 ```
 
 For more configuration options you can use the script `./lib/send_to_stroom.sh`.
+
+### Proxy configuration
+
+The stack is configured with two _stroom-proxy_ instances.
+The proxies have the same datafeed interface as stroom but abstract stroom from the source of the data, allowing stroom to be shutdown while the proxies are still collecting data.
+A stroom-proxy can proxy for another proxy which is how the _remote_ proxy in the stack is configured.
+The following diagram shows how the data can flow.
+
+```
+  data                      data                data
+    +                         +                   +
+    |                         |                   |
+    |                         |                   |
++---v--------+  push    +-----v------+ pull  +----v-----+
+|stroom-proxy|--------->|stroom-proxy|------>|  stroom  |
+|  (remote)  |          |   (local)  |       |          |
++------------+          +------------+       +----------+
+```
+
+The 'remote' proxy is configured to store then forward.
+This aggregates the received data then periodically forwards the aggregated data (in larger batches) to the 'local' proxy.
+The 'local' proxy is configured to store the received data. 
+The stored data in the 'local' proxy is then periodically pulled into stroom, using a shared directory.
 
 ## Volumes
 
