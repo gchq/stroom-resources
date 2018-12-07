@@ -1,28 +1,31 @@
 #!/bin/sh
 
+add_to_headers() {
+    token="$1"
+    value="$2"
+    if [ ! -z "${value}" ]; then
+        echo "${token}:${value}" >> "${headers_file}"
+    fi
+}
+
 main() {
     [ "$#" -eq 1 ] || (echo "'headers_file' argument not supplied!" && exit 1)
     headers_file="$1"
 
-    # Write the details of the host of this container to the headers file 
-    # for stroom-log-sender
-    cat /dev/null > "${headers_file}"
-    if [ ! -z "${DOCKER_HOST_HOSTNAME}" ]; then
-        echo "OriginalHost:${DOCKER_HOST_HOSTNAME}" >> "${headers_file}"
-    fi
-    if [ ! -z "${DOCKER_HOST_IP}" ]; then
-        echo "OriginalIP:${DOCKER_HOST_IP}" >> "${headers_file}"
-    fi
-    if [ ! -z "${GIT_TAG}" ]; then
-        echo "OriginalImageGitTag:${GIT_TAG}" >> "${headers_file}"
-    fi
-
     # This command works in alpine linux 3.8, but may be fragile and subject to change
     # with different docker versions.
     container_id="$(grep -o -e "docker/.*" /proc/self/cgroup | head -n 1 | sed "s/docker\/\(.*\)/\\1/")"
-    if [ ! -z "${container_id}" ]; then
-        echo "OriginalContainerId:${container_id}" >> "${headers_file}"
-    fi
+
+    # Write the details of the host of this container to the headers file 
+    # for stroom-log-sender
+    cat /dev/null > "${headers_file}"
+
+    # These two should be passed in as env vars at container run time 
+    add_to_headers "OriginalHost" "${DOCKER_HOST_HOSTNAME}" 
+    add_to_headers "OriginalIP" "${DOCKER_HOST_IP}" 
+    # This env var should be automatcially set from the build arg at container creation time
+    add_to_headers "OriginalImageGitTag" "${GIT_TAG}" 
+    add_to_headers "OriginalContainerId" "${container_id}" 
 
     echo "Dumping ${headers_file} contents:"
     echo "-------------------------------------------"
