@@ -145,12 +145,9 @@ display_stack_info() {
     # Used for right padding 
     local -r padding="                            "
 
-    while read line; do
-        local image_name
-        local image_version
-
-        image_name="$(echo "${line}" | cut -d ':' -f 1)"
-        image_version="$(echo "${line}" | cut -d ':' -f 2)"
+    while read -r line; do
+        local image_name="${line%%:*}"
+        local image_version="${line#*=}"
         echo_info_line "${padding}" "${image_name}" "${image_version}"
     done < "${DIR}"/VERSIONS.txt
 
@@ -190,6 +187,13 @@ start_stack() {
 
     echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}"
     echo
+
+    # Capture the hostname/ip of the host running the containers so they can
+    # make it available to stroom-log-sender
+    # shellcheck disable=SC2034
+    DOCKER_HOST_HOSTNAME="$(hostname -f)"
+    # shellcheck disable=SC2034
+    DOCKER_HOST_IP="${HOST_IP}"
 
     # shellcheck disable=SC2094
     docker-compose --project-name "${stack_name}" -f "$DIR"/config/"${stack_name}".yml up -d "${@:2}"

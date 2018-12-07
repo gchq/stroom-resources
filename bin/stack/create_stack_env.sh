@@ -75,14 +75,13 @@ add_params() {
     if [ -f "${OVERRIDE_FILE}" ]; then
         echo -e "${GREEN}Applying variable overrides${NC}"
 
-        grep -o "[A-Z_]*=.*" "${OVERRIDE_FILE}" | while read line; do
+        grep -o "^\s*[A-Z_]*=.*" "${OVERRIDE_FILE}" | while read line; do
             # Extract the var name and value from the override file line
-            local var_name
-            local override_value
+            local var_name="${line%%=*}"
+            local override_value="${line#*=}"
+
             local curr_line
             local curr_value
-            var_name="${line%%=*}"
-            override_value="${line#*=}"
             #echo "line [${line}], var_name [${var_name}], override_value [${override_value}]"
 
             # Extract the existing variable value from the env file

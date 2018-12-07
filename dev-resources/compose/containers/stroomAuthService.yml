@@ -5,6 +5,8 @@ services:
     container_name: stroom-auth-service
     image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v1.0-LATEST}"
     environment:
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - STROOM_UI=${STROOM_AUTH_STROOM_UI:-http://$HOST_IP:8099 }
       - ADVERTISED_HTTP_HOST=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authService
       - AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/login
