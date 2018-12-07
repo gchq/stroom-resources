@@ -25,6 +25,7 @@ validate_requested_services() {
         "stroomAuthUi" \
         "stroomLogSender" \
         "stroomProxyLocal" \
+        "stroomProxyRemote" \
         "stroomQueryElasticService" \
         "stroomQueryElasticUi" \
         "stroomStats" \

@@ -312,7 +312,7 @@ http {
             proxy_pass_request_headers on;
         }
 
-        #Lucene index query service on Stroom
+        # Lucene index query service on Stroom
         location /indexService/ {
             proxy_ssl_server_name      on;
             proxy_pass                 http://stroom_upstream_sticky/api/stroom-index/;
@@ -322,10 +322,28 @@ http {
             proxy_pass_request_headers on;
         }
 
-        #SQL Statistics query service on Stroom
+        # SQL Statistics query service on Stroom
         location /sqlstatisticsService/ {
             proxy_ssl_server_name      on;
             proxy_pass                 http://stroom_upstream_sticky/api/sqlstatistics/;
+            proxy_pass_header          Set-Cookie;
+            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body    on;
+            proxy_pass_request_headers on;
+        }
+
+        location /rulesetService/ {
+            proxy_ssl_server_name      on;
+            proxy_pass                 http://stroom_upstream/api/ruleset/;
+            proxy_pass_header          Set-Cookie;
+            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass_request_body    on;
+            proxy_pass_request_headers on;
+        }
+
+        location /dictionaryService/ {
+            proxy_ssl_server_name      on;
+            proxy_pass                 http://stroom_upstream/api/dictionary/;
             proxy_pass_header          Set-Cookie;
             proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body    on;

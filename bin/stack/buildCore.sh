@@ -15,7 +15,7 @@ main() {
         "stroomAuthUi"  \
         "stroomLogSender"  \
         "stroomProxyLocal"  \
-        #"stroomProxyRemote"  \
+        "stroomProxyRemote"  \
         )
 
     ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"

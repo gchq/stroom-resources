@@ -2,14 +2,19 @@
 
 set -e
 
+
 #Shell Colour constants for use in 'echo -e'
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[1;34m'
-LGREY='\e[37m'
-DGREY='\e[90m'
-NC='\033[0m' # No Color
+
+# shellcheck disable=SC2034
+{
+    RED='\033[1;31m'
+    GREEN='\033[1;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[1;34m'
+    LGREY='\e[37m'
+    DGREY='\e[90m'
+    NC='\033[0m' # No Color
+}
 
 error_exit() {
     local -r msg="$1"
@@ -20,7 +25,7 @@ error_exit() {
 
 check_for_installed_binary() {
     local -r binary_name=$1
-    command -v ${binary_name} 1>/dev/null || error_exit "${GREEN}${binary_name}${RED} is not installed"
+    command -v "${binary_name}" 1>/dev/null || error_exit "${GREEN}${binary_name}${RED} is not installed"
 }
 
 check_for_installed_binaries() {
@@ -96,16 +101,19 @@ create_server_certs() {
         -config server.ssl.conf
 
     # Which we can sign using the CA, to get our server certificate: 
+    #-signkey server/server.unencrypted.key \
     echo
     echo -e "${GREEN}Creating server certificate${NC}"
     openssl x509 \
+        -extfile server.ssl.conf \
+        -extensions x509_ext \
         -req \
         -in server/server.csr \
         -CA certificate-authority/ca.pem.crt \
         -CAkey certificate-authority/ca.unencrypted.key \
         -CAcreateserial \
         -out server/server.pem.crt \
-        -days 99999 \
+        -days 99990 \
         -sha256
 
     echo
@@ -142,6 +150,16 @@ create_server_certs() {
         -srcstoretype PKCS12 \
         -srcstorepass password \
         -alias server
+
+    # TODO Not sure if we want to add the ca cert to the keystore or not.
+    keytool \
+        -import \
+        -keystore server/server.jks \
+        -storepass password \
+        -file certificate-authority/ca.pem.crt \
+        -alias ca \
+        -noprompt \
+        -trustcacerts
 }
 
 create_client_certs() {
@@ -175,7 +193,7 @@ create_client_certs() {
         -CAkey certificate-authority/ca.unencrypted.key \
         -CAcreateserial \
         -out client/client.pem.crt \
-        -days 99999 \
+        -days 99990 \
         -sha256
 
     echo
@@ -218,9 +236,9 @@ create_client_certs() {
 delete_existing_certs() {
     echo
     echo -e "${GREEN}Deleting existing files${NC}"
-    rm -f ${SCRIPT_DIR}/certificate-authority/ca.*
-    rm -f ${SCRIPT_DIR}/client/client.*
-    rm -f ${SCRIPT_DIR}/server/server.*
+    rm -f "${SCRIPT_DIR}"/certificate-authority/ca.*
+    rm -f "${SCRIPT_DIR}"/client/client.*
+    rm -f "${SCRIPT_DIR}"/server/server.*
 }
 
 main() {
@@ -242,4 +260,4 @@ main() {
     echo -e "${GREEN}Done!${NC}"
 }
 
-main $@
+main "$@"

@@ -62,10 +62,15 @@ main() {
     local -r SEND_TO_STROOM_VERSION="send-to-stroom-v2.0"
     local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
 
-    echo -e "  Copying ${YELLOW}stroom-proxy${NC} certificates"
-    local -r DEST_PROXY_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy/certs"
-    copy_file "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" "${DEST_PROXY_CERTS_DIRECTORY}"
-    copy_file "${SRC_CERTS_DIRECTORY}/server/server.jks" "${DEST_PROXY_CERTS_DIRECTORY}"
+    echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} certificates"
+    local -r DEST_PROXY_REMOTE_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-remote/certs"
+    copy_file "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
+    copy_file "${SRC_CERTS_DIRECTORY}/server/server.jks" "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
+
+    echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} certificates"
+    local -r DEST_PROXY_LOCAL_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-local/certs"
+    copy_file "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
+    copy_file "${SRC_CERTS_DIRECTORY}/server/server.jks" "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} certificates"
     local -r DEST_AUTH_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/auth-ui/certs"
