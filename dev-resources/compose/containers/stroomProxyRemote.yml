@@ -6,6 +6,8 @@ services:
     container_name: stroom-proxy-remote
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
     environment:
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - CONTENT_SYNC_ENABLED=${STROOM_PROXY_REMOTE_CONTENT_SYNC_ENABLED:-false}
       - FORWARD_URL=${STROOM_PROXY_REMOTE_FORWARD_URL:-http://stroom-proxy-local:8090/stroom/datafeed}
       - FORWARDING_ENABLED=${STROOM_PROXY_REMOTE_FORWARDING_ENABLED:-true}

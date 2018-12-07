@@ -6,6 +6,8 @@ services:
     container_name: stroom-proxy-local
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
     environment:
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - CONTENT_SYNC_ENABLED=${STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED:-false}
       - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
       - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-http://stroom:8080/stroom/datafeed}
