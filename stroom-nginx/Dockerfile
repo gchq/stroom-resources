@@ -59,4 +59,5 @@ LABEL \
     git_commit="$GIT_COMMIT" \
     git_tag="$GIT_TAG"
 # Pass the GIT_TAG through to the running container
+# This should not be set at container run time
 ENV GIT_TAG=$GIT_TAG
