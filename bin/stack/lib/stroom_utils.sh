@@ -160,14 +160,16 @@ display_stack_info() {
         echo_info_line "${padding}" "Stroom Stats" "http://localhost:${STROOM_STATS_SERVICE_ADMIN_PORT}/statsAdmin"
     fi
 
-    echo_info_line "${padding}" "Stroom Proxy" "http://localhost:${STROOM_PROXY_ADMIN_PORT}/proxyAdmin"
+    echo_info_line "${padding}" "Stroom Proxy (local)" "http://localhost:${STROOM_PROXY_LOCAL_ADMIN_PORT}/proxyAdmin"
+    echo_info_line "${padding}" "Stroom Proxy (remote)" "http://localhost:${STROOM_PROXY_REMOTE_ADMIN_PORT}/proxyAdmin"
     echo_info_line "${padding}" "Stroom Auth" "http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT}/authenticationServiceAdmin"
 
     echo
     echo -e "Data can be POSTed to Stroom using the following URLs (see README for details)"
     echo
-    echo_info_line "${padding}" "Stroom Proxy" "https://localhost:${STROOM_PROXY_HTTPS_APP_PORT}/stroom/datafeed"
     echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeed"
+    echo_info_line "${padding}" "Stroom Proxy (local)" "https://localhost:${STROOM_PROXY_LOCAL_HTTPS_APP_PORT}/stroom/datafeed"
+    echo_info_line "${padding}" "Stroom Proxy (remote)" "https://localhost:${STROOM_PROXY_REMOTE_HTTPS_APP_PORT}/stroom/datafeed"
 
     echo
     echo -e "The Stroom user interface can be accessed at the following URL"
