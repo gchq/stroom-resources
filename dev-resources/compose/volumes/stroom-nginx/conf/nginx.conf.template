@@ -259,7 +259,7 @@ http {
             proxy_pass                 http://auth_service_upstream_sticky/;
             proxy_pass_header          Set-Cookie;
             proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header           X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
             proxy_pass_request_body    on;
             proxy_pass_request_headers on;
         }
@@ -269,7 +269,7 @@ http {
             proxy_pass                 http://auth_service_upstream_sticky/authentication/;
             proxy_pass_header          Set-Cookie;
             proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header           X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
             proxy_pass_request_body    on;
             proxy_pass_request_headers on;
         }
@@ -279,7 +279,7 @@ http {
             proxy_pass                 http://auth_service_upstream_sticky/user/;
             proxy_pass_header          Set-Cookie;
             proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header           X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
             proxy_pass_request_body    on;
             proxy_pass_request_headers on;
         }
@@ -289,7 +289,7 @@ http {
             proxy_pass                 http://auth_service_upstream_sticky/token/;
             proxy_pass_header          Set-Cookie;
             proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header           X-SSL-ClIENT-S-DN $ssl_client_s_dn;
+            proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
             proxy_pass_request_body    on;
             proxy_pass_request_headers on;
         }
