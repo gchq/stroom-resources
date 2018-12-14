@@ -28,22 +28,28 @@ class colours:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
 
-def create_build_dir(build_dir):
-    shutil.rmtree(build_dir, True)
-    os.mkdir(build_dir)
+class config:
+  BUILD_DIR = './build'
+  OUTPUT_DIR = './diffs'
 
-def get_release(release_name, build_dir):
+def create_build_dir():
+    shutil.rmtree(config.BUILD_DIR, True)
+    os.mkdir(config.BUILD_DIR)
+    if not os.path.isdir(config.OUTPUT_DIR):
+      os.mkdir(config.OUTPUT_DIR)
+
+def get_release(release_name):
     GITHUB_DOWNLOAD_URL="https://github.com/gchq/stroom-resources/releases/download/{0}/{0}.tar.gz"
     url = GITHUB_DOWNLOAD_URL.format(release_name)
-    downloaded_file="{0}/{1}.tar.gz".format(build_dir, release_name)
-    extracted_files="{0}/{1}".format(build_dir, release_name)
+    downloaded_file="{0}/{1}.tar.gz".format(config.BUILD_DIR, release_name)
+    extracted_files="{0}/{1}".format(config.BUILD_DIR, release_name)
     urllib.urlretrieve (url, downloaded_file)
     tar = tarfile.open(downloaded_file)
     tar.extractall(extracted_files)
     tar.close()
 
-def get_path_to_config(release_name, build_dir):
-    from_version_path  = "{0}/{1}/stroom_core/{1}/config/stroom_core.env".format(build_dir, release_name) 
+def get_path_to_config(release_name):
+    from_version_path  = "{0}/{1}/stroom_core/{1}/config/stroom_core.env".format(config.BUILD_DIR, release_name) 
     return from_version_path
 
 def extract_variables_from_env_file(path):
@@ -65,9 +71,9 @@ def extract_variables_from_env_file(path):
         env_vars[splitted[0] ]= splitted[1]
     return (env_vars, repeated_vars)
 
-def setup_release(release_name, build_dir):
-    get_release(release_name, build_dir)
-    path = get_path_to_config(release_name, build_dir)
+def setup_release(release_name):
+    get_release(release_name)
+    path = get_path_to_config(release_name)
     (env_vars, repeated_vars) = extract_variables_from_env_file(path)
     return (env_vars, repeated_vars)
 
@@ -87,7 +93,7 @@ def compare(from_vars, to_vars):
           changed_vars.append((to_var, from_vars[to_var], to_vars[to_var]))
     return (added_vars, removed_vars, changed_vars)
 
-def create_output_file(output_file_path, from_release, to_release, comparisons, build_dir):
+def create_output_file(output_file_path, from_release, to_release, comparisons):
     added_vars = comparisons[0]
     removed_vars = comparisons[1]
     changed_vars = comparisons[2]
@@ -108,7 +114,7 @@ def create_output_file(output_file_path, from_release, to_release, comparisons, 
 
     output.close()
 
-def add_repetitions_to_output_file(output_file_path, release_name, repeated_vars, build_dir):
+def add_repetitions_to_output_file(output_file_path, release_name, repeated_vars):
     output = open(output_file_path, 'a')
     output.write("\n## Variables that occur more than once within the {0} env file\n\n".format(release_name))
     for repeated_var in repeated_vars:
@@ -122,18 +128,17 @@ def main():
 
     print "Comparing the environment variable files of {0}{1}{2} and {3}{4}{5}".format(colours.BLUE, from_release, colours.NC, colours.BLUE, to_release, colours.NC)
 
-    BUILD_DIR="./build"
-    create_build_dir(BUILD_DIR)
+    create_build_dir()
 
-    output_file_path = "{0}/{1}_to_{2}.md".format(BUILD_DIR, from_release, to_release)
+    output_file_path = "{0}/{1}_to_{2}.md".format(config.OUTPUT_DIR, from_release, to_release)
 
-    (from_vars, repeated_from_vars) = setup_release(from_release, BUILD_DIR)
-    (to_vars, repeated_to_vars) = setup_release(to_release, BUILD_DIR)
+    (from_vars, repeated_from_vars) = setup_release(from_release)
+    (to_vars, repeated_to_vars) = setup_release(to_release)
     comparisons = compare(from_vars, to_vars)    
-    create_output_file(output_file_path, from_release, to_release, comparisons, BUILD_DIR)
+    create_output_file(output_file_path, from_release, to_release, comparisons)
 
-    add_repetitions_to_output_file(output_file_path, from_release, repeated_from_vars, BUILD_DIR)
-    add_repetitions_to_output_file(output_file_path, to_release, repeated_to_vars, BUILD_DIR)
+    add_repetitions_to_output_file(output_file_path, from_release, repeated_from_vars)
+    add_repetitions_to_output_file(output_file_path, to_release, repeated_to_vars)
 
     print "A list of differences has been written to {0}{1}{2}".format(colours.BLUE, output_file_path, colours.NC)
 
