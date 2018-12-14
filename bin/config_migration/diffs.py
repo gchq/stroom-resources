@@ -2,6 +2,8 @@
 """Get the difference between Stroom release configurations
 
 Usage: diffs.py <from_release> <to_release> 
+
+E.g.: ./diffs.py stroom_core-v6.0-beta.18 stroom_core-v6.0-beta.19
 """
 import shutil
 import os
@@ -31,6 +33,7 @@ def extract_variables_from_env_file(path):
     env_file = open(path)
     lines = env_file.readlines()
     env_vars = {}
+    repeated_vars = []
     for line in lines:
       # Strip 'export ' and rstrip off the carriage return
       stripped = line[7:].rstrip()
@@ -40,16 +43,16 @@ def extract_variables_from_env_file(path):
       splitted[1] = splitted[1].strip('"')
 
       if splitted[0] in env_vars:
-        print "Warning: found repeated var:", splitted[0], "is", env_vars[splitted[0]], "and", splitted[1]
+        repeated_vars.append((splitted[0], env_vars[splitted[0]], splitted[1]))
       else: 
         env_vars[splitted[0] ]= splitted[1]
-    return env_vars
+    return (env_vars, repeated_vars)
 
 def setup_release(release_name, build_dir):
     get_release(release_name, build_dir)
     path = get_path_to_config(release_name, build_dir)
-    env_vars = extract_variables_from_env_file(path)
-    return env_vars
+    (env_vars, repeated_vars) = extract_variables_from_env_file(path)
+    return (env_vars, repeated_vars)
 
 def compare(from_vars, to_vars):
     removed_vars = {}
@@ -67,11 +70,11 @@ def compare(from_vars, to_vars):
           changed_vars.append((to_var, from_vars[to_var], to_vars[to_var]))
     return (added_vars, removed_vars, changed_vars)
 
-def create_output_file(from_release, to_release, comparisons, build_dir):
+def create_output_file(output_file_path, from_release, to_release, comparisons, build_dir):
     added_vars = comparisons[0]
     removed_vars = comparisons[1]
     changed_vars = comparisons[2]
-    output = open("{0}/{1}_to_{2}.md".format(build_dir, from_release, to_release), 'w')
+    output = open(output_file_path, 'w')
     output.write("# Differences between {0} and {1}\n\n".format(from_release,to_release))
     
     output.write("## Added\n\n")
@@ -84,23 +87,35 @@ def create_output_file(from_release, to_release, comparisons, build_dir):
 
     output.write("\n## Changed default values\n\n")
     for changed_var in changed_vars:
-      output.write("{0} has changed from \"{1}\" to \"{2}\"".format(changed_var[0], changed_var[1], changed_var[2]))
+      output.write("{0} has changed from \"{1}\" to \"{2}\"\n".format(changed_var[0], changed_var[1], changed_var[2]))
 
     output.close()
 
+def add_repetitions_to_output_file(output_file_path, release_name, repeated_vars, build_dir):
+    output = open(output_file_path, 'a')
+    output.write("\n## Variables that occur more than once within the {0} env file\n\n".format(release_name))
+    for repeated_var in repeated_vars:
+      output.write("{0} is defined twice, as \"{1}\" and as \"{2}\"\n".format(repeated_var[0], repeated_var[1], repeated_var[2]))
+    output.close()
+
 def main():
-    arguments = docopt(__doc__, version='Get the difference between Stroom release configurations')
+    arguments = docopt(__doc__, version='v1.0')
     from_release = arguments["<from_release>"]
     to_release = arguments["<to_release>"]
 
     BUILD_DIR="./build"
     create_build_dir(BUILD_DIR)
 
-    from_vars = setup_release(from_release, BUILD_DIR)
-    to_vars = setup_release(to_release, BUILD_DIR)
-    
+    output_file_path = "{0}/{1}_to_{2}.md".format(BUILD_DIR, from_release, to_release)
+
+    (from_vars, repeated_from_vars) = setup_release(from_release, BUILD_DIR)
+    (to_vars, repeated_to_vars) = setup_release(to_release, BUILD_DIR)
     comparisons = compare(from_vars, to_vars)    
-    create_output_file(from_release, to_release, comparisons, BUILD_DIR)
+    create_output_file(output_file_path, from_release, to_release, comparisons, BUILD_DIR)
+
+    add_repetitions_to_output_file(output_file_path, from_release, repeated_from_vars, BUILD_DIR)
+    add_repetitions_to_output_file(output_file_path, to_release, repeated_to_vars, BUILD_DIR)
+
 
 if __name__ == '__main__':
     main()
