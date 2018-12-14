@@ -11,6 +11,23 @@ import urllib
 import tarfile
 from docopt import docopt
 
+class colours:
+    RED = '\033[1;31m'
+    GREEN = '\033[1;32m'
+    YELLOW = '\033[1;33m'
+    #BLUE = '\033[1;34m'
+    LGREY = '\e[37m'
+    DGREY = '\e[90m'
+    UNDERLINE = '\033[4m'
+    NC = '\033[0m'
+    BLUE = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+
 def create_build_dir(build_dir):
     shutil.rmtree(build_dir, True)
     os.mkdir(build_dir)
@@ -103,6 +120,8 @@ def main():
     from_release = arguments["<from_release>"]
     to_release = arguments["<to_release>"]
 
+    print "Comparing the environment variable files of {0}{1}{2} and {3}{4}{5}".format(colours.BLUE, from_release, colours.NC, colours.BLUE, to_release, colours.NC)
+
     BUILD_DIR="./build"
     create_build_dir(BUILD_DIR)
 
@@ -116,6 +135,7 @@ def main():
     add_repetitions_to_output_file(output_file_path, from_release, repeated_from_vars, BUILD_DIR)
     add_repetitions_to_output_file(output_file_path, to_release, repeated_to_vars, BUILD_DIR)
 
+    print "A list of differences has been written to {0}{1}{2}".format(colours.BLUE, output_file_path, colours.NC)
 
 if __name__ == '__main__':
     main()
