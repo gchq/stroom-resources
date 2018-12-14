@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-"""Get the difference between Stroom release configurations
+"""Generates a manual migration between two Stroom releases
 
-Usage: diffs.py <from_release> <to_release> 
+Usage: create_config_migration.py <from_release> <to_release> 
 
-E.g.: ./diffs.py stroom_core-v6.0-beta.18 stroom_core-v6.0-beta.19
+E.g.: ./create_config_migration.py stroom_core-v6.0-beta.18 stroom_core-v6.0-beta.19
 """
 import shutil
 import os
@@ -30,7 +30,7 @@ class colours:
 
 class config:
   BUILD_DIR = './build'
-  OUTPUT_DIR = './diffs'
+  OUTPUT_DIR = './migrations'
 
 def create_build_dir():
     shutil.rmtree(config.BUILD_DIR, True)
