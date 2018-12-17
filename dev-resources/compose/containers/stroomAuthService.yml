@@ -31,6 +31,7 @@ services:
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes
       - CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/changePassword
+      - UNAUTHORISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/unauthorised
       - FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN=${STROOM_AUTH_FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN:-true}
       # There is an effective regex here: https://stackoverflow.com/questions/3802192/regexp-java-for-password-validation
       # The regex from there is too complicated and mucks up this yaml. If you want to use more complicated validation
