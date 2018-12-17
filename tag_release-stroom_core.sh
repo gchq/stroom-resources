@@ -32,7 +32,7 @@ main() {
     readonly RELEASE_VERSION_REGEX="^${STACK_NAME}-v[0-9]+\.[0-9]+.*$"
     readonly STACK_DIR="./bin/stack"
     readonly STACK_BUILD_DIR="${STACK_DIR}/build"
-    readonly STACK_BUILD_SCRIPT="${STACK_DIR}/buildCore.sh"
+    readonly STACK_BUILD_SCRIPT="./buildCore.sh"
     readonly VERSIONS_FILE="${STACK_BUILD_DIR}/${STACK_NAME}/${STACK_NAME}-SNAPSHOT/VERSIONS.txt"
 
     setup_echo_colours
@@ -72,7 +72,11 @@ main() {
 
     echo -e "${GREEN}Running local stack build to capture docker image versions${NC}"
 
+    pushd "${STACK_DIR}" > /dev/null
+
     . "${STACK_BUILD_SCRIPT}"
+
+    popd "${STACK_DIR}" > /dev/null
 
     if [ ! -f "${VERSIONS_FILE}" ]; then
         error_exit "Can't find file ${BLUE}${VERSIONS_FILE}${GREEN} in the stack build${NC}"
