@@ -94,7 +94,7 @@ main() {
     local expected_stroom_image="${STROOM_IMAGE_PREFIX}:${stroom_version}" 
 
     if ! grep -q "${expected_stroom_image}" "${VERSIONS_FILE}"; then
-        error_exit "Expecting to find [${BLUE}${expected_stroom_image}${GREEN}] in the VERSIONS.txt file.${NC}"
+        error_exit "Expecting to find [${BLUE}${expected_stroom_image}${GREEN}] in the ${BLUE}VERSIONS.txt${GREEN} file.${NC}"
     fi
 
     local commit_msg
