@@ -91,10 +91,14 @@ main() {
 
     # Extract the version part of the tag, e.g. v6.0-beta.20
     local stroom_version="v${version#*-v}"
-    local expected_stroom_image="${STROOM_IMAGE_PREFIX}:${stroom_version}" 
+    # Get the full stroom docker image tag from the VERSIONS.txt file
+    local stroom_image_tag
+    stroom_image_tag="$(grep "${STROOM_IMAGE_PREFIX}:.*" "${VERSIONS_FILE}")"
+    # Extract the version part of the stroom tag
+    local stroom_image_version="${stroom_image_tag#*:}"
 
-    if ! grep -q "${expected_stroom_image}" "${VERSIONS_FILE}"; then
-        error_exit "Expecting to find [${BLUE}${expected_stroom_image}${GREEN}] in the ${BLUE}VERSIONS.txt${GREEN} file.${NC}"
+    if ! echo "${stroom_version}" | grep -q "${stroom_image_version}"; then
+        error_exit "Expecting to find [${BLUE}${stroom_image_version}${GREEN}] in the git tag ${BLUE}${version}${GREEN}.${NC}"
     fi
 
     local commit_msg
