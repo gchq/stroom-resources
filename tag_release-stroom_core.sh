@@ -28,6 +28,7 @@ error_exit() {
 
 main() {
     readonly STACK_NAME='stroom_core'
+    readonly STROOM_IMAGE_PREFIX='gchq/stroom'
     # Git tags should match this regex to be a release tag
     readonly RELEASE_VERSION_REGEX="^${STACK_NAME}-v[0-9]+\.[0-9]+.*$"
     readonly STACK_DIR="./bin/stack"
@@ -72,15 +73,28 @@ main() {
 
     echo -e "${GREEN}Running local stack build to capture docker image versions${NC}"
     echo
+    echo -e "${BLUE}--------------------------------------------------------------------------------${NC}"
 
     pushd "${STACK_DIR}" > /dev/null
 
     "${STACK_BUILD_SCRIPT}"
 
+    echo
+    echo -e "${BLUE}--------------------------------------------------------------------------------${NC}"
+    echo
+
     popd > /dev/null
 
     if [ ! -f "${VERSIONS_FILE}" ]; then
         error_exit "Can't find file ${BLUE}${VERSIONS_FILE}${GREEN} in the stack build${NC}"
+    fi
+
+    # Extract the version part of the tag, e.g. v6.0-beta.20
+    local stroom_version="v${version#*-v}"
+    local expected_stroom_image="${STROOM_IMAGE_PREFIX}:${stroom_version}" 
+
+    if ! grep -q "${expected_stroom_image}" "${VERSIONS_FILE}"; then
+        error_exit "Expecting to find [${BLUE}${expected_stroom_image}${GREEN}] in the VERSIONS.txt file.${NC}"
     fi
 
     local commit_msg
