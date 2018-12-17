@@ -71,10 +71,11 @@ main() {
     fi
 
     echo -e "${GREEN}Running local stack build to capture docker image versions${NC}"
+    echo
 
     pushd "${STACK_DIR}" > /dev/null
 
-    . "${STACK_BUILD_SCRIPT}"
+    "${STACK_BUILD_SCRIPT}"
 
     popd > /dev/null
 
