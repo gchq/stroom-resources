@@ -98,7 +98,7 @@ main() {
     local stroom_image_version="${stroom_image_tag#*:}"
 
     if ! echo "${stroom_version}" | grep -q "${stroom_image_version}"; then
-        error_exit "Expecting to find [${BLUE}${stroom_image_version}${GREEN}] in the git tag ${BLUE}${version}${GREEN}.${NC}"
+        error_exit "Expecting the git tag [${BLUE}${version}${GREEN}] to include the stroom image version [${BLUE}${stroom_image_version}${GREEN}] in it.${NC}"
     fi
 
     local commit_msg
