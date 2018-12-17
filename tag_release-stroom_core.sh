@@ -76,7 +76,7 @@ main() {
 
     . "${STACK_BUILD_SCRIPT}"
 
-    popd "${STACK_DIR}" > /dev/null
+    popd > /dev/null
 
     if [ ! -f "${VERSIONS_FILE}" ]; then
         error_exit "Can't find file ${BLUE}${VERSIONS_FILE}${GREEN} in the stack build${NC}"
