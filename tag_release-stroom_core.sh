@@ -89,6 +89,10 @@ main() {
         error_exit "Can't find file ${BLUE}${VERSIONS_FILE}${GREEN} in the stack build${NC}"
     fi
 
+    if grep -q "SNAPSHOT" "${VERSIONS_FILE}"; then
+        error_exit "Found a ${BLUE}SNAPSHOT${GREEN} version in the ${BLUE}VERSIONS.txt${GREEN} file. You can't release a SNAPSHOT"
+    fi
+
     # Extract the version part of the tag, e.g. v6.0-beta.20
     local stroom_version="v${version#*-v}"
     # Get the full stroom docker image tag from the VERSIONS.txt file
