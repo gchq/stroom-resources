@@ -33,7 +33,7 @@ services:
       - STROOM_USERS_UI_URL=https://${STROOM_AUTH_UI_HOST:-$HOST_IP}/users
       - STROOM_APIKEYS_UI_URL=https://${STROOM_AUTH_UI_HOST:-$HOST_IP}/tokens
       - STROOM_CHANGEPASSWORD_URL=https://${STROOM_AUTH_UI_HOST:-$HOST_IP}/changepassword
-      - STROOM_ADVERTISED_URL=https://${NGINX_HOST:-$HOST_IP}/stroom/ui
+      - STROOM_ADVERTISED_URL=https://${NGINX_HOST:-$HOST_IP}
       # This needs to be an API token issued for a user, i.e. for the admin user.
       # Without this Stroom won't be able to make calls to it's RemoteDataSources.
       - STROOM_SECURITY_API_TOKEN=${STROOM_SECURITY_API_TOKEN:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsInNpZCI6bnVsbH0.k0Ssb43GCdTunAMeM26fIulYKNUuPUaJJk6GxDmzCPb7kVPwEtdfBSrtwazfEFM97dnmvURkLqs-DAZTXhhf-0VqQx4hkwcCHf83eVptWTy-lufIhQo6FCM223c9ONIhl6CPqknWh9Bo3vFNrNJoKz5Zw2T_iCcQhi2WGjd_tjTG7VbibTIpH3lPQDw1IBD2nMsEqACJSk3IaFe0GYcrAEMwsjj3sjAwByMbj5DJvo_DJbAuzUwS5IVpASEENen5Xd3wALLirrraUfED1OY0G56Ttcwl3uQ2s-grZXBM4JCiIurlWR5iNtNwoPUsZsyMju4FMSXt3Ur1NIpD7XKJlg}
@@ -71,6 +71,7 @@ services:
       - STROOM_DOCREF_URL_UI__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP/query-elastic}
       - STROOM_PROXY_DIR=${STROOM_STROOM_PROXY_DIR:-/tmp/proxy}
       - STROOM_HELP_URL=${STROOM_HELP_URL:-https://gchq.github.io/stroom-docs/}
+      - STROOM_UI_PATH=${STROOM_UI_PATH:-/stroom/ui?prompt=login}
       - LOGS_EVENT_FEED_NAME=${STROOM_LOGS_EVENT_FEED_NAME:-STROOM-USER-EVENTS}
       - LOGS_ACCESS_FEED_NAME=${STROOM_LOGS_ACCESS_FEED_NAME:-STROOM-ACCESS-EVENTS}
       - LOGS_APP_FEED_NAME=${STROOM_LOGS_APP_FEED_NAME:-STROOM-APP-EVENTS}
