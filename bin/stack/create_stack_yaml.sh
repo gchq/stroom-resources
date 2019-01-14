@@ -16,6 +16,7 @@ validate_requested_services() {
         "hdfs" \
         "kafka" \
         "kibana" \
+        "mysqlBackup" \
         "nginx" \
         "stroom" \
         "stroomAllDbs" \

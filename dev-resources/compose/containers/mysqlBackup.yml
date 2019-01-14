@@ -1,0 +1,25 @@
+version: '2.4'
+
+services: 
+
+  mysql-backup:
+    container_name: mysql-backup
+    image: "deitch/mysql-backup:84e618c76a29bb2834a758f982344247ab78832e"
+    #image: "deitch/mysql-backup:local-SNAPSHOT"
+    environment:
+      - COMPRESSION=gzip
+        #- DB_DUMP_BEGIN=2330 
+      #- DB_DUMP_BEGIN=+1
+      - DB_DUMP_BY_SCHEMA=true
+      #- DB_DUMP_DEBUG=true
+      - DB_DUMP_FREQ=3
+      - DB_DUMP_KEEP_PERMISSIONS=false
+      - DB_DUMP_TARGET=/db 
+      - DB_USER=root
+      - DB_PASS=${STROOM_DB_ROOT_PASSWORD:-my-secret-pw}
+      - DB_PORT=3306
+      - DB_SERVER=stroom-all-dbs
+      - DB_NAMES=stroom stats
+    volumes:
+      - ../../volumes/database-backups:/db
+

@@ -9,6 +9,7 @@ main() {
     local -r BUILD_STACK_NAME="stroom_core"
     local -r SERVICES=( \
         "nginx" \
+        "mysqlBackup" \
         "stroom"  \
         "stroomAllDbs"  \
         "stroomAuthService"  \

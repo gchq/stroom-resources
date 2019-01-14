@@ -42,28 +42,9 @@ services:
           - elasticsearch
 
   mysql-backup:
-    container_name: mysql-backup
-    #image: "deitch/mysql-backup:fb314549b93f6330b20e7719966be308d316eaf6"
-    image: "deitch/mysql-backup:local-SNAPSHOT"
-    environment:
-      - COMPRESSION=gzip
-        #- DB_DUMP_BEGIN=2330 
-      #- DB_DUMP_BEGIN=+1
-      - DB_DUMP_BY_SCHEMA=true
-      #- DB_DUMP_DEBUG=true
-      - DB_DUMP_FREQ=3
-      - DB_DUMP_KEEP_PERMISSIONS=false
-      - DB_DUMP_TARGET=/db 
-      - DB_USER=root
-      - DB_PASS=my-secret-pw
-      - DB_PORT=3306
-      - DB_SERVER=stroom-all-dbs
-      - DB_NAMES=stroom stats
-    volumes:
-      - ../../volumes/database-backups:/db
-      #- type: volume
-        #source: stroom-all-dbs_backups
-        #target: /db
+      extends:
+          file: ./containers/mysqlBackup.yml
+          service: mysql-backup
 
   nginx:
       extends:
