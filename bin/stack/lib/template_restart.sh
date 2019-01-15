@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-#
-# shellcheck disable=SC2034
-# shellcheck disable=SC1090
-#
+
 # Restarts the stack
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
@@ -23,23 +20,35 @@ readonly HOST_IP=$(determine_host_address)
 source "$DIR"/config/<STACK_NAME>.env
 
 main() {
+  # leading colon means silent error reporting by getopts
+  while getopts ":m" arg; do
+    case $arg in
+      m )  
+        # shellcheck disable=SC2034
+        MONOCHROME=true 
+        ;;
+    esac
+  done
+  shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
-    stop_stack "<STACK_NAME>" 
+  setup_echo_colours
 
-    echo
+  stop_stack "<STACK_NAME>" 
 
-    start_stack "<STACK_NAME>"
+  echo
 
-    echo
-    echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
+  start_stack "<STACK_NAME>"
 
-    wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
+  echo
+  echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
 
-    # Stroom is now up or we have given up waiting so check the health
-    check_overall_health
+  wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
 
-    # Display the banner, URLs and login details
-    display_stack_info
+  # Stroom is now up or we have given up waiting so check the health
+  check_overall_health
+
+  # Display the banner, URLs and login details
+  display_stack_info
 }
 
-main
+main "$@"
