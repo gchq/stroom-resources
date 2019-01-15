@@ -11,10 +11,23 @@ source "$DIR"/lib/stroom_utils.sh
 setup_echo_colours
 
 main() {
-    stop_stack "<STACK_NAME>"
+  # leading colon means silent error reporting by getopts
+  while getopts ":m" arg; do
+    case $arg in
+      m )  
+        # shellcheck disable=SC2034
+        MONOCHROME=true 
+        ;;
+    esac
+  done
+  shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
-    echo
-    echo -e "${GREEN}Done${NC}"
+  setup_echo_colours
+
+  stop_stack "<STACK_NAME>"
+
+  echo
+  echo -e "${GREEN}Done${NC}"
 }
 
-main
+main "$@"

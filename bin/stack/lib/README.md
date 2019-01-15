@@ -60,7 +60,6 @@ sudo firewall-cmd --reload
 The following scripts are available to control the docker containers:
 
 * `config.sh` - Displays the effective configuration that docker-compose will use.
-* `ctop.sh` - Runs the _ctop_ utility for monitoring each of the containers (e.g. memory, CPU, etc.).
 * `health.sh` - Checks the health of the applications in the stack.
 * `info.sh` - Displays information about the various URLs to use for accessing Stroom.
 * `logs.sh` - Starts tailing the logs of all containers from the last 5 entries of each.

@@ -104,15 +104,6 @@ add_params() {
     fi
 }
 
-add_additional_env_vars() {
-    # TODO if we get loads of these they should be moved out into a separate
-    # config file
-
-    # Required to allow the configuration of the docker repo for ctop
-    echo "export CTOP_DOCKER_REPO=\"quay.io/vektorlab/ctop\"" >> "${OUTPUT_FILE}"
-    echo "export CTOP_TAG=\"latest\"" >> "${OUTPUT_FILE}"
-}
-
 create_versions_file() {
 
     # Produce a list of fully qualified docker image tags by sourcing the OUTPUT_FILE
@@ -163,7 +154,6 @@ main() {
 
     create_config
     add_params
-    add_additional_env_vars
 
     # Sort and de-duplicate param list before we do anything else with the file
     sort -o "${OUTPUT_FILE}" -u "${OUTPUT_FILE}"
