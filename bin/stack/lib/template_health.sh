@@ -9,6 +9,17 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$DIR"/lib/shell_utils.sh
 source "$DIR"/lib/stroom_utils.sh
 
+# leading colon means silent error reporting by getopts
+while getopts ":m" arg; do
+  # shellcheck disable=SC2034
+  case $arg in
+    m )  
+      MONOCHROME=true 
+      ;;
+  esac
+done
+shift $((OPTIND-1)) # remove parsed options and args from $@ list
+
 setup_echo_colours
 
 # Read the file containing all the env var exports so we can test

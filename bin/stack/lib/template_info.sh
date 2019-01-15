@@ -12,6 +12,17 @@ source "${DIR}"/lib/stroom_utils.sh
 
 #readonly HOST_IP=$(determine_host_address)
 
+# leading colon means silent error reporting by getopts
+while getopts ":m" arg; do
+  case $arg in
+    m )  
+      # shellcheck disable=SC2034
+      MONOCHROME=true 
+      ;;
+  esac
+done
+shift $((OPTIND-1)) # remove parsed options and args from $@ list
+
 setup_echo_colours
 
 # Read the file containing all the env var exports to make them

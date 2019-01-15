@@ -18,58 +18,74 @@ readonly VALID_DESTINATIONS="stroom|stroom-proxy"
 
 main() {
 
-    local -r data_dir="$1"
-    local -r destination="$2"
-    local -r feed_name="$3"
-    local -r system_name="$4"
-    local -r environment="$5"
-    
-    #echo -e "${GREEN}Sending data in ${BLUE}${data_dir}${GREEN} to ${BLUE}${destination}${GREEN}" \
-        #" with feed: ${BLUE}${feed_name}${GREEN}" \
-        #", system: ${BLUE}${system_name}${GREEN}" \
-        #" and environment: ${BLUE}${environment}${NC}"
+  local -r data_dir="$1"
+  local -r destination="$2"
+  local -r feed_name="$3"
+  local -r system_name="$4"
+  local -r environment="$5"
 
-    if [ "${destination}" = "stroom" ]; then
-        local port=443
-    elif [ "${destination}" = "stroom-proxy" ]; then
-        local port=${STROOM_PROXY_HTTPS_APP_PORT}
-    else
-        die "${RED}ERROR:${GREEN} invalid destination ${BLUE}${destination}${NC}, should be one of (${BLUE}${VALID_DESTINATIONS}${NC}${GREEN})${NC}"
-    fi
+  #echo -e "${GREEN}Sending data in ${BLUE}${data_dir}${GREEN} to ${BLUE}${destination}${GREEN}" \
+  #" with feed: ${BLUE}${feed_name}${GREEN}" \
+  #", system: ${BLUE}${system_name}${GREEN}" \
+  #" and environment: ${BLUE}${environment}${NC}"
 
-    local url=https://localhost:${port}/stroom/datafeed
+  if [ "${destination}" = "stroom" ]; then
+    local port=443
+  elif [ "${destination}" = "stroom-proxy" ]; then
+    local port=${STROOM_PROXY_HTTPS_APP_PORT}
+  else
+    die "${RED}ERROR:${GREEN} invalid destination ${BLUE}${destination}${NC}, should be one of (${BLUE}${VALID_DESTINATIONS}${NC}${GREEN})${NC}"
+  fi
 
-    if [ ! -d "${data_dir}" ]; then
-        die "${RED}ERROR:${GREEN} data directory ${BLUE}${data_dir}${GREEN} does not exist${NC}"
-    fi
+  local url=https://localhost:${port}/stroom/datafeed
 
-     "${DIR:-.}"/lib/send_to_stroom.sh \
-        --no-secure \
-        --pretty \
-        --file-regex ".*/.*" \
-        --key ./certs/client.unencrypted.key \
-        --cert ./certs/client.pem.crt \
-        --cacert ./certs/ca.pem.crt \
-        "${data_dir}" \
-        "${feed_name}" \
-        "${system_name}" \
-        "${environment}" \
-        "${url}"
+  if [ ! -d "${data_dir}" ]; then
+    die "${RED}ERROR:${GREEN} data directory ${BLUE}${data_dir}${GREEN} does not exist${NC}"
+  fi
+
+  if [ "${MONOCHROME}" = true ]; then
+    local pretty_arg="--no-pretty"
+  else
+    local pretty_arg="--pretty"
+  fi
+
+  "${DIR:-.}"/lib/send_to_stroom.sh \
+    --no-secure \
+    "${pretty_arg}" \
+    --file-regex ".*/.*" \
+    --key ./certs/client.unencrypted.key \
+    --cert ./certs/client.pem.crt \
+    --cacert ./certs/ca.pem.crt \
+    "${data_dir}" \
+    "${feed_name}" \
+    "${system_name}" \
+    "${environment}" \
+    "${url}"
 }
 
 # ~~~ Script starts here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+# leading colon means silent error reporting by getopts
+while getopts ":m" arg; do
+  case $arg in
+    m )  
+      # shellcheck disable=SC2034
+      MONOCHROME=true 
+      ;;
+  esac
+done
+shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
 setup_echo_colours
 
 required_arg_count=5
 if [ $# -ne ${required_arg_count} ]; then
-    echo -e "${RED}ERROR:${GREEN} Invalid arguments, found $# args, required ${required_arg_count}${NC}" >&2
-    echo -e "${GREEN}Usage: ${BLUE}$0 data-directory destination(${VALID_DESTINATIONS}) feed-name system-name environment${NC}" >&2
-    echo -e "${GREEN}E.g.:  ${BLUE}$0 /tmp/data stroom-proxy TEST_FEED MY_TEST_SYSTEM DEV${NC}" >&2
-    echo -e "This script will send all files contained in data-directory to the destination system."
-    echo -e "All files successfully sent will be deleted. It does not recurse into child directories."
-    exit 1
+  echo -e "${RED}ERROR:${GREEN} Invalid arguments, found $# args, required ${required_arg_count}${NC}" >&2
+  echo -e "${GREEN}Usage: ${BLUE}$0 data-directory destination(${VALID_DESTINATIONS}) feed-name system-name environment${NC}" >&2
+  echo -e "${GREEN}E.g.:  ${BLUE}$0 /tmp/data stroom-proxy TEST_FEED MY_TEST_SYSTEM DEV${NC}" >&2
+  echo -e "This script will send all files contained in data-directory to the destination system."
+  echo -e "All files successfully sent will be deleted. It does not recurse into child directories."
+  exit 1
 fi
 
 main "$@"
-
