@@ -148,9 +148,9 @@ def main():
     from_release = arguments["<from_release>"]
     to_release = arguments["<to_release>"]
 
-    print "Comparing the environment variable files of {0}{1}{2} and " \
-        + "{3}{4}{5}".format(colours.BLUE, from_release, colours.NC,
-                             colours.BLUE, to_release, colours.NC)
+    print "Comparing the environment variable files of {0}{1}{2}" \
+        .format(colours.BLUE, from_release, colours.NC) \
+        + ", and {0}{1}{2}".format(colours.BLUE, to_release, colours.NC)
 
     create_build_dir()
 
