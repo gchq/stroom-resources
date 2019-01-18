@@ -11,6 +11,7 @@ readonly THIS_PID=$$
 readonly DB_CONTAINER_ID="stroom-all-dbs"
 
 readonly DATABASES=( \
+  "auth"
   "stroom"
   "stats" )
 
@@ -142,7 +143,7 @@ main() {
 
   run_backups "${output_dir}"
 
-  echo -e "Deleting lock file for ${CYAN}${THIS_PID}${NC}"
+  echo -e "Deleting lock file for process ${CYAN}${THIS_PID}${NC}"
   rm "${LOCK_FILE}" || (err "Unable to delete lock file ${BLUE}${LOCK_FILE}${NC}" && exit 1)
 }
 
