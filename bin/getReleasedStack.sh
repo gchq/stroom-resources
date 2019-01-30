@@ -10,13 +10,16 @@
 set -e
 
 #Shell Colour constants for use in 'echo -e'
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[1;34m'
-LGREY='\e[37m'
-DGREY='\e[90m'
-NC='\033[0m' # No Color
+#shellcheck disable=SC2034
+{
+  RED='\033[1;31m'
+  GREEN='\033[1;32m'
+  YELLOW='\033[1;33m'
+  BLUE='\033[1;34m'
+  LGREY='\e[37m'
+  DGREY='\e[90m'
+  NC='\033[0m' # No Color
+}
 
 error_exit() {
     local -r msg="$1"
@@ -45,13 +48,13 @@ main(){
 
     install_dir="$1"
 
-
     mkdir -p "${install_dir}"
 
     cd "${install_dir}"
 
     # Use fzf to get a release tag name
-    local tag=$( \
+    local tag
+    tag=$( \
         http https://api.github.com/repos/gchq/stroom-resources/releases | 
         jq -r "[.[]][].tag_name" | 
         sort |
@@ -61,17 +64,16 @@ main(){
 
     stack_dir="${install_dir}/${tag}"
 
-    [ ! -d ${stack_dir} ] || error_exit "${RED}Directory ${BLUE}${stack_dir}${RED} already exists"
+    ! find . | grep -q "${tag}"  || error_exit "${RED}Tag ${BLUE}${tag}${RED} appears to already be installed"
 
-    mkdir -p "${stack_dir}"
-    cd "${stack_dir}"
-
-    local url=$( \
-        http https://api.github.com/repos/gchq/stroom-resources/releases/tags/${tag} | 
+    local url
+    url=$( \
+        http https://api.github.com/repos/gchq/stroom-resources/releases/tags/"${tag}" | 
         jq -r '.assets[] | select(.content_type == "application/gzip") | .browser_download_url')
 
-    local file=$( \
-        http https://api.github.com/repos/gchq/stroom-resources/releases/tags/${tag} | 
+    local file
+    file=$( \
+        http https://api.github.com/repos/gchq/stroom-resources/releases/tags/"${tag}" | 
         jq -r '.assets[] | select(.content_type == "application/gzip") | .name')
 
     [ $? -eq 0 ] || error_exit "Something went wrong getting the asset url"
@@ -84,20 +86,20 @@ main(){
     echo -e "${GREEN}From ${BLUE}${url}${NC}"
     echo -e "${GREEN}Deploying to ${BLUE}${stack_dir}${NC}"
 
-    wget -q ${url}
+    wget -q "${url}"
 
     #local file="${tag}.tar.gz" 
 
-    [ -f ${file} ] || error_exit "${RED}File ${GREEN}${file}${RED} doesn't exist, it should as we just downloaded it${NC}"
+    [ -f "${file}" ] || error_exit "${RED}File ${GREEN}${file}${RED} doesn't exist, it should as we just downloaded it${NC}"
 
-    tar -xf ${file}
+    tar -xf "${file}"
 
     echo -e "${GREEN}Deleting downloaded file ${BLUE}${file}${NC}"
-    rm ${file}
+    rm "${file}"
 
     echo
-    echo -e "${GREEN}Stroom stack ${BLUE}${tag} ${GREEN}is now available at ${BLUE}${stack_dir}${NC}"
+    echo -e "${GREEN}Stroom stack ${BLUE}${tag}${GREEN} is now available in ${BLUE}${install_dir}${NC}"
     echo
 }
 
-main $@
+main "$@"
