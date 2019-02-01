@@ -11,7 +11,7 @@ services:
       - ADVERTISED_HTTP_HOST=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authService
       - AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/login
       - OWN_PATH=${STROOM_AUTH_SERVICE:-authentication}
-      - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10766,suspend=n}
+      - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10769,suspend=n}
       - STROOM_AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
       - STROOM_AUTH_SERVICE_ADMIN_PORT=${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}
       - DB_USER=${STROOM_AUTH_DB_USERNAME:-authuser}
