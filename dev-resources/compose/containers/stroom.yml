@@ -86,7 +86,7 @@ services:
       - "${STROOM_ADMIN_PORT:-8081}:8081"
       - "${STROOM_DEBUG_PORT:-10765}:10765"
     healthcheck:
-      test: curl --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
+      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
       start_period: 1m30s
       interval: 1m
       timeout: 5s

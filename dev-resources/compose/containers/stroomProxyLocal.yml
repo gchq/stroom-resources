@@ -39,7 +39,7 @@ services:
       - "${STROOM_PROXY_LOCAL_ADMIN_PORT:-8091}:8091"
       - "${STROOM_PROXY_LOCAL_DEBUG_PORT:-10766}:10766"
     healthcheck:
-      test: curl --fail --silent --head --output /dev/null http://localhost:8091/proxyAdmin/healthcheck || exit 1
+      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:8091/proxyAdmin/healthcheck || exit 1
       start_period: 30s 
       interval: 1m
       timeout: 5s
