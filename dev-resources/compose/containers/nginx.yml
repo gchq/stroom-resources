@@ -32,6 +32,9 @@ services:
       - type: volume
         source: nginx_logs
         target: /stroom-nginx/logs
+      - type: volume
+        source: nginx_logrotate
+        target: /stroom-nginx/logrotate
     ports:
       - "80:80"
       - "443:443"
