@@ -34,6 +34,14 @@ die () {
   exit 1
 }
 
+test_for_bash_version_4() {
+  local -r bash_version="$(bash -c 'echo $BASH_VERSION')" 
+  local -r bash_major_version="${bash_version:0:1}"
+  if [[ "${bash_major_version}" -lt 4 ]]; then
+    die "${RED}Error${NC}: Bash version 4 or higher required"
+  fi
+}
+
 check_arg_count() {
   local expected_count="$1"
   local actual_count

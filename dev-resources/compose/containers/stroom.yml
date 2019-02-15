@@ -8,7 +8,6 @@ services:
     environment:
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
-      #- JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m }
       - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10765,suspend=n }
       - STROOM_APP_PORT=8080
       - STROOM_ADMIN_PORT=8081
@@ -71,7 +70,6 @@ services:
       - STROOM_DOCREF_URL_UI__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP/query-elastic}
       - STROOM_PROXY_DIR=${STROOM_STROOM_PROXY_DIR:-/tmp/proxy}
       - STROOM_HELP_URL=${STROOM_HELP_URL:-https://gchq.github.io/stroom-docs/}
-      - STROOM_UI_PATH=${STROOM_UI_PATH:-/stroom/ui?prompt=login}
       - LOGS_EVENT_FEED_NAME=${STROOM_LOGS_EVENT_FEED_NAME:-STROOM-USER-EVENTS}
       - LOGS_ACCESS_FEED_NAME=${STROOM_LOGS_ACCESS_FEED_NAME:-STROOM-ACCESS-EVENTS}
       - LOGS_APP_FEED_NAME=${STROOM_LOGS_APP_FEED_NAME:-STROOM-APP-EVENTS}

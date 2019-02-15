@@ -7,27 +7,29 @@ set -e
 main() {
     local -r VERSION=$1
     local -r BUILD_STACK_NAME="stroom_full"
-    local -r SERVICES=( \ 
-        "elasticsearch" \ 
-        "hbase" \ 
-        "hdfs" \ 
-        "kafka" \ 
-        "kibana" \ 
-        "nginx" \ 
-        "stroom" \ 
-        "stroomAllDbs" \ 
-        "stroomAnnotationsService" \ 
-        "stroomAnnotationsUi" \ 
-        "stroomAuthService" \ 
-        "stroomAuthUi" \ 
-        "stroomLogSender" \ 
-        "stroomProxy" \ 
-        "stroomProxyLocal" \ 
-        "stroomQueryElasticService" \ 
-        "stroomQueryElasticUi" \ 
-        "stroomStats" \ 
-        "zookeeper" \ 
-        )
+    local SERVICES=()
+
+    # Define all the services that make up the stack
+    # Array created like this to allow lines to commneted out
+    #SERVICES+=("elasticsearch")
+    SERVICES+=("hbase")
+    SERVICES+=("hdfs")
+    SERVICES+=("kafka")
+    #SERVICES+=("kibana")
+    SERVICES+=("nginx")
+    SERVICES+=("stroom")
+    SERVICES+=("stroomAllDbs")
+    #SERVICES+=("stroomAnnotationsService")
+    #SERVICES+=("stroomAnnotationsUi")
+    SERVICES+=("stroomAuthService")
+    SERVICES+=("stroomAuthUi")
+    SERVICES+=("stroomLogSender")
+    SERVICES+=("stroomProxyLocal")
+    SERVICES+=("stroomProxyRemote")
+    #SERVICES+=("stroomQueryElasticService")
+    #SERVICES+=("stroomQueryElasticUi")
+    SERVICES+=("stroomStats")
+    SERVICES+=("zookeeper")
 
     ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"
 }

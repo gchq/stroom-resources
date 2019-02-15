@@ -1,0 +1,3 @@
+  stroom-auth-service_logs
+  stroom-all-dbs_data
+  stroom-all-dbs_logs
