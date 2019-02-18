@@ -102,7 +102,7 @@ def write_out_report(unmatched_vars, matched_vars):
     report_file.write('```\n');
 
     report_file.close()
-    print 'Written out a report at ./clean_env_file.env'
+    print 'Written out a report at ./clean_env_file.md'
 
 
 def write_out_overrides(unmatched_vars):
