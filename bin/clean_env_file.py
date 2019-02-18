@@ -102,6 +102,7 @@ def write_out_report(unmatched_vars, matched_vars):
     report_file.write('```\n');
 
     report_file.close()
+    print 'Written out a report at ./clean_env_file.env'
 
 
 def write_out_overrides(unmatched_vars):
@@ -109,6 +110,7 @@ def write_out_overrides(unmatched_vars):
     for k,v in unmatched_vars.items():
         output.write('export {0}=\'{1}\'\n'.format(k,v[0]))
 
+    print 'Written out overrides at ./overrides.env'
 
 def main():
     if len(sys.argv) is not 3:
