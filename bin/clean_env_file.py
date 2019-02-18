@@ -120,8 +120,8 @@ E.g.:
     else:
         env_file = sys.argv[1]
         yaml_file = sys.argv[2]
-        env_vars = extract_variables_from_env_file('./stroom_core.env');
-        yaml_vars = extract_variables_from_yaml_file('stroom_core.yml')
+        env_vars = extract_variables_from_env_file(env_file);
+        yaml_vars = extract_variables_from_yaml_file(yaml_file)
         unmatched_vars, matched_vars = compare_vars(env_vars, yaml_vars)
         write_out_overrides(unmatched_vars)
         write_out_report(unmatched_vars, matched_vars)
