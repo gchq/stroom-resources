@@ -126,6 +126,15 @@ http {
         return 302 https://${AUTH_UI_URL}/;
     }
 
+    ### STROOM-UI ###
+    upstream ui_upstream {
+        server 127.0.0.1:46081;
+    }
+    server {
+        listen 46081;
+        return 302 https://${STROOM_UI_URL}/;
+    }
+
     ### ANNOTATIONS ###
     upstream annotations_upstream {
         server 127.0.0.1:46061;
@@ -491,6 +500,10 @@ http {
 
         location /users {
             proxy_pass http://users_upstream;
+        }
+
+        location /ui {
+            proxy_pass http://ui_upstream;
         }
 
         location /tokens {
