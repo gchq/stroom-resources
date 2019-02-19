@@ -59,6 +59,7 @@ main() {
   local -r SRC_KIBANA_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/kibana/conf"
   local -r SRC_STROOM_LOG_SENDER_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-log-sender/conf"
   local -r SRC_AUTH_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
+  local -r SRC_STROOM_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
   local -r SEND_TO_STROOM_VERSION="send-to-stroom-v2.0"
   local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
 
@@ -81,6 +82,16 @@ main() {
   echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} config files"
   local -r DEST_AUTH_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/auth-ui/conf"
   copy_file "${SRC_AUTH_UI_CONF_DIRECTORY}/nginx.conf.template" "${DEST_AUTH_UI_CONF_DIRECTORY}"
+
+  echo -e "  Copying ${YELLOW}stroom-ui${NC} certificates"
+  local -r DEST_STROOM_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/certs"
+  copy_file "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+  copy_file "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+  copy_file "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+
+  echo -e "  Copying ${YELLOW}stroom-ui${NC} config files"
+  local -r DEST_STROOM_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/conf"
+  copy_file "${SRC_STROOM_UI_CONF_DIRECTORY}/nginx.conf.template" "${DEST_STROOM_UI_CONF_DIRECTORY}"
 
   echo -e "  Copying ${YELLOW}nginx${NC} certificates"
   local -r DEST_NGINX_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/certs"

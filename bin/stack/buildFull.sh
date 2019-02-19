@@ -15,6 +15,7 @@ main() {
         "kibana" \ 
         "nginx" \ 
         "stroom" \ 
+        "stroomUi" \ 
         "stroomAllDbs" \ 
         "stroomAnnotationsService" \ 
         "stroomAnnotationsUi" \ 
