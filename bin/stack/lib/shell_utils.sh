@@ -14,6 +14,7 @@ setup_echo_colours() {
     YELLOW=''
     BLUE=''
     BLUE2=''
+    DGREY=''
     NC='' # No Colour
   else 
     RED='\033[1;31m'
@@ -21,6 +22,7 @@ setup_echo_colours() {
     YELLOW='\033[1;33m'
     BLUE='\033[1;34m'
     BLUE2='\033[1;34m'
+    DGREY='\e[90m'
     NC='\033[0m' # No Colour
   fi
 }

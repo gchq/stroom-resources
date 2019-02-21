@@ -6,7 +6,9 @@
 
 set -e
 
+# shellcheck source=bin/stack/lib/shell_utils.sh
 source lib/shell_utils.sh
+# shellcheck source=bin/stack/lib/network_utils.sh
 source lib/network_utils.sh
 
 create_config() {
@@ -17,21 +19,25 @@ create_config() {
 
 add_env_vars() {
   local -r CONTAINER_VERSIONS_FILE="container_versions.env"
+  declare -A whitelisted_use_counters
 
   # Read the volume whitelist into an array
-  local env_vars_whietlist=()
+  local env_vars_whitelist=()
   if [ -f "${WHITELIST_FILE}" ]; then
-    while read line; do
-      # Add a colon to the end as that is how we see them in the master yml file
-      if [[ ! "${line}" =~ ^[[:space:]]*(#.*)$ ]]; then
-        env_vars_whietlist+=("${line}")
+    while read -r env_var_name; do
+      if [[ ! "${env_var_name}" =~ ^[[:space:]]*(#.*)?$ ]]; then
+        env_vars_whitelist+=("${env_var_name}")
+        echo "[${env_var_name}]"
+        # Initialise the couter at zero for each whitelisted env var name
+        # so we can track if any are not used
+        whitelisted_use_counters[${env_var_name}]=0
       fi
     done < "${WHITELIST_FILE}"
     local use_whitelist=true
     echo -e "${GREEN}Adding white-listed environment variables to ${BLUE}${OUTPUT_FILE}${NC}"
     touch "${OUTPUT_FILE}"
   else
-    echo -e "${RED}WARN${NC}: Environment variable whitelist file ${BLUE}${WHITELIST_FILE}${NC} not found."
+    echo -e "${RED}Warn${NC}: Environment variable whitelist file ${BLUE}${WHITELIST_FILE}${NC} not found."
     echo -e "${GREEN}Adding ALL environment variables to ${BLUE}${OUTPUT_FILE}${NC}"
     local use_whitelist=false
   fi
@@ -52,30 +58,42 @@ add_env_vars() {
       sed "s/<STACK_NAME>/${BUILD_STACK_NAME}/g" )
 
   # associative array to hold counts of each env var seen
-  declare -A usage_counters
+  #declare -A usage_counters
 
-  echo "${all_env_vars}" | while read env_var; do
-    local var_name="${env_var%%=*}"
-    local var_value="${env_var#*=}"
+  echo "${all_env_vars}" | while read -r env_var_name_value; do
+    local var_name="${env_var_name_value%%=*}"
+    local var_value="${env_var_name_value#*=}"
 
     # TODO this bit of code keeps a count of the times we have seen each env
     # var, with a view to adding any that have been seen more than once.
-    if [[ -z "${usage_counters[${var_name}]}" ]]; then
-      usage_counters[${var_name}]=0
-    else
-      # increment the counter
-      (( usage_counters["${var_name}"]=usage_counters["${var_name}"] + 1 ))
-    fi
+    #if [[ -z "${usage_counters[${var_name}]}" ]]; then
+      #usage_counters[${var_name}]=0
+    #else
+      ## increment the counter
+      #(( usage_counters["${var_name}"]=usage_counters["${var_name}"] + 1 ))
+    #fi
     #echo "${var_name}: ${usage_counters[${var_name}]}"
 
-    
+    # If this env var is a whitelisted one then increment its count
+    if [[ -n "${whitelisted_use_counters[${var_name}]}" ]]; then
+      (( whitelisted_use_counters["${var_name}"]=whitelisted_use_counters["${var_name}"] + 1 ))
+    fi
+
     # Now add the env var to the env file if we don't have a whitelist file
     # or it is white-listed
     if [ "${use_whitelist}" = "false" ] || 
-      element_in "${var_name}" "${env_vars_whietlist[@]}"; then
+      element_in "${var_name}" "${env_vars_whitelist[@]}"; then
 
       echo -e "  ${YELLOW}${var_name}${NC}=${BLUE}${var_value}${NC}"
-      echo "export ${env_var}" >> "${OUTPUT_FILE}"
+      echo "export ${env_var_name_value}" >> "${OUTPUT_FILE}"
+    fi
+  done
+
+  # Output warnings if whitelisted env vars are not used anywhere
+  for var_name in "${!whitelisted_use_counters[@]}"; do
+    if [ "${whitelisted_use_counters[$var_name]}" -eq 0 ]; then
+      echo -e "${RED}Warn${NC}: White-listed environment variable ${YELLOW}${var_name}${NC}"
+      echo -e "      is not used in the confguration. Consider removing it."
     fi
   done
 
@@ -87,9 +105,10 @@ add_env_vars() {
   # Sub shell so we don't pollute ours
   (
     # read all the exports
+    # shellcheck source=bin/stack/container_versions.env
     source ${CONTAINER_VERSIONS_FILE}
 
-    grep -E "^\s*export.*" ${CONTAINER_VERSIONS_FILE} | while read line; do
+    grep -E "^\s*export.*" ${CONTAINER_VERSIONS_FILE} | while read -r line; do
       local var_name
       local version
       var_name="$(echo "${line}" | sed -E 's/^.*export\s+([A-Z_]+)=.*/\1/')"
@@ -119,7 +138,7 @@ add_env_vars() {
   if [ -f "${OVERRIDE_FILE}" ]; then
     echo -e "${GREEN}Applying variable overrides${NC}"
 
-    grep -o "^\s*[A-Z_]*=.*" "${OVERRIDE_FILE}" | while read line; do
+    grep -o "^\s*[A-Z_]*=.*" "${OVERRIDE_FILE}" | while read -r line; do
       # Extract the var name and value from the override file line
       local var_name="${line%%=*}"
       local override_value="${line#*=}"
@@ -154,6 +173,7 @@ create_versions_file() {
   # that contains all the env vars and using their values to do variable substitution
   # against the image definitions obtained from the yml (INPUT_FILE)
   # Source the env file in a subshell to avoid poluting ours
+  # shellcheck disable=SC1090
   ( 
     source "${OUTPUT_FILE}"
 
@@ -161,14 +181,14 @@ create_versions_file() {
     # eval them so bash does its variable substitution. Bit hacky using eval.
     grep "image:" "${INPUT_FILE}" | 
       sed -e 's/\s*image:\s*/echo /g' | 
-      while read line; do
+      while read -r line; do
         eval "${line}"
       done 
   ) | sort | uniq > "${VERSIONS_FILE}"
 
   echo -e "${GREEN}Using container versions:${NC}"
 
-  while read line; do
+  while read -r line; do
     echo -e "  ${BLUE}${line}${NC}"
   done < "${VERSIONS_FILE}" 
 
