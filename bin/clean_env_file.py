@@ -75,7 +75,7 @@ def compare_vars(env_vars, yaml_vars):
 
         if env_var in yaml_vars:
             yaml_value = yaml_vars[env_var]
-            if yaml_value != env_var_value:
+            if yaml_value != env_var_value or "$HOST_IP" in yaml_value:
                 unmatched_vars[env_var] = [env_var_value, yaml_value]
             else:
                 matched_vars[env_var] = [env_var_value, yaml_value]
@@ -108,7 +108,7 @@ def write_out_report(unmatched_vars, matched_vars):
 def write_out_overrides(unmatched_vars):
     output = open('overrides.env', 'w')
     for k,v in unmatched_vars.items():
-        output.write('export {0}=\'{1}\'\n'.format(k,v[0]))
+        output.write('export {0}="{1}"\n'.format(k,v[0]))
 
     print 'Written out overrides at ./overrides.env'
 
