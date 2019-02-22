@@ -6,9 +6,9 @@
 
 set -e
 
-# shellcheck source=bin/stack/lib/shell_utils.sh
+# shellcheck disable=SC1091
 source lib/shell_utils.sh
-# shellcheck source=bin/stack/lib/network_utils.sh
+# shellcheck disable=SC1091
 source lib/network_utils.sh
 
 create_config() {
@@ -27,12 +27,13 @@ add_env_vars() {
     while read -r env_var_name; do
       if [[ ! "${env_var_name}" =~ ^[[:space:]]*(#.*)?$ ]]; then
         env_vars_whitelist+=("${env_var_name}")
-        echo "[${env_var_name}]"
+        #echo "[${env_var_name}]"
         # Initialise the couter at zero for each whitelisted env var name
         # so we can track if any are not used
         whitelisted_use_counters[${env_var_name}]=0
       fi
     done < "${WHITELIST_FILE}"
+
     local use_whitelist=true
     echo -e "${GREEN}Adding white-listed environment variables to ${BLUE}${OUTPUT_FILE}${NC}"
     touch "${OUTPUT_FILE}"
@@ -43,6 +44,11 @@ add_env_vars() {
   fi
 
   # Scan the yml file to extract the default value to build an env file
+  # In the yaml there are lines like:
+  # - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}:${STROOM_DB_PORT:-3307}/stroom
+  # and from lines like those we want to extract/transform to
+  # STROOM_DB_HOST="$HOST_IP"
+  # STROOM_DB_PORT="3307"
   all_env_vars=$( \
     # Bit of a fudge to ignore the echo lines in stroomAllDbs.yml
     grep -v "\w* echo" "${INPUT_FILE}" |
@@ -58,42 +64,57 @@ add_env_vars() {
       sed "s/<STACK_NAME>/${BUILD_STACK_NAME}/g" )
 
   # associative array to hold counts of each env var seen
-  #declare -A usage_counters
+  declare -A usage_counters
 
-  echo "${all_env_vars}" | while read -r env_var_name_value; do
+  # Loop over all env vars found in the yaml
+  while read -r env_var_name_value; do
     local var_name="${env_var_name_value%%=*}"
     local var_value="${env_var_name_value#*=}"
 
-    # TODO this bit of code keeps a count of the times we have seen each env
-    # var, with a view to adding any that have been seen more than once.
-    #if [[ -z "${usage_counters[${var_name}]}" ]]; then
-      #usage_counters[${var_name}]=0
-    #else
-      ## increment the counter
-      #(( usage_counters["${var_name}"]=usage_counters["${var_name}"] + 1 ))
-    #fi
+    # this bit of code keeps a count of the times we have seen each env
+    # var, so we can warn about ones seen multiple times but not whitelisted
+    if [[ -z "${usage_counters[${var_name}]}" ]]; then
+      usage_counters[${var_name}]=1
+    else
+      # increment the counter
+      (( usage_counters["${var_name}"]=usage_counters["${var_name}"] + 1 ))
+    fi
     #echo "${var_name}: ${usage_counters[${var_name}]}"
 
     # If this env var is a whitelisted one then increment its count
     if [[ -n "${whitelisted_use_counters[${var_name}]}" ]]; then
       (( whitelisted_use_counters["${var_name}"]=whitelisted_use_counters["${var_name}"] + 1 ))
+      #echo "Incrementing count for ${var_name}, new count ${whitelisted_use_counters["${var_name}"]}"
     fi
 
     # Now add the env var to the env file if we don't have a whitelist file
     # or it is white-listed
-    if [ "${use_whitelist}" = "false" ] || 
-      element_in "${var_name}" "${env_vars_whitelist[@]}"; then
+    if [ "${use_whitelist}" = "false" ] \
+      || element_in "${var_name}" "${env_vars_whitelist[@]}"; then
 
       echo -e "  ${YELLOW}${var_name}${NC}=${BLUE}${var_value}${NC}"
       echo "export ${env_var_name_value}" >> "${OUTPUT_FILE}"
     fi
+  done <<< "${all_env_vars}"
+
+  # Error if any whitelisted env var is not used anywhere in the yaml
+  echo -e "${GREEN}Checking for unused white-listed variables.${NC}"
+  for var_name in "${!whitelisted_use_counters[@]}"; do
+    #echo "count for ${var_name} = ${whitelisted_use_counters["${var_name}"]}"
+    if [ "${whitelisted_use_counters[$var_name]}" -eq 0 ]; then
+      die "${RED}  Error${NC}: White-listed environment variable ${YELLOW}${var_name}${NC} is not used in the yaml."
+    fi
   done
 
-  # Output warnings if whitelisted env vars are not used anywhere
-  for var_name in "${!whitelisted_use_counters[@]}"; do
-    if [ "${whitelisted_use_counters[$var_name]}" -eq 0 ]; then
-      echo -e "${RED}Warn${NC}: White-listed environment variable ${YELLOW}${var_name}${NC}"
-      echo -e "      is not used in the confguration. Consider removing it."
+  # Output warnings if an env var is used more than once in the yaml but is
+  # not whitelisted.
+  echo -e "${GREEN}Checking for environment variables used multiple times${NC}"
+  for var_name in "${!usage_counters[@]}"; do
+    #echo "count for ${var_name} = ${whitelisted_use_counters["${var_name}"]}"
+    if [ "${usage_counters[$var_name]}" -gt 1 ] \
+      && [[ -z "${whitelisted_use_counters[${var_name}]}" ]] ; then
+
+      echo -e "${RED}  Warn${NC}: Environment variable ${YELLOW}${var_name}${NC} is used multiple times in the yaml but isn't white-listed. You may want to whitelist it."
     fi
   done
 
@@ -102,35 +123,33 @@ add_env_vars() {
   # CONTAINER_VERSIONS_FILE. 
 
   echo -e "${GREEN}Setting container versions${NC}"
-  # Sub shell so we don't pollute ours
-  (
-    # read all the exports
-    # shellcheck source=bin/stack/container_versions.env
-    source ${CONTAINER_VERSIONS_FILE}
+  # read all the exports
+  # shellcheck disable=SC1091
+  source ${CONTAINER_VERSIONS_FILE}
 
-    grep -E "^\s*export.*" ${CONTAINER_VERSIONS_FILE} | while read -r line; do
-      local var_name
-      local version
-      var_name="$(echo "${line}" | sed -E 's/^.*export\s+([A-Z_]+)=.*/\1/')"
-      version="$(echo "${line}" | sed -E 's/^.*export\s+[A-Z_]+=(.*)/\1/')"
+  # Implicit sub-shell doesn't matter as we are not modifying any outer variables
+  grep -E "^\s*export.*" ${CONTAINER_VERSIONS_FILE} | while read -r line; do
+    local var_name
+    local version
+    var_name="$(echo "${line}" | sed -E 's/^.*export\s+([A-Z_]+)=.*/\1/')"
+    version="$(echo "${line}" | sed -E 's/^.*export\s+[A-Z_]+=(.*)/\1/')"
 
-      # Support lines like:
-      # export STROOM_PROXY_TAG="${STROOM_TAG}"
-      if [[ "${version}" =~ .*\$\{.*\}.* ]]; then
-        # Use bash indirect expansion ('!') to read the value of a variable with a given name
-        expanded_version="${!var_name}"
-        echo -e "  Expanding ${BLUE}${var_name}${NC} from ${BLUE}${version}${NC} to ${BLUE}${expanded_version}${NC}"
-        version="${expanded_version}"
-      fi
+    # Support lines like:
+    # export STROOM_PROXY_TAG="${STROOM_TAG}"
+    if [[ "${version}" =~ .*\$\{.*\}.* ]]; then
+      # Use bash indirect expansion ('!') to read the value of a variable with a given name
+      expanded_version="${!var_name}"
+      echo -e "  Expanding ${BLUE}${var_name}${NC} from ${BLUE}${version}${NC} to ${BLUE}${expanded_version}${NC}"
+      version="${expanded_version}"
+    fi
 
-      # check if file contains the var or interest
-      if grep -E --silent "\s*${var_name}=" "${OUTPUT_FILE}"; then
-        echo -e "  Changing ${BLUE}${var_name}${NC} to ${BLUE}${version}${NC}"
-        # repalce var in OUTPUT_FILE with our CONTAINER_VERSIONS_FILE one
-        sed -i'' -E "s#^export\s+${var_name}=.*#export ${var_name}=${version}#g" "${OUTPUT_FILE}"
-      fi
-    done
-  )
+    # check if file contains the var or interest
+    if grep -E --silent "\s*${var_name}=" "${OUTPUT_FILE}"; then
+      echo -e "  Changing ${BLUE}${var_name}${NC} to ${BLUE}${version}${NC}"
+      # repalce var in OUTPUT_FILE with our CONTAINER_VERSIONS_FILE one
+      sed -i'' -E "s#^export\s+${var_name}=.*#export ${var_name}=${version}#g" "${OUTPUT_FILE}"
+    fi
+  done
 
   # If there is a <stack_name>.override.env file in ./overrides then replace any matching env
   # vars found in the OUTPUT_FILE with the values from the override file.
