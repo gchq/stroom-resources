@@ -12,14 +12,80 @@ source lib/shell_utils.sh
 source lib/network_utils.sh
 
 create_config() {
-  rm -f "${OUTPUT_FILE}"
-  touch "${OUTPUT_FILE}"
-  chmod +x "${OUTPUT_FILE}"
+  rm -f "${OUTPUT_ENV_FILE}"
+  touch "${OUTPUT_ENV_FILE}"
+  chmod +x "${OUTPUT_ENV_FILE}"
+}
+
+# If var_name is "STROOM_TAG", replacement_value is "v6.1.2" and a line in
+# ${INPUT_YAML_FILE} looks like:
+#   image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
+# then it becomes 
+#   image: "${STROOM_REPO:-gchq/stroom}:v6.1.2"
+replace_in_yaml() {
+  local -r var_name="$1"
+  local -r replacement_value="$2"
+  local -r regex="\\$\{${var_name}(:-?[^}]*)?}"
+
+  #echo "${regex}"
+
+  if grep -E --silent "${regex}" "${INPUT_YAML_FILE}"; then
+    echo -e "  Overriding the value of ${YELLOW}${var_name}${NC} to ${BLUE}${replacement_value}${NC}"
+    sed -i'' -E "s|${regex}|${replacement_value}|g" "${INPUT_YAML_FILE}"
+  fi
+}
+
+#override_container_versions() {
+  ## force a sub-shell so the sourcing doesn't pollute our shell
+  #(
+    ## source the file so we can read the override values
+    ## shellcheck disable=SC1091
+    #source "${CONTAINER_VERSIONS_FILE}"
+
+    ## Implicit sub-shell doesn't matter as we are not modifying any outer variables
+    #grep -E "^[ \t]*[A-Z0-9_]+=.*" "${CONTAINER_VERSIONS_FILE}" | while read -r line; do
+      #local var_name="${line%%=*}"
+      ## We have sourced the container version file so use bash indirect expansion
+      ## ('!') to get the value of var_name
+      #local var_value="${!var_name}"
+      ##echo "var_name: [${var_name}], var_value: [${var_value}]"
+
+      #replace_in_yaml "${var_name}" "${var_value}"
+    #done
+  #)
+#}
+
+apply_overrides_to_yaml() {
+
+  local -r override_file="$1"
+  # force a sub-shell so the sourcing doesn't pollute our shell
+  (
+    # source the file so we can read the override values
+    # shellcheck disable=SC1091
+    source "${override_file}"
+
+    grep -oE "^[ \t]*[A-Z0-9_]+=.*" "${override_file}" | while read -r line; do
+      # Extract the var name and value from the override file line
+      local var_name="${line%%=*}"
+      # remove leading whitespace characters
+      var_name="${var_name#"${var_name%%[![:space:]]*}"}"
+      # We have sourced the container version file so use bash indirect expansion
+      # ('!') to get the value of var_name
+      local var_value="${!var_name}"
+      #echo "var_name: [${var_name}], var_value: [${var_value}]"
+
+      replace_in_yaml "${var_name}" "${var_value}"
+    done
+  )
 }
 
 add_env_vars() {
   local -r CONTAINER_VERSIONS_FILE="container_versions.env"
+  # Associative array to hold whitelisted_var_name => use_count
   declare -A whitelisted_use_counters
+
+  # Associative array to hold var_name => var_value
+  declare -A output_env_vars
 
   # Read the volume whitelist into an array
   local env_vars_whitelist=()
@@ -35,11 +101,11 @@ add_env_vars() {
     done < "${WHITELIST_FILE}"
 
     local use_whitelist=true
-    echo -e "${GREEN}Adding white-listed environment variables to ${BLUE}${OUTPUT_FILE}${NC}"
-    touch "${OUTPUT_FILE}"
+    echo -e "${GREEN}Adding white-listed environment variables to ${BLUE}${OUTPUT_ENV_FILE}${NC}"
+    touch "${OUTPUT_ENV_FILE}"
   else
     echo -e "${RED}Warn${NC}: Environment variable whitelist file ${BLUE}${WHITELIST_FILE}${NC} not found."
-    echo -e "${GREEN}Adding ALL environment variables to ${BLUE}${OUTPUT_FILE}${NC}"
+    echo -e "${GREEN}Adding ALL environment variables to ${BLUE}${OUTPUT_ENV_FILE}${NC}"
     local use_whitelist=false
   fi
 
@@ -51,19 +117,15 @@ add_env_vars() {
   # STROOM_DB_PORT="3307"
   all_env_vars=$( \
     # Bit of a fudge to ignore the echo lines in stroomAllDbs.yml
-    grep -v "\w* echo" "${INPUT_FILE}" |
+    grep -v "\w* echo" "${INPUT_YAML_FILE}" |
       # Extracts the params
       grep -Po "(?<=\\$\\{).*?(?=\\})" |
       # ignore commented lines
       grep -v '^\w*#' |
       # Replaces ':-' with '='
-      sed "s/:-/=\"/g" |
-      # Adds a closing double quote to the end of the line
-      sed "s/$/\"/g" |
-      # Add in the stack name
-      sed "s/<STACK_NAME>/${BUILD_STACK_NAME}/g" )
+      sed "s/:-/=/g" )
 
-  # associative array to hold counts of each env var seen
+  # associative array to hold var_name => count
   declare -A usage_counters
 
   # Loop over all env vars found in the yaml
@@ -93,7 +155,10 @@ add_env_vars() {
       || element_in "${var_name}" "${env_vars_whitelist[@]}"; then
 
       echo -e "  ${YELLOW}${var_name}${NC}=${BLUE}${var_value}${NC}"
-      echo "export ${env_var_name_value}" >> "${OUTPUT_FILE}"
+      #echo "export ${env_var_name_value}" >> "${OUTPUT_ENV_FILE}"
+
+      # Add the env var to our assoc. array
+      output_env_vars["${var_name}"]="${var_value}"
     fi
   done <<< "${all_env_vars}"
 
@@ -118,87 +183,54 @@ add_env_vars() {
     fi
   done
 
-  # OUTPUT_FILE contains stuff like STROOM_TAG=v6.0-LATEST, i.e. development
+  # OUTPUT_ENV_FILE contains stuff like STROOM_TAG=v6.0-LATEST, i.e. development
   # docker tags, so we need to replace them with fixed versions from 
   # CONTAINER_VERSIONS_FILE. 
 
   echo -e "${GREEN}Setting container versions${NC}"
-  # read all the exports
-  # shellcheck disable=SC1091
-  source ${CONTAINER_VERSIONS_FILE}
+  #override_container_versions
+  apply_overrides_to_yaml "${CONTAINER_VERSIONS_FILE}"
 
-  # Implicit sub-shell doesn't matter as we are not modifying any outer variables
-  grep -E "^\s*export.*" ${CONTAINER_VERSIONS_FILE} | while read -r line; do
-    local var_name
-    local version
-    var_name="$(echo "${line}" | sed -E 's/^.*export\s+([A-Z_]+)=.*/\1/')"
-    version="$(echo "${line}" | sed -E 's/^.*export\s+[A-Z_]+=(.*)/\1/')"
+  ## force a sub-shell so the sourcing doesn't pollute our shell
+  #(
+    ## source the file so 
+    ## shellcheck disable=SC1091
+    #source ${CONTAINER_VERSIONS_FILE}
 
-    # Support lines like:
-    # export STROOM_PROXY_TAG="${STROOM_TAG}"
-    if [[ "${version}" =~ .*\$\{.*\}.* ]]; then
-      # Use bash indirect expansion ('!') to read the value of a variable with a given name
-      expanded_version="${!var_name}"
-      echo -e "  Expanding ${BLUE}${var_name}${NC} from ${BLUE}${version}${NC} to ${BLUE}${expanded_version}${NC}"
-      version="${expanded_version}"
-    fi
+    ## Implicit sub-shell doesn't matter as we are not modifying any outer variables
+    #grep -E "^\s*STROOM[A-Z0-9_]*_TAG=.*" ${CONTAINER_VERSIONS_FILE} | while read -r line; do
+      #local var_name="${line%%=*}"
+      ## We have sourced the container version file so use bash indirect expansion
+      ## ('!') to get the value of var_name
+      #local var_value="${!var_name}"
+      ##echo "var_name: [${var_name}], var_value: [${var_value}]"
 
-    # check if file contains the var or interest
-    if grep -E --silent "\s*${var_name}=" "${OUTPUT_FILE}"; then
-      echo -e "  Changing ${BLUE}${var_name}${NC} to ${BLUE}${version}${NC}"
-      # repalce var in OUTPUT_FILE with our CONTAINER_VERSIONS_FILE one
-      sed -i'' -E "s#^export\s+${var_name}=.*#export ${var_name}=${version}#g" "${OUTPUT_FILE}"
-    fi
-  done
+      #replace_in_yaml "${var_name}" "${var_value}"
+    #done
+  #)
 
-  # If there is a <stack_name>.override.env file in ./overrides then replace any matching env
-  # vars found in the OUTPUT_FILE with the values from the override file.
+  # If there is a override file then replace any matching env
+  # vars found in the OUTPUT_ENV_FILE with the values from the override file.
   # This allows a stack to differ slightly from the defaults taken from the yml
   if [ -f "${OVERRIDE_FILE}" ]; then
     echo -e "${GREEN}Applying variable overrides${NC}"
-
-    grep -o "^\s*[A-Z_]*=.*" "${OVERRIDE_FILE}" | while read -r line; do
-      # Extract the var name and value from the override file line
-      local var_name="${line%%=*}"
-      local override_value="${line#*=}"
-
-      local curr_line
-      local curr_value
-      #echo "line [${line}], var_name [${var_name}], override_value [${override_value}]"
-
-      # Extract the existing variable value from the env file
-      # TODO - it is possible that there may be more that one use of the same
-      # variable so we just have to take the first one and assume they have the same
-      # default values.
-      curr_line="$(grep -E "${var_name}=.*$" "${OUTPUT_FILE}" | head -n1)"
-      curr_value="${curr_line#*=}"
-
-      #echo "curr_line [${curr_line}], curr_value [${curr_value}]"
-
-      echo
-      echo -e "  Overriding ${DGREY}${var_name}=${curr_value}${NC}"
-      echo -e "  With       ${YELLOW}${var_name}${NC}=${BLUE}${override_value}${NC}"
-
-      # Replace the current value with the override
-      # This line may break if the sed delimiter (currently |) appears in ${override_value}
-      sed -i'' -E "s|(${var_name})=.*|\1=${override_value}|g" "${OUTPUT_FILE}"
-    done
+    apply_overrides_to_yaml "${OVERRIDE_FILE}"
   fi
 }
 
 create_versions_file() {
 
-  # Produce a list of fully qualified docker image tags by sourcing the OUTPUT_FILE
+  # Produce a list of fully qualified docker image tags by sourcing the OUTPUT_ENV_FILE
   # that contains all the env vars and using their values to do variable substitution
-  # against the image definitions obtained from the yml (INPUT_FILE)
+  # against the image definitions obtained from the yml (INPUT_YAML_FILE)
   # Source the env file in a subshell to avoid poluting ours
   # shellcheck disable=SC1090
   ( 
-    source "${OUTPUT_FILE}"
+    source "${OUTPUT_ENV_FILE}"
 
     # Find all image: lines in the yml and turn them into echo statements so we can
     # eval them so bash does its variable substitution. Bit hacky using eval.
-    grep "image:" "${INPUT_FILE}" | 
+    grep "image:" "${INPUT_YAML_FILE}" | 
       sed -e 's/\s*image:\s*/echo /g' | 
       while read -r line; do
         eval "${line}"
@@ -232,17 +264,20 @@ main() {
   local -r STACK_DEFINITIONS_DIR="stack_definitions/${BUILD_STACK_NAME}"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}/config"
   mkdir -p "${WORKING_DIRECTORY}"
-  local -r INPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
-  local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
+  local -r INPUT_YAML_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
+  local -r OUTPUT_ENV_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
   local -r OVERRIDE_FILE="${STACK_DEFINITIONS_DIR}/overrides.env"
   local -r WHITELIST_FILE="${STACK_DEFINITIONS_DIR}/env_vars_whitelist.txt"
   local -r VERSIONS_FILE="${WORKING_DIRECTORY}/../VERSIONS.txt"
+
+  echo -e "${GREEN}Setting stack name in yaml file${NC}"
+  replace_in_yaml "STACK_NAME" "${BUILD_STACK_NAME}"
 
   create_config
   add_env_vars
 
     # Sort and de-duplicate param list before we do anything else with the file
-    sort -o "${OUTPUT_FILE}" -u "${OUTPUT_FILE}"
+    sort -o "${OUTPUT_ENV_FILE}" -u "${OUTPUT_ENV_FILE}"
     create_versions_file
   }
 
