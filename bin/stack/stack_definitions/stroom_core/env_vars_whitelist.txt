@@ -5,6 +5,7 @@
 # In this example if you wanted the environment variable and its default to
 # be included in the stack env file then you would add 'YY_YY' to this
 # whitelist
+# NOTE: Env vars listed here cannot also be in the overrides.env file
 
 DOCKER_HOST_HOSTNAME
 DOCKER_HOST_IP
@@ -27,8 +28,6 @@ STROOM_JAVA_OPTS
 STROOM_NODE
 STROOM_PROXY_LOCAL_SYNC_API_KEY
 STROOM_RACK
-STROOM_SERVICE_DISCOVERY_ENABLED
 STROOM_STATS_DB_HOST
 STROOM_STATS_DB_PASSWORD
-STROOM_STROOM_PROXY_DIR
 STROOM_UI_URL
