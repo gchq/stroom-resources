@@ -35,26 +35,6 @@ replace_in_yaml() {
   fi
 }
 
-#override_container_versions() {
-  ## force a sub-shell so the sourcing doesn't pollute our shell
-  #(
-    ## source the file so we can read the override values
-    ## shellcheck disable=SC1091
-    #source "${CONTAINER_VERSIONS_FILE}"
-
-    ## Implicit sub-shell doesn't matter as we are not modifying any outer variables
-    #grep -E "^[ \t]*[A-Z0-9_]+=.*" "${CONTAINER_VERSIONS_FILE}" | while read -r line; do
-      #local var_name="${line%%=*}"
-      ## We have sourced the container version file so use bash indirect expansion
-      ## ('!') to get the value of var_name
-      #local var_value="${!var_name}"
-      ##echo "var_name: [${var_name}], var_value: [${var_value}]"
-
-      #replace_in_yaml "${var_name}" "${var_value}"
-    #done
-  #)
-#}
-
 # Given the path to a file of environemnt variables of the form
 # XXX_XXX="some value"
 # replace strings in the docker compose yaml like this:
@@ -169,10 +149,20 @@ add_env_vars() {
       || element_in "${var_name}" "${env_vars_whitelist[@]}"; then
 
       echo -e "  ${YELLOW}${var_name}${NC}=${BLUE}${var_value}${NC}"
-      #echo "export ${env_var_name_value}" >> "${OUTPUT_ENV_FILE}"
 
       # Add the env var to our assoc. array
       output_env_vars["${var_name}"]="${var_value}"
+    fi
+
+    # You may have bits in the yaml like:
+    # STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}
+    # and substitution of the default value doesn't work so we must white list it
+    if [ "${use_whitelist}" = "true" ]; then
+      if [[ "${var_value}" =~ \$[A-Z_0-9]+ ]] \
+        && [[ -z "${whitelisted_use_counters[${var_name}]}" ]] ; then
+
+				die "${RED}  Error${NC}: Environment variable ${YELLOW}${var_name}${NC}=\"${BLUE}${var_value}${NC}\" contains a substitution variable but isn't white-listed."
+			fi
     fi
   done <<< "${all_env_vars}"
 
@@ -181,7 +171,9 @@ add_env_vars() {
   for var_name in "${!output_env_vars[@]}"; do
     local var_value="${output_env_vars[${var_name}]}"
     # OUTPUT_ENV_FILE already exists at this point
-    echo "${var_name}=\"${var_value}\"" >> "${OUTPUT_ENV_FILE}"
+    # They must be exported as they need to be available to child processes,
+    # i.e. docker-compose.
+    echo "export ${var_name}=\"${var_value}\"" >> "${OUTPUT_ENV_FILE}"
   done
 
   # Error if any whitelisted env var is not used anywhere in the yaml
@@ -211,24 +203,6 @@ add_env_vars() {
   echo -e "${GREEN}Setting container versions in YAML file${NC}"
   apply_overrides_to_yaml "${CONTAINER_VERSIONS_FILE}"
 
-  ## force a sub-shell so the sourcing doesn't pollute our shell
-  #(
-    ## source the file so 
-    ## shellcheck disable=SC1091
-    #source ${CONTAINER_VERSIONS_FILE}
-
-    ## Implicit sub-shell doesn't matter as we are not modifying any outer variables
-    #grep -E "^\s*STROOM[A-Z0-9_]*_TAG=.*" ${CONTAINER_VERSIONS_FILE} | while read -r line; do
-      #local var_name="${line%%=*}"
-      ## We have sourced the container version file so use bash indirect expansion
-      ## ('!') to get the value of var_name
-      #local var_value="${!var_name}"
-      ##echo "var_name: [${var_name}], var_value: [${var_value}]"
-
-      #replace_in_yaml "${var_name}" "${var_value}"
-    #done
-  #)
-
   # If there is a override file then replace any matching env
   # vars found in the OUTPUT_ENV_FILE with the values from the override file.
   # This allows a stack to differ slightly from the defaults taken from the yml
@@ -236,7 +210,6 @@ add_env_vars() {
     echo -e "${GREEN}Applying variable overrides to YAML file${NC}"
     apply_overrides_to_yaml "${OVERRIDE_FILE}"
   fi
-
 }
 
 create_versions_file() {
