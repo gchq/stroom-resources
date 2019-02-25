@@ -55,13 +55,19 @@ replace_in_yaml() {
   #)
 #}
 
+# Given the path to a file of environemnt variables of the form
+# XXX_XXX="some value"
+# replace strings in the docker compose yaml like this:
+#   yamlProp: "${XXX_XXX:-a default value}"
+# with this:
+#   yamlProp: "some value"
 apply_overrides_to_yaml() {
 
   local -r override_file="$1"
   # force a sub-shell so the sourcing doesn't pollute our shell
   (
     # source the file so we can read the override values
-    # shellcheck disable=SC1091
+    # shellcheck disable=SC1091,SC1090
     source "${override_file}"
 
     grep -oE "^[ \t]*[A-Z0-9_]+=.*" "${override_file}" | while read -r line; do
@@ -69,6 +75,14 @@ apply_overrides_to_yaml() {
       local var_name="${line%%=*}"
       # remove leading whitespace characters
       var_name="${var_name#"${var_name%%[![:space:]]*}"}"
+
+      # Check this override variable is not in the whitelist as if we are
+      # overriding then having the env var in the env file will have no
+      # effect.
+      if element_in "${var_name}" "${env_vars_whitelist[@]}"; then
+        die "${RED}ERROR${NC}: Variable ${YELLOW}${var_name}${NC} cannot be both white-listed and overridden"
+      fi
+
       # We have sourced the container version file so use bash indirect expansion
       # ('!') to get the value of var_name
       local var_value="${!var_name}"
@@ -162,6 +176,14 @@ add_env_vars() {
     fi
   done <<< "${all_env_vars}"
 
+  # Now write our env var out to a file
+  echo -e "${GREEN}Writing environment variables file ${BLUE}${OUTPUT_ENV_FILE}${NC}"
+  for var_name in "${!output_env_vars[@]}"; do
+    local var_value="${output_env_vars[${var_name}]}"
+    # OUTPUT_ENV_FILE already exists at this point
+    echo "${var_name}=\"${var_value}\"" >> "${OUTPUT_ENV_FILE}"
+  done
+
   # Error if any whitelisted env var is not used anywhere in the yaml
   echo -e "${GREEN}Checking for unused white-listed variables.${NC}"
   for var_name in "${!whitelisted_use_counters[@]}"; do
@@ -183,12 +205,10 @@ add_env_vars() {
     fi
   done
 
-  # OUTPUT_ENV_FILE contains stuff like STROOM_TAG=v6.0-LATEST, i.e. development
-  # docker tags, so we need to replace them with fixed versions from 
-  # CONTAINER_VERSIONS_FILE. 
-
+  # The yaml file contains stuff like "${STROOM_TAG:-v6.0-LATEST}", 
+  # i.e. development docker tags, so we need to replace them with fixed versions 
+  # from CONTAINER_VERSIONS_FILE. 
   echo -e "${GREEN}Setting container versions${NC}"
-  #override_container_versions
   apply_overrides_to_yaml "${CONTAINER_VERSIONS_FILE}"
 
   ## force a sub-shell so the sourcing doesn't pollute our shell
@@ -216,6 +236,7 @@ add_env_vars() {
     echo -e "${GREEN}Applying variable overrides${NC}"
     apply_overrides_to_yaml "${OVERRIDE_FILE}"
   fi
+
 }
 
 create_versions_file() {
