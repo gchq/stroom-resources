@@ -208,7 +208,7 @@ add_env_vars() {
   # The yaml file contains stuff like "${STROOM_TAG:-v6.0-LATEST}", 
   # i.e. development docker tags, so we need to replace them with fixed versions 
   # from CONTAINER_VERSIONS_FILE. 
-  echo -e "${GREEN}Setting container versions${NC}"
+  echo -e "${GREEN}Setting container versions in YAML file${NC}"
   apply_overrides_to_yaml "${CONTAINER_VERSIONS_FILE}"
 
   ## force a sub-shell so the sourcing doesn't pollute our shell
@@ -233,7 +233,7 @@ add_env_vars() {
   # vars found in the OUTPUT_ENV_FILE with the values from the override file.
   # This allows a stack to differ slightly from the defaults taken from the yml
   if [ -f "${OVERRIDE_FILE}" ]; then
-    echo -e "${GREEN}Applying variable overrides${NC}"
+    echo -e "${GREEN}Applying variable overrides to YAML file${NC}"
     apply_overrides_to_yaml "${OVERRIDE_FILE}"
   fi
 
