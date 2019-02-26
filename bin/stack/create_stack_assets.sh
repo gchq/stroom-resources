@@ -50,21 +50,21 @@ main() {
   local -r SEND_TO_STROOM_VERSION="send-to-stroom-v2.0"
   local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
 
-  if element_in "stroomProxyRemote" "${services[@]}"; then
+  if element_in "stroom-proxy-remote" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} certificates"
     local -r DEST_PROXY_REMOTE_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-remote/certs"
     copy_file "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
     copy_file "${SRC_CERTS_DIRECTORY}/server/server.jks" "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
   fi
 
-  if element_in "stroomProxyLocal" "${services[@]}"; then
+  if element_in "stroom-proxy-local" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} certificates"
     local -r DEST_PROXY_LOCAL_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-local/certs"
     copy_file "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
     copy_file "${SRC_CERTS_DIRECTORY}/server/server.jks" "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
   fi
 
-  if element_in "stroomAuthUi" "${services[@]}"; then
+  if element_in "stroom-auth-ui" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} certificates"
     local -r DEST_AUTH_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/auth-ui/certs"
     copy_file "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" "${DEST_AUTH_UI_CERTS_DIRECTORY}"
@@ -91,8 +91,8 @@ main() {
   fi
 
   if element_in "stroom" "${services[@]}" \
-    || element_in "stroomProxyLocal" "${services[@]}" \
-    || element_in "stroomProxyRemote" "${services[@]}"; then
+    || element_in "stroom-proxy-local" "${services[@]}" \
+    || element_in "stroom-proxy-remote" "${services[@]}"; then
 
     # Set up the client certs needed for the send_data script
     echo -e "  Copying ${YELLOW}client${NC} certificates"
@@ -117,7 +117,7 @@ main() {
   fi
 
   # If stroom-log-sender is in the list of services add its volume
-  if element_in "stroomLogSender" "${services[@]}"; then
+  if element_in "stroom-log-sender" "${services[@]}"; then
 
     echo -e "  Copying ${YELLOW}stroom-log-sender${NC} certificates"
     local -r DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-log-sender/certs"

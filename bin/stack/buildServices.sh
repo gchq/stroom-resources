@@ -14,9 +14,9 @@ main() {
     # Define all the services that make up the stack
     # Array created like this to allow lines to commneted out
     SERVICES+=("nginx")
-    SERVICES+=("stroomAuthService")
-    SERVICES+=("stroomAuthUi")
-    SERVICES+=("stroomLogSender")
+    SERVICES+=("stroom-auth-service")
+    SERVICES+=("stroom-auth-ui")
+    SERVICES+=("stroom-log-sender")
 
     ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"
 }

@@ -30,7 +30,7 @@ main() {
 
   mkdir -p "${WORKING_DIRECTORY}"
 
-  if element_in "stroomAllDbs" "${SERVICES[@]}"; then
+  if element_in "stroom-all-dbs" "${SERVICES[@]}"; then
     create_script backup_databases
   fi
 
@@ -38,9 +38,9 @@ main() {
 
   # Only dropwiz apps need the health script
   if element_in "stroom" "${SERVICES[@]}" \
-    || element_in "stroomProxyLocal" "${SERVICES[@]}" \
-    || element_in "stroomProxyRemote" "${SERVICES[@]}" \
-    || element_in "stroomAuthService" "${SERVICES[@]}"; then
+    || element_in "stroom-proxy-local" "${SERVICES[@]}" \
+    || element_in "stroom-proxy-remote" "${SERVICES[@]}" \
+    || element_in "stroom-auth-service" "${SERVICES[@]}"; then
     create_script health
   fi
 
@@ -51,8 +51,8 @@ main() {
 
   # Send data script only need if we have a stroom or a proxy
   if element_in "stroom" "${SERVICES[@]}" \
-    || element_in "stroomProxyLocal" "${SERVICES[@]}" \
-    || element_in "stroomProxyRemote" "${SERVICES[@]}"; then
+    || element_in "stroom-proxy-local" "${SERVICES[@]}" \
+    || element_in "stroom-proxy-remote" "${SERVICES[@]}"; then
     create_script send_data
   fi
 

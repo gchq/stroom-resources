@@ -110,7 +110,7 @@ add_env_vars() {
   # STROOM_DB_HOST="$HOST_IP"
   # STROOM_DB_PORT="3307"
   all_env_vars=$( \
-    # Bit of a fudge to ignore the echo lines in stroomAllDbs.yml
+    # Bit of a fudge to ignore the echo lines in stroom-all-dbs.yml
     grep -v "\w* echo" "${INPUT_YAML_FILE}" |
       # Extracts the params
       grep -Po "(?<=\\$\\{).*?(?=\\})" |

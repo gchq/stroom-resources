@@ -11,24 +11,24 @@ validate_requested_services() {
   # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
   local -r VALID_SERVICES=( \
     "elasticsearch" \
-    "fakeSmtp" \
+    "fake-smtp" \
     "hbase" \
     "hdfs" \
     "kafka" \
     "kibana" \
     "nginx" \
     "stroom" \
-    "stroomAllDbs" \
-    "stroomAnnotationsService" \
-    "stroomAnnotationsUi" \
-    "stroomAuthService" \
-    "stroomAuthUi" \
-    "stroomLogSender" \
-    "stroomProxyLocal" \
-    "stroomProxyRemote" \
-    "stroomQueryElasticService" \
-    "stroomQueryElasticUi" \
-    "stroomStats" \
+    "stroom-all-dbs" \
+    "stroom-annotations-service" \
+    "stroom-annotations-ui" \
+    "stroom-auth-service" \
+    "stroom-auth-ui" \
+    "stroom-log-sender" \
+    "stroom-proxy-local" \
+    "stroom-proxy-remote" \
+    "stroom-query-elastic-service" \
+    "stroom-query-elastic-ui" \
+    "stroom-stats" \
     "zookeeper" \
     )
 

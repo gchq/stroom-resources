@@ -14,12 +14,12 @@ main() {
     # Array created like this to allow lines to commneted out
     SERVICES+=("nginx")
     SERVICES+=("stroom")
-    SERVICES+=("stroomAllDbs")
-    SERVICES+=("stroomAuthService")
-    SERVICES+=("stroomAuthUi")
-    SERVICES+=("stroomLogSender")
-    SERVICES+=("stroomProxyLocal")
-    SERVICES+=("stroomProxyRemote")
+    SERVICES+=("stroom-all-dbs")
+    SERVICES+=("stroom-auth-service")
+    SERVICES+=("stroom-auth-ui")
+    SERVICES+=("stroom-log-sender")
+    SERVICES+=("stroom-proxy-local")
+    SERVICES+=("stroom-proxy-remote")
 
     ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"
 }
