@@ -18,6 +18,8 @@ setup_echo_colours
 # Read the file containing all the env var exports to make them
 # available to docker-compose
 source "$DIR"/config/<STACK_NAME>.env
+  # shellcheck disable=SC2034
+STACK_NAME="<STACK_NAME>" 
 
 check_installed_binaries() {
   # The version numbers mentioned here are mostly governed by the docker compose syntax version that 
@@ -54,18 +56,21 @@ main() {
 
   check_installed_binaries
 
-  start_stack "<STACK_NAME>" "$@"
+  start_stack "$@"
 
   # If any args are supplied then it means specific services are being started so we
   # can't wait for check for health as we don't know what has been started
   if [ "$#" -eq 0 ]; then
 
-  echo
-  echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
-  echo -e "${DGREY}Stroom has to build its database tables when started for the first time,${NC}"
-  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
+    echo
+    echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
+    echo -e "${DGREY}Stroom has to build its database tables when started for the first time,${NC}"
+    echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
 
-  wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
+    local stroom_admin_port
+    stroom_admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
+
+    wait_for_200_response "http://localhost:${stroom_admin_port}/stroomAdmin"
 
     # Stroom is now up or we have given up waiting so check the health
     check_overall_health

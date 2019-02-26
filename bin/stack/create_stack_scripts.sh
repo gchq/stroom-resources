@@ -10,14 +10,19 @@ source lib/stroom_utils.sh
 create_script() {
   local script_name=$1
   local SCRIPT_PATH="${WORKING_DIRECTORY}/${script_name}.sh"
-  sed "s/<STACK_NAME>/${BUILD_STACK_NAME}/g" "${LIB_DIRECTORY}/template_${script_name}.sh" > "${SCRIPT_PATH}"
+  sed \
+    "s/<STACK_NAME>/${BUILD_STACK_NAME}/g" \
+    "${LIB_DIRECTORY}/template_${script_name}.sh" \
+    > "${SCRIPT_PATH}"
   chmod u+x "${SCRIPT_PATH}"
 }
 
 main() {
   setup_echo_colours
 
-  [ "$#" -ge 2 ] || die "${RED}Error${NC}: Invalid arguments, usage: ${BLUE}build.sh stackName serviceX serviceY etc.${NC}"
+  [ "$#" -ge 2 ] \
+    || die "${RED}Error${NC}: Invalid arguments, usage: " \
+      "${BLUE}build.sh stackName serviceX serviceY etc.${NC}"
 
   echo -e "${GREEN}Copying stack management scripts${NC}"
 
@@ -56,7 +61,6 @@ main() {
     create_script send_data
   fi
 
-  #create_script stack
   create_script start
   create_script status
   create_script stop

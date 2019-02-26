@@ -26,6 +26,9 @@ setup_echo_colours
 # if certain port variables are set or not
 source "$DIR"/config/<STACK_NAME>.env
 
+# shellcheck disable=SC2034
+STACK_NAME="<STACK_NAME>"
+
 check_overall_health
 
 # return the unhealthy count so this script can be used in an automated way

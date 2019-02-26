@@ -111,16 +111,21 @@ add_env_vars() {
   # STROOM_DB_PORT="3307"
   all_env_vars=$( \
     # Bit of a fudge to ignore the echo lines in stroom-all-dbs.yml
-    grep -v "\w* echo" "${INPUT_YAML_FILE}" |
+    grep -v "\s* echo" "${INPUT_YAML_FILE}" |
+      # ignore commented lines
+      grep -v '^\s*#' |
       # Extracts the params
       grep -Po "(?<=\\$\\{).*?(?=\\})" |
-      # ignore commented lines
-      grep -v '^\w*#' |
       # Replaces ':-' with '='
-      sed "s/:-/=/g" )
+      sed "s/:-/=/g" |
+      uniq |
+      sort )
 
   # associative array to hold var_name => count
   declare -A usage_counters
+
+  local last_var_name=""
+  local last_var_value=""
 
   # Loop over all env vars found in the yaml
   while read -r env_var_name_value; do
@@ -143,16 +148,29 @@ add_env_vars() {
       #echo "Incrementing count for ${var_name}, new count ${whitelisted_use_counters["${var_name}"]}"
     fi
 
-    # Now add the env var to the env file if we don't have a whitelist file
-    # or it is white-listed
-    if [ "${use_whitelist}" = "false" ] \
-      || element_in "${var_name}" "${env_vars_whitelist[@]}"; then
+    #echo "${last_var_name}: ${last_var_value}"
+    if [ "${var_name}" == "${last_var_name}" ]; then
+      # Seen it already
+      if [ "${var_value}" != "${last_var_value}" ]; then
+				die "${RED}  Error${NC}:" \
+          "Environment variable ${YELLOW}${var_name}${NC} has multiple values," \
+          "${BLUE}${last_var_value}${NC} and ${BLUE}${var_value}${NC}"
+      fi
+    else
+      # Not seen this var before.
+      # Now add the env var to the env file if we don't have a whitelist file
+      # or it is white-listed
+      if [ "${use_whitelist}" = "false" ] \
+        || element_in "${var_name}" "${env_vars_whitelist[@]}"; then
 
-      echo -e "  ${YELLOW}${var_name}${NC}=${BLUE}${var_value}${NC}"
+        echo -e "  ${YELLOW}${var_name}${NC}=${BLUE}${var_value}${NC}"
 
-      # Add the env var to our assoc. array
-      output_env_vars["${var_name}"]="${var_value}"
+        # Add the env var to our assoc. array
+        output_env_vars["${var_name}"]="${var_value}"
+      fi
     fi
+    last_var_name="${var_name}"
+    last_var_value="${var_value}"
 
     # You may have bits in the yaml like:
     # STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}

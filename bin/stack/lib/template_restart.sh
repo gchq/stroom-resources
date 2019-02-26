@@ -19,6 +19,9 @@ readonly HOST_IP=$(determine_host_address)
 # available to docker-compose
 source "$DIR"/config/<STACK_NAME>.env
 
+# shellcheck disable=SC2034
+STACK_NAME="<STACK_NAME>" 
+
 main() {
   # leading colon means silent error reporting by getopts
   while getopts ":m" arg; do
@@ -33,16 +36,19 @@ main() {
 
   setup_echo_colours
 
-  stop_stack "<STACK_NAME>" 
+  stop_stack
 
   echo
 
-  start_stack "<STACK_NAME>"
+  start_stack
 
   echo
   echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
 
-  wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
+  local stroom_admin_port
+  stroom_admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
+
+  wait_for_200_response "http://localhost:${stroom_admin_port}/stroomAdmin"
 
   # Stroom is now up or we have given up waiting so check the health
   check_overall_health
