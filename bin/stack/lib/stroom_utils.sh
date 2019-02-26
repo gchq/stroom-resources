@@ -12,6 +12,36 @@ echo_unhealthy() {
   echo
 }
 
+get_config_env_var() {
+  local -r var_name="$1"
+  # Use indirection to get value of the env var with this name
+  local var_value="${!var_name}" 
+
+  if [ -z "${var_value}" ]; then
+    # Not set so try getting it from the yaml
+    local -r yaml_file="${DIR}/config/${stack_name}.yml"
+
+    local env_var_name_value
+    env_var_name_value="$( \
+      grep -v "\w* echo " "${yaml_file}" \
+        | grep -v "^\w*#" \
+        | grep -oP "(?<=\\$\\{)${var_name}[^}]+(?=\\})" \
+        | head -n1 \
+        | sed "s/:-/:/g" 
+    )"
+    var_value="${env_var_name_value#*:}"
+  fi
+  echo "${var_value}"
+}
+
+is_service_in_stack() {
+  local -r service_name="$1"
+
+  # return true if service_name is in the file
+  # shellcheck disable=SC2151
+  return grep -q "^${service_name}$" "${DIR}/SERVICES.txt"
+}
+
 check_service_health() {
   if [ $# -ne 4 ]; then
     echo -e "${RED}ERROR: ${NC}Invalid arguments. Usage: ${BLUE}health.sh HOST PORT PATH${NC}, e.g. health.sh localhost 8080 stroomAdmin"
@@ -81,6 +111,24 @@ check_service_health() {
   fi
 }
 
+check_service_health_if_in_stack() {
+  local -r service_name="$1"
+  local -r host="$2"
+  local -r admin_port_var_name="$3"
+  local -r admin_path="$4"
+
+  if is_service_in_stack "${service_name}"; then
+    local admin_port
+    admin_port="$(get_config_env_var "${admin_port_var_name}")"
+
+    check_service_health \
+      "${service_name}" \
+      "${host}" \
+      "${admin_port}" \
+      "${admin_path}"
+  fi
+}
+
 check_overall_health() {
 
   local -r host="localhost"
@@ -96,10 +144,12 @@ check_overall_health() {
     local is_jq_installed=false
   fi 
 
+  # TODO change to use check_service_health_if_in_stack
   check_service_health "stroom" "${host}" "${STROOM_ADMIN_PORT}" "stroomAdmin"
   check_service_health "stroom-proxy-remote" "${host}" "${STROOM_PROXY_REMOTE_ADMIN_PORT}" "proxyAdmin"
   check_service_health "stroom-proxy-local" "${host}" "${STROOM_PROXY_LOCAL_ADMIN_PORT}" "proxyAdmin"
   check_service_health "stroom-auth-service" "${host}" "${STROOM_AUTH_SERVICE_ADMIN_PORT}" "authenticationServiceAdmin"
+
   if [[ ! -z ${STROOM_STATS_SERVICE_ADMIN_PORT} ]]; then
     check_service_health "stroom-stats" "${host}" "${STROOM_STATS_SERVICE_ADMIN_PORT}" "statsAdmin"
   fi
@@ -200,7 +250,12 @@ start_stack() {
   DOCKER_HOST_IP="${HOST_IP}"
 
   # shellcheck disable=SC2094
-  docker-compose --project-name "${stack_name}" -f "$DIR"/config/"${stack_name}".yml up -d "${@:2}"
+  docker-compose \
+    --project-name "${stack_name}" \
+    -f "$DIR/config/${stack_name}.yml" \
+    up \
+    -d \
+    "${@:2}"
 }
 
 stop_service_if_in_stack() {
@@ -214,7 +269,11 @@ stop_service_if_in_stack() {
 
   if [ "${state}" = "true" ]; then
     # shellcheck disable=SC2094
-    docker-compose --project-name "${stack_name}" -f "$DIR"/config/"${stack_name}".yml stop "${service_name}"
+    docker-compose \
+      --project-name "${stack_name}" \
+      -f "$DIR"/config/"${stack_name}".yml \
+      stop \
+      "${service_name}"
   else
     echo -e "Container ${BLUE}${service_name}${NC} is not running"
   fi
@@ -239,5 +298,8 @@ stop_stack() {
   # In case we have missed any stop the whole project
   echo -e "${GREEN}Stopping any remaining containers in the stack${NC}"
   # shellcheck disable=SC2094
-  docker-compose --project-name "${stack_name}" -f "$DIR"/config/"${stack_name}".yml stop
+  docker-compose \
+    --project-name "${stack_name}" \
+    -f "$DIR/config/${stack_name}.yml" \
+    stop
 }
