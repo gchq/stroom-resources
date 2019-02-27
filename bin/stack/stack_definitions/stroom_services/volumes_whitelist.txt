@@ -1,3 +1,5 @@
-  stroom-auth-service_logs
-  nginx_logs
-  nginx_logrotate
+nginx_logrotate
+nginx_logs
+stroom-auth-service_logs
+stroom-proxy-local_logs
+stroom_logs

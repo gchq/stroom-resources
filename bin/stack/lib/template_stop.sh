@@ -16,7 +16,12 @@ STACK_NAME="<STACK_NAME>"
 do_stop() {
   if [ "$#" -eq 1 ]; then
     local -r service_name="$1"
-    stop_service_if_in_stack "${service_name}"
+    if is_service_in_stack "${service_name}"; then
+      stop_service_if_in_stack "${service_name}"
+    else
+      die "${RED}  Error${NC}:" \
+        "${BLUE}${service_name}${NC} is not part in this stack"
+    fi
   else
     stop_stack
   fi

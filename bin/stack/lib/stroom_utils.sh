@@ -53,6 +53,21 @@ is_service_in_stack() {
   fi
 }
 
+is_container_running() {
+  check_arg_count 1 "$@"
+  local -r service_name="$1"
+  if is_service_in_stack "${service_name}"; then
+    local -r state="$(docker inspect -f '{{.State.Running}}' "${service_name}")"
+    if [ "${state}" == "true" ]; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    return 1
+  fi
+}
+
 # Return zero if any of the supplied services are in the stack
 are_services_in_stack() {
   local -r service_names=( "$@" )
@@ -406,6 +421,7 @@ start_stack() {
     "${@}"
 }
 
+
 stop_service_if_in_stack() {
   check_arg_count 1 "$@"
   local -r service_name="$1"
@@ -425,9 +441,6 @@ stop_service_if_in_stack() {
     else
       echo -e "Container ${BLUE}${service_name}${NC} is not running"
     fi
-  else
-    die "${RED}  Error${NC}:" \
-      "${BLUE}${service_name}${NC} is not part in this stack"
   fi
 }
 
@@ -452,5 +465,80 @@ stop_stack() {
     --project-name "${STACK_NAME}" \
     -f "$DIR/config/${STACK_NAME}.yml" \
     stop
+}
+
+wait_for_stroom() {
+  echo
+  echo -e "${GREEN}Waiting for Stroom to complete its start up.${NC}"
+  echo -e "${DGREY}Stroom has to build its database tables when started for the first time,${NC}"
+  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
+
+  local admin_port
+  admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
+
+  wait_for_200_response "http://localhost:${admin_port}/stroomAdmin"
+}
+
+wait_for_stroom_auth_service() {
+  echo
+  echo -e "${GREEN}Waiting for Stroom Authentication to complete its start up.${NC}"
+
+  local admin_port
+  admin_port="$(get_config_env_var "STROOM_AUTH_SERVICE_ADMIN_PORT")"
+
+  wait_for_200_response "http://localhost:${admin_port}/authenticationServiceAdmin"
+}
+
+wait_for_stroom_stats() {
+  echo
+  echo -e "${GREEN}Waiting for Stroom Stats to complete its start up.${NC}"
+
+  local admin_port
+  admin_port="$(get_config_env_var "STROOM_STATS_SERVICE_ADMIN_PORT")"
+
+  wait_for_200_response "http://localhost:${admin_port}/statsAdmin"
+}
+
+wait_for_stroom_proxy_local() {
+  echo
+  echo -e "${GREEN}Waiting for Stroom Proxy (local) to complete its start up.${NC}"
+  echo -e "${DGREY}Stroom Proxy has to build its database tables when started for the first time,${NC}"
+  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
+
+  local admin_port
+  admin_port="$(get_config_env_var "STROOM_PROXY_LOCAL_ADMIN_PORT")"
+
+  wait_for_200_response "http://localhost:${admin_port}/proxyAdmin"
+}
+
+wait_for_stroom_proxy_remote() {
+  echo
+  echo -e "${GREEN}Waiting for Stroom Proxy (remote) to complete its start up.${NC}"
+  echo -e "${DGREY}Stroom Proxy has to build its database tables when started for the first time,${NC}"
+  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
+
+  local admin_port
+  admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_ADMIN_PORT")"
+
+  wait_for_200_response "http://localhost:${admin_port}/proxyAdmin"
+}
+
+wait_for_service_to_start() {
+  # We don't know which services are in the stack or have been started so
+  # wait one one service in this order of precidence, checking each one is
+  # actually running first. They should be in order of the startup speed,
+  # slowest first
+  if is_container_running "stroom"; then
+    wait_for_stroom
+  elif is_container_running "stroom-proxy-local"; then
+    wait_for_stroom_proxy_local
+  elif is_container_running "stroom-proxy-remote"; then
+    wait_for_stroom_proxy_remote
+  elif is_container_running "stroom-auth-service"; then
+    wait_for_stroom_auth_service
+  elif is_container_running "stroom-stats"; then
+    wait_for_stroom_stats
+  fi
+  # If we fall out here then we have nothing useful to wait for
 }
 

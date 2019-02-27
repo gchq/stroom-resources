@@ -51,13 +51,7 @@ main() {
 
   do_restart "$@"
 
-  echo
-  echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
-
-  local stroom_admin_port
-  stroom_admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
-
-  wait_for_200_response "http://localhost:${stroom_admin_port}/stroomAdmin"
+  wait_for_service_to_start
 
   # Stroom is now up or we have given up waiting so check the health
   check_overall_health

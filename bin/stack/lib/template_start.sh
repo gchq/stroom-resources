@@ -58,26 +58,13 @@ main() {
 
   start_stack "$@"
 
-  # If any args are supplied then it means specific services are being started so we
-  # can't wait for check for health as we don't know what has been started
-  #if [ "$#" -eq 0 ]; then
+  wait_for_service_to_start
 
-    echo
-    echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
-    echo -e "${DGREY}Stroom has to build its database tables when started for the first time,${NC}"
-    echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
+  # Stroom is now up or we have given up waiting so check the health
+  check_overall_health
 
-    local stroom_admin_port
-    stroom_admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
-
-    wait_for_200_response "http://localhost:${stroom_admin_port}/stroomAdmin"
-
-    # Stroom is now up or we have given up waiting so check the health
-    check_overall_health
-
-    # Display the banner, URLs and login details
-    display_stack_info
-  #fi
+  # Display the banner, URLs and login details
+  display_stack_info
 }
 
 main "$@"
