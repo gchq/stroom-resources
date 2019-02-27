@@ -2,6 +2,15 @@ language: bash
 dist: trusty
 sudo: required
 
+# Use a build matrix so we can build each stack variant
+matrix:
+  include:
+  - env: STACK_NAME=stroom_core
+  - env: STACK_NAME=stroom_core_test
+  - env: STACK_NAME=stroom_dbs
+  #- env: STACK_NAME=stroom_full
+  - env: STACK_NAME=stroom_services
+
 services:
   - docker
 

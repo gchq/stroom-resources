@@ -6,7 +6,7 @@ set -e
 
 main() {
     local -r VERSION=$1
-    local -r BUILD_STACK_NAME="stroom_db"
+    local -r BUILD_STACK_NAME="stroom_dbs"
 
     local SERVICES=()
 

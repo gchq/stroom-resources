@@ -5,11 +5,14 @@ set -e
 
 #Shell Colour constants for use in 'echo -e'
 #e.g.  echo -e "My message ${GREEN}with just this text in green${NC}"
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[1;34m'
-NC='\033[0m' # No Colour 
+# shellcheck disable=SC2034
+{
+  RED='\033[1;31m'
+  GREEN='\033[1;32m'
+  YELLOW='\033[1;33m'
+  BLUE='\033[1;34m'
+  NC='\033[0m' # No Colour 
+}
 
 # Prefixes for git tags that determine what the build does
 # Docker image prefixes
@@ -17,8 +20,19 @@ TAG_PREFIX_STROOM_LOG_SENDER="stroom-log-sender"
 TAG_PREFIX_STROOM_NGINX="stroom-nginx"
 TAG_PREFIX_STROOM_ZOOKEEPER="stroom-zookeeper"
 # Stack prefixes
-TAG_PREFIX_STROOM_STROOM_CORE="stroom_core"
-TAG_PREFIX_STROOM_STROOM_FULL="stroom_full"
+TAG_PREFIX_STROOM_CORE="stroom_core"
+TAG_PREFIX_STROOM_CORE_TEST="stroom_core_test"
+TAG_PREFIX_STROOM_DBS="stroom_dbs"
+TAG_PREFIX_STROOM_FULL="stroom_full"
+TAG_PREFIX_STROOM_SERVICES="stroom_services"
+
+ALL_STACK_PREFIXES=(
+  "${TAG_PREFIX_STROOM_CORE}"
+  "${TAG_PREFIX_STROOM_CORE_TEST}"
+  "${TAG_PREFIX_STROOM_DBS}"
+  "${TAG_PREFIX_STROOM_FULL}"
+  "${TAG_PREFIX_STROOM_SERVICES}"
+)
 
 DOCKER_REPO_STROOM_LOG_SENDER="gchq/stroom-log-sender"
 DOCKER_REPO_STROOM_NGINX="gchq/stroom-nginx"
@@ -33,12 +47,29 @@ SNAPSHOT_FLOATING_TAG=""
 MAJOR_VER_FLOATING_TAG=""
 MINOR_VER_FLOATING_TAG=""
 VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
+PREFIX_PART_REGEX="^[\\w-]+(?=-${VERSION_PART_REGEX})"
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
-STACK_NAME=""
+
+# The stack used for the get_stroom.sh script that we publish on gh-pages
+GET_STROOM_STACK_NAME="${TAG_PREFIX_STROOM_STROOM_CORE_TEST}"
 
 # The dir used to hold content for deploying to github pages, i.e. https://gchq.github.io/stroom-resources
 GH_PAGES_DIR="${TRAVIS_BUILD_DIR}/gh-pages"
+
+# Returns 0 if $1 is in the array of elements passed as subsequent args
+# e.g. 
+# arr=( "one" "two" "three" )
+# element_in "two" "${arr[@]}" # returns 0
+element_in () {
+  local element 
+  local match="$1"
+  shift
+  for element; do 
+    [[ "${element}" == "${match}" ]] && return 0
+  done
+  return 1
+}
 
 #args: dockerRepo contextRoot tag1VersionPart tag2VersionPart ... tagNVersionPart
 release_to_docker_hub() {
@@ -53,33 +84,33 @@ release_to_docker_hub() {
     #shift the the args so we can loop round the open ended list of tags, $1 is now the first tag
     shift 2
 
-    allTagArgs=""
+    allTagArgs=()
 
     for tagVersionPart in "$@"; do
         if [ "x${tagVersionPart}" != "x" ]; then
             #echo -e "Adding docker tag [${GREEN}${tagVersionPart}${NC}]"
-            allTagArgs="${allTagArgs} --tag=${dockerRepo}:${tagVersionPart}"
+            allTagArgs+=( "--tag=${dockerRepo}:${tagVersionPart}" )
         fi
     done
 
     echo -e "Building and releasing a docker image using:"
     echo -e "dockerRepo:                    [${GREEN}${dockerRepo}${NC}]"
     echo -e "contextRoot:                   [${GREEN}${contextRoot}${NC}]"
-    echo -e "allTags:                       [${GREEN}${allTagArgs}${NC}]"
+    echo -e "allTags:                       [${GREEN}${allTagArgs[*]}${NC}]"
 
     # If we have a TRAVIS_TAG (git tag) then use that, else use the floating tag
     docker build \
-        ${allTagArgs} \
+        "${allTagArgs[@]}" \
         --build-arg GIT_COMMIT="${TRAVIS_COMMIT}" \
         --build-arg GIT_TAG="${TRAVIS_TAG:-${SNAPSHOT_FLOATING_TAG}}" \
-        ${contextRoot}
+        "${contextRoot}"
 
     #The username and password are configured in the travis gui
     echo -e "Logging in to DockerHub"
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin >/dev/null 2>&1 
 
-    echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC} with tags: ${GREEN}${allTagArgs}${NC}"
-    docker push ${dockerRepo} >/dev/null 2>&1
+    echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC} with tags: ${GREEN}${allTagArgs[*]}${NC}"
+    docker push "${dockerRepo}" >/dev/null 2>&1
 
     echo -e "Logging out of Docker"
     docker logout >/dev/null 2>&1
@@ -108,30 +139,36 @@ derive_docker_tags() {
     #TODO - the major and minor floating tags assume that the release builds are all done in strict sequence
     #If say the build for v6.0.1 is re-run after the build for v6.0.2 has run then v6.0-LATEST will point to v6.0.1
     #which is incorrect, hopefully this course of events is unlikely to happen
-    allDockerTags="${VERSION_FIXED_TAG} ${SNAPSHOT_FLOATING_TAG} ${MAJOR_VER_FLOATING_TAG} ${MINOR_VER_FLOATING_TAG}"
+    allDockerTags=(
+      "${VERSION_FIXED_TAG}"
+      "${SNAPSHOT_FLOATING_TAG}"
+      "${MAJOR_VER_FLOATING_TAG}"
+      "${MINOR_VER_FLOATING_TAG}"
+    )
 }
 
 do_versioned_stack_build() {
-    local -r scriptName="${1}.sh"
+    local -r stack_name="$1"
+    local -r scriptName="build_${stack_name}.sh"
     local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
     local -r buildDir=${scriptDir}/build/
 
     echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-    echo -e "${GREEN}Building and testing a versioned ${BLUE}${STACK_NAME}${GREEN} stack${NC}"
+    echo -e "${GREEN}Building and testing a versioned ${BLUE}${stack_name}${GREEN} stack${NC}"
     echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
 
-    pushd ${scriptDir} > /dev/null
+    pushd "${scriptDir}" > /dev/null
 
     # Ensure there is no buildDir from a previous build
-    rm -rf ${buildDir}
+    rm -rf "${buildDir}"
 
     echo -e "Running ${scriptName} in ${scriptDir}"
 
-    ./${scriptName} "${BUILD_VERSION}"
+    ./"${scriptName}" "${BUILD_VERSION}"
 
-    pushd ${buildDir} > /dev/null
+    pushd "${buildDir}" > /dev/null
 
-    local -r fileName="$(ls -1 *.tar.gz)"
+    local -r fileName="$(ls -1 ./*.tar.gz)"
 
     # Now create an MD5 hash of the stack file
     local md5File="${fileName}.md5"
@@ -169,7 +206,7 @@ test_stack() {
 
     # Clear out all docker images/volumes/containers
     echo -e "${GREEN}Clearing out docker images/containers/volumes${NC}"
-    ${TRAVIS_BUILD_DIR}/bin/clean.sh
+    "${TRAVIS_BUILD_DIR}"/bin/clean.sh
 
     popd > /dev/null
 }
@@ -214,7 +251,7 @@ create_get_stroom_script() {
     echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a copy of ${BLUE}${get_stroom_source_file}${NC}"
     cp "${get_stroom_source_file}" "${get_stroom_dest_file}"
 
-    substitute_tag "<STACK_NAME>" "${STACK_NAME}" "${get_stroom_dest_file}"
+    substitute_tag "<STACK_NAME>" "${GET_STROOM_STACK_NAME}" "${get_stroom_dest_file}"
     substitute_tag "<STACK_TAG>" "${TRAVIS_TAG}" "${get_stroom_dest_file}"
     substitute_tag "<STACK_VERSION>" "${BUILD_VERSION}" "${get_stroom_dest_file}"
 
@@ -239,6 +276,7 @@ main() {
 
         #Tagged commit so use that as our build version, e.g. v6.0.0
         BUILD_VERSION="$(echo "${TRAVIS_TAG}" | grep -oP "${VERSION_PART_REGEX}")"
+        local -r tag_prefix="$(echo "${TRAVIS_TAG}" | grep -oP "${PREFIX_PART_REGEX}")"
 
         echo -e "BUILD_VERSION:             [${GREEN}${BUILD_VERSION}${NC}]"
 
@@ -249,7 +287,7 @@ main() {
             derive_docker_tags
             
             #build and release the image to dockerhub
-            release_to_docker_hub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" ${allDockerTags}
+            release_to_docker_hub "${DOCKER_REPO_STROOM_NGINX}" "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" "${allDockerTags[@]}"
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_LOG_SENDER} ]]; then
             #This is a stroom-log-sender release, so do a docker build/push
@@ -258,7 +296,7 @@ main() {
             derive_docker_tags
             
             #build and release the image to dockerhub
-            release_to_docker_hub "${DOCKER_REPO_STROOM_LOG_SENDER}" "${DOCKER_CONTEXT_ROOT_STROOM_LOG_SENDER}" ${allDockerTags}
+            release_to_docker_hub "${DOCKER_REPO_STROOM_LOG_SENDER}" "${DOCKER_CONTEXT_ROOT_STROOM_LOG_SENDER}" "${allDockerTags[@]}"
 
         elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
             #This is a stroom-zookeeper release, so do a docker build/push
@@ -267,33 +305,33 @@ main() {
             derive_docker_tags
             
             #build and release the image to dockerhub
-            release_to_docker_hub "${DOCKER_REPO_STROOM_ZOOKEEPER}" "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" ${allDockerTags}
+            release_to_docker_hub "${DOCKER_REPO_STROOM_ZOOKEEPER}" "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" "${allDockerTags[@]}"
 
-        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_CORE} ]]; then
-            STACK_NAME="${TAG_PREFIX_STROOM_STROOM_CORE}"
-            #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
-            echo -e "${GREEN}Performing a ${BLUE}stroom_core${GREEN} stack release to github${NC}"
+        # TODO fix the logic for doing a stack release within a build matrix
+        elif element_in "${tag_prefix}" "${ALL_STACK_PREFIXES[@]}"; then
+            #This is a stack release, so create the stack so travis deploy/releases can pick it up
+            echo -e "${GREEN}Performing a ${BLUE}${tag_prefix}${GREEN} stack release to github${NC}"
 
-            do_versioned_stack_build buildCore
-            create_get_stroom_script
+            do_versioned_stack_build "${tag_prefix}"
 
-        elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STROOM_FULL} ]]; then
-            STACK_NAME="${TAG_PREFIX_STROOM_STROOM_FULL}"
-            #This is a stroom_core stack release, so create the stack so travis deploy/releases can pick it up
-            echo -e "${GREEN}Performing a ${BLUE}stroom_full${GREEN} stack release to github${NC}"
-
-            do_versioned_stack_build buildFull
-            create_get_stroom_script
+            # Only update the get_stroom script for a certain stack release
+            if [[ ${TRAVIS_TAG} =~ ${GET_STROOM_STACK_NAME} ]]; then
+              create_get_stroom_script
+            fi
         fi
+
     else
+        # TODO probably want to build the stacks regardless, possibly as travis
+        # build jobs/stages prior to a deploy stage
+        # see https://docs.travis-ci.com/user/build-stages/matrix-expansion/
         BUILD_VERSION="SNAPSHOT"
 
         #No tag so finish
         echo -e "Not a tagged build so just build the stack and test it"
 
-        # TODO need to also do the full stack at some point.
-
-        do_versioned_stack_build buildCore
+        # STACK_NAME is set by the travis build matrix
+        # shellcheck disable=SC2153
+        do_versioned_stack_build "${STACK_NAME}"
     fi
 }
 
