@@ -52,6 +52,18 @@ main() {
 
     if [ "$keyPressed" = 'y' ] || [ "$keyPressed" = 'Y' ]; then
       echo
+      echo -e "${RED}WARNING:${NC} ${GREEN}You are about to completely remove the stack including ALL data.${NC}"
+      echo -e "${GREEN}Are you sure?${NC}"
+      echo
+      read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
+
+      if [ "$keyPressed" = 'y' ] || [ "$keyPressed" = 'Y' ]; then
+        echo
+      else
+        echo
+        echo "Exiting"
+        exit 0
+      fi
     else
       echo
       echo "Exiting"

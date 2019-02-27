@@ -203,17 +203,18 @@ add_env_vars() {
     fi
   done
 
+  # TODO not sure if we care about this or not
   # Output warnings if an env var is used more than once in the yaml but is
   # not whitelisted.
-  echo -e "${GREEN}Checking for environment variables used multiple times${NC}"
-  for var_name in "${!usage_counters[@]}"; do
-    #echo "count for ${var_name} = ${whitelisted_use_counters["${var_name}"]}"
-    if [ "${usage_counters[$var_name]}" -gt 1 ] \
-      && [[ -z "${whitelisted_use_counters[${var_name}]}" ]] ; then
+  #echo -e "${GREEN}Checking for environment variables used multiple times${NC}"
+  #for var_name in "${!usage_counters[@]}"; do
+    ##echo "count for ${var_name} = ${whitelisted_use_counters["${var_name}"]}"
+    #if [ "${usage_counters[$var_name]}" -gt 1 ] \
+      #&& [[ -z "${whitelisted_use_counters[${var_name}]}" ]] ; then
 
-      echo -e "${RED}  Warn${NC}: Environment variable ${YELLOW}${var_name}${NC} is used multiple times in the yaml but isn't white-listed. You may want to whitelist it."
-    fi
-  done
+      #echo -e "${GREEN}  Info${NC}: Environment variable ${YELLOW}${var_name}${NC} is used multiple times in the yaml."
+    #fi
+  #done
 
   # The yaml file contains stuff like "${STROOM_TAG:-v6.0-LATEST}", 
   # i.e. development docker tags, so we need to replace them with fixed versions 

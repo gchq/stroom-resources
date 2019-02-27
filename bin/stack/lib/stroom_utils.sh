@@ -400,8 +400,8 @@ start_stack() {
   docker-compose \
     --project-name "${STACK_NAME}" \
     -f "$DIR/config/${STACK_NAME}.yml" \
-    -d \
     up \
+    -d \
     "${@:2}"
 }
 

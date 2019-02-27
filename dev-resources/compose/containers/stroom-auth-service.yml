@@ -9,7 +9,8 @@ services:
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - STROOM_UI=${STROOM_AUTH_STROOM_UI:-http://$HOST_IP:8099}
       - ADVERTISED_HTTP_HOST=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authService
-      - AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/login
+      #- AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/login
+      - AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_URL:-$HOST_IP:9443}/login
       - OWN_PATH=${STROOM_AUTH_SERVICE:-authentication}
       - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10769,suspend=n}
       - STROOM_AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
@@ -30,8 +31,10 @@ services:
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes
-      - CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/changePassword
-      - UNAUTHORISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/unauthorised
+      #- CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/changePassword
+      - CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_URL:-$HOST_IP:9443}/changePassword
+      #- UNAUTHORISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/unauthorised
+      - UNAUTHORISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_URL:-$HOST_IP:9443}/unauthorised
       - FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN=${STROOM_AUTH_FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN:-true}
       # There is an effective regex here: https://stackoverflow.com/questions/3802192/regexp-java-for-password-validation
       # The regex from there is too complicated and mucks up this yaml. If you want to use more complicated validation
