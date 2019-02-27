@@ -18,7 +18,7 @@ setup_echo_colours
 # Read the file containing all the env var exports to make them
 # available to docker-compose
 source "$DIR"/config/<STACK_NAME>.env
-  # shellcheck disable=SC2034
+# shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>" 
 
 check_installed_binaries() {
