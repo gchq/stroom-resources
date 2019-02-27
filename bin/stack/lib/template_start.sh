@@ -60,7 +60,7 @@ main() {
 
   # If any args are supplied then it means specific services are being started so we
   # can't wait for check for health as we don't know what has been started
-  if [ "$#" -eq 0 ]; then
+  #if [ "$#" -eq 0 ]; then
 
     echo
     echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
@@ -77,7 +77,7 @@ main() {
 
     # Display the banner, URLs and login details
     display_stack_info
-  fi
+  #fi
 }
 
 main "$@"

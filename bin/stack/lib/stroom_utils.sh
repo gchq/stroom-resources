@@ -214,6 +214,7 @@ check_service_health_if_in_stack() {
 check_containers() {
   local unhealthy_count=0
 
+  local service_name
   while read service_name; do
     # OR to stop set -e exiting the script
     check_container_health "${service_name}" || unhealthy_count=$?
@@ -402,7 +403,7 @@ start_stack() {
     -f "$DIR/config/${STACK_NAME}.yml" \
     up \
     -d \
-    "${@:2}"
+    "${@}"
 }
 
 stop_service_if_in_stack() {
@@ -424,6 +425,9 @@ stop_service_if_in_stack() {
     else
       echo -e "Container ${BLUE}${service_name}${NC} is not running"
     fi
+  else
+    die "${RED}  Error${NC}:" \
+      "${BLUE}${service_name}${NC} is not part in this stack"
   fi
 }
 
@@ -449,3 +453,4 @@ stop_stack() {
     -f "$DIR/config/${STACK_NAME}.yml" \
     stop
 }
+

@@ -13,6 +13,15 @@ setup_echo_colours
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>"
 
+do_stop() {
+  if [ "$#" -eq 1 ]; then
+    local -r service_name="$1"
+    stop_service_if_in_stack "${service_name}"
+  else
+    stop_stack
+  fi
+}
+
 main() {
   # leading colon means silent error reporting by getopts
   while getopts ":m" arg; do
@@ -27,7 +36,7 @@ main() {
 
   setup_echo_colours
 
-  stop_stack
+  do_stop "$@"
 
   echo
   echo -e "${GREEN}Done${NC}"

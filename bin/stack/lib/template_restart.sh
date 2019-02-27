@@ -22,6 +22,19 @@ source "$DIR"/config/<STACK_NAME>.env
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>" 
 
+do_restart() {
+  if [ "$#" -eq 1 ]; then
+    local -r service_name="$1"
+    stop_service_if_in_stack "${service_name}"
+    echo
+    start_stack "${service_name}"
+  else
+    stop_stack
+    echo
+    start_stack
+  fi
+}
+
 main() {
   # leading colon means silent error reporting by getopts
   while getopts ":m" arg; do
@@ -36,11 +49,7 @@ main() {
 
   setup_echo_colours
 
-  stop_stack
-
-  echo
-
-  start_stack
+  do_restart "$@"
 
   echo
   echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
