@@ -22,6 +22,7 @@ services:
 
 before_script: ./travis.before.sh
 
+# This script does the testing of stacks
 script: ./travis.script.sh
 
 # Add a deploy stage that runs if all the test stage jobs have run.
@@ -31,7 +32,7 @@ jobs:
   include:
     - stage: deploy
       script: ./travis.stage.release.sh
-      env: STACK_NAME=NOT_USED
+      env: STACK_NAME=NOT_APPLICABLE
 
 # The deployment to github releases will only happen for a stroom_core or stroom_full tag
 deploy:
