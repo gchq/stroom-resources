@@ -6,21 +6,16 @@ stages:
   - test
   - deploy
 
+# Defines all the possible values for STACK_NAME, so Travis will
+# create a build matrix in the 'test' stage, i.e. one test stage
+# job per STACK_NAME value
 env:
   - STACK_NAME=stroom_core
   - STACK_NAME=stroom_core_test
   - STACK_NAME=stroom_dbs
   #- STACK_NAME=stroom_full
-  - STACK_NAME=stroom_services
-
-# Use a build matrix so we can build each stack variant
-#matrix:
-  #include:
-  #- env: STACK_NAME=stroom_core
-  #- env: STACK_NAME=stroom_core_test
-  #- env: STACK_NAME=stroom_dbs
-  ##- env: STACK_NAME=stroom_full
-  #- env: STACK_NAME=stroom_services
+  # We can't test stroom_services as it relies on a database that is not there
+  #- STACK_NAME=stroom_services
 
 services:
   - docker
@@ -29,10 +24,14 @@ before_script: ./travis.before.sh
 
 script: ./travis.script.sh
 
+# Add a deploy stage that runs if all the test stage jobs have run.
+# This tage will deploy the component (stroom-nginx, stroom-log-sender,
+# a named stack, etc.) to docker/GitHub releases.
 jobs:
   include:
     - stage: deploy
       script: ./travis.stage.release.sh
+      env: STACK_NAME=NOT_USED
 
 # The deployment to github releases will only happen for a stroom_core or stroom_full tag
 deploy:
