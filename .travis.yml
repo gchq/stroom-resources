@@ -18,6 +18,11 @@ before_script: ./travis.before.sh
 
 script: ./travis.script.sh
 
+jobs:
+  include:
+    - stage: release
+      script: ./travis.stage.release.sh
+
 # The deployment to github releases will only happen for a stroom_core or stroom_full tag
 deploy:
   - provider: releases
