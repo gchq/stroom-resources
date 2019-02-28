@@ -2,14 +2,25 @@ language: bash
 dist: trusty
 sudo: required
 
+stages:
+  - test
+  - deploy
+
+env:
+  - STACK_NAME=stroom_core
+  - STACK_NAME=stroom_core_test
+  - STACK_NAME=stroom_dbs
+  #- STACK_NAME=stroom_full
+  - STACK_NAME=stroom_services
+
 # Use a build matrix so we can build each stack variant
-matrix:
-  include:
-  - env: STACK_NAME=stroom_core
-  - env: STACK_NAME=stroom_core_test
-  - env: STACK_NAME=stroom_dbs
-  #- env: STACK_NAME=stroom_full
-  - env: STACK_NAME=stroom_services
+#matrix:
+  #include:
+  #- env: STACK_NAME=stroom_core
+  #- env: STACK_NAME=stroom_core_test
+  #- env: STACK_NAME=stroom_dbs
+  ##- env: STACK_NAME=stroom_full
+  #- env: STACK_NAME=stroom_services
 
 services:
   - docker
@@ -36,7 +47,7 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
-      condition: $TRAVIS_TAG =~ ^(stroom_core|stroom_full)
+      condition: $TRAVIS_TAG =~ ^(stroom_core|stroom_core_test|stroom_full|stroom_services|stroom_dbs)
     # Push the get_stroom.sh script to GitHub Pages so we can do 
     # Only pushed for a core stack build
     # bash <(curl https://gchq.github.io/stroom-resources/get_stroom.sh)
@@ -48,4 +59,4 @@ deploy:
     target_branch: gh-pages
     on:
       tags: true
-      condition: $TRAVIS_TAG =~ ^stroom_core
+      condition: $TRAVIS_TAG =~ ^stroom_core_test
