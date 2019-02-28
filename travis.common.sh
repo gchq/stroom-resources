@@ -77,6 +77,34 @@ element_in () {
   return 1
 }
 
+assert_all_containers_count() {
+  local -r expected_count="$1"
+  local -r actual_count
+  expected_count="$(docker ps -a --format '{{.Names}}' | wc -l)"
+  if [ "${actual_count}" -ne "${expected_count}" ]; then
+    echo -e "${RED}Error${GREEN}:" \
+      "Expecting ${BLUE}${expected_count}${GREEN} docker containers," \
+      "found ${BLUE}${actual_count}${NC}"
+    return 1
+  else
+    return 0
+  fi
+}
+
+assert_running_containers_count() {
+  local -r expected_count="$1"
+  local -r actual_count
+  expected_count="$(docker ps --format '{{.Names}}' | wc -l)"
+  if [ "${actual_count}" -ne "${expected_count}" ]; then
+    echo -e "${RED}Error${GREEN}:" \
+      "Expecting ${BLUE}${expected_count}${GREEN} running docker containers," \
+      "found ${BLUE}${actual_count}${NC}"
+    return 1
+  else
+    return 0
+  fi
+}
+
 # args: dockerRepo contextRoot tag1VersionPart tag2VersionPart ... tagNVersionPart
 release_to_docker_hub() {
   # echo "releaseToDockerHub called with args [$@]"
@@ -201,11 +229,16 @@ test_stack() {
 
   # jq is installed by default on travis so no need to install it
 
+  # Get the expected count of services
+  local services_count
+  # shellcheck disable=SC2002
+  services_count="$(cat SERVICES.txt | wc -l)"
+
   echo -e "${GREEN}Running start script${NC}"
   # If the stack is unhealthy then start should exit with a non-zero code.
   ./start.sh
 
-  # TODO should really check that all containers are running
+  assert_running_containers_count "${services_count}"
 
   # If this stack has a health script, run that. If the stack is unhealthy then
   # the script will exit with a non-zero code.
@@ -218,19 +251,20 @@ test_stack() {
   echo -e "${GREEN}Running stop script${NC}"
   ./restart.sh
 
-  # TODO should really check that all containers are running
+  assert_running_containers_count "${services_count}"
 
   # Test the stop script
   echo -e "${GREEN}Running stop script${NC}"
   ./stop.sh
 
-  # TODO should really check that there are no running containers
+  assert_running_containers_count 0
+  assert_all_containers_count "${services_count}"
 
   # Test the remove script
   echo -e "${GREEN}Running remove script${NC}"
   ./remove.sh -y
 
-  # TODO should really check that there are no containers/volumes left
+  assert_all_containers_count 0
 
   # Clear out all docker images/volumes/containers
   echo -e "${GREEN}Clearing out docker images/containers/volumes${NC}"
