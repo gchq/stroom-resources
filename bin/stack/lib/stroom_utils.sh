@@ -475,12 +475,12 @@ stop_service_if_in_stack() {
   check_arg_count 1 "$@"
   local -r service_name="$1"
 
-  # first check if the service has a container or not
-  if docker container inspect "${service_name}" 1>/dev/null 2>&1; then
-    # now check the run state of the container
-    if is_service_in_stack "${service_name}"; then
-      echo -e "${GREEN}Stopping container ${BLUE}${service_name}${NC}"
+  if is_service_in_stack "${service_name}"; then
+    echo -e "${GREEN}Stopping container ${BLUE}${service_name}${NC}"
+    # first check if the service has a container or not
+    if docker container inspect "${service_name}" 1>/dev/null 2>&1; then
 
+      # now check the run state of the container
       local -r state="$(docker inspect -f '{{.State.Running}}' "${service_name}")"
 
       if [ "${state}" = "true" ]; then
@@ -493,9 +493,9 @@ stop_service_if_in_stack() {
       else
         echo -e "Container ${BLUE}${service_name}${NC} is not running"
       fi
+    else
+      echo -e "Container ${BLUE}${service_name}${NC} does not exist"
     fi
-  else
-    echo -e "Container ${BLUE}${service_name}${NC} does not exist"
   fi
 }
 
