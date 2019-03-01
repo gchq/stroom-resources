@@ -73,6 +73,16 @@ apply_overrides_to_yaml() {
   )
 }
 
+is_variable_overridden() {
+  local var_name="$1"
+
+  if grep -oPq "^[ \t]*${var_name}(?==)" "${OVERRIDE_FILE}"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 add_env_vars() {
   local -r CONTAINER_VERSIONS_FILE="container_versions.env"
   # Associative array to hold whitelisted_var_name => use_count
@@ -177,7 +187,8 @@ add_env_vars() {
     # and substitution of the default value doesn't work so we must white list it
     if [ "${use_whitelist}" = "true" ]; then
       if [[ "${var_value}" =~ \$[A-Z_0-9]+ ]] \
-        && [[ -z "${whitelisted_use_counters[${var_name}]}" ]] ; then
+        && [[ -z "${whitelisted_use_counters[${var_name}]}" ]] \
+        && ! is_variable_overridden "${var_name}"; then
 
 				die "${RED}  Error${NC}: Environment variable ${YELLOW}${var_name}${NC}=\"${BLUE}${var_value}${NC}\" contains a substitution variable but isn't white-listed."
 			fi
