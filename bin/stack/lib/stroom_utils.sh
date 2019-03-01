@@ -285,7 +285,7 @@ check_overall_health() {
   check_service_health_if_in_stack \
     "stroom-stats" \
     "${host}" \
-    "STROOM_STATS_SERVICE_ADMIN_PORT" \
+    "STROOM_STATS_ADMIN_PORT" \
     "statsAdmin"
 
   echo
