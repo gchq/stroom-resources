@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#
-# Stops the stack gracefully
+
+cmd_help_msg="Stops the specified service or the whole stack if no service name is supplied."
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
@@ -19,8 +19,8 @@ do_stop() {
     if is_service_in_stack "${service_name}"; then
       stop_service_if_in_stack "${service_name}"
     else
-      die "${RED}  Error${NC}:" \
-        "${BLUE}${service_name}${NC} is not part in this stack"
+      die "${RED}Error${NC}:" \
+        "${BLUE}${service_name}${NC} is not part of this stack"
     fi
   else
     stop_stack
@@ -29,8 +29,12 @@ do_stop() {
 
 main() {
   # leading colon means silent error reporting by getopts
-  while getopts ":m" arg; do
+  while getopts ":hm" arg; do
     case $arg in
+      h )  
+        show_default_service_usage "${cmd_help_msg}"
+        exit 0
+        ;;
       m )  
         # shellcheck disable=SC2034
         MONOCHROME=true 
@@ -38,6 +42,12 @@ main() {
     esac
   done
   shift $((OPTIND-1)) # remove parsed options and args from $@ list
+
+  if [ "$#" -gt 1 ]; then
+    echo -e "${RED}Error${NC}: Invalid arguments, only one service name can be supplied" >&2
+    show_default_service_usage "${cmd_help_msg}"
+    exit 1
+  fi
 
   setup_echo_colours
 

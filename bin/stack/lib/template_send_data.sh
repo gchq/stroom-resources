@@ -24,6 +24,16 @@ check_destination() {
   fi
 }
 
+show_usage() {
+  echo -e "Usage: ${BLUE}$(basename "$0") data-directory destination(${VALID_DESTINATIONS}) feed-name system-name environment${NC}" >&2
+  echo -e "This script will send all files contained in data-directory to the destination system."
+  echo -e "All files successfully sent will be deleted. It does not recurse into child directories."
+  echo -e "Valid OPTION values:"
+  echo -e "  -m   Use monochrome output, coloured output is used by default."
+  echo -e "  -h   Display this help"
+  echo -e "E.g.:  ${BLUE}$0 /tmp/data stroom-proxy TEST_FEED MY_TEST_SYSTEM DEV${NC}" >&2
+}
+
 main() {
 
   local -r data_dir="$1"
@@ -79,8 +89,12 @@ main() {
 # ~~~ Script starts here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 # leading colon means silent error reporting by getopts
-while getopts ":m" arg; do
+while getopts ":hm" arg; do
   case $arg in
+    h )  
+      show_usage
+      exit 0
+      ;;
     m )  
       # shellcheck disable=SC2034
       MONOCHROME=true 
@@ -93,11 +107,8 @@ setup_echo_colours
 
 required_arg_count=5
 if [ $# -ne ${required_arg_count} ]; then
-  echo -e "${RED}ERROR:${GREEN} Invalid arguments, found $# args, required ${required_arg_count}${NC}" >&2
-  echo -e "${GREEN}Usage: ${BLUE}$0 data-directory destination(${VALID_DESTINATIONS}) feed-name system-name environment${NC}" >&2
-  echo -e "${GREEN}E.g.:  ${BLUE}$0 /tmp/data stroom-proxy TEST_FEED MY_TEST_SYSTEM DEV${NC}" >&2
-  echo -e "This script will send all files contained in data-directory to the destination system."
-  echo -e "All files successfully sent will be deleted. It does not recurse into child directories."
+  echo -e "${RED}Error${NC}: Invalid arguments, found $# args, required ${required_arg_count}" >&2
+  show_usage
   exit 1
 fi
 

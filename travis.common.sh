@@ -80,7 +80,7 @@ element_in () {
 assert_all_containers_count() {
   local expected_count="$1"
   local actual_count
-  expected_count="$(docker ps -a --format '{{.Names}}' | wc -l)"
+  expected_count="$(docker ps -a --format '{{.ID}}' | wc -l)"
   if [ "${actual_count}" -ne "${expected_count}" ]; then
     echo -e "${RED}Error${GREEN}:" \
       "Expecting ${BLUE}${expected_count}${GREEN} docker containers," \
@@ -94,7 +94,7 @@ assert_all_containers_count() {
 assert_running_containers_count() {
   local expected_count="$1"
   local actual_count
-  expected_count="$(docker ps --format '{{.Names}}' | wc -l)"
+  expected_count="$(docker ps --format '{{.ID}}' | wc -l)"
   if [ "${actual_count}" -ne "${expected_count}" ]; then
     echo -e "${RED}Error${GREEN}:" \
       "Expecting ${BLUE}${expected_count}${GREEN} running docker containers," \

@@ -2,6 +2,8 @@
 
 setup_echo_colours
 
+stack_services_file="SERVICES.txt"
+
 echo_running() {
   echo -e "  Status:   ${GREEN}RUNNING${NC}"
 }
@@ -18,6 +20,48 @@ echo_unhealthy() {
   echo -e "  Status:   ${RED}UNHEALTHY${NC}"
   echo -e "  Details:"
   echo
+}
+
+show_services_usage_part() {
+  # shellcheck disable=SC2002
+  if [ -f "${DIR}/${stack_services_file}" ] \
+    && [ "$(cat "${DIR}/${stack_services_file}" | wc -l)" -gt 0 ]; then
+
+    echo -e "Valid SERVICE values:"
+    while read service; do
+      echo -e "  ${service}"
+    done < "${DIR}/${stack_services_file}"
+  fi
+}
+
+show_default_usage() {
+  local specific_args="$1"
+  local specific_msg="$2"
+  # specific_options must be a single line or the sort below will break it
+  local specific_options="$3"
+  echo -e "Usage: $(basename "$0") [OPTION]... ${specific_args}"
+  if [ -n "${specific_msg}" ]; then
+    echo -e "${specific_msg}"
+  fi
+  echo -e "Valid OPTION values:"
+  # build the list of options, sorting them
+  {
+    echo -e "  -m   Use monochrome output, coloured output is used by default."
+    echo -e "  -h   Display this help"
+    if [ -n "${specific_options}" ]; then
+      echo -e "${specific_options}"
+    fi
+  } | sort
+}
+
+show_default_services_usage() {
+  show_default_usage "[SERVICE]..." "$@"
+  show_services_usage_part
+}
+
+show_default_service_usage() {
+  show_default_usage "[SERVICE]" "$@"
+  show_services_usage_part
 }
 
 get_config_env_var() {
@@ -46,7 +90,7 @@ is_service_in_stack() {
   local -r service_name="$1"
 
   # return true if service_name is in the file
-  if grep -q "^${service_name}$" "${DIR}/SERVICES.txt"; then
+  if grep -q "^${service_name}$" "${DIR}/${stack_services_file}"; then
     return 0;
   else
     return 1;
@@ -57,6 +101,9 @@ is_container_running() {
   check_arg_count 1 "$@"
   local -r service_name="$1"
   if is_service_in_stack "${service_name}"; then
+    # first check if the service has a container or not
+    docker container inspect "${service_name}" 1>/dev/null 2>&1 || return 1
+    # now check the run state of the container
     local -r state="$(docker inspect -f '{{.State.Running}}' "${service_name}")"
     if [ "${state}" == "true" ]; then
       return 0
@@ -79,7 +126,7 @@ are_services_in_stack() {
 
   # return true if service_name is in the file
   # shellcheck disable=SC2151
-  if grep -q "${regex}" "${DIR}/SERVICES.txt"; then
+  if grep -q "${regex}" "${DIR}/${stack_services_file}"; then
     return 0;
   else
     return 1;
@@ -236,7 +283,7 @@ check_containers() {
 
     total_unhealthy_count=$((total_unhealthy_count + unhealthy_count))
     #((total_unhealthy_count+=unhealthy_count))
-  done < "${DIR}/SERVICES.txt"
+  done < "${DIR}/${stack_services_file}"
 }
 
 check_overall_health() {
@@ -426,21 +473,27 @@ stop_service_if_in_stack() {
   check_arg_count 1 "$@"
   local -r service_name="$1"
 
-  if is_service_in_stack "${service_name}"; then
-    echo -e "${GREEN}Stopping container ${BLUE}${service_name}${NC}"
+  # first check if the service has a container or not
+  if docker container inspect "${service_name}" 1>/dev/null 2>&1; then
+    # now check the run state of the container
+    if is_service_in_stack "${service_name}"; then
+      echo -e "${GREEN}Stopping container ${BLUE}${service_name}${NC}"
 
-    local -r state="$(docker inspect -f '{{.State.Running}}' "${service_name}")"
+      local -r state="$(docker inspect -f '{{.State.Running}}' "${service_name}")"
 
-    if [ "${state}" = "true" ]; then
-      # shellcheck disable=SC2094
-      docker-compose \
-        --project-name "${STACK_NAME}" \
-        -f "$DIR"/config/"${STACK_NAME}".yml \
-        stop \
-        "${service_name}"
-    else
-      echo -e "Container ${BLUE}${service_name}${NC} is not running"
+      if [ "${state}" = "true" ]; then
+        # shellcheck disable=SC2094
+        docker-compose \
+          --project-name "${STACK_NAME}" \
+          -f "$DIR"/config/"${STACK_NAME}".yml \
+          stop \
+          "${service_name}"
+      else
+        echo -e "Container ${BLUE}${service_name}${NC} is not running"
+      fi
     fi
+  else
+    echo -e "Container ${BLUE}${service_name}${NC} does not exist"
   fi
 }
 
