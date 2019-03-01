@@ -254,7 +254,9 @@ check_service_health_if_in_stack() {
   local -r admin_path="$4"
   local unhealthy_count=0
 
-  if is_service_in_stack "${service_name}"; then
+  if is_service_in_stack "${service_name}" \
+    && is_container_running "${service_name}"; then
+
     local admin_port
     admin_port="$(get_config_env_var "${admin_port_var_name}")"
 
@@ -509,7 +511,12 @@ stop_stack() {
   stop_service_if_in_stack "stroom-auth-ui"
   stop_service_if_in_stack "stroom-auth-service"
   stop_service_if_in_stack "stroom"
+  stop_service_if_in_stack "stroom-stats"
   stop_service_if_in_stack "stroom-all-dbs"
+  stop_service_if_in_stack "kafka"
+  stop_service_if_in_stack "hbase"
+  stop_service_if_in_stack "zookeeper"
+  stop_service_if_in_stack "hdfs"
 
   # In case we have missed any stop the whole project
   echo -e "${GREEN}Stopping any remaining containers in the stack${NC}"
