@@ -12,6 +12,10 @@ echo_stopped() {
   echo -e "  Status:   ${RED}STOPPED${NC}"
 }
 
+echo_doesnt_exist() {
+  echo -e "  Status:   ${RED}NO CONTAINER${NC}"
+}
+
 echo_healthy() {
   echo -e "  Status:   ${GREEN}HEALTHY${NC}"
 }
@@ -28,7 +32,7 @@ show_services_usage_part() {
     && [ "$(cat "${DIR}/${stack_services_file}" | wc -l)" -gt 0 ]; then
 
     echo -e "Valid SERVICE values:"
-    while read service; do
+    while read -r service; do
       echo -e "  ${service}"
     done < "${DIR}/${stack_services_file}"
   fi
@@ -97,12 +101,25 @@ is_service_in_stack() {
   fi
 }
 
-is_container_running() {
+does_container_exist() {
   check_arg_count 1 "$@"
   local -r service_name="$1"
   if is_service_in_stack "${service_name}"; then
     # first check if the service has a container or not
-    docker container inspect "${service_name}" 1>/dev/null 2>&1 || return 1
+    if docker container inspect "${service_name}" 1>/dev/null 2>&1; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    return 1
+  fi
+}
+
+is_container_running() {
+  check_arg_count 1 "$@"
+  local -r service_name="$1"
+  if does_container_exist "${service_name}"; then
     # now check the run state of the container
     local -r state="$(docker inspect -f '{{.State.Running}}' "${service_name}")"
     if [ "${state}" == "true" ]; then
@@ -141,25 +158,17 @@ check_container_health() {
   echo
   echo -e "Checking the run state of container ${GREEN}${service_name}${NC}"
 
-  local -r container_run_state="$( \
-    docker inspect  \
-      -f '{{.State.Running}}'  \
-      "${service_name}" \
-  )"
-
-  if [ "${container_run_state}" = "true" ]; then
-    #local -r container_health="$( \
-      #docker inspect  \
-        #-f '{{.State.Health.Status}}'  \
-        #"${service_name}" \
-    #)"
-    #if [ "${container_health}" = "healthy" ]; then
-
-    echo_running
-    return_code=0
+  if does_container_exist "${service_name}"; then
+    if is_container_running "${service_name}"; then
+      echo_running
+      return_code=0
+    else
+      echo_stopped
+      return_code=1
+    fi
   else
-    echo_stopped
-    return_code=1
+    echo_doesnt_exist
+    return_code=0
   fi
 
   return ${return_code}
@@ -279,7 +288,7 @@ check_containers() {
   local unhealthy_count=0
 
   local service_name
-  while read service_name; do
+  while read -r service_name; do
     # OR to stop set -e exiting the script
     check_container_health "${service_name}" || unhealthy_count=$?
 
