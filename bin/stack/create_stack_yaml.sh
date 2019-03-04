@@ -18,7 +18,6 @@ validate_requested_services() {
         "kibana" \
         "nginx" \
         "stroom" \
-        "stroomUi" \
         "stroomAllDbs" \
         "stroomAnnotationsService" \
         "stroomAnnotationsUi" \

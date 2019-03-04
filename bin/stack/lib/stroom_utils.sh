@@ -231,7 +231,6 @@ stop_stack() {
   stop_service_if_in_stack "${stack_name}" "stroom-proxy-remote"
   stop_service_if_in_stack "${stack_name}" "stroom-proxy-local"
   stop_service_if_in_stack "${stack_name}" "nginx"
-  stop_service_if_in_stack "${stack_name}" "stroom-ui"
   stop_service_if_in_stack "${stack_name}" "stroom-auth-ui"
   stop_service_if_in_stack "${stack_name}" "stroom-auth-service"
   stop_service_if_in_stack "${stack_name}" "stroom"
