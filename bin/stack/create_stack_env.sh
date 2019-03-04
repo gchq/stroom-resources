@@ -11,10 +11,40 @@ source lib/shell_utils.sh
 # shellcheck disable=SC1091
 source lib/network_utils.sh
 
+# Creates the blank env file and sets some standard header text
 create_config() {
   rm -f "${OUTPUT_ENV_FILE}"
   touch "${OUTPUT_ENV_FILE}"
   chmod +x "${OUTPUT_ENV_FILE}"
+}
+
+# Write a header block to the env file
+add_header_to_env_file() {
+  local temp_env_file
+  temp_env_file="$(mktemp)"
+  # shellcheck disable=SC2016
+  {
+    echo '# This file contains overrides to values used in the <stack name>.yml file'
+    echo '# used by docker-compose.'
+    echo '# For example, the .yml file may contain a line like:'
+    echo '#   - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroomuser}'
+    echo '# This means docker will pass the environment variable STROOM_JDBC_DRIVER_PASSWORD'
+    echo '# to the relevant container. The value for this will be taken from'
+    echo '# STROOM_DB_PASSWORD or if that is not set then it will use the default value'
+    echo '# of stroompassword1. To override the value used set it in this'
+    echo '# file like so:'
+    echo '# STROOM_DB_PASSWORD=MyNewPassword123'
+    echo 
+    echo '# The following line can be uncommented and set if you want to specify the'
+    echo '# hostname used for all communication between the various services. If left'
+    echo '# commented out, the stack scripts will determine the IP address of the host'
+    echo '# and use that.'
+    echo 
+    echo '#HOST_IP=<enter you hostname here>'
+    echo
+    cat "${OUTPUT_ENV_FILE}"
+  } > "${temp_env_file}"
+  mv "${temp_env_file}" "${OUTPUT_ENV_FILE}"
 }
 
 # If var_name is "STROOM_TAG", replacement_value is "v6.1.2" and a line in
@@ -300,9 +330,10 @@ main() {
   create_config
   add_env_vars
 
-    # Sort and de-duplicate param list before we do anything else with the file
-    sort -o "${OUTPUT_ENV_FILE}" -u "${OUTPUT_ENV_FILE}"
-    create_versions_file
-  }
+  # Sort and de-duplicate param list before we do anything else with the file
+  sort -o "${OUTPUT_ENV_FILE}" -u "${OUTPUT_ENV_FILE}"
+  add_header_to_env_file
+  create_versions_file
+}
 
 main "$@"
