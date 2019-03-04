@@ -51,10 +51,12 @@ add_header_to_env_file() {
 # ${INPUT_YAML_FILE} looks like:
 #   image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
 # then it becomes 
-#   image: "${STROOM_REPO:-gchq/stroom}:v6.1.2"
+#   image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.1.2}"
+# This changes the default value, whilst still allowing it to be overridden
+# via the env file at deployment time.
 replace_in_yaml() {
   local -r var_name="$1"
-  local -r replacement_value="$2"
+  local -r replacement_value="\${${var_name}:-$2}"
   local -r regex="\\$\{${var_name}(:-?[^}]*)?}"
 
   #echo "${regex}"
@@ -70,7 +72,7 @@ replace_in_yaml() {
 # replace strings in the docker compose yaml like this:
 #   yamlProp: "${XXX_XXX:-a default value}"
 # with this:
-#   yamlProp: "some value"
+#   yamlProp: "${XXX_XXX:-some value}"
 apply_overrides_to_yaml() {
 
   local -r override_file="$1"
