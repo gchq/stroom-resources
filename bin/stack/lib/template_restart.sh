@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cmd_help_msg="Restarts the specified service or the whole stack if no service name is supplied.\nThe services will be shutdown in a graceful order"
+cmd_help_msg="Restarts the specified service(s) or the whole stack if no service names are supplied.\nThe services will be shutdown in a graceful order"
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
@@ -27,16 +27,16 @@ source "$DIR"/config/<STACK_NAME>.env
 STACK_NAME="<STACK_NAME>" 
 
 do_restart() {
-  if [ "$#" -eq 1 ]; then
-    local -r service_name="$1"
-    if is_service_in_stack "${service_name}"; then
-      stop_service_if_in_stack "${service_name}"
-      echo
-      start_stack "${service_name}"
-    else
-      die "${RED}Error${NC}:" \
-        "${BLUE}${service_name}${NC} is not part of this stack"
-    fi
+  if [ "$#" -gt 0 ]; then
+    for service_name in "$@"; do
+      if ! is_service_in_stack "${service_name}"; then
+        die "${RED}Error${NC}:" \
+          "${BLUE}${service_name}${NC} is not part of this stack"
+      fi
+    done
+    stop_services_if_in_stack "$@"
+    echo
+    start_stack "$@"
   else
     stop_stack
     echo
@@ -49,7 +49,7 @@ main() {
   while getopts ":hm" arg; do
     case $arg in
       h )  
-        show_default_service_usage "${cmd_help_msg}"
+        show_default_services_usage "${cmd_help_msg}"
         exit 0
         ;;
       m )  
@@ -59,12 +59,6 @@ main() {
     esac
   done
   shift $((OPTIND-1)) # remove parsed options and args from $@ list
-
-  if [ "$#" -gt 1 ]; then
-    echo -e "${RED}Error${NC}: Invalid arguments, only one service name can be supplied" >&2
-    show_default_service_usage "${cmd_help_msg}"
-    exit 1
-  fi
 
   setup_echo_colours
 

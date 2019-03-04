@@ -2,7 +2,36 @@
 
 setup_echo_colours
 
+# shellcheck disable=SC1090
+#{
+  #source "$DIR"/lib/stroom_utils.sh
+#}
+
 stack_services_file="SERVICES.txt"
+
+SERVICES_WITH_HEALTH_CHECK=(
+    "stroom"
+    "stroom-auth-service"
+    "stroom-stats"
+    "stroom-proxy-local"
+    "stroom-proxy-remote"
+)
+
+SERVICE_SHUTDOWN_ORDER=(
+  "stroom-log-sender"
+  "stroom-proxy-remote"
+  "stroom-proxy-local"
+  "nginx"
+  "stroom-auth-ui"
+  "stroom-auth-service"
+  "stroom"
+  "stroom-stats"
+  "stroom-all-dbs"
+  "kafka"
+  "hbase"
+  "zookeeper"
+  "hdfs"
+)
 
 echo_running() {
   echo -e "  Status:   ${GREEN}RUNNING${NC}"
@@ -103,7 +132,7 @@ is_service_in_stack() {
 
 does_container_exist() {
   check_arg_count 1 "$@"
-  local -r service_name="$1"
+  local  service_name="$1"
   if is_service_in_stack "${service_name}"; then
     # first check if the service has a container or not
     if docker container inspect "${service_name}" 1>/dev/null 2>&1; then
@@ -118,7 +147,7 @@ does_container_exist() {
 
 is_container_running() {
   check_arg_count 1 "$@"
-  local -r service_name="$1"
+  local service_name="$1"
   if does_container_exist "${service_name}"; then
     # now check the run state of the container
     local -r state="$(docker inspect -f '{{.State.Running}}' "${service_name}")"
@@ -133,7 +162,7 @@ is_container_running() {
 }
 
 # Return zero if any of the supplied services are in the stack
-are_services_in_stack() {
+is_at_least_one_service_in_stack() {
   local -r service_names=( "$@" )
   local regex="^"
   for service_name in "${service_names[@]}"; do
@@ -177,9 +206,10 @@ check_container_health() {
 check_service_health() {
   if [ $# -ne 4 ]; then
     echo -e "${RED}ERROR${NC}:" \
-      "Invalid arguments. Usage: ${BLUE}health.sh HOST PORT PATH${NC}," \
-      "e.g. health.sh localhost 8080 stroomAdmin"
-    echo "$@"
+      "Invalid arguments. Usage: ${BLUE}health.sh HOST PORT PATH${NC},\n" \
+      "e.g. health.sh localhost 8080 stroomAdmin\n" \
+      "Arguments [$*]" >&2
+    dump_call_stack
     exit 1
   fi
 
@@ -395,12 +425,7 @@ display_stack_info() {
     echo_info_line "${padding}" "${image_name}" "${image_version}"
   done < "${DIR}"/VERSIONS.txt
 
-  if are_services_in_stack \
-    "stroom" \
-    "stroom-auth-service" \
-    "stroom-stats" \
-    "stroom-proxy-local" \
-    "stroom-proxy-remote"; then
+  if is_at_least_one_service_in_stack "${SERVICES_WITH_HEALTH_CHECK[@]}"; then
 
     echo
     echo -e "The following admin pages are available"
@@ -428,7 +453,7 @@ display_stack_info() {
     fi
   fi
 
-  if are_services_in_stack "stroom" "stroom-proxy-local" "stroom-proxy-remote"; then
+  if is_at_least_one_service_in_stack "stroom" "stroom-proxy-local" "stroom-proxy-remote"; then
     echo
     echo -e "Data can be POSTed to Stroom using the following URLs (see README for details)"
     echo
@@ -479,6 +504,19 @@ start_stack() {
     "${@}"
 }
 
+stop_services_if_in_stack() {
+  check_arg_count_at_least 1 "$@"
+  local -r service_names_to_shutdown=( "$@" )
+
+  # loop over all services in gracefull shutdown order and if it is one
+  # of the requested servcies, shut it down.
+  for service_name_to_shutdown in "${SERVICE_SHUTDOWN_ORDER[@]}"; do
+    if element_in "${service_name_to_shutdown}" "${service_names_to_shutdown[@]}"; then
+      stop_service_if_in_stack "${service_name_to_shutdown}"
+    fi
+  done
+}
+
 
 stop_service_if_in_stack() {
   check_arg_count 1 "$@"
@@ -512,20 +550,12 @@ stop_stack() {
   echo -e "${GREEN}Stopping the docker containers in graceful order${NC}"
   echo
 
-  # Order is critical here for a graceful shutdown
-  stop_service_if_in_stack "stroom-log-sender"
-  stop_service_if_in_stack "stroom-proxy-remote"
-  stop_service_if_in_stack "stroom-proxy-local"
-  stop_service_if_in_stack "nginx"
-  stop_service_if_in_stack "stroom-auth-ui"
-  stop_service_if_in_stack "stroom-auth-service"
-  stop_service_if_in_stack "stroom"
-  stop_service_if_in_stack "stroom-stats"
-  stop_service_if_in_stack "stroom-all-dbs"
-  stop_service_if_in_stack "kafka"
-  stop_service_if_in_stack "hbase"
-  stop_service_if_in_stack "zookeeper"
-  stop_service_if_in_stack "hdfs"
+  local all_services=()
+  while read -r service_to_stop; do
+    all_services+=( "${service_to_stop}" )
+  done < "${DIR}/${stack_services_file}"
+
+  stop_services_if_in_stack "${all_services[@]}"
 
   # In case we have missed any stop the whole project
   echo -e "${GREEN}Stopping any remaining containers in the stack${NC}"

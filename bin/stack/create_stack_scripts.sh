@@ -4,8 +4,11 @@
 
 set -e
 
-source lib/shell_utils.sh
-source lib/stroom_utils.sh
+# shellcheck disable=SC1091
+{
+  source lib/shell_utils.sh
+  source lib/stroom_utils.sh
+}
 
 create_script() {
   local script_name=$1
@@ -39,7 +42,7 @@ main() {
     create_script backup_databases
   fi
 
-  create_script config
+  create_script show_config
 
   # Only dropwiz apps need the health script
   if element_in "stroom" "${SERVICES[@]}" \
