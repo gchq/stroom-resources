@@ -200,7 +200,7 @@ do_versioned_stack_build() {
   # Ensure there is no buildDir from a previous build
   rm -rf "${buildDir}"
 
-  echo -e "Running ${scriptName} in ${scriptDir}"
+  echo -e "Running ${GREEN}${scriptName}${NC} in ${GREEN}${scriptDir}${NC}"
 
   ./"${scriptName}" "${BUILD_VERSION}"
 
@@ -215,7 +215,12 @@ do_versioned_stack_build() {
 
   for archive_filename in *.tar.gz; do
     # Now spin up the stack to make sure it all works
-    test_stack_archive "${archive_filename}"
+    # TODO we can't test stroom_services as it won't run without a database
+    if [[ ! "${archive_filename}" =~ ^stroom_services ]]; then
+      test_stack_archive "${archive_filename}"
+    else
+      echo -e "Skipping tests for ${GREEN}${archive_filename}${NC}"
+    fi
   done
 
   popd > /dev/null
@@ -280,7 +285,7 @@ test_stack() {
 test_stack_archive() {
   local -r stack_archive_file=$1
   echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
-  echo -e "Testing stack archive ${stack_archive_file}"
+  echo -e "Testing stack archive ${GREEN}${stack_archive_file}${NC}"
 
   if [ ! -f "${stack_archive_file}" ]; then
     echo -e "${RED}Can't find file ${BLUE}${stack_archive_file}${NC}"
@@ -289,7 +294,7 @@ test_stack_archive() {
 
   # Although the stack was already exploded when it was built, we want to
   # make sure the tar.gz has everything in it.
-  mkdir _exploded
+  mkdir -p _exploded
   local exploded_dir
   exploded_dir="$(mktemp -d --tmpdir=_exploded)"
   echo -e "Using temp dir ${exploded_dir}"
