@@ -10,6 +10,7 @@ import shutil
 import os
 import urllib
 import tarfile
+import sys
 from docopt import docopt
 
 
@@ -39,6 +40,10 @@ def create_build_dir():
     if not os.path.isdir(config.OUTPUT_DIR):
         os.mkdir(config.OUTPUT_DIR)
 
+def log_error(msg):
+    print "{0}Error{1}: {2}{3}".format(
+            colours.RED, colours.NC, msg, colours.NC)
+
 
 def get_release(release_name):
     GITHUB_DOWNLOAD_URL = "https://github.com/gchq/stroom-resources/" \
@@ -46,10 +51,17 @@ def get_release(release_name):
     url = GITHUB_DOWNLOAD_URL.format(release_name)
     downloaded_file = "{0}/{1}.tar.gz".format(config.BUILD_DIR, release_name)
     extracted_files = "{0}/{1}".format(config.BUILD_DIR, release_name)
+    print "Downloading file {0}{1}{2}" \
+        .format(colours.BLUE, url, colours.NC)
     urllib.urlretrieve(url, downloaded_file)
-    tar = tarfile.open(downloaded_file)
-    tar.extractall(extracted_files)
-    tar.close()
+    try:
+        with tarfile.open(downloaded_file) as tar:
+            tar = tarfile.open(downloaded_file)
+            tar.extractall(extracted_files)
+    except:
+        log_error("Opening file {0}{1}{2}, the url may not exist or the file may be corrupt."
+                .format(colours.BLUE, downloaded_file, colours.NC))
+        raise
 
 
 def get_path_to_config(release_name):
