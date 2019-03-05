@@ -76,6 +76,18 @@ main() {
     copy_file "${SRC_AUTH_UI_CONF_DIRECTORY}/nginx.conf.template" "${DEST_AUTH_UI_CONF_DIRECTORY}"
   fi
 
+  if element_in "stroom-ui" "${services[@]}"; then
+    echo -e "  Copying ${YELLOW}stroom-ui${NC} certificates"
+    local -r DEST_STROOM_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/certs"
+    copy_file "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+    copy_file "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+    copy_file "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+
+    echo -e "  Copying ${YELLOW}stroom-ui${NC} config files"
+    local -r DEST_STROOM_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/conf"
+    copy_file "${SRC_STROOM_UI_CONF_DIRECTORY}/nginx.conf.template" "${DEST_STROOM_UI_CONF_DIRECTORY}"
+  fi
+
   if element_in "nginx" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}nginx${NC} certificates"
     local -r DEST_NGINX_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/certs"

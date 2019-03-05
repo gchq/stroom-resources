@@ -29,6 +29,7 @@ validate_requested_services() {
     "stroom-query-elastic-service" \
     "stroom-query-elastic-ui" \
     "stroom-stats" \
+    "stroom-ui" \
     "zookeeper" \
     )
 

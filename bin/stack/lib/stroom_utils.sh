@@ -23,6 +23,7 @@ SERVICE_SHUTDOWN_ORDER=(
   "stroom-proxy-local"
   "nginx"
   "stroom-auth-ui"
+  "stroom-ui"
   "stroom-auth-service"
   "stroom"
   "stroom-stats"

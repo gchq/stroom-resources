@@ -28,6 +28,7 @@ main() {
   SERVICES+=("stroom-proxy-remote")
   #SERVICES+=("stroom-query-elastic-service")
   #SERVICES+=("stroom-query-elastic-ui")
+  SERVICES+=("stroom-ui")
   SERVICES+=("stroom-stats")
   SERVICES+=("zookeeper")
 
