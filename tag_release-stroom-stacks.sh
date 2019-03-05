@@ -27,10 +27,13 @@ error_exit() {
 }
 
 main() {
-    readonly STACK_NAME='stroom_core'
+    local version="$1"
+    # extract "stroom_core_test" from "stroom_core_test-v1.0.3"
+    local STACK_NAME="${version%%-*}"
+
     readonly STROOM_IMAGE_PREFIX='gchq/stroom'
     # Git tags should match this regex to be a release tag
-    readonly RELEASE_VERSION_REGEX="^${STACK_NAME}-v[0-9]+\.[0-9]+.*$"
+    readonly RELEASE_VERSION_REGEX="^stroom_(core|core_test|full|services|dbs)-v[0-9]+\.[0-9]+.*$"
     readonly STACK_DIR="./bin/stack"
     readonly STACK_BUILD_DIR="${STACK_DIR}/build"
     readonly STACK_BUILD_SCRIPT="./build_${STACK_NAME}.sh"
@@ -49,7 +52,6 @@ main() {
         exit 1
     fi
 
-    local version=$1
     
     if [[ ! "${version}" =~ ${RELEASE_VERSION_REGEX} ]]; then
         error_exit "Version [${BLUE}${version}${GREEN}] does not match the release version regex ${BLUE}${RELEASE_VERSION_REGEX}${NC}"
@@ -65,6 +67,10 @@ main() {
 
     if [ "$(git status --porcelain 2>/dev/null | wc -l)" -ne 0 ]; then
         error_exit "There are uncommitted changes or untracked files. Commit them before tagging.${NC}"
+    fi
+
+    if [ ! -f "${STACK_BUILD_SCRIPT}" ]; then
+        error_exit "The stack build script ${BLUE}${STACK_BUILD_SCRIPT}${NC} does not exist.${NC}"
     fi
 
     if [ -d "${STACK_BUILD_DIR}" ]; then
@@ -107,7 +113,7 @@ main() {
 
     local commit_msg
 
-    commit_msg="$(cat ${VERSIONS_FILE})"
+    commit_msg="$(cat "${VERSIONS_FILE}")"
 
     # Add the release version as the top line of the commit msg, followed by
     # two new lines
