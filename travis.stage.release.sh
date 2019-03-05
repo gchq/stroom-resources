@@ -6,7 +6,7 @@ set -e
 # shellcheck disable=SC1091
 source travis.common.sh
 
-main() {
+do_release() {
   setup_colours
   dump_travis_env_vars
 
