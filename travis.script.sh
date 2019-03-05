@@ -3,9 +3,6 @@
 # exit script on any error
 set -e
 
-# shellcheck disable=SC1091
-source travis.common.sh
-
 # Prefixes for git tags that determine what the build does
 # Docker image prefixes
 TAG_PREFIX_STROOM_LOG_SENDER="stroom-log-sender"
