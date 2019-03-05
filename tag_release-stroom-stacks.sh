@@ -99,16 +99,19 @@ main() {
         error_exit "Found a ${BLUE}SNAPSHOT${GREEN} version in the ${BLUE}VERSIONS.txt${GREEN} file. You can't release a SNAPSHOT"
     fi
 
-    # Extract the version part of the tag, e.g. v6.0-beta.20
-    local stroom_version="v${version#*-v}"
-    # Get the full stroom docker image tag from the VERSIONS.txt file
-    local stroom_image_tag
-    stroom_image_tag="$(grep "${STROOM_IMAGE_PREFIX}:.*" "${VERSIONS_FILE}")"
-    # Extract the version part of the stroom tag
-    local stroom_image_version="${stroom_image_tag#*:}"
+    # If the stack includes stroom, make sure the stroom image matches the version
+    if grep -q "${STROOM_IMAGE_PREFIX}:" "${VERSIONS_FILE}"; then
+      # Extract the version part of the tag, e.g. v6.0-beta.20
+      local stroom_version="v${version#*-v}"
+      # Get the full stroom docker image tag from the VERSIONS.txt file
+      local stroom_image_tag
+      stroom_image_tag="$(grep "${STROOM_IMAGE_PREFIX}:.*" "${VERSIONS_FILE}")"
+      # Extract the version part of the stroom tag
+      local stroom_image_version="${stroom_image_tag#*:}"
 
-    if ! echo "${stroom_version}" | grep -q "${stroom_image_version}"; then
-        error_exit "Expecting the git tag [${BLUE}${version}${GREEN}] to include the stroom image version [${BLUE}${stroom_image_version}${GREEN}] in it.${NC}"
+      if ! echo "${stroom_version}" | grep -q "${stroom_image_version}"; then
+          error_exit "Expecting the git tag [${BLUE}${version}${GREEN}] to include the stroom image version [${BLUE}${stroom_image_version}${GREEN}] in it.${NC}"
+      fi
     fi
 
     local commit_msg
