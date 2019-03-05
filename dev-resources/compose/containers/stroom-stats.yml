@@ -31,8 +31,8 @@ services:
       - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-$HOST_IP}:8080/api/authorisation/v1
       - STATS_ADVERTISED_HOST_OR_IP=${STATS_ADVERTISED_HOST_OR_IP:-localhost}
     ports:
-      - 8086:8086 # app
-      - 8087:8087 # admin
+      - "${STROOM_STATS_APP_PORT:-8086}:8086" # app
+      - "${STROOM_STATS_ADMIN_PORT:-8087}:8087" # admin
     logging:
       options:
         max-size: "${STROOM_STATS_STD_OUT_LOGS_MAX_SIZE:-10m}"

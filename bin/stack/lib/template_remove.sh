@@ -1,37 +1,35 @@
 #!/usr/bin/env bash
 
-# Removes the stack from the host. All containers are stopped and removed. So are their volumes!
+cmd_help_args=""
+cmd_help_msg="Removes the complete stack from the host.\nAll containers are stopped and removed. So are their volumes!\nAll data (content, events, indexes, etc.) will be lost!"
+cmd_help_options="  -y   Do not prompt for confirmation, e.g. when run from a script"
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "$DIR"/lib/shell_utils.sh
-setup_echo_colours
-
-showUsage() {
-  echo -e "Usage: ${BLUE}$0 [OPTION]...${NC}"
-  echo -e "  ${GREEN}-y${NC} - Do not prompt for confirmation, e.g. when run from a script"
-  echo
-}
+source "$DIR"/lib/stroom_utils.sh
 
 main() {
   local requireConfirmation=true
-  # Assume not monochrome until we know otherwise
-  setup_echo_colours
 
-  local optspec=":ym"
+  local optspec=":mhy"
   while getopts "$optspec" optchar; do
     case "${optchar}" in
-      y)
-        requireConfirmation=false
+      h )  
+        show_default_usage "${cmd_help_args}" "${cmd_help_msg}" "${cmd_help_options}"
+        exit 0
         ;;
       m )  
         # shellcheck disable=SC2034
         MONOCHROME=true 
         ;;
+      y)
+        requireConfirmation=false
+        ;;
       *)
-        echo -e "${RED}ERROR${NC} Unknown argument: '-${OPTARG}'" >&2
+        echo -e "Error: Unknown argument: '-${OPTARG}'" >&2
         echo
         showUsage
         exit 1
@@ -52,6 +50,18 @@ main() {
 
     if [ "$keyPressed" = 'y' ] || [ "$keyPressed" = 'Y' ]; then
       echo
+      echo -e "${RED}WARNING:${NC} ${GREEN}You are about to completely remove the stack including ALL data.${NC}"
+      echo -e "${GREEN}Are you sure?${NC}"
+      echo
+      read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
+
+      if [ "$keyPressed" = 'y' ] || [ "$keyPressed" = 'Y' ]; then
+        echo
+      else
+        echo
+        echo "Exiting"
+        exit 0
+      fi
     else
       echo
       echo "Exiting"
@@ -64,7 +74,11 @@ main() {
   echo
 
   # shellcheck disable=SC2094
-  docker-compose --project-name <STACK_NAME> -f "$DIR"/config/<STACK_NAME>.yml down -v
+  docker-compose \
+    --project-name <STACK_NAME> \
+    -f "$DIR"/config/<STACK_NAME>.yml \
+    down \
+    -v
 }
 
 main "$@"

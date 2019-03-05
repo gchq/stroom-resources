@@ -1,0 +1,11 @@
+# This file contains a whitelist of environemnt variables to
+# extract from the source docker compose yml file. In the source
+# yml file you will see entries like:
+# - XX_XX=${YY_YY:-some_default}
+# In this example if you wanted the environment variable and its default to
+# be included in the stack env file then you would add 'YY_YY' to this
+# whitelist
+# NOTE: Env vars listed here cannot also be in the overrides.env file
+
+
+STROOM_DB_ROOT_PASSWORD

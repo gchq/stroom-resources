@@ -1,23 +1,30 @@
 #!/usr/bin/env bash
 
-# Starts the stack, using the configuration defined in the .env file.
+cmd_help_msg="Starts the specified services or the whole stack if no service name is supplied."
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$DIR"/lib/network_utils.sh
-source "$DIR"/lib/shell_utils.sh
-source "$DIR"/lib/stroom_utils.sh
+# shellcheck disable=SC1090
+{
+  source "$DIR"/lib/network_utils.sh
+  source "$DIR"/lib/shell_utils.sh
+  source "$DIR"/lib/stroom_utils.sh
+}
 
-# This is needed in the docker compose yaml
-readonly HOST_IP=$(determine_host_address)
-
-setup_echo_colours
+# This line MUST be before we source the env file, as HOST_IP may be set
+# in the env file and thus needs to override the HOST_IP determined here.
+# shellcheck disable=SC2034
+HOST_IP=$(determine_host_address)
 
 # Read the file containing all the env var exports to make them
 # available to docker-compose
+# shellcheck disable=SC1090
 source "$DIR"/config/<STACK_NAME>.env
+
+# shellcheck disable=SC2034
+STACK_NAME="<STACK_NAME>" 
 
 check_installed_binaries() {
   # The version numbers mentioned here are mostly governed by the docker compose syntax version that 
@@ -40,8 +47,12 @@ check_installed_binaries() {
 
 main() {
   # leading colon means silent error reporting by getopts
-  while getopts ":m" arg; do
+  while getopts ":hm" arg; do
     case $arg in
+      h )  
+        show_default_services_usage "${cmd_help_msg}"
+        exit 0
+        ;;
       m )  
         # shellcheck disable=SC2034
         MONOCHROME=true 
@@ -50,29 +61,25 @@ main() {
   done
   shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
+  for requested_service in "${@}"; do
+    if ! is_service_in_stack "${requested_service}"; then
+      die "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not in the stack."
+    fi
+  done
+
   setup_echo_colours
 
   check_installed_binaries
 
-  start_stack "<STACK_NAME>" "$@"
+  start_stack "$@"
 
-  # If any args are supplied then it means specific services are being started so we
-  # can't wait for check for health as we don't know what has been started
-  if [ "$#" -eq 0 ]; then
+  wait_for_service_to_start
 
-  echo
-  echo -e "${GREEN}Waiting for stroom to complete its start up.${NC}"
-  echo -e "${DGREY}Stroom has to build its database tables when started for the first time,${NC}"
-  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
+  # Stroom is now up or we have given up waiting so check the health
+  check_overall_health
 
-  wait_for_200_response "http://localhost:${STROOM_ADMIN_PORT}/stroomAdmin"
-
-    # Stroom is now up or we have given up waiting so check the health
-    check_overall_health
-
-    # Display the banner, URLs and login details
-    display_stack_info
-  fi
+  # Display the banner, URLs and login details
+  display_stack_info
 }
 
 main "$@"

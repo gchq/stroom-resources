@@ -9,12 +9,30 @@ set -e
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${DIR:-.}"/lib/shell_utils.sh
+source "${DIR:-.}"/lib/stroom_utils.sh
 
 # Read the file containing all the env var exports to make them
 # available to docker-compose
 source "$DIR"/config/<STACK_NAME>.env
 
 readonly VALID_DESTINATIONS="stroom|stroom-proxy"
+
+check_destination() {
+  if ! is_service_in_stack "${destination}"; then
+    die "${RED}Error:${GREEN}" \
+      "Invalid destination. ${BLUE}${destination}${NC} is not part of the stack"
+  fi
+}
+
+show_usage() {
+  echo -e "Usage: ${BLUE}$(basename "$0") data-directory destination(${VALID_DESTINATIONS}) feed-name system-name environment${NC}" >&2
+  echo -e "This script will send all files contained in data-directory to the destination system."
+  echo -e "All files successfully sent will be deleted. It does not recurse into child directories."
+  echo -e "Valid OPTION values:"
+  echo -e "  -m   Use monochrome output, coloured output is used by default."
+  echo -e "  -h   Display this help"
+  echo -e "E.g.:  ${BLUE}$0 /tmp/data stroom-proxy TEST_FEED MY_TEST_SYSTEM DEV${NC}" >&2
+}
 
 main() {
 
@@ -29,12 +47,17 @@ main() {
   #", system: ${BLUE}${system_name}${GREEN}" \
   #" and environment: ${BLUE}${environment}${NC}"
 
+  check_destination "${destination}"
+
   if [ "${destination}" = "stroom" ]; then
     local port=443
-  elif [ "${destination}" = "stroom-proxy" ]; then
-    local port=${STROOM_PROXY_HTTPS_APP_PORT}
+  elif [ "${destination}" = "stroom-proxy-local" ]; then
+    local port
+    port="$(get_config_env_var "STROOM_PROXY_HTTPS_APP_PORT")"
   else
-    die "${RED}ERROR:${GREEN} invalid destination ${BLUE}${destination}${NC}, should be one of (${BLUE}${VALID_DESTINATIONS}${NC}${GREEN})${NC}"
+    die "${RED}Error:${GREEN}" \
+      "invalid destination ${BLUE}${destination}${NC}, should be one of" \
+      "(${BLUE}${VALID_DESTINATIONS}${NC}${GREEN})${NC}"
   fi
 
   local url=https://localhost:${port}/stroom/datafeed
@@ -66,8 +89,12 @@ main() {
 # ~~~ Script starts here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 # leading colon means silent error reporting by getopts
-while getopts ":m" arg; do
+while getopts ":hm" arg; do
   case $arg in
+    h )  
+      show_usage
+      exit 0
+      ;;
     m )  
       # shellcheck disable=SC2034
       MONOCHROME=true 
@@ -80,11 +107,8 @@ setup_echo_colours
 
 required_arg_count=5
 if [ $# -ne ${required_arg_count} ]; then
-  echo -e "${RED}ERROR:${GREEN} Invalid arguments, found $# args, required ${required_arg_count}${NC}" >&2
-  echo -e "${GREEN}Usage: ${BLUE}$0 data-directory destination(${VALID_DESTINATIONS}) feed-name system-name environment${NC}" >&2
-  echo -e "${GREEN}E.g.:  ${BLUE}$0 /tmp/data stroom-proxy TEST_FEED MY_TEST_SYSTEM DEV${NC}" >&2
-  echo -e "This script will send all files contained in data-directory to the destination system."
-  echo -e "All files successfully sent will be deleted. It does not recurse into child directories."
+  echo -e "${RED}Error${NC}: Invalid arguments, found $# args, required ${required_arg_count}" >&2
+  show_usage
   exit 1
 fi
 
