@@ -8,7 +8,6 @@ source lib/shell_utils.sh
 setup_echo_colours
 
 validate_requested_services() {
-  # TODO: Rename the yaml to reflect the container names, i.e. from camel case to dashed.
   local -r VALID_SERVICES=( \
     "elasticsearch" \
     "fake-smtp" \
@@ -31,7 +30,7 @@ validate_requested_services() {
     "stroom-stats" \
     "stroom-ui" \
     "zookeeper" \
-    )
+  )
 
   for service in "${@}"; do
     if ! element_in "${service}" "${VALID_SERVICES[@]}"; then

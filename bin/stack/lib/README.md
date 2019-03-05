@@ -1,7 +1,6 @@
 # Stroom
 
 Use the scripts in this directory to control a set of Docker containers that make up a working Stroom stack.
-This stack is not intended for production use, it is intended to be used for testing, trialing or demonstrating the Stroom software.
 
 The file _VERSIONS.txt_ defines the version of each container in use.
 
@@ -14,7 +13,7 @@ In order to use these scripts you will need:
 * _GNU sed_
 * _GNU grep_
 
-In order to use the `health.sh` script you will need
+To use the `health.sh` script with its full functionality you will need the following, though it can be used with reduced functionality without it.
 
 * [_jq_](https://stedolan.github.io/jq/)
 
@@ -59,13 +58,14 @@ sudo firewall-cmd --reload
 
 The following scripts are available to control the docker containers:
 
-* `show_config.sh` - Displays the effective configuration that docker-compose will use.
+* `backup_databases.sh` - A script to backup the databases in the stack.
 * `health.sh` - Checks the health of the applications in the stack.
 * `info.sh` - Displays information about the various URLs to use for accessing Stroom.
 * `logs.sh` - Starts tailing the logs of all containers from the last 5 entries of each.
 * `remove.sh` - Removes all the containers in the stack, destroying any state.
 * `restart.sh` - Restarts all the containers in the stack.
 * `send-data.sh` - A script for sending data into Stroom or Stroom Proxy
+* `show_config.sh` - Displays the effective configuration that docker-compose will use.
 * `stack.sh` - A single script for controlling the stack, e.g. `./stack.sh start`
 * `start.sh` - Starts all the containers for the stack.
 * `status.sh` - Displays the status of all the docker containers in the stack.
@@ -75,6 +75,17 @@ For details of any arguments required for the scripts, run them with the `-h` fl
 
 By default most of the scripts produce coloured output for readability.
 To run them in monochrome mode, use the `-m` flag.
+
+The scripts `start.sh`, `stop.sh`, `restart.sh` and `logs.sh` can be run in two ways.
+You can call them with no arguments, in which case they operate on the whole stack, e.g. `start.sh` will start all services in the stack.
+Alternatively you can supply a list of services that you want the script to apply to, e.g. `start.sh stroom stroom-all-dbs` will start just _stroom_ and _stroom-all-dbs_.
+If you supply one or more service names, those names must be part of the stack.
+The list of services in the stack can be found in the `SERVICES.txt` file, or by running one of the above scripts with the `-h` flag.
+
+## Docker image versions
+
+The file `VERSION.txt` contains the docker tags and versions used in the stack.
+This information can also be obtained by running the script `info.sh`.
 
 ## Sending data to Stroom
 
