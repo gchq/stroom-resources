@@ -213,15 +213,19 @@ do_versioned_stack_build() {
   #echo -e "Creating MD5 hash file ${GREEN}${md5File}${NC}"
   #md5sum "${fileName}" > "${md5File}"
 
+  echo -e "Dumping build artifacts in ${GREEN}${buildDir}${NC}"
+  ls -1 "${buildDir}"
+
   for archive_filename in *.tar.gz; do
     # Now spin up the stack to make sure it all works
     # TODO we can't test stroom_services as it won't run without a database
-    if [[ ! "${archive_filename}" =~ ^stroom_services ]]; then
+    if [[ ! "${archive_filename}" =~ ^stroom_services- ]]; then
       test_stack_archive "${archive_filename}"
     else
       echo -e "Skipping tests for ${GREEN}${archive_filename}${NC}"
     fi
   done
+
 
   popd > /dev/null
   popd > /dev/null
