@@ -31,7 +31,7 @@ RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
 
 # The stack used for the get_stroom.sh script that we publish on gh-pages
-GET_STROOM_STACK_NAME="${TAG_PREFIX_STROOM_STROOM_CORE_TEST}"
+GET_STROOM_STACK_NAME="stroom_core_test"
 
 # The dir used to hold content for deploying to github pages, i.e.
 # https://gchq.github.io/stroom-resources
@@ -68,7 +68,7 @@ assert_all_containers_count() {
   local expected_count="$1"
   local actual_count
   actual_count="$(docker ps -a --format '{{.ID}}' | wc -l)"
-  echo -e "Comparing actual [${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
+  echo -e "Comparing actual container count [${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
   if [ "${actual_count}" -ne "${expected_count}" ]; then
     echo -e "${RED}Error${GREEN}:" \
       "Expecting ${BLUE}${expected_count}${GREEN} docker containers," \
@@ -83,7 +83,7 @@ assert_running_containers_count() {
   local expected_count="$1"
   local actual_count
   actual_count="$(docker ps --format '{{.ID}}' | wc -l)"
-  echo -e "Comparing actual [${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
+  echo -e "Comparing actual running container count [${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
   if [ "${actual_count}" -ne "${expected_count}" ]; then
     echo -e "${RED}Error${GREEN}:" \
       "Expecting ${BLUE}${expected_count}${GREEN} running docker containers," \
@@ -211,13 +211,13 @@ do_versioned_stack_build() {
   for archive_filename in *.tar.gz; do
     # Now spin up the stack to make sure it all works
     # TODO we can't test stroom_services as it won't run without a database
-    if [[ ! "${archive_filename}" =~ ^stroom_services- ]]; then
+    # TODO we can't test stroom_full as it will blow travis' memory
+    if [[ ! "${archive_filename}" =~ ^stroom_(services|full)- ]]; then
       test_stack_archive "${archive_filename}"
     else
       echo -e "Skipping tests for ${GREEN}${archive_filename}${NC}"
     fi
   done
-
 
   popd > /dev/null
   popd > /dev/null
@@ -238,6 +238,8 @@ test_stack() {
   # shellcheck disable=SC2002
   services_count="$(cat SERVICES.txt | wc -l)"
   echo -e "services_count:            [${GREEN}${services_count}${NC}]"
+
+  ./info.sh
 
   echo -e "${GREEN}Running start script${NC}"
   # If the stack is unhealthy then start should exit with a non-zero code.
