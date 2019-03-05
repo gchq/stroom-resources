@@ -7,7 +7,6 @@ set -e
 # shellcheck disable=SC1091
 source lib/shell_utils.sh
 
-
 create_stack_from_services() {
   local -r PATH_TO_CONTAINERS="../compose/containers"
   echo version: \'2.4\'
