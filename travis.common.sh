@@ -81,6 +81,7 @@ assert_all_containers_count() {
   local expected_count="$1"
   local actual_count
   expected_count="$(docker ps -a --format '{{.ID}}' | wc -l)"
+  echo -e "Comparing actual [${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
   if [ "${actual_count}" -ne "${expected_count}" ]; then
     echo -e "${RED}Error${GREEN}:" \
       "Expecting ${BLUE}${expected_count}${GREEN} docker containers," \
@@ -95,6 +96,7 @@ assert_running_containers_count() {
   local expected_count="$1"
   local actual_count
   expected_count="$(docker ps --format '{{.ID}}' | wc -l)"
+  echo -e "Comparing actual [${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
   if [ "${actual_count}" -ne "${expected_count}" ]; then
     echo -e "${RED}Error${GREEN}:" \
       "Expecting ${BLUE}${expected_count}${GREEN} running docker containers," \
@@ -227,12 +229,15 @@ test_stack() {
   # Bit nasty but there should only be one match in there in both cases
   pushd ./stroom_*/stroom_* > /dev/null
 
+  echo -e "In directory ${GREEN}$(pwd)${NC}"
+
   # jq is installed by default on travis so no need to install it
 
   # Get the expected count of services
   local services_count
   # shellcheck disable=SC2002
   services_count="$(cat SERVICES.txt | wc -l)"
+  echo -e "services_count:            [${GREEN}${services_count}${NC}]"
 
   echo -e "${GREEN}Running start script${NC}"
   # If the stack is unhealthy then start should exit with a non-zero code.
