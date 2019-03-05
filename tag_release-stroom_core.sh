@@ -33,7 +33,7 @@ main() {
     readonly RELEASE_VERSION_REGEX="^${STACK_NAME}-v[0-9]+\.[0-9]+.*$"
     readonly STACK_DIR="./bin/stack"
     readonly STACK_BUILD_DIR="${STACK_DIR}/build"
-    readonly STACK_BUILD_SCRIPT="./buildCore.sh"
+    readonly STACK_BUILD_SCRIPT="./build_${STACK_NAME}.sh"
     readonly VERSIONS_FILE="${STACK_BUILD_DIR}/${STACK_NAME}/${STACK_NAME}-SNAPSHOT/VERSIONS.txt"
 
     setup_echo_colours
