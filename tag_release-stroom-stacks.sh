@@ -69,8 +69,8 @@ main() {
         error_exit "There are uncommitted changes or untracked files. Commit them before tagging.${NC}"
     fi
 
-    if [ ! -f "${STACK_BUILD_SCRIPT}" ]; then
-        error_exit "The stack build script ${BLUE}${STACK_BUILD_SCRIPT}${NC} does not exist.${NC}"
+    if [ ! -f "${STACK_DIR}/${STACK_BUILD_SCRIPT}" ]; then
+        error_exit "The stack build script ${BLUE}${STACK_DIR}/${STACK_BUILD_SCRIPT}${NC} does not exist.${NC}"
     fi
 
     if [ -d "${STACK_BUILD_DIR}" ]; then
