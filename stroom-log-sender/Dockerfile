@@ -15,6 +15,12 @@
 #**********************************************************************
 
 
+#ARG SUPERCRONIC_VERSION=v0.1.8
+#ARG SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64
+#ARG SUPERCRONIC=supercronic-linux-amd64
+#ARG SUPERCRONIC_SHA1SUM=be43e64c45acd6ec4fce5831e03759c89676a0ea
+
+
 # ~~~ send logs scripts stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Intermediate build stage to grab all the send logs scripts
@@ -31,6 +37,30 @@ ADD https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSI
 RUN chmod u+x ./*.sh
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+# ~~~ Download supercronic stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM alpine:3.8 as download-supercronic-stage
+WORKDIR /supercronic
+
+ENV \
+  SUPERCRONIC_VERSION=v0.1.8 \
+  SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64 \
+  SUPERCRONIC=supercronic-linux-amd64 \
+  SUPERCRONIC_SHA1SUM=be43e64c45acd6ec4fce5831e03759c89676a0ea
+
+RUN \
+  apk add --no-cache \
+    curl && \
+  echo "SUPERCRONIC_URL: ${SUPERCRONIC_URL}" && \
+  curl -fsSLO "$SUPERCRONIC_URL" && \
+  echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - 
+  #chmod +x "$SUPERCRONIC"
+
+  #mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+ #&& ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,13 +102,16 @@ RUN echo "http_proxy: $http_proxy" && \
     mkdir -p /stroom-log-sender/config && \
     mkdir -p /stroom-log-sender/certs && \
     mkdir -p /stroom-log-sender/log-volumes && \
-    chown -R sender:sender /stroom-log-sender
+    chown -R sender:sender /stroom-log-sender && \
+    ln -s /usr/local/bin/supercronic-linux-amd64 /usr/local/bin/supercronic
 
 # Copy in all the send logs scripts downloaded in the intermediate build stage
 COPY --chown=sender:sender --from=send-logs-scripts-stage /scripts /stroom-log-sender
 
 # Copy in the scripts for running the container
 COPY --chown=sender:sender docker-entrypoint.sh /stroom-log-sender/
+
+COPY --chown=sender:sender --from=download-supercronic-stage /supercronic /usr/local/bin/supercronic
 
 # Label the image so we can see what commit/tag it came from
 ARG GIT_COMMIT=unspecified
