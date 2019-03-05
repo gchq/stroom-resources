@@ -10,12 +10,7 @@ set -e
   TAG_PREFIX_STROOM_LOG_SENDER="stroom-log-sender"
   TAG_PREFIX_STROOM_NGINX="stroom-nginx"
   TAG_PREFIX_STROOM_ZOOKEEPER="stroom-zookeeper"
-  # Stack prefixes
-  TAG_PREFIX_STROOM_CORE="stroom_core"
-  TAG_PREFIX_STROOM_CORE_TEST="stroom_core_test"
-  TAG_PREFIX_STROOM_DBS="stroom_dbs"
-  TAG_PREFIX_STROOM_FULL="stroom_full"
-  TAG_PREFIX_STROOM_SERVICES="stroom_services"
+  TAG_PREFIX_STROOM_STACKS="stroom-stacks"
 
   ALL_STACK_PREFIXES=(
     "${TAG_PREFIX_STROOM_CORE}"
@@ -191,14 +186,14 @@ derive_docker_tags() {
 }
 
 do_versioned_stack_build() {
-  local -r stack_name="$1"
-  local -r scriptName="build_${stack_name}.sh"
+  #local -r stack_name="$1"
+  local -r scriptName="build_ALL.sh"
   local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
   local -r buildDir=${scriptDir}/build/
 
-  echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-  echo -e "${GREEN}Building and testing stack ${BLUE}${stack_name}${NC}"
-  echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+  #echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
+  #echo -e "${GREEN}Building and testing stack ${BLUE}${stack_name}${NC}"
+  #echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
 
   pushd "${scriptDir}" > /dev/null
 
@@ -211,21 +206,25 @@ do_versioned_stack_build() {
 
   pushd "${buildDir}" > /dev/null
 
-  local -r fileName="$(ls -1 ./*.tar.gz)"
+  #local -r fileName="$(ls -1 ./*.tar.gz)"
 
-  # Now create an MD5 hash of the stack file
-  local md5File="${fileName}.md5"
-  echo -e "Creating MD5 hash file ${GREEN}${md5File}${NC}"
-  md5sum "${fileName}" > "${md5File}"
+  ## Now create an MD5 hash of the stack file
+  #local md5File="${fileName}.md5"
+  #echo -e "Creating MD5 hash file ${GREEN}${md5File}${NC}"
+  #md5sum "${fileName}" > "${md5File}"
 
-  # Now spin up the stack to make sure it all works
-  test_stack_archive "${fileName}"
+  for archive_filename in *.tar.gz; do
+    # Now spin up the stack to make sure it all works
+    test_stack_archive "${archive_filename}"
+  done
 
   popd > /dev/null
   popd > /dev/null
 }
 
 test_stack() {
+  echo -e "Testing stack"
+
   # Bit nasty but there should only be one match in there in both cases
   pushd ./stroom_*/stroom_* > /dev/null
 
@@ -272,7 +271,7 @@ test_stack() {
   assert_all_containers_count 0
 
   # Clear out all docker images/volumes/containers
-  echo -e "${GREEN}Clearing out docker images/containers/volumes${NC}"
+  echo -e "${GREEN}Clearing out all docker images/containers/volumes${NC}"
   "${TRAVIS_BUILD_DIR}"/bin/clean.sh
 
   popd > /dev/null
@@ -280,6 +279,8 @@ test_stack() {
 
 test_stack_archive() {
   local -r stack_archive_file=$1
+  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
+  echo -e "Testing stack archive ${stack_archive_file}"
 
   if [ ! -f "${stack_archive_file}" ]; then
     echo -e "${RED}Can't find file ${BLUE}${stack_archive_file}${NC}"
@@ -288,15 +289,19 @@ test_stack_archive() {
 
   # Although the stack was already exploded when it was built, we want to
   # make sure the tar.gz has everything in it.
-  mkdir exploded_stack
-  pushd exploded_stack > /dev/null
+  mkdir _exploded
+  local exploded_dir
+  exploded_dir="$(mktemp -d --tmpdir=_exploded)"
+  echo -e "Using temp dir ${exploded_dir}"
+  pushd "${exploded_dir}" > /dev/null
 
   echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
-  tar -xvf "../${stack_archive_file}"
+  tar -xvf "../../${stack_archive_file}"
 
   test_stack
 
   popd > /dev/null
+  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
 }
 
 substitute_tag() {
