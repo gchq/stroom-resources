@@ -10,7 +10,6 @@ main() {
     local -r SERVICES=( \
         "nginx" \
         "stroom"  \
-        "stroomUi"  \
         "stroomAllDbs"  \
         "stroomAuthService"  \
         "stroomAuthUi"  \
