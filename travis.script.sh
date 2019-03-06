@@ -191,7 +191,8 @@ do_versioned_stack_build() {
 
   echo -e "Running ${GREEN}${scriptName}${NC} in ${GREEN}${scriptDir}${NC}"
 
-  ./"${scriptName}" "${BUILD_VERSION}"
+  # strip the "stroom-stacks-" part of the tag if it is there
+  ./"${scriptName}" "${BUILD_VERSION//stroom-stacks-/}"
 
   pushd "${buildDir}" > /dev/null
 
