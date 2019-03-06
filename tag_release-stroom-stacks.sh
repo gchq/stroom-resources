@@ -28,15 +28,15 @@ error_exit() {
 
 main() {
     local version="$1"
-    # extract "stroom_core_test" from "stroom_core_test-v1.0.3"
-    local STACK_NAME="${version%%-*}"
+    # extract "v1.0.3" from "stroom_core_test-v1.0.3"
+    local VERSION_PART="${version//stroom-stacks-/}"
 
     readonly STROOM_IMAGE_PREFIX='gchq/stroom'
     # Git tags should match this regex to be a release tag
-    readonly RELEASE_VERSION_REGEX="^stroom_(core|core_test|full|services|dbs)-v[0-9]+\.[0-9]+.*$"
+    readonly RELEASE_VERSION_REGEX="^stroom-stacks-v[0-9]+\.[0-9]+.*$"
     readonly STACK_DIR="./bin/stack"
     readonly STACK_BUILD_DIR="${STACK_DIR}/build"
-    readonly STACK_BUILD_SCRIPT="./build_${STACK_NAME}.sh"
+    readonly STACK_BUILD_SCRIPT="./build_ALL.sh"
     readonly VERSIONS_FILE="${STACK_BUILD_DIR}/${STACK_NAME}/${STACK_NAME}-SNAPSHOT/VERSIONS.txt"
 
     setup_echo_colours
@@ -83,7 +83,7 @@ main() {
 
     pushd "${STACK_DIR}" > /dev/null
 
-    "${STACK_BUILD_SCRIPT}"
+    "${STACK_BUILD_SCRIPT}" "${VERSION_PART}"
 
     echo
     echo -e "${BLUE}--------------------------------------------------------------------------------${NC}"
