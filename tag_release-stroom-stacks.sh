@@ -53,22 +53,22 @@ main() {
 
 
   if [[ ! "${version}" =~ ${RELEASE_VERSION_REGEX} ]]; then
-    error_exit "Version [${BLUE}${version}${GREEN}] does not match the " \
+    error_exit "Version [${BLUE}${version}${GREEN}] does not match the" \
       "release version regex ${BLUE}${RELEASE_VERSION_REGEX}${NC}"
   fi
 
   if ! git rev-parse --show-toplevel > /dev/null 2>&1; then
-    error_exit "You are not in a git repository. This script should be run " \
+    error_exit "You are not in a git repository. This script should be run" \
       "from the root of a repository.${NC}"
   fi
 
   if git tag | grep -q "^${version}$"; then
-    error_exit "This repository has already been tagged with " \
+    error_exit "This repository has already been tagged with" \
       "[${BLUE}${version}${GREEN}].${NC}"
   fi
 
   if [ "$(git status --porcelain 2>/dev/null | wc -l)" -ne 0 ]; then
-    error_exit "There are uncommitted changes or untracked files. Commit them " \
+    error_exit "There are uncommitted changes or untracked files. Commit them" \
       "before tagging.${NC}"
   fi
 
@@ -77,7 +77,7 @@ main() {
   fi
 
   if [ -d "${STACK_BUILD_DIR}" ]; then
-    error_exit "The stack build directory " \
+    error_exit "The stack build directory" \
       "${BLUE}${STACK_BUILD_DIR}${NC} already exists. Please delete it.${NC}"
   fi
 
@@ -131,20 +131,20 @@ main() {
       local stroom_image_version="${stroom_image_tag#*:}"
 
       if ! echo "${stroom_version}" | grep -q "${stroom_image_version}"; then
-        error_exit "Expecting the git tag [${BLUE}${version}${GREEN}] to include " \
+        error_exit "Expecting the git tag [${BLUE}${version}${GREEN}] to include" \
           "the stroom image version [${BLUE}${stroom_image_version}${GREEN}] in it.${NC}"
       fi
     fi
 
     commit_msg+="${stack_name}\n"
-    commit_msg+="==========================="
-    commit_msg+="$(<${versions_file})"
+    commit_msg+="===========================\n"
+    commit_msg+="$(<${versions_file})\n"
   done
 
   # Remove any repeated blank lines with cat -s
   commit_msg="$(echo -e "${commit_msg}" | cat -s)"
 
-  echo -e "${GREEN}You are about to create the git tag " \
+  echo -e "${GREEN}You are about to create the git tag" \
     "${BLUE}${version}${GREEN} with the following commit message.${NC}"
   echo -e "${DGREY}------------------------------------------------------------------------${NC}"
   echo -e "${YELLOW}${commit_msg}${NC}"
