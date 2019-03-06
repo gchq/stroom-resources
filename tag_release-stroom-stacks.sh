@@ -19,7 +19,7 @@ setup_echo_colours() {
 }
 
 error_exit() {
-  msg="$1"
+  msg="$*"
   echo -e "${RED}ERROR${GREEN}: ${msg}${NC}"
   echo
   exit 1
