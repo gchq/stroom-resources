@@ -109,6 +109,9 @@ main() {
   )"
 
   local commit_msg="${version}\n\n"
+  commit_msg+="The following stacks are in this release. Each stack lists the\n"
+  commit_msg+="docker image versions used.\n\n"
+
   for stack_name in ${stack_names}; do
     local versions_file="${STACK_BUILD_DIR}/${stack_name}/${stack_name}-${VERSION_PART}/VERSIONS.txt"
     if [ ! -f "${versions_file}" ]; then
