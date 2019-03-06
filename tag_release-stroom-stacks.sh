@@ -138,7 +138,7 @@ main() {
 
     commit_msg+="${stack_name}\n"
     commit_msg+="===========================\n"
-    commit_msg+="$(<${versions_file})\n"
+    commit_msg+="$(<${versions_file})\n\n"
   done
 
   # Remove any repeated blank lines with cat -s
