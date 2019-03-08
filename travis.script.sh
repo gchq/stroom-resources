@@ -311,7 +311,7 @@ create_get_stroom_script() {
   local -r stack_build_dir="${TRAVIS_BUILD_DIR}/bin/stack/build"
   local -r get_stroom_source_file="${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}"
   local -r get_stroom_dest_file="${script_build_dir}/${get_stroom_filename}"
-  local -r hash_file="${stack_build_dir}/${GET_STROOM_STACK_NAME}-${BUILD_VERSION}.sha256"
+  local -r hash_file="${stack_build_dir}/${GET_STROOM_STACK_NAME}-${BUILD_VERSION}.tar.gz.sha256"
 
   mkdir -p "${script_build_dir}"
 
