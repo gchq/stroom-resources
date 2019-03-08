@@ -3,6 +3,9 @@
 # Script to downlaod and extract a release of a stroom stack
 
 # This script is templated and will be substituted during the build process
+# To test the templated version you can do something like this:
+# bash <(cat ~/git_work/stroom-resources/bin/stack/lib/get_stroom.sh | sed 's/<STACK_NAME>/stroom_core_test/; s/<STACK_TAG>/stroom-stacks-v6.0-beta.28-9/; s/<STACK_VERSION>/v6.0-beta.28-9/; s/<HASH_FILE_CONTENTS>/fc593474e2ee6b9a7f507303fc38522c6a4d1abf62e2ddc7af0f20d15b6baeb0  stroom_core_test-v6.0-beta.28-9.tar.gz/' )
+# replacing the sed replacements
 
 # Exit the script on any error
 set -e
@@ -61,7 +64,7 @@ main() {
 
   local temp_dir
   temp_dir="$(mktemp -d)"
-  local archive_file="${temp_dir}/${archive_file}"
+  local archive_file="${temp_dir}/${archive_filename}"
 
   # Download the file to a temporary lo
   curl --silent --location --output "${archive_file}" "${url}" 
@@ -73,15 +76,17 @@ main() {
   fi
 
   # Verify the archive file against the checksum
-  if command -v shasum; then
+  if command -v shasum > /dev/null; then
     echo
-    echo -e "${GREEN}Verifying stack archive against file hash"
+    echo -e "${GREEN}Verifying stack archive against file hash${NC}"
+    pushd "${temp_dir}" > /dev/null
     if ! echo "${hash_file_contents}" | shasum -c -s; then
       echo -e "${RED}Error${GREEN}: Archive file ${BLUE}${archive_file}${NC}" \
         "failed the checksum test using checksum" \
         "${BLUE}${hash_file_contents}${NC}" >&2
       exit 1
     fi
+    popd > /dev/null
   else
     echo
     echo -e "${RED}Warning${GREEN}: Unable to verify the stack archive against" \
@@ -89,10 +94,10 @@ main() {
   fi
 
   echo
-  echo -e "${GREEN}Unpacking stack archive"
+  echo -e "${GREEN}Unpacking stack archive${NC}"
 
   # Extract the stack archive file
-  tar xz "${archive_file}"
+  tar -xf "${archive_file}"
 
   # Delete the downloaded file and temp dir
   rm "${archive_file}"
