@@ -42,7 +42,7 @@ deploy:
     file_glob: true # this needs to be turned on for wildcards to work
     file:
       - bin/stack/build/*.tar.gz
-      - bin/stack/build/*.tar.gz.md5
+      - bin/stack/build/*.tar.gz.sha256
       - build/get_stroom.sh
     skip_cleanup: true
     on:
