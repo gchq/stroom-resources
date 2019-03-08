@@ -98,7 +98,7 @@ release_to_docker_hub() {
   # echo "releaseToDockerHub called with args [$@]"
 
   if [ $# -lt 3 ]; then
-    echo "Incorrect args, expecting at least 3"
+    echo -e "Incorrect args, expecting at least 3"
     exit 1
   fi
   dockerRepo="$1"
@@ -308,14 +308,15 @@ substitute_tag() {
 create_get_stroom_script() {
   local -r get_stroom_filename="get_stroom.sh"
   local -r script_build_dir="${TRAVIS_BUILD_DIR}/build"
+  local -r stack_build_dir="${TRAVIS_BUILD_DIR}/bin/stack/build"
   local -r get_stroom_source_file="${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}"
   local -r get_stroom_dest_file="${script_build_dir}/${get_stroom_filename}"
-  local -r hash_file="${script_build_dir}/${GET_STROOM_STACK_NAME}-${BUILD_VERSION}.sha256"
+  local -r hash_file="${stack_build_dir}/${GET_STROOM_STACK_NAME}-${BUILD_VERSION}.sha256"
 
   mkdir -p "${script_build_dir}"
 
   if [ ! -f "${hash_file}" ]; then
-    echo "${RED}ERROR${NC}: Can't find hash file ${GREEN}${hash_file}${NC}"
+    echo -e "${RED}ERROR${NC}: Can't find hash file ${GREEN}${hash_file}${NC}"
     exit 1
   fi
 
