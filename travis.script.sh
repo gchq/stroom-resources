@@ -321,7 +321,7 @@ create_get_stroom_script() {
   fi
 
   # Get the content of the hashsum file
-  local -r hash_file_contents
+  local hash_file_contents
   hash_file_contents="$(<"${hash_file}")"
 
   echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a" \
