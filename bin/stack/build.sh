@@ -64,7 +64,7 @@ main() {
   local -r SERVICES=("${@:3}")
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
   local -r ARCHIVE_NAME="${BUILD_STACK_NAME}-${VERSION}.tar.gz"
-  local -r HASH_FILE_NAME="${ARCHIVE_NAME}.md5"
+  local -r HASH_FILE_NAME="${ARCHIVE_NAME}.sha256"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}"
   local -r SERVICES_FILE="${WORKING_DIRECTORY}/SERVICES.txt"
 
@@ -93,7 +93,7 @@ main() {
   tar -zcf "${ARCHIVE_NAME}" "./${BUILD_STACK_NAME}"
 
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${HASH_FILE_NAME}${NC}"
-  md5sum "${ARCHIVE_NAME}" > "${HASH_FILE_NAME}"
+  shasum -a 256 "${ARCHIVE_NAME}" > "${HASH_FILE_NAME}"
 
   popd > /dev/null
 }

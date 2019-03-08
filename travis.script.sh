@@ -65,7 +65,8 @@ assert_all_containers_count() {
   local expected_count="$1"
   local actual_count
   actual_count="$(docker ps -a --format '{{.ID}}' | wc -l)"
-  echo -e "Comparing actual container count [${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
+  echo -e "Comparing actual container count [${GREEN}${actual_count}${NC}] to" \
+    "expected [${GREEN}${expected_count}${NC}]"
   if [ "${actual_count}" -ne "${expected_count}" ]; then
     echo -e "${RED}Error${GREEN}:" \
       "Expecting ${BLUE}${expected_count}${GREEN} docker containers," \
@@ -80,7 +81,8 @@ assert_running_containers_count() {
   local expected_count="$1"
   local actual_count
   actual_count="$(docker ps --format '{{.ID}}' | wc -l)"
-  echo -e "Comparing actual running container count [${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
+  echo -e "Comparing actual running container count" \
+    "[${GREEN}${actual_count}${NC}] to expected [${GREEN}${expected_count}${NC}]"
   if [ "${actual_count}" -ne "${expected_count}" ]; then
     echo -e "${RED}Error${GREEN}:" \
       "Expecting ${BLUE}${expected_count}${GREEN} running docker containers," \
@@ -180,10 +182,6 @@ do_versioned_stack_build() {
   local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
   local -r buildDir=${scriptDir}/build/
 
-  #echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-  #echo -e "${GREEN}Building and testing stack ${BLUE}${stack_name}${NC}"
-  #echo -e "${GREEN}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-
   pushd "${scriptDir}" > /dev/null
 
   # Ensure there is no buildDir from a previous build
@@ -195,13 +193,6 @@ do_versioned_stack_build() {
   ./"${scriptName}" "${BUILD_VERSION//stroom-stacks-/}"
 
   pushd "${buildDir}" > /dev/null
-
-  #local -r fileName="$(ls -1 ./*.tar.gz)"
-
-  ## Now create an MD5 hash of the stack file
-  #local md5File="${fileName}.md5"
-  #echo -e "Creating MD5 hash file ${GREEN}${md5File}${NC}"
-  #md5sum "${fileName}" > "${md5File}"
 
   echo -e "Dumping build artifacts in ${GREEN}${buildDir}${NC}"
   ls -1 "${buildDir}"
@@ -309,27 +300,41 @@ substitute_tag() {
   local -r tag="$1"
   local -r replacement="$2"
   local -r file="$3"
-  echo -e "${GREEN}Substituting tag ${tag} with value ${BLUE}${replacement}${GREEN} in ${BLUE}${file}${NC}"
+  echo -e "${GREEN}Substituting tag ${tag} with value" \
+    "${BLUE}${replacement}${GREEN} in ${BLUE}${file}${NC}"
   sed -i "s/${tag}/${replacement}/" "${get_stroom_dest_file}"
 }
 
 create_get_stroom_script() {
-  local -r get_stroom_filename=get_stroom.sh
-  local -r script_build_dir=${TRAVIS_BUILD_DIR}/build
-  local -r get_stroom_source_file=${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}
-  local -r get_stroom_dest_file=${script_build_dir}/${get_stroom_filename}
+  local -r get_stroom_filename="get_stroom.sh"
+  local -r script_build_dir="${TRAVIS_BUILD_DIR}/build"
+  local -r get_stroom_source_file="${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}"
+  local -r get_stroom_dest_file="${script_build_dir}/${get_stroom_filename}"
+  local -r hash_file="${script_build_dir}/${GET_STROOM_STACK_NAME}-${BUILD_VERSION}.sha256"
 
   mkdir -p "${script_build_dir}"
 
-  echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a copy of ${BLUE}${get_stroom_source_file}${NC}"
+  if [ ! -f "${hash_file}" ]; then
+    echo "${RED}ERROR${NC}: Can't find hash file ${GREEN}${hash_file}${NC}"
+    exit 1
+  fi
+
+  # Get the content of the hashsum file
+  local -r hash_file_contents
+  hash_file_contents="$(<"${hash_file}")"
+
+  echo -e "${GREEN}Creating file ${BLUE}${get_stroom_dest_file}${GREEN} as a" \
+    "copy of ${BLUE}${get_stroom_source_file}${NC}"
   cp "${get_stroom_source_file}" "${get_stroom_dest_file}"
 
   substitute_tag "<STACK_NAME>" "${GET_STROOM_STACK_NAME}" "${get_stroom_dest_file}"
   substitute_tag "<STACK_TAG>" "${TRAVIS_TAG}" "${get_stroom_dest_file}"
   substitute_tag "<STACK_VERSION>" "${BUILD_VERSION}" "${get_stroom_dest_file}"
+  substitute_tag "<HASH_FILE_CONTENTS>" "${hash_file_contents}" "${get_stroom_dest_file}"
 
   # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
-  echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to ${BLUE}${GH_PAGES_DIR}/${NC}"
+  echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
+    "${BLUE}${GH_PAGES_DIR}/${NC}"
   mkdir -p "${GH_PAGES_DIR}"
   cp "${get_stroom_dest_file}" "${GH_PAGES_DIR}"/
 }
@@ -368,7 +373,8 @@ do_release() {
 
     if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
       # This is a stroom-nginx release, so do a docker build/push
-      echo -e "${GREEN}Performing a ${BLUE}stroom-nginx${GREEN} release to dockerhub${NC}"
+      echo -e "${GREEN}Performing a ${BLUE}stroom-nginx${GREEN} release" \
+        "to dockerhub${NC}"
 
       derive_docker_tags
 
@@ -381,7 +387,8 @@ do_release() {
 
     elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_LOG_SENDER} ]]; then
       # This is a stroom-log-sender release, so do a docker build/push
-      echo -e "${GREEN}Performing a ${BLUE}stroom-log-sender${GREEN} release to dockerhub${NC}"
+      echo -e "${GREEN}Performing a ${BLUE}stroom-log-sender${GREEN} release" \
+        "to dockerhub${NC}"
 
       derive_docker_tags
 
@@ -393,7 +400,8 @@ do_release() {
 
     elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
       # This is a stroom-zookeeper release, so do a docker build/push
-      echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release to dockerhub${NC}"
+      echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release" \
+        "to dockerhub${NC}"
 
       derive_docker_tags
 
@@ -404,13 +412,16 @@ do_release() {
         "${allDockerTags[@]}"
 
     elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STACKS} ]]; then
-      echo -e "${GREEN}Performing a ${BLUE}${tag_prefix}${GREEN} stack release to github${NC}"
+      echo -e "${GREEN}Performing a ${BLUE}${tag_prefix}${GREEN} stack" \
+        "release to github${NC}"
 
-      echo -e "${GREEN}Releasing a new get_stroom.sh script to GitHub pages for stack ${tag_prefix}${NC}"
+      echo -e "${GREEN}Releasing a new get_stroom.sh script to GitHub pages" \
+        "for stack ${tag_prefix}${NC}"
       create_get_stroom_script
     fi
   else
-    echo -e "${GREEN}Not a tagged commit (or a tag we recognise), nothing to release.${NC}"
+    echo -e "${GREEN}Not a tagged commit (or a tag we recognise), nothing to" \
+      "release.${NC}"
   fi
 }
 
