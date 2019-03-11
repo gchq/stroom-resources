@@ -7,5 +7,7 @@
 # whitelist
 # NOTE: Env vars listed here cannot also be in the overrides.env file
 
-
+STROOM_AUTH_DB_PASSWORD
+STROOM_DB_PASSWORD
 STROOM_DB_ROOT_PASSWORD
+STROOM_STATS_DB_PASSWORD
