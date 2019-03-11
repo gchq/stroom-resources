@@ -7,6 +7,7 @@
 # whitelist
 # NOTE: Env vars listed here cannot also be in the overrides.env file
 
+MYSQL_DOCKER_REPO
 STROOM_AUTH_DB_PASSWORD
 STROOM_DB_PASSWORD
 STROOM_DB_ROOT_PASSWORD
