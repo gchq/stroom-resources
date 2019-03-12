@@ -43,6 +43,7 @@ main() {
   fi
 
   create_script show_config
+  create_script pull_images
 
   # Only dropwiz apps need the health script
   if element_in "stroom" "${SERVICES[@]}" \
