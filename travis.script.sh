@@ -201,7 +201,7 @@ do_versioned_stack_build() {
     # Now spin up the stack to make sure it all works
     # TODO we can't test stroom_services as it won't run without a database
     # TODO we can't test stroom_full as it will blow travis' memory
-    if [[ ! "${archive_filename}" =~ ^stroom_(services|full)- ]]; then
+    if [[ ! "${archive_filename}" =~ ^stroom_(services|full|full_test)- ]]; then
       test_stack_archive "${archive_filename}"
     else
       echo -e "Skipping tests for ${GREEN}${archive_filename}${NC}"
