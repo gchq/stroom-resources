@@ -27,7 +27,7 @@ error_exit() {
 
 main() {
   local version="$1"
-  # extract "v1.0.3" from "stroom_core_test-v1.0.3"
+  # extract "v1.0.3" from "stroom_stacks-v1.0.3"
   local VERSION_PART="${version//stroom-stacks-/}"
 
   readonly STROOM_IMAGE_PREFIX='gchq/stroom'
@@ -44,7 +44,7 @@ main() {
   if [ $# -ne 1 ]; then
     echo -e "${RED}ERROR${GREEN}: Missing version argument${NC}"
     echo -e "${GREEN}Usage: ${BLUE}./tag_release.sh version${NC}"
-    echo -e "${GREEN}e.g:   ${BLUE}./tag_release.sh stroom_core-v6.0-beta.20${NC}"
+    echo -e "${GREEN}e.g:   ${BLUE}./tag_release.sh stroom-stacks-v6.0-beta.20${NC}"
     echo
     echo -e "${GREEN}This script will build a local stack and create an annotated git commit using the${NC}"
     echo -e "${GREEN}VERSIONS.txt file content. The tag commit will be pushed to the origin.${NC}"
@@ -141,7 +141,7 @@ main() {
 
     commit_msg+="${stack_name}\n"
     commit_msg+="===========================\n"
-    commit_msg+="$(<${versions_file})\n\n"
+    commit_msg+="$(<"${versions_file}")\n\n"
   done
 
   # Remove any repeated blank lines with cat -s
