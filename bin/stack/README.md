@@ -28,6 +28,7 @@ There are a number of forms of the stack to cater for different deployments
 * _stroom_core_ - This contains the bare minimum to run stroom. It is intended for running stroom in small scale non-clustered deployments.
 * _stroom_core_test_ - This stack is similar to _stroom_core_ but includes pre-loaded content. It is intended for testing or evaluation purposes.
 * _stroom_full_ - This stack contains stroom and all essenntial and non-essential services.
+* _stroom_full_test_ - Same as _stroom_ful_ with the addition of pre-loaded content.
 * _stroom_dbs_ - This stack contains just a MySQL database.
 
 The required stack can be created locally using the appropriate build script.
@@ -92,14 +93,17 @@ Then the resulting stack `.yml` file becomes:
 ```
 
 
-## Releasing a stack to GitHub
+## Releasing the stacks to GitHub
 
-To create a new release of the stack do the following:
+All stack variants are released together under one release tag.
+Each variant becomes a separate release artifact.
+
+To create a new release of the stacks do the following:
 
 1. Edit the file `./container_versions.env` and set the required versions for each image.
 1. Commit the version changes and push.
-1. Create an annotated git tag along the lines of:
-    1. `git tag -a stroom_core-v6.0-beta.3` # it is crtical the tag begins `stroom_core` or `stroom_full`.
-    1. `git push origin stroom_core-v6.0-beta.3`
+1. Run the following script passing in the desired git tag name. The tag name should reflect the version of stroom that the stack uses. If you are releasing a new version of the stack with the same stroom version as a previous stack release then suffix the tag name with a sequential number, e.g. `-2`.
+    1. `tag_release-stroom-stacks.sh stroom-stacks-XXX` (where `XXX` is the version of stroom), e.g. `stroom-stacks-v6.0-beta.30`
+1. Teh script will create a git tag and push it to origin.
 1. Travis will now build the stack and release it to GitHub at [github.com/gchq/stroom-resources/releases](https://github.com/gchq/stroom-resources/releases).
 
