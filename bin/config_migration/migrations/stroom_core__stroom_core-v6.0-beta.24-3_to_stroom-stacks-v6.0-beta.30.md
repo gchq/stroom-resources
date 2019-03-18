@@ -1,4 +1,4 @@
-# Differences between stroom_core-v6.0-beta.24-3 and stroom-stacks-v6.0-beta.30
+# Differences between `stroom_core-v6.0-beta.24-3` and `stroom-stacks-v6.0-beta.30`
 
 ## Added
 
@@ -184,7 +184,7 @@ STROOM_AUTH_UI_URL has changed from "$HOST_IP:5000" to "$HOST_IP:9443"
 STROOM_JAVA_OPTS has changed from " -Xms50m -Xmx1024m " to " -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10765,suspend=n"
 ```
 
-## Variables that occur more than once within the stroom_core-v6.0-beta.24-3 env file
+## Variables that occur more than once within the `stroom_core-v6.0-beta.24-3` env file
 
 ``` bash
 STROOM_ANNOTATIONS_UI_URL is defined twice, as "http://$HOST_IP:5001" and as "http://$HOST_IP/annotations"
@@ -201,7 +201,7 @@ STROOM_PROXY_REMOTE_UPSTREAM_RULE_URL is defined twice, as "https://nginx/rulese
 STROOM_QUERY_ELASTIC_UI_URL is defined twice, as "http://$HOST_IP:5002" and as "http://$HOST_IP/query-elastic"
 ```
 
-## Variables that occur more than once within the stroom-stacks-v6.0-beta.30 env file
+## Variables that occur more than once within the `stroom-stacks-v6.0-beta.30` env file
 
 ``` bash
 ```

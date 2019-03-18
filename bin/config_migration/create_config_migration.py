@@ -138,7 +138,7 @@ def create_output_file(
     removed_vars = comparisons[1]
     changed_vars = comparisons[2]
     output = open(output_file_path, 'w')
-    output.write("# Differences between {0} and {1}\n\n"
+    output.write("# Differences between `{0}` and `{1}`\n\n"
                  .format(from_release, to_release))
 
     output.write("## Added\n\n")
@@ -168,7 +168,7 @@ def add_repetitions_to_output_file(
                output_file_path, release_name, repeated_vars):
     output = open(output_file_path, 'a')
     output.write(
-         "\n## Variables that occur more than once within the {0} env file\n\n"
+         "\n## Variables that occur more than once within the `{0}` env file\n\n"
          .format(release_name))
     output.write("``` bash\n")
     for repeated_var in repeated_vars:
