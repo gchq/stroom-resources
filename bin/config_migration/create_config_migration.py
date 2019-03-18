@@ -142,18 +142,24 @@ def create_output_file(
                  .format(from_release, to_release))
 
     output.write("## Added\n\n")
+    output.write("``` bash\n")
     for added_var in sorted(added_vars):
         output.write("{0}={1}\n".format(added_var, added_vars[added_var]))
+    output.write("```\n")
 
     output.write("\n## Removed\n\n")
+    output.write("``` bash\n")
     for removed_var in sorted(removed_vars):
         output.write("{0}={1}\n"
                      .format(removed_var, removed_vars[removed_var]))
+    output.write("```\n")
 
     output.write("\n## Changed default values\n\n")
+    output.write("``` bash\n")
     for changed_var in changed_vars:
         output.write("{0} has changed from \"{1}\" to \"{2}\"\n"
                      .format(changed_var[0], changed_var[1], changed_var[2]))
+    output.write("```\n")
 
     output.close()
 
@@ -164,10 +170,12 @@ def add_repetitions_to_output_file(
     output.write(
          "\n## Variables that occur more than once within the {0} env file\n\n"
          .format(release_name))
+    output.write("``` bash\n")
     for repeated_var in repeated_vars:
         output.write(
                 "{0} is defined twice, as \"{1}\" and as \"{2}\"\n"
                 .format(repeated_var[0], repeated_var[1], repeated_var[2]))
+    output.write("```\n")
     output.close()
 
 

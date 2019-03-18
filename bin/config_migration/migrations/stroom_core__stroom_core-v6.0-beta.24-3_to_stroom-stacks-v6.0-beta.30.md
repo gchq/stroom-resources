@@ -2,9 +2,12 @@
 
 ## Added
 
+``` bash
+```
 
 ## Removed
 
+``` bash
 ADMIN_CONTEXT_PATH=/stroomAdmin
 ELASTIC_BINARY_PORT=9300
 ELASTIC_HOST=elastic
@@ -168,18 +171,22 @@ STROOM_STROOM_PROXY_DIR=/stroom/proxy-repo
 STROOM_TAG=v6.0-beta.24
 STROOM_UI_PATH=/stroom/ui?prompt=login
 ZOOKEEPER_QUORUM=zookeeper:2181
+```
 
 ## Changed default values
 
+``` bash
 STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL has changed from "https://nginx/dictionaryService/v1" to "http://stroom:8080/api/dictionary/v1"
 STROOM_AUTH_SERVICE_JAVA_OPTS has changed from " -Xms50m -Xmx1024m " to " -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10769,suspend=n"
 STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL has changed from "https://nginx/rulesetService/v1" to "http://stroom:8080/api/ruleset/v1"
 STROOM_AUTH_STROOM_UI has changed from "http://$HOST_IP:8099 " to "http://$HOST_IP:8099"
 STROOM_AUTH_UI_URL has changed from "$HOST_IP:5000" to "$HOST_IP:9443"
 STROOM_JAVA_OPTS has changed from " -Xms50m -Xmx1024m " to " -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10765,suspend=n"
+```
 
 ## Variables that occur more than once within the stroom_core-v6.0-beta.24-3 env file
 
+``` bash
 STROOM_ANNOTATIONS_UI_URL is defined twice, as "http://$HOST_IP:5001" and as "http://$HOST_IP/annotations"
 STROOM_AUTH_UI_ACTIVE_SCHEME is defined twice, as "http" and as "https"
 STROOM_AUTH_UI_URL is defined twice, as "$HOST_IP:5000" and as "$HOST_IP:9443"
@@ -192,6 +199,9 @@ STROOM_PROXY_REMOTE_SYNC_API_KEY is defined twice, as "" and as "http://stroom:8
 STROOM_PROXY_REMOTE_UPSTREAM_DICTIONARY_URL is defined twice, as "https://nginx/dictionaryService/v1" and as "http://stroom-proxy-local:8090/api/dictionary/v1"
 STROOM_PROXY_REMOTE_UPSTREAM_RULE_URL is defined twice, as "https://nginx/rulesetService/v1" and as "http://stroom-proxy-local:8090/api/ruleset/v1"
 STROOM_QUERY_ELASTIC_UI_URL is defined twice, as "http://$HOST_IP:5002" and as "http://$HOST_IP/query-elastic"
+```
 
 ## Variables that occur more than once within the stroom-stacks-v6.0-beta.30 env file
 
+``` bash
+```
