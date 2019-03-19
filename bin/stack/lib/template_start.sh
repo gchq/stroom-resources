@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-cmd_help_msg="Starts the specified services or the whole stack if no service name is supplied."
+CMD_HELP_MSG="Starts the specified services or the whole stack if no service name is supplied."
+Q_OPTION_TEXT="  -q   Quiet start. Don't wait for health checks and don't display info."
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
@@ -27,35 +28,42 @@ source "$DIR"/config/<STACK_NAME>.env
 STACK_NAME="<STACK_NAME>" 
 
 check_installed_binaries() {
-  # The version numbers mentioned here are mostly governed by the docker compose syntax version that 
-  # we use in the yml files, currently 2.4, see https://docs.docker.com/compose/compose-file/compose-versioning/
+  # The version numbers mentioned here are mostly governed by the docker
+  # compose syntax version that we use in the yml files, currently 2.4, see
+  # https://docs.docker.com/compose/compose-file/compose-versioning/
 
   if ! command -v docker 1>/dev/null; then 
     echo -e "${RED}ERROR${NC}: Docker CE is not installed!"
-    echo -e "See ${BLUE}https://docs.docker.com/install/#supported-platforms${NC} for details on how to install it"
+    echo -e "See ${BLUE}https://docs.docker.com/install/#supported-platforms${NC}" \
+      "for details on how to install it"
     echo -e "Version ${BLUE}17.12.0${NC} or higher is required"
     exit 1
   fi
 
   if ! command -v docker-compose 1>/dev/null; then 
     echo -e "${RED}ERROR${NC}: Docker Compose is not installed!"
-    echo -e "See ${BLUE}https://docs.docker.com/compose/install/${NC} for details on how to install it"
+    echo -e "See ${BLUE}https://docs.docker.com/compose/install/${NC} for" \
+      "details on how to install it"
     echo -e "Version ${BLUE}1.23.1${NC} or higher is required"
     exit 1
   fi
 }
 
 main() {
+  local wait_for_health_checks=true
   # leading colon means silent error reporting by getopts
-  while getopts ":hm" arg; do
+  while getopts ":hmq" arg; do
     case $arg in
       h )  
-        show_default_services_usage "${cmd_help_msg}"
+        show_default_services_usage "${CMD_HELP_MSG}" "${Q_OPTION_TEXT}"
         exit 0
         ;;
       m )  
         # shellcheck disable=SC2034
         MONOCHROME=true 
+        ;;
+      q )  
+        wait_for_health_checks=false
         ;;
     esac
   done
@@ -63,7 +71,8 @@ main() {
 
   for requested_service in "${@}"; do
     if ! is_service_in_stack "${requested_service}"; then
-      die "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not in the stack."
+      die "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not" \
+        "in the stack."
     fi
   done
 
@@ -73,13 +82,15 @@ main() {
 
   start_stack "$@"
 
-  wait_for_service_to_start
+  if [ "${wait_for_health_checks}" = true ]; then
+    wait_for_service_to_start
 
-  # Stroom is now up or we have given up waiting so check the health
-  check_overall_health
+    # Stroom is now up or we have given up waiting so check the health
+    check_overall_health
 
-  # Display the banner, URLs and login details
-  display_stack_info
+    # Display the banner, URLs and login details
+    display_stack_info
+  fi
 }
 
 main "$@"

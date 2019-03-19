@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-cmd_help_msg="Stops the specified service(s) or the whole stack if no service names are supplied."
+CMD_HELP_MSG="Stops the specified service(s) or the whole stack if no service names are supplied."
+F_OPTION_TEXT="  -f   Fast stop. Stop all containers at the same time. Not a graceful shutdown."
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
@@ -17,26 +18,27 @@ setup_echo_colours
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>"
 
+validate_services
+
 do_stop() {
   if [ "$#" -gt 0 ]; then
-    for service_name in "$@"; do
-      if ! is_service_in_stack "${service_name}"; then
-        die "${RED}Error${NC}:" \
-          "${BLUE}${service_name}${NC} is not part of this stack"
-      fi
-    done
+    validate_services "$@"
     stop_services_if_in_stack "$@"
   else
-    stop_stack
+    stop_stack_gracefully
   fi
 }
 
 main() {
+  local is_fast_stop=false
   # leading colon means silent error reporting by getopts
-  while getopts ":hm" arg; do
+  while getopts ":hmf" arg; do
     case $arg in
+      f )  
+        is_fast_stop=true
+        ;;
       h )  
-        show_default_services_usage "${cmd_help_msg}"
+        show_default_services_usage "${CMD_HELP_MSG}" "${F_OPTION_TEXT}"
         exit 0
         ;;
       m )  
@@ -49,7 +51,12 @@ main() {
 
   setup_echo_colours
 
-  do_stop "$@"
+  if [ "${is_fast_stop}" = true ]; then
+    validate_services "$@"
+    stop_stack_quickly "$@"
+  else
+    do_stop "$@"
+  fi
 
   echo
   echo -e "${GREEN}Done${NC}"
