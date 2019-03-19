@@ -46,6 +46,7 @@ main() {
   local -r SRC_ELASTIC_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/elasticsearch/conf"
   local -r SRC_KIBANA_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/kibana/conf"
   local -r SRC_STROOM_LOG_SENDER_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-log-sender/conf"
+  local -r SRC_STROOM_ALL_DBS_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-all-dbs/conf"
   local -r SRC_AUTH_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
   local -r SEND_TO_STROOM_VERSION="send-to-stroom-v2.0"
   local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
@@ -130,6 +131,12 @@ main() {
     copy_file "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt" "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
     copy_file "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env" "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
   fi
+
+  if element_in "stroom-all-dbs" "${services[@]}"; then
+    local -r DEST_STROOM_ALL_DBS_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-all-dbs/conf"
+    copy_file "${SRC_STROOM_ALL_DBS_CONF_DIRECTORY}/stroom-all-dbs.cnf" "${DEST_STROOM_ALL_DBS_CONF_DIRECTORY}"
+  fi
+
 
   # If kibana is in the list of services add its volume
   if element_in "kibana" "${services[@]}"; then
