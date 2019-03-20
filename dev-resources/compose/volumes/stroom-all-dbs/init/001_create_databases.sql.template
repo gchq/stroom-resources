@@ -35,4 +35,10 @@ CREATE DATABASE IF NOT EXISTS stroom;
 CREATE USER "<<<STROOM_DB_USERNAME>>>"@"%" IDENTIFIED BY "<<<STROOM_DB_PASSWORD>>>";
 GRANT ALL ON stroom.* TO "<<<STROOM_DB_USERNAME>>>"@"%";
 
+SELECT 'Dumping list of databases' AS '';
+SELECT '---------------------------------------' AS '';
+show databases;
 
+SELECT 'Dumping list of users' AS '';
+SELECT '---------------------------------------' AS '';
+SELECT User AS '' FROM mysql.user;
