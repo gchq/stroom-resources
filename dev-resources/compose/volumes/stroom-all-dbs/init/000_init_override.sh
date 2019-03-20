@@ -49,9 +49,9 @@ process_template_file() {
   done <<< "${all_substitution_variables}"
 
   echo "Completed substitutions. Dumping contents of ${output_file}"
-  echo "-----------------------------------------------------------"
+  echo "====================================================================="
   cat "${output_file}"
-  echo "-----------------------------------------------------------"
+  echo "====================================================================="
 
   # Now we have substituted the values call process_init_file again
   echo "Calling process_init_file on ${output_file}"
