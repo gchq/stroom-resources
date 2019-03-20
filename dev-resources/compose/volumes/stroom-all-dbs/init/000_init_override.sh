@@ -85,7 +85,6 @@ process_template_file() {
 # /usr/local/bin/docker-entrypoint.sh (in the container)
 # to provide more functionality:
 #   - The additional handling of .template files
-#   - The passing of mysql[@] to the .sh file
 # files. It will be called for each file found in 
 # /docker-entrypoint-initdb.d/
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,8 +96,6 @@ process_template_file() {
 process_init_file() {
   local file="$1"; shift
   local mysql=( "$@" )
-
-  #echo "mysql: [${mysql[*]}]"
 
   case "${file}" in
     *.sh)       echo "$0: running ${file}"; . "${file}" ;;
