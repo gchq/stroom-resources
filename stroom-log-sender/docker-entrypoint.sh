@@ -1,29 +1,19 @@
 #!/bin/sh
 set -e
 
+# Re-set permission to the `sender` user if current user is root
+# This avoids permission denied if the data volume is mounted by root
 if [ "$(id -u)" = '0' ]; then
+  # dump the environment variables
+  echo "Dumping environment variables"
+  echo "----------------------------------------------------------"
+  env \
+    | uniq \
+    | sort
+  echo "----------------------------------------------------------"
 
-    crontab_file=/stroom-log-sender/config/crontab.txt
+  #chown sender:sender /stroom-log-sender/log-volumes
 
-    if [ -f "${crontab_file}" ]; then
-        echo "(Re-)setting crontab to:"
-        echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        cat "${crontab_file}"
-        echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        # If we assign the crontab to the 'sender' user (crontab -u ...) it won't work, 
-        # as sender dosn't have perms on /dev/stdout
-        # Instead, consider using supercronic - https://github.com/aptible/supercronic/ so that
-        # we can run as non-root
-        /usr/bin/crontab "${crontab_file}"
-
-        # start crond as root
-        echo "Starting crond in the foreground"
-        exec /usr/sbin/crond -f -l 8
-    else
-        echo "Error: crontab file ${crontab_file} not found"
-        echo "Quitting"
-        exit 1
-    fi
+  # run the COMMAND as user 'sender'
+  exec su-exec sender "$@"
 fi
-
-#echo "End of entrypoint"

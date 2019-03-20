@@ -198,9 +198,6 @@ main() {
     copy_file \
       "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt" \
       "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
-    copy_file \
-      "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env" \
-      "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
   fi
 
   if element_in "stroom-all-dbs" "${services[@]}"; then
