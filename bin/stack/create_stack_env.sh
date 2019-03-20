@@ -153,7 +153,7 @@ add_env_vars() {
   # STROOM_DB_PORT="3307"
   all_env_vars=$( \
     # Bit of a fudge to ignore the echo lines in stroom-all-dbs.yml
-    grep -v "\s* echo" "${INPUT_YAML_FILE}" |
+    grep -v "\s* echoXXXXX" "${INPUT_YAML_FILE}" |
       # ignore commented lines
       grep -v '^\s*#' |
       # Extracts the params

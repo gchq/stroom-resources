@@ -1,5 +1,23 @@
 #!/bin/bash
 
+############################################################################
+# 
+#  Copyright 2019 Crown Copyright
+# 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# 
+############################################################################
+
 setup_echo_colours
 
 # shellcheck disable=SC1090
@@ -128,6 +146,15 @@ is_service_in_stack() {
   else
     return 1;
   fi
+}
+
+validate_services() {
+  for service_name in "$@"; do
+    if ! is_service_in_stack "${service_name}"; then
+      die "${RED}Error${NC}:" \
+        "${BLUE}${service_name}${NC} is not part of this stack, use the -h argument to see the list of valid services"
+    fi
+  done
 }
 
 does_container_exist() {
@@ -341,8 +368,10 @@ check_overall_health() {
     local is_jq_installed=true
   else
     # jq is not available so do a simple health check
-    echo -e "\n${YELLOW}Warning${NC}: Doing simple health check as ${BLUE}jq${NC} is not installed."
-    echo -e "See ${BLUE}https://stedolan.github.io/jq/${NC} for details on how to install it."
+    echo -e "\n${YELLOW}Warning${NC}: Doing simple health check as" \
+      "${BLUE}jq${NC} is not installed."
+    echo -e "See ${BLUE}https://stedolan.github.io/jq/${NC} for details on" \
+      "how to install it."
     local is_jq_installed=false
   fi 
 
@@ -393,7 +422,8 @@ echo_info_line() {
   local -r padded_string=$2
   local -r unpadded_string=$3
   # Uses bash substitution to only print the part of padding beyond the length of padded_string
-  printf "  ${GREEN}%s${NC} %s${BLUE}${unpadded_string}${NC}\n" "${padded_string}" "${padding:${#padded_string}}"
+  printf "  ${GREEN}%s${NC} %s${BLUE}${unpadded_string}${NC}\n" \
+    "${padded_string}" "${padding:${#padded_string}}"
 }
 
 display_stack_info() {
@@ -433,23 +463,28 @@ display_stack_info() {
     local admin_port
     if is_service_in_stack "stroom"; then
       admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
-      echo_info_line "${padding}" "Stroom" "http://localhost:${admin_port}/stroomAdmin"
+      echo_info_line "${padding}" "Stroom" \
+        "http://localhost:${admin_port}/stroomAdmin"
     fi
     if is_service_in_stack "stroom-stats"; then
       admin_port="$(get_config_env_var "STROOM_STATS_SERVICE_ADMIN_PORT")"
-      echo_info_line "${padding}" "Stroom Stats" "http://localhost:${admin_port}/statsAdmin"
+      echo_info_line "${padding}" "Stroom Stats" \
+        "http://localhost:${admin_port}/statsAdmin"
     fi
     if is_service_in_stack "stroom-proxy-local"; then
       admin_port="$(get_config_env_var "STROOM_PROXY_LOCAL_ADMIN_PORT")"
-      echo_info_line "${padding}" "Stroom Proxy (local)" "http://localhost:${admin_port}/proxyAdmin"
+      echo_info_line "${padding}" "Stroom Proxy (local)" \
+        "http://localhost:${admin_port}/proxyAdmin"
     fi
     if is_service_in_stack "stroom-proxy-remote"; then
       admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_ADMIN_PORT")"
-      echo_info_line "${padding}" "Stroom Proxy (remote)" "http://localhost:${admin_port}/proxyAdmin"
+      echo_info_line "${padding}" "Stroom Proxy (remote)" \
+        "http://localhost:${admin_port}/proxyAdmin"
     fi
     if is_service_in_stack "stroom-auth-service"; then
       admin_port="$(get_config_env_var "STROOM_AUTH_SERVICE_ADMIN_PORT")"
-      echo_info_line "${padding}" "Stroom Auth" "http://localhost:${admin_port}/authenticationServiceAdmin"
+      echo_info_line "${padding}" "Stroom Auth" \
+        "http://localhost:${admin_port}/authenticationServiceAdmin"
     fi
   fi
 
@@ -461,10 +496,12 @@ display_stack_info() {
       echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeed"
     fi
     if is_service_in_stack "stroom-proxy-local"; then
-      echo_info_line "${padding}" "Stroom Proxy (local)" "https://localhost:${STROOM_PROXY_LOCAL_HTTPS_APP_PORT}/stroom/datafeed"
+      echo_info_line "${padding}" "Stroom Proxy (local)" \
+        "https://localhost:${STROOM_PROXY_LOCAL_HTTPS_APP_PORT}/stroom/datafeed"
     fi
     if is_service_in_stack "stroom-proxy-remote"; then
-      echo_info_line "${padding}" "Stroom Proxy (remote)" "https://localhost:${STROOM_PROXY_REMOTE_HTTPS_APP_PORT}/stroom/datafeed"
+      echo_info_line "${padding}" "Stroom Proxy (remote)" \
+        "https://localhost:${STROOM_PROXY_REMOTE_HTTPS_APP_PORT}/stroom/datafeed"
     fi
 
     if is_service_in_stack "stroom"; then
@@ -546,7 +583,17 @@ stop_service_if_in_stack() {
   fi
 }
 
-stop_stack() {
+stop_stack_quickly() {
+  echo -e "${GREEN}Stopping all the docker containers at once${NC}"
+  echo
+
+  docker-compose \
+    --project-name "${STACK_NAME}" \
+    -f "$DIR/config/${STACK_NAME}.yml" \
+    stop "$@"
+}
+
+stop_stack_gracefully() {
   echo -e "${GREEN}Stopping the docker containers in graceful order${NC}"
   echo
 
@@ -559,7 +606,6 @@ stop_stack() {
 
   # In case we have missed any stop the whole project
   echo -e "${GREEN}Stopping any remaining containers in the stack${NC}"
-  # shellcheck disable=SC2094
   docker-compose \
     --project-name "${STACK_NAME}" \
     -f "$DIR/config/${STACK_NAME}.yml" \
