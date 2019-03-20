@@ -13,49 +13,75 @@ services:
       - "3307:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${STROOM_DB_ROOT_PASSWORD:-my-secret-pw}
-    command: mysqld
-    entrypoint:
-      # The mysql entrypoint script will run any sql files found in /docker-entrypoint-initdb.d/
-      # As we want to use env vars to set db/user names and passwords we have to craft a file
-      # dynamically rather than having a static file in a volume.
-      sh -c "
-        {
-          echo 'CREATE DATABASE IF NOT EXISTS annotations;';
-          echo 'CREATE USER \"${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}\";';
-          echo 'GRANT ALL ON annotations.* TO \"${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}\"@\"%\";';
+        # Database users
+      - STROOM_ANNOTATIONS_DB_USERNAME=${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}
+      - STROOM_AUTH_DB_USERNAME=${STROOM_AUTH_DB_USERNAME:-authuser}
+      - STROOM_CONFIG_DB_USERNAME=${STROOM_CONFIG_DB_USERNAME:-configuser}
+      - STROOM_DATAMETA_DB_USERNAME=${STROOM_DATAMETA_DB_USERNAME:-datametauser}
+      - STROOM_EXPLORER_DB_USERNAME=${STROOM_EXPLORER_DB_USERNAME:-exploreruser}
+      - STROOM_PROCESS_DB_USERNAME=${STROOM_PROCESS_DB_USERNAME:-processuser}
+      - STROOM_STATS_DB_USERNAME=${STROOM_STATS_DB_USERNAME:-statsuser}
+      - STROOM_DB_USERNAME=${STROOM_DB_USERNAME:-stroomuser}
+        # Database passwords
+      - STROOM_ANNOTATIONS_DB_PASSWORD=${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}
+      - STROOM_AUTH_DB_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
+      - STROOM_CONFIG_DB_PASSWORD=${STROOM_CONFIG_DB_PASSWORD:-stroompassword1}
+      - STROOM_DATAMETA_DB_PASSWORD=${STROOM_DATAMETA_DB_PASSWORD:-stroompassword1}
+      - STROOM_EXPLORER_DB_PASSWORD=${STROOM_EXPLORER_DB_PASSWORD:-stroompassword1}
+      - STROOM_PROCESS_DB_PASSWORD=${STROOM_PROCESS_DB_PASSWORD:-stroompassword1}
+      - STROOM_STATS_DB_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
+      - STROOM_DB_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
+    #command: mysqld
+    #entrypoint:
+      #sh -c "
+        #echo 'my entrypoint';
+        #ls -l /docker-entrypoint-initdb.d/"
+    #entrypoint:
+      ## The mysql entrypoint script will run any sql files found in /docker-entrypoint-initdb.d/
+      ## As we want to use env vars to set db/user names and passwords we have to craft a file
+      ## dynamically rather than having a static file in a volume.
+      #sh -c "
+        #{
+          #echo 'CREATE DATABASE IF NOT EXISTS annotations;';
+          #echo 'CREATE USER \"${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}\";';
+          #echo 'GRANT ALL ON annotations.* TO \"${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}\"@\"%\";';
 
-          echo 'CREATE DATABASE IF NOT EXISTS auth;';
-          echo 'CREATE USER \"${STROOM_AUTH_DB_USERNAME:-authuser}\"@\"%\" IDENTIFIED BY \"${STROOM_AUTH_DB_PASSWORD:-stroompassword1}\";';
-          echo 'GRANT ALL ON auth.* TO \"${STROOM_AUTH_DB_USERNAME:-authuser}\"@\"%\";';
+          #echo 'CREATE DATABASE IF NOT EXISTS auth;';
+          #echo 'CREATE USER \"${STROOM_AUTH_DB_USERNAME:-authuser}\"@\"%\" IDENTIFIED BY \"${STROOM_AUTH_DB_PASSWORD:-stroompassword1}\";';
+          #echo 'GRANT ALL ON auth.* TO \"${STROOM_AUTH_DB_USERNAME:-authuser}\"@\"%\";';
 
-          echo 'CREATE DATABASE IF NOT EXISTS config;';
-          echo 'CREATE USER \"${STROOM_CONFIG_DB_USERNAME:-configuser}\"@\"%\" IDENTIFIED BY \"${STROOM_CONFIG_DB_PASSWORD:-stroompassword1}\";';
-          echo 'GRANT ALL ON config.* TO \"${STROOM_CONFIG_DB_USERNAME:-configuser}\"@\"%\";';
+          #echo 'CREATE DATABASE IF NOT EXISTS config;';
+          #echo 'CREATE USER \"${STROOM_CONFIG_DB_USERNAME:-configuser}\"@\"%\" IDENTIFIED BY \"${STROOM_CONFIG_DB_PASSWORD:-stroompassword1}\";';
+          #echo 'GRANT ALL ON config.* TO \"${STROOM_CONFIG_DB_USERNAME:-configuser}\"@\"%\";';
 
-          echo 'CREATE DATABASE IF NOT EXISTS datameta;';
-          echo 'CREATE USER \"${STROOM_DATAMETA_DB_USERNAME:-datametauser}\"@\"%\" IDENTIFIED BY \"${STROOM_DATAMETA_DB_PASSWORD:-stroompassword1}\";';
-          echo 'GRANT ALL ON datameta.* TO \"${STROOM_DATAMETA_DB_USERNAME:-datametauser}\"@\"%\";';
+          #echo 'CREATE DATABASE IF NOT EXISTS datameta;';
+          #echo 'CREATE USER \"${STROOM_DATAMETA_DB_USERNAME:-datametauser}\"@\"%\" IDENTIFIED BY \"${STROOM_DATAMETA_DB_PASSWORD:-stroompassword1}\";';
+          #echo 'GRANT ALL ON datameta.* TO \"${STROOM_DATAMETA_DB_USERNAME:-datametauser}\"@\"%\";';
 
-          echo 'CREATE DATABASE IF NOT EXISTS explorer;';
-          echo 'CREATE USER \"${STROOM_EXPLORER_DB_USERNAME:-exploreruser}\"@\"%\" IDENTIFIED BY \"${STROOM_EXPLORER_DB_PASSWORD:-stroompassword1}\";';
-          echo 'GRANT ALL ON explorer.* TO \"${STROOM_EXPLORER_DB_USERNAME:-exploreruser}\"@\"%\";';
+          #echo 'CREATE DATABASE IF NOT EXISTS explorer;';
+          #echo 'CREATE USER \"${STROOM_EXPLORER_DB_USERNAME:-exploreruser}\"@\"%\" IDENTIFIED BY \"${STROOM_EXPLORER_DB_PASSWORD:-stroompassword1}\";';
+          #echo 'GRANT ALL ON explorer.* TO \"${STROOM_EXPLORER_DB_USERNAME:-exploreruser}\"@\"%\";';
 
-          echo 'CREATE DATABASE IF NOT EXISTS process;';
-          echo 'CREATE USER \"${STROOM_PROCESS_DB_USERNAME:-processuser}\"@\"%\" IDENTIFIED BY \"${STROOM_PROCESS_DB_PASSWORD:-stroompassword1}\";';
-          echo 'GRANT ALL ON process.* TO \"${STROOM_PROCESS_DB_USERNAME:-processuser}\"@\"%\";';
+          #echo 'CREATE DATABASE IF NOT EXISTS process;';
+          #echo 'CREATE USER \"${STROOM_PROCESS_DB_USERNAME:-processuser}\"@\"%\" IDENTIFIED BY \"${STROOM_PROCESS_DB_PASSWORD:-stroompassword1}\";';
+          #echo 'GRANT ALL ON process.* TO \"${STROOM_PROCESS_DB_USERNAME:-processuser}\"@\"%\";';
 
-          echo 'CREATE DATABASE IF NOT EXISTS stats;';
-          echo 'CREATE USER \"${STROOM_STATS_DB_USERNAME:-statsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_STATS_DB_PASSWORD:-stroompassword1}\";';
-          echo 'GRANT ALL ON stats.* TO \"${STROOM_STATS_DB_USERNAME:-statsuser}\"@\"%\";';
+          #echo 'CREATE DATABASE IF NOT EXISTS stats;';
+          #echo 'CREATE USER \"${STROOM_STATS_DB_USERNAME:-statsuser}\"@\"%\" IDENTIFIED BY \"${STROOM_STATS_DB_PASSWORD:-stroompassword1}\";';
+          #echo 'GRANT ALL ON stats.* TO \"${STROOM_STATS_DB_USERNAME:-statsuser}\"@\"%\";';
 
-          echo 'CREATE DATABASE IF NOT EXISTS stroom;';
-          echo 'CREATE USER \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\" IDENTIFIED BY \"${STROOM_DB_PASSWORD:-stroompassword1}\";';
-          echo 'GRANT ALL ON stroom.* TO \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\";';
-        } > /docker-entrypoint-initdb.d/init.sql;
+          #echo 'CREATE DATABASE IF NOT EXISTS stroom;';
+          #echo 'CREATE USER \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\" IDENTIFIED BY \"${STROOM_DB_PASSWORD:-stroompassword1}\";';
+          #echo 'GRANT ALL ON stroom.* TO \"${STROOM_DB_USERNAME:-stroomuser}\"@\"%\";';
+        #} > /docker-entrypoint-initdb.d/init.sql;
 
-        /usr/local/bin/docker-entrypoint.sh mysqld"
+        #/usr/local/bin/docker-entrypoint.sh mysqld"
     volumes:
       - ${MYSQL_VOLUME_CONF_FILE:-../../volumes/stroom-all-dbs/conf/stroom-all-dbs.cnf}:/etc/mysql/conf.d/stroom-all-dbs.cnf:ro
+      - ${MYSQL_VOLUME_INIT:-../../volumes/stroom-all-dbs/init}:/docker-entrypoint-initdb.d:ro
+      #- ../volumes/stroom-all-dbs/init/:/docker-entrypoint-initdb.d
+      #- ../../volumes/stroom-all-dbs/init/000_init_override.sh:/docker-entrypoint-initdb.d/000_init_override.sh
+      #- ../../volumes/stroom-all-dbs/init/001_create_databases.sql.template:/docker-entrypoint-initdb.d/001_create_databases.sql.template
       - type: volume
         source: stroom-all-dbs_data
         target: /var/lib/mysql
