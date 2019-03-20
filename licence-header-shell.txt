@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 ############################################################################
 # 
 #  Copyright 2019 Crown Copyright
@@ -17,11 +15,3 @@
 #  limitations under the License.
 # 
 ############################################################################
-
-# Shows the status of the stack.
-
-docker \
-  ps \
-  --all \
-  --filter "label=stack_name=<STACK_NAME>" \
-  --format  "table {{.Names}}\t{{.Status}}\t{{.Image}}\t{{.ID}}"

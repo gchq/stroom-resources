@@ -70,6 +70,7 @@ The following scripts are available to control the docker containers:
 * `start.sh` - Starts all the containers for the stack.
 * `status.sh` - Displays the status of all the docker containers in the stack.
 * `stop.sh` - Stops all the containers in the stack.
+* `pull_images.sh` - Pulls docker images from the remote repository. Does not create or start containers.
 
 For details of any arguments required for the scripts, run them with the `-h` flag to see the help text.
 

@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+main() {
+  local -r DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+  for template_file in "${DIR}"/*.template; do
+    echo "Processing template file ${template_file}"
+
+    local all_substitution_variables
+    all_substitution_variables="$( \
+      grep -oP "<<<[^>]+>>>" "${template_file}" \
+        | sort \
+        | uniq
+      )"
+
+    local output_file="${template_file%.template}"
+
+    if [ -f "${output_file}" ] ; then
+        echo "Output file ${output_file} already exists, quitting!"
+        exit 1
+    fi
+
+    cat "${template_file}" > "${output_file}"
+
+    while read tag; do
+      echo "Substituting tag ${tag}"
+      local tag_name
+      # shellcheck disable=SC2001
+      tag_name="$(echo "${tag}" | sed "s/[<>]{3}//g")"
+      # Use bash indirection to get the value of the variable
+      local value="${!tag_name}"
+
+      if [ ! -n "${value}" ]; then
+        echo "Missing value for variable ${tag_name}, quitting!"
+        exit 1
+      fi
+
+      # Replace the tag with its value
+      sed -i'' "s|${tag}|${value}|g" "${output_file}"
+
+    done <<< "${all_substitution_variables}"
+
+    # now process the substituted file using the function from
+    # /usr/local/bin/docker-entrypoint.sh
+    process_init_file "${output_file}"
+
+  done
+
+}
+
+
+main "$@"
+
