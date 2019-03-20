@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+############################################################################
+# 
+#  Copyright 2019 Crown Copyright
+# 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# 
+############################################################################
+
 # Function to take a file containing tags of the form <<<MY_TAG>>>.
 # Each tag will be replaced by the value of an ennvironemnt variable
 # with the same name. This allows sql scripts to be run that use environment
@@ -16,8 +34,9 @@ process_template_file() {
   local output_file="${temp_dir}/${output_file_name}"
 
   if [ -f "${output_file}" ] ; then
-      echo "Output file ${output_file} already exists, quitting!"
-      exit 1
+    # Should never happen given we are using mktemp
+    echo "Output file ${output_file} already exists, quitting!"
+    exit 1
   fi
 
   cat "${template_file}" > "${output_file}"
@@ -30,18 +49,15 @@ process_template_file() {
     )"
 
   while read tag; do
-    #echo "Substituting tag ${tag}"
     local tag_name
     # shellcheck disable=SC2001
     tag_name="$(echo "${tag}" | sed -E "s/[<>]{3}//g")"
     # Use bash indirection to get the value of the variable
-    #echo "Substituting tag ${tag_name}"
     local value="${!tag_name}"
-    echo "Substituting tag ${tag} for value [${value}]"
-
     if [ ! -n "${value}" ]; then
       echo "WARNING: No value for variable ${tag_name}, replacing with nothing"
     fi
+    echo "Substituting tag ${tag} with value [${value}]"
 
     # Replace the tag with its value
     sed -i'' "s|${tag}|${value}|g" "${output_file}"
@@ -56,7 +72,9 @@ process_template_file() {
   # Now we have substituted the values call process_init_file again
   echo "Calling process_init_file on ${output_file}"
   echo
+
   # ${mysql[@]} is set in the original call to process_init_file
+  # If we don't pass it back in the connection details will be unavailable
   process_init_file "${output_file}" "${mysql[@]}"
   echo "Deleting directory ${temp_dir}"
   rm -rf "${temp_dir}"
@@ -77,17 +95,17 @@ process_template_file() {
 # function here, so that initializer scripts (*.sh) can use the same logic,
 # potentially recursively, or override the logic used in subsequent calls)
 process_init_file() {
-  local f="$1"; shift
+  local file="$1"; shift
   local mysql=( "$@" )
 
   #echo "mysql: [${mysql[*]}]"
 
-  case "$f" in
-    *.sh)       echo "$0: running $f"; . "$f" ;;
-    *.sql)      echo "$0: running $f"; "${mysql[@]}" < "$f"; echo ;;
-    *.sql.gz)   echo "$0: running $f"; gunzip -c "$f" | "${mysql[@]}"; echo ;;
-    *.template) echo "$0: processing $f"; process_template_file "$f";;
-    *)          echo "$0: ignoring $f" ;;
+  case "${file}" in
+    *.sh)       echo "$0: running ${file}"; . "${file}" ;;
+    *.sql)      echo "$0: running ${file}"; "${mysql[@]}" < "${file}"; echo ;;
+    *.sql.gz)   echo "$0: running ${file}"; gunzip -c "${file}" | "${mysql[@]}"; echo ;;
+    *.template) echo "$0: processing ${file}"; process_template_file "${file}";;
+    *)          echo "$0: ignoring ${file}" ;;
   esac
   echo
 }

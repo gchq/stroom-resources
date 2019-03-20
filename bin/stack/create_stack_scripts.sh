@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+############################################################################
+# 
+#  Copyright 2019 Crown Copyright
+# 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# 
+############################################################################
+
 # Creates scripts to run stacks
 
 set -e
@@ -11,13 +29,25 @@ set -e
 }
 
 create_script() {
-  local script_name=$1
-  local SCRIPT_PATH="${WORKING_DIRECTORY}/${script_name}.sh"
+  local script_name="$1"
+  local source_script_name="template_${script_name}.sh"
+  local dest_script_name="${script_name}.sh"
+  local SCRIPT_PATH="${WORKING_DIRECTORY}/${dest_script_name}"
+  echo -e "  Copying ${BLUE}${source_script_name}${NC}" \
+    "${YELLOW}=>${NC} ${BLUE}${SCRIPT_PATH}${NC}"
   sed \
     "s/<STACK_NAME>/${BUILD_STACK_NAME}/g" \
-    "${LIB_DIRECTORY}/template_${script_name}.sh" \
+    "${LIB_DIRECTORY}/${source_script_name}" \
     > "${SCRIPT_PATH}"
   chmod u+x "${SCRIPT_PATH}"
+}
+
+copy_file() {
+  local -r src=$1
+  local -r dest_dir=$2
+  echo -e "  Copying ${BLUE}${src}${NC} ${YELLOW}=>${NC} ${BLUE}${dest_dir}${NC}"
+  mkdir -p "${dest_dir}"
+  cp "${src}" "${dest_dir}"
 }
 
 main() {
@@ -27,7 +57,7 @@ main() {
     || die "${RED}Error${NC}: Invalid arguments, usage: " \
       "${BLUE}build.sh stackName serviceX serviceY etc.${NC}"
 
-  echo -e "${GREEN}Copying stack management scripts${NC}"
+  echo -e "${GREEN}Copying and substituting stack management script templates${NC}"
 
   local -r BUILD_STACK_NAME=$1
   local -r VERSION=$2
@@ -69,15 +99,18 @@ main() {
   create_script status
   create_script stop
 
-  cp lib/README.md "${WORKING_DIRECTORY}"
-
+  echo -e "${GREEN}Copying stack management lib scripts${NC}"
   # Copy libs to build
   local -r DEST_LIB="${WORKING_DIRECTORY}/lib"
   mkdir -p "${DEST_LIB}"
-  cp lib/banner.txt "${DEST_LIB}"
-  cp lib/network_utils.sh "${DEST_LIB}"
-  cp lib/shell_utils.sh "${DEST_LIB}"
-  cp lib/stroom_utils.sh "${DEST_LIB}"
+  copy_file lib/banner.txt "${DEST_LIB}"
+  copy_file lib/network_utils.sh "${DEST_LIB}"
+  copy_file lib/shell_utils.sh "${DEST_LIB}"
+  copy_file lib/stroom_utils.sh "${DEST_LIB}"
+
+  echo -e "${GREEN}Copying assorted files to stack root${NC}"
+  copy_file lib/README.md "${WORKING_DIRECTORY}"
+  copy_file lib/LICENCE.txt "${WORKING_DIRECTORY}"
 }
 
 main "$@"
