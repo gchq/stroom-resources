@@ -1,3 +1,0 @@
-select user();
-
--- <<<HOME>>>
