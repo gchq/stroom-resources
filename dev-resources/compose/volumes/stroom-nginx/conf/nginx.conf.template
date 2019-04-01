@@ -466,7 +466,7 @@ http {
 
         # This is an exact match that directs '/stroom' to the Stroom UI...
         location ~ /stroom$ {
-             return 302 https://${STROOM_HOST}/stroom/ui;
+             return 302 https://${NGINX_ADVERTISED_HOST}/stroom/ui;
         }
 
         location ~ .*/clustercall.rpc$ {
