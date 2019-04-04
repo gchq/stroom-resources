@@ -4,6 +4,7 @@
 
 set -e
 
+# shellcheck disable=SC1091
 source lib/shell_utils.sh
 setup_echo_colours
 
@@ -35,8 +36,8 @@ validate_requested_services() {
   for service in "${@}"; do
     if ! element_in "${service}" "${VALID_SERVICES[@]}"; then
       err "${RED}'${service}'${NC} is not a valid service! Valid services are:"
-      for service in "${VALID_SERVICES[@]}"; do
-        err "  ${BLUE}${service}${NC}" 
+      for valid_service in "${VALID_SERVICES[@]}"; do
+        err "  ${BLUE}${valid_service}${NC}" 
       done
       exit 1
     fi
@@ -64,6 +65,7 @@ main() {
   local -r SERVICES=("${@:3}")
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
   local -r ARCHIVE_NAME="${BUILD_STACK_NAME}-${VERSION}.tar.gz"
+  local -r HASH_FILE_NAME="${ARCHIVE_NAME}.sha256"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}"
   local -r SERVICES_FILE="${WORKING_DIRECTORY}/SERVICES.txt"
 
@@ -87,9 +89,13 @@ main() {
   ./create_stack_scripts.sh "${BUILD_STACK_NAME}" "${VERSION}" "${SERVICES[@]}"
   ./create_stack_assets.sh "${BUILD_STACK_NAME}" "${VERSION}" "${SERVICES[@]}"
 
-  echo -e "${GREEN}Creating ${BUILD_DIRECTORY}/${ARCHIVE_NAME} ${NC}"
+  echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${ARCHIVE_NAME}${NC}"
   pushd build > /dev/null
   tar -zcf "${ARCHIVE_NAME}" "./${BUILD_STACK_NAME}"
+
+  echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${HASH_FILE_NAME}${NC}"
+  shasum -a 256 "${ARCHIVE_NAME}" > "${HASH_FILE_NAME}"
+
   popd > /dev/null
 }
 

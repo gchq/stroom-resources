@@ -6,6 +6,9 @@ services:
     container_name: stroom-stats
     image: "${STROOM_STATS_DOCKER_REPO:-gchq/stroom-stats}:${STROOM_STATS_TAG:-v0.6-LATEST}"
     environment:
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
+      - JAVA_OPTS=${STROOM_STATS_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10768,suspend=n }
       # At the moment, stroom-stats gets it document entities from the stroom DB, not the 'stats' DB.
       # The 'stats' DB contains legacy SQL stats tables only
       - STATS_DB_USER=${STROOM_DB_USERNAME:-stroomuser}
@@ -29,10 +32,11 @@ services:
       - ADMIN_CONTEXT_PATH=/statsAdmin
       - AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authService
       - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-$HOST_IP}:8080/api/authorisation/v1
-      - STATS_ADVERTISED_HOST_OR_IP=${STATS_ADVERTISED_HOST_OR_IP:-localhost}
+      - STROOM_STATS_ADVERTISED_HOST_OR_IP=${STROOM_STATS_ADVERTISED_HOST_OR_IP:-$HOST_IP}
     ports:
-      - "${STROOM_STATS_APP_PORT:-8086}:8086" # app
-      - "${STROOM_STATS_ADMIN_PORT:-8087}:8087" # admin
+      - "${STROOM_STATS_APP_PORT:-8086}:8086"
+      - "${STROOM_STATS_ADMIN_PORT:-8087}:8087"
+      - "${STROOM_STATS_DEBUG_PORT:-10768}:10768"
     logging:
       options:
         max-size: "${STROOM_STATS_STD_OUT_LOGS_MAX_SIZE:-10m}"
