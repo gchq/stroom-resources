@@ -517,6 +517,21 @@ display_stack_info() {
   fi
 }
 
+determing_docker_host_details() {
+  # If they haven't already been set in the env file, capture the hostname/ip
+  # of the host running the containers so they can make it available to
+  # stroom-log-sender. This is typically done by the file
+  # add_container_identity_headers.sh in the container. They have to be
+  # exported so docker-compose can use them.
+  # shellcheck disable=SC2034
+  export DOCKER_HOST_HOSTNAME="${DOCKER_HOST_HOSTNAME:-$(hostname --fqdn)}"
+  # shellcheck disable=SC2034
+  export DOCKER_HOST_IP="${DOCKER_HOST_IP:-$(determine_host_address)}"
+
+  echo -e "${GREEN}Using hostname ${BLUE}${DOCKER_HOST_HOSTNAME}${GREEN} and" \
+    "IP address ${BLUE}${DOCKER_HOST_IP}${GREEN} for audit logging.${NC}"
+}
+
 start_stack() {
   # These lines may help in debugging the config that is passed to the containers
   #env
@@ -525,12 +540,7 @@ start_stack() {
   echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}"
   echo
 
-  # Capture the hostname/ip of the host running the containers so they can
-  # make it available to stroom-log-sender
-  # shellcheck disable=SC2034
-  DOCKER_HOST_HOSTNAME="$(hostname -f)"
-  # shellcheck disable=SC2034
-  DOCKER_HOST_IP="${HOST_IP}"
+  determing_docker_host_details
 
   # shellcheck disable=SC2094
   docker-compose \
@@ -553,7 +563,6 @@ stop_services_if_in_stack() {
     fi
   done
 }
-
 
 stop_service_if_in_stack() {
   check_arg_count 1 "$@"

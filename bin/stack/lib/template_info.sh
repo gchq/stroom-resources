@@ -29,8 +29,6 @@ source "${DIR}"/lib/network_utils.sh
 source "${DIR}"/lib/shell_utils.sh
 source "${DIR}"/lib/stroom_utils.sh
 
-#readonly HOST_IP=$(determine_host_address)
-
 main() {
   # leading colon means silent error reporting by getopts
   while getopts ":mh" arg; do
