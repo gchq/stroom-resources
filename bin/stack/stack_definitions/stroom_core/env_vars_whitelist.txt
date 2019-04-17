@@ -8,8 +8,6 @@
 # NOTE: Env vars listed here cannot also be in the overrides.env file
 
 
-DOCKER_HOST_HOSTNAME
-DOCKER_HOST_IP
 MYSQL_DOCKER_REPO
 NGINX_ADVERTISED_HOST
 NGINX_HOST
