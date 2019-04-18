@@ -147,12 +147,14 @@ main() {
   # Remove any repeated blank lines with cat -s
   commit_msg="$(echo -e "${commit_msg}" | cat -s)"
 
+  echo -e "${GREEN}Commit message text:${NC}"
   echo -e "${DGREY}------------------------------------------------------------------------${NC}"
   echo -e "${YELLOW}${commit_msg}${NC}"
   echo -e "${DGREY}------------------------------------------------------------------------${NC}"
   echo
   echo -e "${GREEN}You are about to create the git tag" \
     "${BLUE}${version}${GREEN} with the above commit message text.${NC}"
+  echo
 
   read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
 
