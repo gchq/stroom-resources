@@ -152,7 +152,7 @@ main() {
   echo -e "${DGREY}------------------------------------------------------------------------${NC}"
   echo
   echo -e "${GREEN}You are about to create the git tag" \
-    "${BLUE}${version}${GREEN} with the following commit message.${NC}"
+    "${BLUE}${version}${GREEN} with the above commit message text.${NC}"
 
   read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
 
