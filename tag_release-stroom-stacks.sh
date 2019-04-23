@@ -46,8 +46,8 @@ main() {
     echo -e "${GREEN}Usage: ${BLUE}./tag_release.sh version${NC}"
     echo -e "${GREEN}e.g:   ${BLUE}./tag_release.sh stroom-stacks-v6.0-beta.20${NC}"
     echo
-    echo -e "${GREEN}This script will build a local stack and create an annotated git commit using the${NC}"
-    echo -e "${GREEN}VERSIONS.txt file content. The tag commit will be pushed to the origin.${NC}"
+    echo -e "${GREEN}This script will build all the stack variants and create an annotated git commit using the${NC}"
+    echo -e "${GREEN}version information for each stack. The tag commit will be pushed to the origin.${NC}"
     exit 1
   fi
 
@@ -147,11 +147,14 @@ main() {
   # Remove any repeated blank lines with cat -s
   commit_msg="$(echo -e "${commit_msg}" | cat -s)"
 
-  echo -e "${GREEN}You are about to create the git tag" \
-    "${BLUE}${version}${GREEN} with the following commit message.${NC}"
+  echo -e "${GREEN}Commit message text:${NC}"
   echo -e "${DGREY}------------------------------------------------------------------------${NC}"
   echo -e "${YELLOW}${commit_msg}${NC}"
   echo -e "${DGREY}------------------------------------------------------------------------${NC}"
+  echo
+  echo -e "${GREEN}You are about to create the git tag" \
+    "${BLUE}${version}${GREEN} with the above commit message text.${NC}"
+  echo
 
   read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
 
