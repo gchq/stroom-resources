@@ -8,12 +8,12 @@ services:
     # All URLs are accessed from a browser, and so need to refer to the advertised host.
     environment:
       # The AUTH_UI_xxx variables configure the app as loaded in the browser
-      - AUTH_UI_AUTHENTICATION_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authenticationService/v1
-      - AUTH_UI_USER_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/userService/v1
-      - AUTH_UI_TOKEN_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/tokenService/v1
-      - AUTH_UI_AUTHORISATION_SERVICE_URL=https://${STROOM_AUTHORISATION_SERVICE_HOST:-$HOST_IP}/authorisationService/v1
-      - AUTH_UI_STROOM_UI_URL=https://${STROOM_HOST:-$HOST_IP}:8080/stroom
-      - AUTH_UI_ADVERTISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_URL:-$HOST_IP:9443}
+      - AUTH_UI_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1
+      - AUTH_UI_USER_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/userService/v1
+      - AUTH_UI_TOKEN_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/tokenService/v1
+      - AUTH_UI_AUTHORISATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authorisationService/v1
+      - AUTH_UI_STROOM_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/stroom
+      - AUTH_UI_ADVERTISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_HOST:-$HOST_IP}:${STROOM_AUTH_UI_ACTIVE_PORT:-9443}
       - AUTH_UI_APP_CLIENT_ID=stroom-accounts
       - AUTH_UI_ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
       # The NGINX_xxx variables configure the NGINX server that serves the app
@@ -28,8 +28,8 @@ services:
       # nginx.conf.template - used to create the actual config when the container starts
       - ${STROOM_AUTH_UI_VOLUME_CONF:-../../volumes/auth-ui/conf}:/etc/nginx/template:ro
     ports:
-      - 5000:5000
-      - 9443:9443
+      - "${STROOM_AUTH_UI_HTTP_PORT:-5000}:5000"
+      - "${STROOM_AUTH_UI_HTTPS_PORT:-9443}:9443"
     logging:
       options:
         max-size: "${STROOM_AUTH_UI_STD_OUT_LOGS_MAX_SIZE:-10m}"

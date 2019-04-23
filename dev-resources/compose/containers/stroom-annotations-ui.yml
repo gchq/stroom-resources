@@ -6,11 +6,11 @@ services:
     container_name: stroom-annotations-ui
     image: "${STROOM_ANNOTATIONS_UI_DOCKER_REPO:-gchq/stroom-annotations-ui}:${STROOM_ANNOTATIONS_UI_TAG:-v0.2.1-alpha.1}"
     environment:
-      - ANNOTATIONS_UI_AUTHENTICATION_SERVICE_URL=https://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authenticationService/v1
-      - ANNOTATIONS_UI_AUTHORISATION_SERVICE_URL=https://${STROOM_AUTHORISATION_SERVICE_HOST:-$HOST_IP}/authorisationService/v1
-      - ANNOTATIONS_UI_ADVERTISED_URL=${STROOM_ANNOTATIONS_UI_URL:-http://$HOST_IP:5001}
+      - ANNOTATIONS_UI_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1
+      - ANNOTATIONS_UI_AUTHORISATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authorisationService/v1
+      - ANNOTATIONS_UI_ADVERTISED_URL=${STROOM_ANNOTATIONS_ACTIVE_SCHEME:-https}://${STROOM_ANNOTATIONS_UI_HOST:-$HOST_IP}:${STROOM_ANNOTATIONS_ACTIVE_PORT:-5001}
       - ANNOTATIONS_UI_APP_CLIENT_ID=stroom-annotations
-      - ANNOTATIONS_UI_ANNOTATIONS_SERVICE_URL=https://${STROOM_ANNOTATIONS_SERVICE_HOST:-$HOST_IP}/annotationsService
+      - ANNOTATIONS_UI_ANNOTATIONS_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/annotationsService
       # The NGINX_xxx variables configure the NGINX server that serves the app
       - NGINX_HOST=${STROOM_ANNOTATIONS_UI_HOST:-$HOST_IP}
       - NGINX_HTTP_PORT=${STROOM_ANNOTATIONS_UI_HTTP_PORT:-5001}
@@ -24,7 +24,9 @@ services:
       # nginx.conf.template - used to create the actual config when the container starts
       - ../../../stroom-microservice-ui/template:/etc/nginx/template:ro
     ports:
+        #TODO port clash with stroom-ui
       - 5001:5001
+        #TODO port clash with stroom-ui
       - 9444:9444
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
