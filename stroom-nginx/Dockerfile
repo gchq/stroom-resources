@@ -24,6 +24,9 @@ VOLUME [ "/stroom-nginx/certs" ]
 # the actual nginx.conf file on container start and the cron configuration
 VOLUME [ "/stroom-nginx/config" ]
 
+# The location of any html served by nginx
+VOLUME [ "/stroom-nginx/html" ]
+
 # Volume for file based logs for collection by stroom-log-sender
 # Nginx will also log to /var/log/nginx/access.log|error.log which are sym links
 # to stdout|stderr so 'docker logs' can see them.
@@ -40,6 +43,7 @@ CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 
 # logrotate for rotation of the file based access/app logs
 # tini required for process control in the entrypoint
+# remove the default nginx html path to avoid confusion
 RUN \
     apk add --no-cache \
         logrotate \
@@ -47,7 +51,9 @@ RUN \
     mkdir -p /stroom-nginx/logs && \
     mkdir -p /stroom-nginx/logrotate && \
     mkdir -p /stroom-nginx/certs && \
-    mkdir -p /stroom-nginx/config
+    mkdir -p /stroom-nginx/config && \
+    mkdir -p /stroom-nginx/html && \
+    rm -rf /usr/share/nginx/html
 
 # Copy entrypoint and related shell scripts
 COPY *.sh /stroom-nginx/

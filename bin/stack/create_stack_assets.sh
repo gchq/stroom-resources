@@ -63,6 +63,7 @@ main() {
   local -r SRC_CERTS_DIRECTORY="../../dev-resources/certs"
   local -r SRC_VOLUMES_DIRECTORY="../../dev-resources/compose/volumes"
   local -r SRC_NGINX_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-nginx/conf"
+  local -r SRC_NGINX_HTML_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-nginx/html"
   local -r SRC_ELASTIC_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/elasticsearch/conf"
   local -r SRC_KIBANA_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/kibana/conf"
   local -r SRC_STROOM_LOG_SENDER_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-log-sender/conf"
@@ -138,6 +139,15 @@ main() {
     copy_file \
       "${SRC_NGINX_CONF_DIRECTORY}/crontab.txt" \
       "${DEST_NGINX_CONF_DIRECTORY}"
+
+    echo -e "  Copying ${YELLOW}nginx${NC} html files"
+    local -r DEST_NGINX_HTML_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/html"
+    copy_file \
+      "${SRC_NGINX_HTML_DIRECTORY}/50x.html" \
+      "${DEST_NGINX_HTML_DIRECTORY}"
+    copy_file \
+      "${SRC_NGINX_HTML_DIRECTORY}/index.html" \
+      "${DEST_NGINX_HTML_DIRECTORY}"
   fi
 
   if element_in "stroom" "${services[@]}" \
