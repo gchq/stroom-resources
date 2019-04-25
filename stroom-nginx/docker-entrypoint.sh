@@ -13,7 +13,7 @@ echo "Substituting variables to generate nginx.conf"
 # substituting NGINX_ADVERTISED_HOST from its environment variable
 # As nginx.conf contains stuff like '$proxy_add_x_forwarded_for', 
 # we need to give envsubst a specific list of variables
-# to substitute, else it will breake the config
+# to substitute, else it will break the config
 # shellcheck disable=SC2016
 envsubst '
     ${NGINX_ADVERTISED_HOST}
