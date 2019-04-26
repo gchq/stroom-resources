@@ -472,7 +472,7 @@ main() {
   # on Dockerhub to be able to test the stack against it 
   if [ -n "${TRAVIS_TAG}" ] && \
      is_prefixed_by \
-      "${TRAVIS_TAG}"
+      "${TRAVIS_TAG}" \
       "${TAG_PREFIX_STROOM_NGINX}" \
       "${TAG_PREFIX_STROOM_ZOOKEEPER}" \
       "${TAG_PREFIX_STROOM_LOG_SENDER}"; then
