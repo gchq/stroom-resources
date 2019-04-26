@@ -151,10 +151,10 @@ http {
 
     server {
         #rewrite_log    on;
-	#log_not_found  on;
+        #log_not_found  on;
         #log_subrequest on;
 
-        root /usr/share/nginx/html;
+        root ${NGINX_HTML_ROOT_PATH};
 
         listen                      80;
         listen                      443 ssl;
