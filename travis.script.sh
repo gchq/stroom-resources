@@ -47,6 +47,33 @@ setup_colours() {
   }
 }
 
+# return 0 if $1 is prefixed by any of $2-$n
+# e.g. is_prefixed_by "stroom-nginx-v1.2.3" "stroom-nginx" "stroom-log-sender"
+is_prefixed_by() {
+  if [ $# -lt 2 ]; then
+    echo "Invald args to is_prefixed_by.  Args: $*"
+    exit 1
+  fi
+  local str="$1"; shift
+  
+  local regex="^("
+  local is_first_prefix=true
+  for prefix in "$@"; do
+    if [ "${is_first_prefix}" = true ]; then
+      is_first_prefix=false
+    else
+      regex="${regex}|"
+    fi
+    regex="${regex}${prefix}"
+  done
+  regex="${regex})"
+
+  # Now test the regex against the string
+  [[ "${str}" =~ ${regex} ]]
+
+  return $?
+}
+
 # Returns 0 if $1 is in the array of elements passed as subsequent args
 # e.g. 
 # arr=( "one" "two" "three" )
@@ -441,9 +468,20 @@ main() {
   # No tag so finish
   echo -e "Not a tagged build so just build the stack and test it"
 
-  # STACK_NAME is set by the travis build matrix
-  # shellcheck disable=SC2153
-  do_versioned_stack_build
+  # If we are releasing a new docker image then that version will not be available
+  # on Dockerhub to be able to test the stack against it 
+  if [ -n "${TRAVIS_TAG}" ] && \
+     is_prefixed_by \
+      "${TRAVIS_TAG}"
+      "${TAG_PREFIX_STROOM_NGINX}" \
+      "${TAG_PREFIX_STROOM_ZOOKEEPER}" \
+      "${TAG_PREFIX_STROOM_LOG_SENDER}"; then
+    echo "This is a docker image build so don't test the stack"
+  else
+    # STACK_NAME is set by the travis build matrix
+    # shellcheck disable=SC2153
+    do_versioned_stack_build
+  fi
 
   do_release
 }
