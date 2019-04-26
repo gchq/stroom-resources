@@ -41,11 +41,13 @@ ENTRYPOINT ["/sbin/tini", "--", "/stroom-nginx/docker-entrypoint.sh"]
 
 CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 
+# bash for the entrypoint script
 # logrotate for rotation of the file based access/app logs
 # tini required for process control in the entrypoint
 # remove the default nginx html path to avoid confusion
 RUN \
     apk add --no-cache \
+        bash \
         logrotate \
         tini && \
     mkdir -p /stroom-nginx/logs && \
