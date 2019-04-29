@@ -159,8 +159,7 @@ release_to_docker_hub() {
   echo -e "Logging in to DockerHub"
   echo "$DOCKER_PASSWORD" | docker login \
     -u "$DOCKER_USERNAME" \
-    --password-stdin \
-    >/dev/null 2>&1 
+    --password-stdin
 
   echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC}" \
     "with tags: ${GREEN}${allTagArgs[*]}${NC}"
