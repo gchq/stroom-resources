@@ -1,0 +1,7 @@
+stroom-proxy-local_config
+stroom-proxy-local_content
+stroom-proxy-local_logs
+stroom-proxy-local_repo
+stroom_logs
+stroom_output
+stroom_volumes
