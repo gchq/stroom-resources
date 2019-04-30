@@ -5,6 +5,14 @@
 
 set -e
 
+BLACK_LISTED_TAGS=(
+  "gchq/stroom-zookeeper:"
+  "gchq/stroom-stats:"
+  "gchq/stroom-stats-hbase:"
+  "wurstmeister/kafka:"
+  "sequenceiq/hadoop-docker:"
+)
+
 setup_urls() {
   STROOM_RELEASE_BASE="https://github.com/gchq/stroom/releases/download"
   STROOM_BINARY_URL="${STROOM_RELEASE_BASE}/${STROOM_TAG}/stroom-app-${STROOM_TAG}.zip"
@@ -39,6 +47,16 @@ setup_echo_colours() {
   fi
 }
 
+is_tag_blacklisted() {
+  local tag_under_test="$1"; shift
+  for black_listed_prefix in "${BLACK_LISTED_TAGS[@]}"; do
+    if [[ "${tag_under_test}" =~ ${black_listed_prefix} ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 info() {
   echo -e "${GREEN}$*${NC}"
 }
@@ -66,32 +84,27 @@ download_image() {
   local tag="$1"; shift
   local name="${tag//\//_}.img"
 
-  info "Pulling docker image ${BLUE}${tag}${GREEN} to file ${BLUE}${name}"
+  info "Pulling docker image ${YELLOW}${tag}${GREEN}"
   docker pull "${tag}"
+  info "Saving docker image ${YELLOW}${tag}${GREEN} to file ${BLUE}${name}"
   docker save -o "./${name}" "${tag}"
 }
 
 main() {
   setup_echo_colours
 
-  if [ "$#" -ne 3 ]; then
+  if [ "$#" -ne 2 ]; then
     error "Invalid arguments"
-    info "Usage: ${BLUE}$0 output_file stack_version container_versions_file"
-    info "E.g:   ${BLUE}$0 /tmp/artifacts.tag.gz v6.0-beta.34-3 ./stacks/container_versions.env"
+    info "Usage: ${BLUE}$0 stack_version output_file"
+    info "E.g:   ${BLUE}$0 v6.0-beta.34-3 /tmp/artifacts.tag.gz"
     exit 1
   fi
 
-  local output_file="$1"; shift
   local stack_version="$1"; shift
-  local container_versions_file="$1"; shift
+  local output_file="$1"; shift
 
   if [ -f "${output_file}" ]; then
-    error "Output file ${output_file} already exists"
-    exit 1
-  fi
-
-  if [ ! -f "${container_versions_file}" ]; then
-    error "container_versions file ${container_versions_file} doesn't exist"
+    error "Output file ${BLUE}${output_file}${GREEN} already exists"
     exit 1
   fi
 
@@ -99,30 +112,50 @@ main() {
   download_dir="$(mktemp -d -t "stroom_artifacts_XXXXXX")"
   info "Creating directory ${BLUE}${download_dir}"
 
-  # Source this so we get the docker image tag versions
-  info "Sourcing ${BLUE}${container_versions_file}"
-  # shellcheck disable=SC1090
-  source "${container_versions_file}"
-
   pushd "${download_dir}" > /dev/null
 
   setup_urls
 
-  download_binary_and_hash "${STROOM_BINARY_URL}"
+  # Get all the github binary files
   download_binary_and_hash "${CORE_STACK_BINARY_URL}"
   download_binary_and_hash "${SERVICES_STACK_BINARY_URL}"
   download_binary_and_hash "${DBS_STACK_BINARY_URL}"
 
-  download_gchq_image "stroom:${STROOM_TAG}"
-  download_gchq_image "stroom-proxy:${STROOM_PROXY_TAG}"
-  download_gchq_image "stroom-nginx:${STROOM_NGINX_TAG}"
-  download_gchq_image "stroom-auth-service:${STROOM_AUTH_SERVICE_TAG}"
-  download_gchq_image "stroom-auth-ui:${STROOM_AUTH_UI_TAG}"
-  download_gchq_image "stroom-log-sender:${STROOM_LOG_SENDER_TAG}"
-  download_gchq_image "stroom-log-sender:${STROOM_LOG_SENDER_TAG}"
+  # Use GH api to get the commit hash for our release tag
+  local gh_api_refs_url="https://api.github.com/repos/gchq/stroom-resources/git/refs/tags/stroom-stacks-${stack_version}"
 
-  # TODO need to get this tag version from somewhere
-  download_image "mysql:5.6.43"
+  info "Getting commit hash from ${BLUE}${gh_api_refs_url}"
+
+  local gh_api_tags_url
+  gh_api_tags_url="$( \
+    curl -s "${gh_api_refs_url}" \
+      | jq -r '.object.url' \
+  )"
+  
+  # Use GH api to get the commit msg for our release commit and extract the
+  # image tags from it
+  info "Getting image tags from ${BLUE}${gh_api_refs_url}"
+  local all_image_tags
+  all_image_tags="$( \
+    curl -s "$gh_api_tags_url" \
+      | jq -r '.message' \
+      | grep ":" \
+      | sort \
+      | uniq \
+  )"
+
+  info "Found the following image tags for release ${YELLOW}stroom-stacks-${stack_version}:"
+  while read -r tag; do
+    echo -e "  ${YELLOW}${tag}${NC}"
+  done <<< "${all_image_tags}"
+
+  while read -r tag; do
+    if is_tag_blacklisted "${tag}"; then
+      info "Tag ${YELLOW}${tag}${GREEN} is blacklisted so will be ignored"
+    else
+      download_image "${tag}"
+    fi
+  done <<< "${all_image_tags}"
 
   info "Creating archive ${BLUE}${output_file}"
   tar -cvf "${output_file}" ./*
@@ -131,7 +164,6 @@ main() {
 
   info "Deleting directory ${BLUE}${download_dir}"
   rm -rf "${download_dir}"
-
 }
 
 main "$@"
