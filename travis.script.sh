@@ -198,10 +198,11 @@ do_versioned_stack_build() {
   ls -1 "${buildDir}"
 
   for archive_filename in *.tar.gz; do
-    # Now spin up the stack to make sure it all works
-    # TODO we can't test stroom_services as it won't run without a database
-    # TODO we can't test stroom_full as it will blow travis' memory
-    if [[ ! "${archive_filename}" =~ ^stroom_(services|full|full_test)- ]]; then
+    # Now spin up the stacks to make sure it all works
+    # Some stacks won't run in CI:
+    #  - stroom_full and stroom_full_test need too much memory to run in Travis
+    #  - stroom, stroom_services, and stroom_and_proxy need a database to run
+    if [[ "${archive_filename}" =~ ^stroom_(core|core_test|dbs)- ]]; then
       test_stack_archive "${archive_filename}"
     else
       echo -e "Skipping tests for ${GREEN}${archive_filename}${NC}"
