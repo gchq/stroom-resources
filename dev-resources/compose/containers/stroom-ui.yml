@@ -25,7 +25,7 @@ services:
       # nginx.conf.template - used to create the actual config when the container starts
       - ${STROOM_UI_VOLUME_CONF:-../../volumes/stroom-ui/conf}:/etc/nginx/template:ro
     ports:
-      - "${STROOM_UI_HTTP_PORT:-9446}:9446"
+      - "${STROOM_UI_HTTP_PORT:-5001}:5001"
       - "${STROOM_UI_HTTPS_PORT:-9446}:9446"
     logging:
       options:
