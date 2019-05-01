@@ -42,3 +42,5 @@ show databases;
 SELECT 'Dumping list of users' AS '';
 SELECT '---------------------------------------' AS '';
 SELECT User AS 'USER', Host AS 'HOST' FROM mysql.user;
+
+-- vim: set filetype=sql:
