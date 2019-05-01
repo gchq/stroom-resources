@@ -69,6 +69,7 @@ main() {
   local -r SRC_STROOM_ALL_DBS_CONF_FILE="${SRC_VOLUMES_DIRECTORY}/stroom-all-dbs/conf/stroom-all-dbs.cnf"
   local -r SRC_STROOM_ALL_DBS_INIT_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-all-dbs/init"
   local -r SRC_AUTH_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
+  local -r SRC_STROOM_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
   local -r SEND_TO_STROOM_VERSION="send-to-stroom-v2.0"
   local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
 

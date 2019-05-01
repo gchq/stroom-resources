@@ -8,7 +8,7 @@ services:
       - AUTH_SERVICE_HOST=${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
       - AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
       # In development we need to use port 5000 for http access
-      - AUTH_UI_URL=${STROOM_AUTH_UI_HOST:-$HOST_IP}:${STROOM_AUTH_UI_ACTIVE_PORT:-9444}
+      - AUTH_UI_URL=${STROOM_UI_HOST:-$HOST_IP}:${STROOM_UI_ACTIVE_PORT:-9446}
         # TODO not sure is this should be 9446 or 5001 or something else
       - STROOM_UI_URL=${STROOM_UI_HOST:-$HOST_IP}:${STROOM_UI_ACTIVE_PORT:-9446}
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
