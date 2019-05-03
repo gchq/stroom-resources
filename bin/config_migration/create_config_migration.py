@@ -12,8 +12,11 @@ import shutil
 import sys
 import tarfile
 import urllib.request
+import filecmp
+import difflib
 
-FENCE_OPEN = "``` bash\n"
+FENCE_OPEN_BASH = "```bash\n"
+FENCE_OPEN_DIFF = "```diff\n"
 FENCE_CLOSE = "```\n"
 
 USAGE_TXT= "" \
@@ -69,7 +72,7 @@ def get_version_from_release(release_name):
     return match.group()
 
 
-def get_release(release_name, stack_name):
+def download_release(release_name, stack_name):
     version = get_version_from_release(release_name)
     artifact = "{0}-{1}.tar.gz".format(stack_name, version)
 
@@ -98,6 +101,11 @@ def get_path_to_config(release_name, stack_name):
     return from_version_path
 
 
+def get_path_to_volumes_dir(release_name, stack_name):
+    return "{0}/{1}/{2}/volumes" \
+        .format(Config.BUILD_DIR, release_name, stack_name)
+
+
 def extract_variables_from_env_file(path):
     print("Extracting variables from file {0}{1}{2}" \
         .format(Colours.BLUE, path, Colours.NC))
@@ -124,7 +132,7 @@ def extract_variables_from_env_file(path):
 
 
 def setup_release(release_name, stack_name):
-    get_release(release_name, stack_name)
+    download_release(release_name, stack_name)
     path = get_path_to_config(release_name, stack_name)
     (env_vars, repeated_vars) = extract_variables_from_env_file(path)
     return (env_vars, repeated_vars)
@@ -148,8 +156,19 @@ def compare(from_vars, to_vars):
     return (added_vars, removed_vars, changed_vars)
 
 
+def write_heading_2(file_handle, heading):
+    file_handle.write("## {0}\n\n".format(heading))
+
+
+def write_heading_3(file_handle, heading):
+    file_handle.write("### {0}\n\n".format(heading))
+
+
 def create_output_file(
-       output_file_path, from_release, to_release, comparisons):
+        output_file_path, 
+        from_release, 
+        to_release, 
+        comparisons):
     added_vars = comparisons[0]
     removed_vars = comparisons[1]
     changed_vars = comparisons[2]
@@ -157,21 +176,23 @@ def create_output_file(
     output.write("# Differences between `{0}` and `{1}`\n\n"
                  .format(from_release, to_release))
 
-    output.write("## Added\n\n")
-    output.write(FENCE_OPEN)
+    write_heading_2(output, "Added")
+    output.write(FENCE_OPEN_BASH)
     for added_var in sorted(added_vars):
         output.write("{0}={1}\n".format(added_var, added_vars[added_var]))
     output.write(FENCE_CLOSE)
 
-    output.write("\n## Removed\n\n")
-    output.write(FENCE_OPEN)
+    output.write("\n")
+    write_heading_2(output, "Removed")
+    output.write(FENCE_OPEN_BASH)
     for removed_var in sorted(removed_vars):
         output.write("{0}={1}\n"
                      .format(removed_var, removed_vars[removed_var]))
     output.write(FENCE_CLOSE)
 
-    output.write("\n## Changed default values\n\n")
-    output.write(FENCE_OPEN)
+    output.write("\n")
+    write_heading_2(output, "Changed default values")
+    output.write(FENCE_OPEN_BASH)
     for changed_var in changed_vars:
         output.write("{0} has changed from \"{1}\" to \"{2}\"\n"
                      .format(changed_var[0], changed_var[1], changed_var[2]))
@@ -183,10 +204,12 @@ def create_output_file(
 def add_repetitions_to_output_file(
                output_file_path, release_name, repeated_vars):
     output = open(output_file_path, 'a')
-    output.write(
-         "\n## Variables that occur more than once within the `{0}` env file\n\n"
-         .format(release_name))
-    output.write(FENCE_OPEN)
+    output.write("\n")
+    write_heading_2(
+            output,
+            "Variables that occur more than once within the `{0}` env file"
+            .format(release_name))
+    output.write(FENCE_OPEN_BASH)
     for repeated_var in repeated_vars:
         output.write(
                 "{0} is defined twice, as \"{1}\" and as \"{2}\"\n"
@@ -203,9 +226,92 @@ def dump_file_contents(file_path):
             if fence_match == None:
                 heading_match = re.search("^#+ ", line)
                 if heading_match != None:
-                    print("{0}{1}{2}".format(Colours.GREEN, line, Colours.NC), end='')
+                    print("{0}{1}{2}".format(Colours.YELLOW, line, Colours.NC), end='')
                 else:
                     print(line, end='')
+
+
+def diff_files(output, from_file, to_file):
+    with open(from_file, 'r') as from_handle:
+        with open(to_file, 'r') as to_handle:
+            diff = difflib.unified_diff(
+                from_handle.readlines(),
+                to_handle.readlines()
+            )
+            for line in diff:
+                output.write(line)
+
+
+def compare_directories(output_file_path, from_release, to_release, stack_name):
+    with open(output_file_path, 'a') as output:
+        write_heading_2(output, "Changes to the volumes directory")
+        from_dir = get_path_to_volumes_dir(from_release, stack_name)
+        to_dir = get_path_to_volumes_dir(to_release, stack_name)
+        # filecmp.dircmp(from_dir, to_dir).report_full_closure()
+        dir_comp = filecmp.dircmp(from_dir, to_dir)
+        changed_files=[]
+        process_directory_comparison(output, dir_comp, "", changed_files) 
+
+        for pair in changed_files:
+            output.write("\n")
+            write_heading_3(output, "Diff for {0}".format(pair[0]))
+            output.write("From: `" + pair[1] + "`\n")
+            output.write("\n")
+            output.write("To:   `" + pair[2] + "`\n")
+            output.write("\n")
+            output.write(FENCE_OPEN_DIFF)
+            diff_files(output, pair[1], pair[2])
+            output.write(FENCE_CLOSE)
+
+
+def process_directory_comparison(output, dir_comp, indent, changed_files):
+
+    # Sort all the lists for a consistent output
+    dir_comp.diff_files.sort()
+    dir_comp.left_only.sort()
+    dir_comp.right_only.sort()
+    dir_comp.common_dirs.sort()
+
+    # recursive processing of common dirs
+    for name in dir_comp.common_dirs:
+        output.write("{0}* {1}/\n".format(indent, name))
+        process_directory_comparison(
+                output, 
+                dir_comp.subdirs[name], 
+                indent + "    ", 
+                changed_files)
+
+    # Added directories
+    for name in dir_comp.right_only:
+        if os.path.isdir(dir_comp.right + "/" + name):
+        # if name in dir_comp.subdirs:
+            output.write("{0}* {1}/ - **ADDED**\n".format(indent, name))
+
+    # removed directories
+    for name in dir_comp.left_only:
+        # if name in dir_comp.subdirs:
+        if os.path.isdir(dir_comp.left + "/" + name):
+            output.write("{0}* {1}/ - **REMOVED**\n".format(indent, name))
+
+    # Modified files
+    for file_name in dir_comp.diff_files:
+        output.write("{0}* {1} - **MODIFIED** (see below)\n".format(indent, file_name))
+        pair = (file_name, 
+                dir_comp.left + "/" + file_name, 
+                dir_comp.right + "/" + file_name)
+        changed_files.append(pair)
+
+    # Added files
+    for name in dir_comp.right_only:
+        if os.path.isfile(dir_comp.right + "/" + name):
+        # if not name in dir_comp.subdirs:
+            output.write("{0}* {1} - **ADDED**\n".format(indent, name))
+
+    # Removed files
+    for name in dir_comp.left_only:
+        if os.path.isfile(dir_comp.left + "/" + name):
+        # if not name in dir_comp.subdirs:
+            output.write("{0}{1} - **REMOVED**\n".format(indent, name))
 
 
 def main():
@@ -238,11 +344,14 @@ def main():
     add_repetitions_to_output_file(output_file_path, to_release,
                                    repeated_to_vars)
 
+    compare_directories(output_file_path, from_release, to_release, stack_name)
+
     print("A list of differences has been written to {0}{1}{2}".format(
         Colours.BLUE, output_file_path, Colours.NC))
     print("")
     print("=====================================================================")
     dump_file_contents(output_file_path)
+    print("")
     print("=====================================================================")
 
 
