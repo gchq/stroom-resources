@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-"""Generates a manual migration between two Stroom releases
+#!/usr/bin/env python3
+"""
 
 Usage: create_config_migration.py <from_release> <to_release> <stack_name>
 
@@ -11,11 +11,19 @@ import re
 import shutil
 import sys
 import tarfile
-import urllib
-from docopt import docopt
+import urllib.request
+
+FENCE_OPEN = "``` bash\n"
+FENCE_CLOSE = "```\n"
+
+USAGE_TXT= "" \
+        + "Script to generate a list of configuration changes between two releases\n" \
+        + "Usage: create_config_migration.py <from_release> <to_release> <stack_name>\n" \
+        + "E.g: \n" \
+        + "./create_config_migration.py stroom-stacks-v6.0-beta.30 stroom-stacks-v6.0-beta.31 stroom_core" \
 
 
-class colours:
+class Colours:
     RED = '\033[1;31m'
     GREEN = '\033[1;32m'
     YELLOW = '\033[1;33m'
@@ -30,20 +38,28 @@ class colours:
     BOLD = '\033[1m'
 
 
-class config:
+class Config:
     BUILD_DIR = './build'
     OUTPUT_DIR = './migrations'
 
+def print_usage():
+    print(USAGE_TXT)
+
+def print_error(msg):
+    print("{0}Error{1}: {2}".format(Colours.RED, Colours.NC, msg))
+
 
 def create_build_dir():
-    shutil.rmtree(config.BUILD_DIR, True)
-    os.mkdir(config.BUILD_DIR)
-    if not os.path.isdir(config.OUTPUT_DIR):
-        os.mkdir(config.OUTPUT_DIR)
+    shutil.rmtree(Config.BUILD_DIR, True)
+    os.mkdir(Config.BUILD_DIR)
+    if not os.path.isdir(Config.OUTPUT_DIR):
+        os.mkdir(Config.OUTPUT_DIR)
+
 
 def log_error(msg):
-    print "{0}Error{1}: {2}{3}".format(
-            colours.RED, colours.NC, msg, colours.NC)
+    print("{0}Error{1}: {2}{3}".format(
+            Colours.RED, Colours.NC, msg, Colours.NC))
+
 
 def get_version_from_release(release_name):
     match = re.search("v[0-9]+\.[0-9]+.*", release_name)
@@ -60,31 +76,31 @@ def get_release(release_name, stack_name):
     GITHUB_DOWNLOAD_URL = "https://github.com/gchq/stroom-resources/" \
             + "releases/download/{0}/{1}"
     url = GITHUB_DOWNLOAD_URL.format(release_name, artifact)
-    downloaded_file = "{0}/{1}".format(config.BUILD_DIR, artifact)
-    extracted_files = "{0}/{1}".format(config.BUILD_DIR, release_name)
-    print "Downloading file {0}{1}{2}" \
-        .format(colours.BLUE, url, colours.NC)
-    urllib.urlretrieve(url, downloaded_file)
+    downloaded_file = "{0}/{1}".format(Config.BUILD_DIR, artifact)
+    extracted_files = "{0}/{1}".format(Config.BUILD_DIR, release_name)
+    print("Downloading file {0}{1}{2}" \
+        .format(Colours.BLUE, url, Colours.NC))
+    urllib.request.urlretrieve(url, downloaded_file)
     try:
         with tarfile.open(downloaded_file) as tar:
             tar = tarfile.open(downloaded_file)
             tar.extractall(extracted_files)
     except:
         log_error("Opening file {0}{1}{2}, the url may not exist or the file may be corrupt."
-                .format(colours.BLUE, downloaded_file, colours.NC))
+                .format(Colours.BLUE, downloaded_file, Colours.NC))
         raise
 
 
 def get_path_to_config(release_name, stack_name):
     version = get_version_from_release(release_name)
     from_version_path = "{0}/{1}/{2}/{2}-{3}/config/{2}.env" \
-        .format(config.BUILD_DIR, release_name, stack_name, version)
+        .format(Config.BUILD_DIR, release_name, stack_name, version)
     return from_version_path
 
 
 def extract_variables_from_env_file(path):
-    print "Extracting variables from file {0}{1}{2}" \
-        .format(colours.BLUE, path, colours.NC)
+    print("Extracting variables from file {0}{1}{2}" \
+        .format(Colours.BLUE, path, Colours.NC))
     env_file = open(path)
     lines = env_file.readlines()
     env_vars = {}
@@ -142,24 +158,24 @@ def create_output_file(
                  .format(from_release, to_release))
 
     output.write("## Added\n\n")
-    output.write("``` bash\n")
+    output.write(FENCE_OPEN)
     for added_var in sorted(added_vars):
         output.write("{0}={1}\n".format(added_var, added_vars[added_var]))
-    output.write("```\n")
+    output.write(FENCE_CLOSE)
 
     output.write("\n## Removed\n\n")
-    output.write("``` bash\n")
+    output.write(FENCE_OPEN)
     for removed_var in sorted(removed_vars):
         output.write("{0}={1}\n"
                      .format(removed_var, removed_vars[removed_var]))
-    output.write("```\n")
+    output.write(FENCE_CLOSE)
 
     output.write("\n## Changed default values\n\n")
-    output.write("``` bash\n")
+    output.write(FENCE_OPEN)
     for changed_var in changed_vars:
         output.write("{0} has changed from \"{1}\" to \"{2}\"\n"
                      .format(changed_var[0], changed_var[1], changed_var[2]))
-    output.write("```\n")
+    output.write(FENCE_CLOSE)
 
     output.close()
 
@@ -170,29 +186,46 @@ def add_repetitions_to_output_file(
     output.write(
          "\n## Variables that occur more than once within the `{0}` env file\n\n"
          .format(release_name))
-    output.write("``` bash\n")
+    output.write(FENCE_OPEN)
     for repeated_var in repeated_vars:
         output.write(
                 "{0} is defined twice, as \"{1}\" and as \"{2}\"\n"
                 .format(repeated_var[0], repeated_var[1], repeated_var[2]))
-    output.write("```\n")
+    output.write(FENCE_CLOSE)
     output.close()
 
 
-def main():
-    arguments = docopt(__doc__, version='v1.0')
-    from_release = arguments["<from_release>"]
-    to_release = arguments["<to_release>"]
-    stack_name = arguments["<stack_name>"]
+def dump_file_contents(file_path):
+    with open(file_path, 'r') as file_handle:
+        # print file_handle.read()
+        for line in file_handle:
+            fence_match = re.search("^\`\`\`", line)
+            if fence_match == None:
+                heading_match = re.search("^#+ ", line)
+                if heading_match != None:
+                    print("{0}{1}{2}".format(Colours.GREEN, line, Colours.NC), end='')
+                else:
+                    print(line, end='')
 
-    print "Comparing the environment variable files of {0}{1}{2}" \
-        .format(colours.BLUE, from_release, colours.NC) \
-        + ", and {0}{1}{2}".format(colours.BLUE, to_release, colours.NC)
+
+def main():
+    if len(sys.argv) != 4:
+        print_error("Invalid arguments")
+        print_usage()
+        exit(1)
+
+    from_release = sys.argv[1]
+    to_release = sys.argv[2]
+    stack_name = sys.argv[3]
+
+    print("Comparing the environment variable files of {0}{1}{2}" \
+        .format(Colours.BLUE, from_release, Colours.NC) \
+        + ", and {0}{1}{2}".format(Colours.BLUE, to_release, Colours.NC))
 
     create_build_dir()
 
     output_file_path = "{0}/{3}__{1}_to_{2}.md".format(
-        config.OUTPUT_DIR,
+        Config.OUTPUT_DIR,
         from_release, to_release, stack_name)
 
     (from_vars, repeated_from_vars) = setup_release(from_release, stack_name)
@@ -205,8 +238,12 @@ def main():
     add_repetitions_to_output_file(output_file_path, to_release,
                                    repeated_to_vars)
 
-    print "A list of differences has been written to {0}{1}{2}".format(
-        colours.BLUE, output_file_path, colours.NC)
+    print("A list of differences has been written to {0}{1}{2}".format(
+        Colours.BLUE, output_file_path, Colours.NC))
+    print("")
+    print("=====================================================================")
+    dump_file_contents(output_file_path)
+    print("=====================================================================")
 
 
 if __name__ == '__main__':
