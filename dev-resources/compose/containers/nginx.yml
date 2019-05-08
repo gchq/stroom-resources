@@ -23,6 +23,7 @@ services:
         # so set it to 'optional' so that it asks the client for a cert and if it
         # provides one it will inspect it
       - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-optional}
+      - NGINX_HTML_ROOT_PATH=${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}
       #- QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP:5002}
       - STROOM_HOST=${STROOM_HOST:-$HOST_IP}
       - STROOM_PORT=${STROOM_APP_PORT:-8080}
@@ -32,6 +33,7 @@ services:
       - ${NGINX_VOLUME_CERTS:-../../volumes/nginx/certs}:/stroom-nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
       - ${NGINX_VOLUME_CONF:-../../volumes/nginx/conf}:/stroom-nginx/config:ro
+      - ${NGINX_VOLUME_HTML:-../../volumes/nginx/html}:${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}:ro
       - type: volume
         source: nginx_logs
         target: /stroom-nginx/logs

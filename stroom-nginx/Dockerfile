@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM nginx:1.15.10-alpine
+FROM nginx:1.15.12-alpine
 
 # This is the root dir for all our files/scripts
 WORKDIR /stroom-nginx
@@ -23,6 +23,9 @@ VOLUME [ "/stroom-nginx/certs" ]
 # The location of the template configuration file to use as the base for generating
 # the actual nginx.conf file on container start and the cron configuration
 VOLUME [ "/stroom-nginx/config" ]
+
+# The location of any html served by nginx
+VOLUME [ "/stroom-nginx/html" ]
 
 # Volume for file based logs for collection by stroom-log-sender
 # Nginx will also log to /var/log/nginx/access.log|error.log which are sym links
@@ -38,16 +41,21 @@ ENTRYPOINT ["/sbin/tini", "--", "/stroom-nginx/docker-entrypoint.sh"]
 
 CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 
+# bash for the entrypoint script
 # logrotate for rotation of the file based access/app logs
 # tini required for process control in the entrypoint
+# remove the default nginx html path to avoid confusion
 RUN \
     apk add --no-cache \
+        bash \
         logrotate \
         tini && \
     mkdir -p /stroom-nginx/logs && \
     mkdir -p /stroom-nginx/logrotate && \
     mkdir -p /stroom-nginx/certs && \
-    mkdir -p /stroom-nginx/config
+    mkdir -p /stroom-nginx/config && \
+    mkdir -p /stroom-nginx/html && \
+    rm -rf /usr/share/nginx/html
 
 # Copy entrypoint and related shell scripts
 COPY *.sh /stroom-nginx/
