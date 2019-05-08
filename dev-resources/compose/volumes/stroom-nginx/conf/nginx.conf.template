@@ -102,7 +102,7 @@ http {
     }
     server {
         listen 46081;
-        return 302 https://${STROOM_UI_URL}/;
+        return 302 https://<<<STROOM_UI_URL>>>/;
     }   
 
     ### TOKENS ###
