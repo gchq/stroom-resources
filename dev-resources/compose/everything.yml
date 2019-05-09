@@ -80,11 +80,6 @@ services:
       depends_on:
           - stroom-all-dbs
 
-  stroom-auth-ui:
-      extends:
-          file: ./containers/stroom-auth-ui.yml
-          service: stroom-auth-ui
-  
   stroom-ui:
       extends:
           file: ./containers/stroom-ui.yml
