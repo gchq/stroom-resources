@@ -135,27 +135,6 @@ http {
         return 302 https://<<<AUTH_UI_URL>>>/;
     }
 
-    ### ANNOTATIONS ###
-    upstream annotations_upstream {
-        server 127.0.0.1:46061;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46061;
-        return 302 <<<ANNOTATIONS_UI_URL>>>/;
-    }
-
-    ### QUERY-ELASTIC ###
-    upstream query_elastic_upstream {
-        server 127.0.0.1:46071;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46071;
-        return 302 <<<QUERY_ELASTIC_UI_URL>>>/;
-    }
-
-
     index index.html index.htm;
 
     server {
@@ -312,15 +291,6 @@ http {
             proxy_pass_request_headers on;
         }
 
-        location /annotationsService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://<<<NGINX_ADVERTISED_HOST>>>:8199/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
         # Lucene index query service on Stroom
         location /indexService/ {
             proxy_ssl_server_name      on;
@@ -363,15 +333,6 @@ http {
         location /stroomstatsService/ {
             proxy_ssl_server_name      on;
             proxy_pass                 http://<<<NGINX_ADVERTISED_HOST>>>:8086/api/stroom-stats/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /queryElasticService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://<<<NGINX_ADVERTISED_HOST>>>:8299/;
             proxy_pass_header          Set-Cookie;
             proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body    on;
@@ -519,14 +480,6 @@ http {
         # should be non-root. E.g. passwordReset is root, so we need this location.
         location /authui {
             proxy_pass http://auth_ui_upstream;
-        }
-
-        location /annotations {
-            proxy_pass http://annotations_upstream;
-        }
-
-        location /query-elastic {
-            proxy_pass http://query_elastic_upstream;
         }
     }
 }
