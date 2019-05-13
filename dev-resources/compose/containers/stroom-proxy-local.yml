@@ -7,12 +7,13 @@ services:
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
     environment:
         #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-http://stroom:8080/api/dictionary/v1}
-      - CONTENT_SYNC_ENABLED=${STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED:-false}
+      #- CONTENT_SYNC_ENABLED=${STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED:-false}
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
       - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-}
       - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10766,suspend=n }
+        # Ruleset functionality not ready for use in v6
       #- RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
       - STORING_ENABLED=${STROOM_PROXY_LOCAL_STORING_ENABLED:-true}
       - STROOM_PROXY_ADMIN_PORT=8091
@@ -28,12 +29,14 @@ services:
       - STROOM_PROXY_HTTPS_TRUSTSTORE_PATH=${STROOM_PROXY_LOCAL_HTTPS_TRUSTSTORE_PATH:-/stroom-proxy/certs/ca.jks}
       - STROOM_PROXY_HTTPS_TRUSTSTORE_TYPE=${STROOM_PROXY_LOCAL_HTTPS_TRUSTSTORE_TYPE:-JKS}
       - STROOM_PROXY_HTTPS_WANT_CLIENT_AUTH=${STROOM_PROXY_LOCAL_HTTPS_WANT_CLIENT_AUTH:-true}
-      - SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-}
+        # Ruleset functionality not ready for use in v6
+      #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-}
         # TODO These two upstream urls should be going via nginx, but in dev I had issues getting the ssl to work
       #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-http://stroom:8080/api/dictionary/v1}
         #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-https://nginx/dictionaryService/v1}
       #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
         #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-https://nginx/rulesetService/v1}
+      - FEED_STATUS_URL=
     ports:
       - "${STROOM_PROXY_LOCAL_APP_PORT:-8090}:8090"
       - "${STROOM_PROXY_LOCAL_HTTPS_APP_PORT:-8543}:8543"
