@@ -13,7 +13,7 @@ services:
       - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
       - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-}
       - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10766,suspend=n }
-      - RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
+      #- RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
       - STORING_ENABLED=${STROOM_PROXY_LOCAL_STORING_ENABLED:-true}
       - STROOM_PROXY_ADMIN_PORT=8091
       - STROOM_PROXY_APP_PORT=8090
@@ -30,9 +30,9 @@ services:
       - STROOM_PROXY_HTTPS_WANT_CLIENT_AUTH=${STROOM_PROXY_LOCAL_HTTPS_WANT_CLIENT_AUTH:-true}
       - SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-}
         # TODO These two upstream urls should be going via nginx, but in dev I had issues getting the ssl to work
-      - UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-http://stroom:8080/api/dictionary/v1}
+      #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-http://stroom:8080/api/dictionary/v1}
         #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-https://nginx/dictionaryService/v1}
-      - UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
+      #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
         #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-https://nginx/rulesetService/v1}
     ports:
       - "${STROOM_PROXY_LOCAL_APP_PORT:-8090}:8090"
