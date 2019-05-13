@@ -464,6 +464,10 @@ http {
 
         ## ROUTING FOR STROOM
 
+        location = / {
+             return 302 https://<<<NGINX_ADVERTISED_HOST>>>/stroom/ui;
+        }
+
         # This is an exact match that directs '/stroom' to the Stroom UI...
         location ~ /stroom$ {
              return 302 https://<<<NGINX_ADVERTISED_HOST>>>/stroom/ui;
