@@ -4,7 +4,7 @@ services:
 
   stroom:
     container_name: stroom
-    image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
+    image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}

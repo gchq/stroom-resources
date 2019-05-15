@@ -57,9 +57,9 @@ add_header_to_env_file() {
 
 # If var_name is "STROOM_TAG", replacement_value is "v6.1.2" and a line in
 # ${INPUT_YAML_FILE} looks like:
-#   image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
+#   image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
 # then it becomes 
-#   image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.1.2}"
+#   image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.1.2}"
 # This changes the default value, whilst still allowing it to be overridden
 # via the env file at deployment time.
 replace_in_yaml() {
