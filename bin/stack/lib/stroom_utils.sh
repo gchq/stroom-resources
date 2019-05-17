@@ -622,59 +622,56 @@ stop_stack_gracefully() {
 }
 
 wait_for_stroom() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom to complete its start up.${NC}"
-  echo -e "${DGREY}Stroom has to build its database tables when started for the first time,${NC}"
-  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/stroomAdmin"
+  local info_msg="Waiting for Stroom to complete its start up."
+  local sub_info_msg=$'Stroom has to build its database tables when started for the first time,\nso this may take a minute or so. Subsequent starts will be quicker.'
 
-  wait_for_200_response "http://localhost:${admin_port}/stroomAdmin"
+  wait_for_200_response "${url}" "${info_msg}" "${sub_info_msg}"
 }
 
 wait_for_stroom_auth_service() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom Authentication to complete its start up.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_AUTH_SERVICE_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/authenticationServiceAdmin"
+  local info_msg="Waiting for Stroom Authentication to complete its start up."
 
-  wait_for_200_response "http://localhost:${admin_port}/authenticationServiceAdmin"
+  wait_for_200_response "${url}" "${info_msg}"
 }
 
 wait_for_stroom_stats() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom Stats to complete its start up.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_STATS_SERVICE_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/statsAdmin"
+  local info_msg="Waiting for Stroom Stats to complete its start up."
 
-  wait_for_200_response "http://localhost:${admin_port}/statsAdmin"
+  wait_for_200_response "${url}" "${info_msg}"
 }
 
 wait_for_stroom_proxy_local() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom Proxy (local) to complete its start up.${NC}"
-  echo -e "${DGREY}Stroom Proxy has to build its database tables when started for the first time,${NC}"
-  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_PROXY_LOCAL_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/proxyAdmin"
+  local info_msg="Waiting for Stroom Proxy (local) to complete its start up."
+  local sub_info_msg=$'Stroom Proxy has to build its database tables when started for the first time,\nso this may take a minute or so. Subsequent starts will be quicker.'
 
-  wait_for_200_response "http://localhost:${admin_port}/proxyAdmin"
+  wait_for_200_response "${url}" "${info_msg}" "${sub_info_msg}"
 }
 
 wait_for_stroom_proxy_remote() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom Proxy (remote) to complete its start up.${NC}"
-  echo -e "${DGREY}Stroom Proxy has to build its database tables when started for the first time,${NC}"
-  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/proxyAdmin"
+  local info_msg="Waiting for Stroom Proxy (remote) to complete its start up."
+  local sub_info_msg=$'Stroom Proxy has to build its database tables when started for the first time,\nso this may take a minute or so. Subsequent starts will be quicker.'
 
-  wait_for_200_response "http://localhost:${admin_port}/proxyAdmin"
+  wait_for_200_response "${url}" "${info_msg}" "${sub_info_msg}"
 }
 
 wait_for_service_to_start() {
@@ -684,13 +681,17 @@ wait_for_service_to_start() {
   # slowest first
   if is_container_running "stroom"; then
     wait_for_stroom
-  elif is_container_running "stroom-proxy-local"; then
+  fi
+  if is_container_running "stroom-proxy-local"; then
     wait_for_stroom_proxy_local
-  elif is_container_running "stroom-proxy-remote"; then
+  fi
+  if is_container_running "stroom-proxy-remote"; then
     wait_for_stroom_proxy_remote
-  elif is_container_running "stroom-auth-service"; then
+  fi
+  if is_container_running "stroom-auth-service"; then
     wait_for_stroom_auth_service
-  elif is_container_running "stroom-stats"; then
+  fi
+  if is_container_running "stroom-stats"; then
     wait_for_stroom_stats
   fi
   # If we fall out here then we have nothing useful to wait for

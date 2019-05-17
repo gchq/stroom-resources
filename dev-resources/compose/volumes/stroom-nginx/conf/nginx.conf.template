@@ -332,18 +332,29 @@ http {
             proxy_pass_request_headers on;
         }
 
-        location /rulesetService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/api/ruleset/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
+# Ruleset functionality not fit for use in v6 so commented out
+#        location /rulesetService/ {
+#            proxy_ssl_server_name      on;
+#            proxy_pass                 http://stroom_upstream/api/ruleset/;
+#            proxy_pass_header          Set-Cookie;
+#            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
+#            proxy_pass_request_body    on;
+#            proxy_pass_request_headers on;
+#        }
+#
+#        location /dictionaryService/ {
+#            proxy_ssl_server_name      on;
+#            proxy_pass                 http://stroom_upstream/api/dictionary/;
+#            proxy_pass_header          Set-Cookie;
+#            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
+#            proxy_pass_request_body    on;
+#            proxy_pass_request_headers on;
+#        }
 
-        location /dictionaryService/ {
+        # Servcie for proxies to check the accept/reject/drop status of a feed
+        location /feedStatusService/ {
             proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/api/dictionary/;
+            proxy_pass                 http://stroom_upstream/api/feedStatus/;
             proxy_pass_header          Set-Cookie;
             proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_request_body    on;

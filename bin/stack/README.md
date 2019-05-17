@@ -77,7 +77,7 @@ This file contains overrides to substitution variables found in the docker compo
 For example, if `stroom.yml` contains a line like
 
 ``` yaml
-  image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
+  image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
 ```
 
 and the `overrides.env` file contains
@@ -89,7 +89,7 @@ STROOM_TAG="v6.1.2"
 Then the resulting stack `.yml` file becomes:
 
 ``` yaml
-  image: "${STROOM_REPO:-gchq/stroom}:v6.1.2"
+  image: "${STROOM_DOCKER_REPO:-gchq/stroom}:v6.1.2"
 ```
 
 
