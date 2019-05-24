@@ -16,6 +16,16 @@ services:
         # The following env vars are used to substitute values in
         # 001_create_databases.sql.template
 
+        # Database names
+      - STROOM_ANNOTATIONS_DB_NAME=${STROOM_ANNOTATIONS_DB_NAME:-annotations}
+      - STROOM_AUTH_DB_NAME=${STROOM_AUTH_DB_NAME:-auth}
+      - STROOM_CONFIG_DB_NAME=${STROOM_CONFIG_DB_NAME:-config}
+      - STROOM_DATAMETA_DB_NAME=${STROOM_DATAMETA_DB_NAME:-datameta}
+      - STROOM_EXPLORER_DB_NAME=${STROOM_EXPLORER_DB_NAME:-explorer}
+      - STROOM_PROCESS_DB_NAME=${STROOM_PROCESS_DB_NAME:-process}
+      - STROOM_STATS_DB_NAME=${STROOM_STATS_DB_NAME:-stats}
+      - STROOM_DB_NAME=${STROOM_DB_NAME:-stroom}
+
         # Database users
       - STROOM_ANNOTATIONS_DB_USERNAME=${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}
       - STROOM_AUTH_DB_USERNAME=${STROOM_AUTH_DB_USERNAME:-authuser}
@@ -35,6 +45,7 @@ services:
       - STROOM_PROCESS_DB_PASSWORD=${STROOM_PROCESS_DB_PASSWORD:-stroompassword1}
       - STROOM_STATS_DB_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
       - STROOM_DB_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
+
     volumes:
       - ${MYSQL_VOLUME_CONF_FILE:-../../volumes/stroom-all-dbs/conf/stroom-all-dbs.cnf}:/etc/mysql/conf.d/stroom-all-dbs.cnf:ro
       - ${MYSQL_VOLUME_INIT:-../../volumes/stroom-all-dbs/init}:/docker-entrypoint-initdb.d:ro
