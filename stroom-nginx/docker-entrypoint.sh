@@ -15,15 +15,27 @@ setup_colours() {
   }
 }
 
-create_nginx_conf() {
-  echo -e "Substituting tags in ${BLUE}${nginx_conf_template_file}${NC}" \
-    "to generate ${BLUE}${nginx_conf_file}${NC}"
+# Takes the path to the templates and generates templated conf files for each.
+create_confs() {
+  for source_path in ${1}/*.conf.template; do
+    local source=$(basename $source_path)
+    local destination=${source%.template}
+    create_conf ${source_path} "/etc/nginx/${destination}"
+  done
+}
 
-  cat "${nginx_conf_template_file}" > "${nginx_conf_file}"
+# Takes a template file and a target file and templates <<<something>>> variables.
+create_conf() {
+  local template_file=$1
+  local target_file=$2
+  echo -e "Substituting tags in ${BLUE}${template_file}${NC}" \
+    "to generate ${BLUE}${target_file}${NC}"
+
+  cat "${template_file}" > "${target_file}"
 
   # Find all the distinct <<<SOME_TAG>>> type tags in the template file
   unique_tags_in_file="$( \
-    grep -oE "<<<[^<]+>>>" "${nginx_conf_template_file}" \
+    grep -oE "<<<[^<]+>>>" "${template_file}" \
     | sort \
     | uniq \
   )"
@@ -40,7 +52,7 @@ create_nginx_conf() {
       echo -e "  Replacing tag ${YELLOW}${tag_name}${NC} with value" \
         "[${GREEN}${replacement_value}${NC}]"
 
-      sed -i'' "s|${tag}|${replacement_value}|g" "${nginx_conf_file}"
+      sed -i'' "s|${tag}|${replacement_value}|g" "${target_file}"
 
       if [ ! -n "${replacement_value}" ]; then
         echo -e "  ${RED}WARN${NC}: No substitution value for" \
@@ -102,11 +114,9 @@ main() {
   logrotate_template_file="${config_dir}/logrotate.conf.template"
   logrotate_conf_file="${base_dir}/logrotate/logrotate.conf"
 
-  nginx_conf_template_file="${config_dir}/nginx.conf.template"
-  nginx_conf_file="/etc/nginx/nginx.conf"
-
   setup_colours
-  create_nginx_conf
+
+  create_confs "${config_dir}"
 
   echo -e "Ensuring directories"
   # Ensure we have the sub-directories in our /nginx/logs/ volume
