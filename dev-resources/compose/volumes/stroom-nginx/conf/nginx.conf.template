@@ -14,206 +14,70 @@ http {
     ####################
 
     upstream auth_service_upstream_sticky {
-        ip_hash; # Upstream determined by a hash of the clients IP address -- effectively enabling sticky sessions
+        ip_hash; 
         server <<<AUTH_SERVICE_HOST>>>:<<<AUTH_SERVICE_PORT>>>;
-        # Can add other servers below
     }
 
     upstream stroom_upstream_sticky {
-        ip_hash; # Upstream determined by a hash of the clients IP address -- effectively enabling sticky sessions
+        ip_hash;
         server <<<STROOM_HOST>>>:<<<STROOM_PORT>>>;
-        # Can add other servers below
     }
 
     upstream stroom_upstream {
         server <<<STROOM_HOST>>>:<<<STROOM_PORT>>>;
-        # Can add other servers below
     }
 
     upstream stroom_proxy_upstream {
         server <<<STROOM_PROXY_HOST>>>:<<<STROOM_PROXY_PORT>>>;
-        # Can add other servers below
     }
 
     upstream auth_ui_upstream {
-      server <<<AUTH_UI_URL>>>;
+        server <<<AUTH_UI_URL>>>;
     }
 
     index index.html index.htm;
 
     server {
-        #rewrite_log    on;
-        #log_not_found  on;
-        #log_subrequest on;
-
-        root <<<NGINX_HTML_ROOT_PATH>>>;
-
-        listen                      80;
-        listen                      443 ssl;
-        server_name                 <<<NGINX_ADVERTISED_HOST>>> localhost;
-
-        # The server's public certificate
-        ssl_certificate             /stroom-nginx/certs/<<<NGINX_SSL_CERTIFICATE>>>;
-        # The server's private key
-        ssl_certificate_key         /stroom-nginx/certs/<<<NGINX_SSL_CERTIFICATE_KEY>>>;
-        # The public CA cert for verifying client certs
-        ssl_client_certificate      /stroom-nginx/certs/<<<NGINX_SSL_CLIENT_CERTIFICATE>>>;
-
-        # These two need to be on otherwise we won't be able to extract the DN or the cert
-        # In order to capture the DN in the headers/logs, ssl_client_verify needs to be set
-        # to 'on' or 'optional'. With 'optional' nginx will request that the client provides
-        # a cert and use it if it does. Nginx doedsn't currently (without using multiple server 
-        # blocks) have a way to set ssl_client_verify at the 'location' level which would 
-        # allow us to selectively turn it on.
-        ssl_verify_client           <<<NGINX_SSL_VERIFY_CLIENT>>>;
-        ssl_verify_depth            10;
-
-        # These set the timeouts - the unit is seconds
-        proxy_connect_timeout       300;
-        proxy_send_timeout          300;
-        proxy_read_timeout          300;
-        send_timeout                300;
-
-        # Set the max body sizde to unlimited to allow for large data imports
-        client_max_body_size        0;
-
-        # Set the amount of memory used to buffer client bodies before using temporary files
-        client_body_buffer_size     <<<NGINX_CLIENT_BODY_BUFFER_SIZE>>>;
-
-        # If this were on NGINX would buffer all client request bodies. This includes any huge
-        # files sent to datafeed. Turning this off means all requests are immediately sent to
-        # the proxied upstream server. 
-        # TODO: I _think_ this makes client_max_body_size and client_body_buffer_size redundent.
-        # TODO: Possibly this should be set just for /datafeed.
-        proxy_request_buffering     off;
-
-        # TODO - May want to consider this approach for large file uploads
-        # https://stackoverflow.com/questions/44371643/nginx-php-failing-with-large-file-uploads-over-6-gb
-        # i.e. getting nginx to persist the body to disk then only pass the persisted filename to stroom.
-        # This is on the assumption that stroom and nginx can both rw to the same disk location, e.g. a
-        # a common docker volume.
-
-        # Was the CA cert configured with an OCSP responder?
-        #   - If so you can enable the following lines and NGINX will call out to the OCSP
-        #     server to check for revoked certificates.
-        # Are there intermediate CA certs?
-        #   - If so you will need to cat them together to make sure the OCSP server is picked up.
-        #ssl_stapling            on;
-        #ssl_stapling_verify     on;
-        #ssl_trusted_certificate /stroom-nginx/certs/ca.pem.crt;
-
-
-#        location / {
-#          include cors.conf;
-#        }
-
+       
+        include server.conf;
         ########################
         # ROUTING FOR SERVICES #
         ########################
-
-        # This is the root for all services hosted by auth.
-        # It's needed for the Swagger client's baseUrl.
-#        location /authService/ {
-#            proxy_pass                 http://auth_service_upstream_sticky/;
-#            include location_defaults.conf;
-#        }
-#
-#        location /authenticationService/ {
-#            proxy_pass                 http://auth_service_upstream_sticky/authentication/;
-#            include location_defaults.conf;
-#        }
-#
-#        location /userService/ {
-#            proxy_pass                 http://auth_service_upstream_sticky/user/;
-#            include location_defaults.conf;
-#        }
-#
-#        location /tokenService/ {
-#            proxy_pass                 http://auth_service_upstream_sticky/token/;
-#            include location_defaults.conf;
-#        }
 
         location /api/auth/ {
             proxy_pass http://auth_service_upstream_sticky/;
         }
 
-        # TODO: This should mean we don't need a lot of the other routes!
         location /api/ {
-            proxy_pass                 http://stroom_upstream/api/;
+            proxy_pass http://stroom_upstream/api/;
             include location_defaults.conf;
         }
 
 
-
-#        location /authorisationService/ {
-#            proxy_pass                 http://stroom_upstream/api/authorisation/;
-#            include location_defaults.conf;
-#        }
-#
-#        # Lucene index query service on Stroom
-#        location /indexService/ {
-#            proxy_pass                 http://stroom_upstream_sticky/api/stroom-index/;
-#            include location_defaults.conf;
-#        }
-#
-#        # SQL Statistics query service on Stroom
-#        location /sqlstatisticsService/ {
-#            proxy_pass                 http://stroom_upstream_sticky/api/sqlstatistics/;
-#            include location_defaults.conf;
-#        }
-#
-#        location /rulesetService/ {
-#           proxy_pass                 http://stroom_upstream/api/ruleset/;
-#            include location_defaults.conf;
-#        }
-#
-#        location /dictionaryService/ {
-#            proxy_pass                 http://stroom_upstream/api/dictionary/;
-#            include location_defaults.conf;
-#        }
-#
-#        #Stroom-stats query service on stroom-stats
-#        location /stroomstatsService/ {
-#            proxy_pass                 http://<<<NGINX_ADVERTISED_HOST>>>:8086/api/stroom-stats/;
-#            include location_defaults.conf;
-#        }
-
-        # TODO may also need location = /stroom/datafeeddirect
-        # see http://nginx.org/en/docs/http/ngx_http_core_module.html#location
-
         # datafeed direct into stroom with no prxoy aggregation
         location /stroom/datafeeddirect/ {
-           proxy_pass                 http://stroom_upstream/stroom/datafeed/;
+           proxy_pass http://stroom_upstream/stroom/datafeed/;
            include proxy_location_defaults.conf;
         }
 
         # datafeed direct into stroom with no prxoy aggregation (exact match)
         location = /stroom/datafeeddirect {
-            proxy_pass                 http://stroom_upstream/stroom/datafeed/;
+            proxy_pass http://stroom_upstream/stroom/datafeed/;
             include proxy_location_defaults.conf;
         }
 
         # datafeed into proxy
         location /stroom/datafeed/ {
-            proxy_pass                 http://stroom_proxy_upstream/stroom/datafeed/;
+            proxy_pass http://stroom_proxy_upstream/stroom/datafeed/;
             include proxy_location_defaults.conf;
         }
 
         # datafeed into proxy (exact match)
         location = /stroom/datafeed {
-            proxy_pass                 http://stroom_proxy_upstream/stroom/datafeed/;
+            proxy_pass http://stroom_proxy_upstream/stroom/datafeed/;
             include proxy_location_defaults.conf;
         }
 
-#        location /streamTaskService/ {
-#            proxy_pass                 http://stroom_upstream/api/streamtasks/;
-#            include location_defaults.conf;
-#        }
-#
-#        location /exportService/ {
-#            proxy_pass                 http://stroom_upstream/api/export/;
-#            include location_defaults.conf;
-#        }
 
         ##################
         # ROUTING FOR UI #
@@ -232,31 +96,11 @@ http {
 
         # ... and everything else gets reverse-proxied to stroom.
         location /stroom {
-            proxy_pass                 http://<<<STROOM_HOST>>>:<<<STROOM_PORT>>>/stroom;
+            proxy_pass http://<<<STROOM_HOST>>>:<<<STROOM_PORT>>>/stroom;
             include location_defaults.conf;
         }
 
         ## ROUTING FOR OTHER UI
-
-#        location /login {
-#            proxy_pass https://auth_ui_upstream/login;
-#        }
-#
-#        location /users {
-#            proxy_pass https://auth_ui_upstream/userSearch;
-#        }
-#
-#        location /ui {
-#            proxy_pass https://auth_ui_upstream;
-#        }
-#
-#        location /tokens {
-#            proxy_pass https://auth_ui_upstream/tokens;
-#        }
-#
-#        location /changepassword {
-#            proxy_pass https://auth_ui_upstream/changepassword;
-#        }
 
         # TODO: We don't really want this path. Auth has several responsibilities.
         # Some of them are mapped to more helpful locations, as above, but really 
@@ -264,7 +108,6 @@ http {
         location /authui {
             proxy_pass https://auth_ui_upstream;
         }
-
 
 
         # The following routes mount stroom-ui onto this server. These paths catch 
@@ -290,11 +133,13 @@ http {
           proxy_pass https://auth_ui_upstream/s;
         }
 
-        location / {
-          proxy_pass https://auth_ui_upstream/;
-          proxy_http_version 1.1;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade"; 
-        }
+
+        # The following should catch websocket requests (wss:) but it doesn't seem to work.
+        # location / {
+        #   proxy_pass https://auth_ui_upstream/;
+        #   proxy_http_version 1.1;
+        #   proxy_set_header Upgrade $http_upgrade;
+        #   proxy_set_header Connection "upgrade"; 
+        # }
     }
 }
