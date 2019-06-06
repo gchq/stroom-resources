@@ -1,22 +1,16 @@
-version: '2.4'
+version: "2.4"
 
 services:
-
   stroom-ui:
     container_name: stroom-ui
     image: "${STROOM_UI_DOCKER_REPO:-gchq/stroom-ui}:${STROOM_UI_TAG:-v7.0-LATEST}"
-    # All URLs are accessed from a browser, and so need to refer to the advertised host.
     environment:
-      # The AUTH_UI_xxx variables configure the app as loaded in the browser
-      - APP_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1
-      - APP_AUTHORISATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authorisationService/v1
-      - APP_STREAM_TASK_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/streamTaskService/v1
       - APP_ADVERTISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}
       - APP_CLIENT_ID=stroom-ui
       - APP_STROOM_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api
+      - APP_AUTH_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
       - APP_STROOM_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}:8080/stroom
-      - APP_TOKEN_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/token/v1
-      - APP_USER_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/user/v1
+      - APP_ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
       # The NGINX_xxx variables configure the NGINX server that serves the app
       - NGINX_HOST=${STROOM_UI_HOST:-$HOST_IP}
       - NGINX_HTTP_PORT=${STROOM_UI_HTTP_PORT:-5001}
