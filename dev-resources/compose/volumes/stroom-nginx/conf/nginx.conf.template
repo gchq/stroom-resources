@@ -35,67 +35,8 @@ http {
         # Can add other servers below
     }
 
-
-    ######################
-    # Upstream redirects #
-    ######################
-    ### USERS ###
-    upstream users_upstream {
-        server 127.0.0.1:46011;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46011;
-        return 302 https://<<<AUTH_UI_URL>>>/userSearch/;
-    }
-
-    ### LOGIN ###
-    upstream login_upstream {
-        server 127.0.0.1:46021;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46021;
-        return 302 https://<<<AUTH_UI_URL>>>/login/;
-    }
-
-    ### STROOM-UI ###
-    upstream ui_upstream {
-        server 127.0.0.1:46081;
-    }
-    server {
-        listen 46081;
-        return 302 https://<<<STROOM_UI_URL>>>/;
-    }   
-
-    ### TOKENS ###
-    upstream tokens_upstream {
-        server 127.0.0.1:46031;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46031;
-        return 302 https://<<<AUTH_UI_URL>>>/tokens/;
-    }
-
-    ### CHANGEPASSWORD ###
-    upstream change_password_upstream {
-        server 127.0.0.1:46041;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46041;
-        return 302 https://<<<AUTH_UI_URL>>>/changepassword/;
-    }
-
-    ### AUTHUI ###
     upstream auth_ui_upstream {
-        server 127.0.0.1:46051;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46051;
-        return 302 https://<<<AUTH_UI_URL>>>/;
+      server <<<AUTH_UI_URL>>>;
     }
 
     index index.html index.htm;
@@ -161,7 +102,10 @@ http {
         #ssl_stapling_verify     on;
         #ssl_trusted_certificate /stroom-nginx/certs/ca.pem.crt;
 
-        include cors.conf;
+
+#        location / {
+#          include cors.conf;
+#        }
 
         ########################
         # ROUTING FOR SERVICES #
@@ -189,6 +133,7 @@ http {
             include location_defaults.conf;
         }
 
+        # TODO: This should mean we don't need a lot of the other routes!
         location /api/ {
             proxy_pass                 http://stroom_upstream/api/;
             include location_defaults.conf;
@@ -287,31 +232,63 @@ http {
 
         ## ROUTING FOR OTHER UI
 
-        location /login {
-            proxy_pass http://login_upstream;
-        }
-
-        location /users {
-            proxy_pass http://users_upstream;
-        }
-
-        location /ui {
-            proxy_pass http://ui_upstream;
-        }
-
-        location /tokens {
-            proxy_pass http://tokens_upstream;
-        }
-
-        location /changepassword {
-            proxy_pass http://change_password_upstream;
-        }
+#        location /login {
+#            proxy_pass https://auth_ui_upstream/login;
+#        }
+#
+#        location /users {
+#            proxy_pass https://auth_ui_upstream/userSearch;
+#        }
+#
+#        location /ui {
+#            proxy_pass https://auth_ui_upstream;
+#        }
+#
+#        location /tokens {
+#            proxy_pass https://auth_ui_upstream/tokens;
+#        }
+#
+#        location /changepassword {
+#            proxy_pass https://auth_ui_upstream/changepassword;
+#        }
 
         # TODO: We don't really want this path. Auth has several responsibilities.
         # Some of them are mapped to more helpful locations, as above, but really 
         # should be non-root. E.g. passwordReset is root, so we need this location.
         location /authui {
-            proxy_pass http://auth_ui_upstream;
+            proxy_pass https://auth_ui_upstream;
+        }
+
+
+
+        # The following routes mount stroom-ui onto this server. These paths catch 
+        # everything that should go to the UI.
+        # Handle the response for the authentication flow, so stroom-ui can authenticate itself.
+        location /handleAuthenticationResponse {
+          proxy_pass https://auth_ui_upstream/handleAuthenticationResponse;
+        }
+        location /login {
+          proxy_pass https://auth_ui_upstream/login;
+        }
+        # This allows stroom-ui to get its config.
+        location /config.json {
+          proxy_pass https://auth_ui_upstream/config.json;
+        }
+        # This allows stroom-ui to get its assets, e.g. css and images.
+        location /static {
+          proxy_pass https://auth_ui_upstream/static;
+        }
+        # This is the path where all non-chrome pages are hosted,
+        # i.e. all the normal functionality but without the chrome (navigation, footer).
+        location /s {
+          proxy_pass https://auth_ui_upstream/s;
+        }
+
+        location / {
+          proxy_pass https://auth_ui_upstream/;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade"; 
         }
     }
 }
