@@ -113,24 +113,28 @@ http {
 
         # This is the root for all services hosted by auth.
         # It's needed for the Swagger client's baseUrl.
-        location /authService/ {
-            proxy_pass                 http://auth_service_upstream_sticky/;
-            include location_defaults.conf;
-        }
+#        location /authService/ {
+#            proxy_pass                 http://auth_service_upstream_sticky/;
+#            include location_defaults.conf;
+#        }
+#
+#        location /authenticationService/ {
+#            proxy_pass                 http://auth_service_upstream_sticky/authentication/;
+#            include location_defaults.conf;
+#        }
+#
+#        location /userService/ {
+#            proxy_pass                 http://auth_service_upstream_sticky/user/;
+#            include location_defaults.conf;
+#        }
+#
+#        location /tokenService/ {
+#            proxy_pass                 http://auth_service_upstream_sticky/token/;
+#            include location_defaults.conf;
+#        }
 
-        location /authenticationService/ {
-            proxy_pass                 http://auth_service_upstream_sticky/authentication/;
-            include location_defaults.conf;
-        }
-
-        location /userService/ {
-            proxy_pass                 http://auth_service_upstream_sticky/user/;
-            include location_defaults.conf;
-        }
-
-        location /tokenService/ {
-            proxy_pass                 http://auth_service_upstream_sticky/token/;
-            include location_defaults.conf;
+        location /api/auth/ {
+            proxy_pass http://auth_service_upstream_sticky/;
         }
 
         # TODO: This should mean we don't need a lot of the other routes!
@@ -139,38 +143,40 @@ http {
             include location_defaults.conf;
         }
 
-        location /authorisationService/ {
-            proxy_pass                 http://stroom_upstream/api/authorisation/;
-            include location_defaults.conf;
-        }
 
-        # Lucene index query service on Stroom
-        location /indexService/ {
-            proxy_pass                 http://stroom_upstream_sticky/api/stroom-index/;
-            include location_defaults.conf;
-        }
 
-        # SQL Statistics query service on Stroom
-        location /sqlstatisticsService/ {
-            proxy_pass                 http://stroom_upstream_sticky/api/sqlstatistics/;
-            include location_defaults.conf;
-        }
-
-        location /rulesetService/ {
-           proxy_pass                 http://stroom_upstream/api/ruleset/;
-            include location_defaults.conf;
-        }
-
-        location /dictionaryService/ {
-            proxy_pass                 http://stroom_upstream/api/dictionary/;
-            include location_defaults.conf;
-        }
-
-        #Stroom-stats query service on stroom-stats
-        location /stroomstatsService/ {
-            proxy_pass                 http://<<<NGINX_ADVERTISED_HOST>>>:8086/api/stroom-stats/;
-            include location_defaults.conf;
-        }
+#        location /authorisationService/ {
+#            proxy_pass                 http://stroom_upstream/api/authorisation/;
+#            include location_defaults.conf;
+#        }
+#
+#        # Lucene index query service on Stroom
+#        location /indexService/ {
+#            proxy_pass                 http://stroom_upstream_sticky/api/stroom-index/;
+#            include location_defaults.conf;
+#        }
+#
+#        # SQL Statistics query service on Stroom
+#        location /sqlstatisticsService/ {
+#            proxy_pass                 http://stroom_upstream_sticky/api/sqlstatistics/;
+#            include location_defaults.conf;
+#        }
+#
+#        location /rulesetService/ {
+#           proxy_pass                 http://stroom_upstream/api/ruleset/;
+#            include location_defaults.conf;
+#        }
+#
+#        location /dictionaryService/ {
+#            proxy_pass                 http://stroom_upstream/api/dictionary/;
+#            include location_defaults.conf;
+#        }
+#
+#        #Stroom-stats query service on stroom-stats
+#        location /stroomstatsService/ {
+#            proxy_pass                 http://<<<NGINX_ADVERTISED_HOST>>>:8086/api/stroom-stats/;
+#            include location_defaults.conf;
+#        }
 
         # TODO may also need location = /stroom/datafeeddirect
         # see http://nginx.org/en/docs/http/ngx_http_core_module.html#location
@@ -199,15 +205,15 @@ http {
             include proxy_location_defaults.conf;
         }
 
-        location /streamTaskService/ {
-            proxy_pass                 http://stroom_upstream/api/streamtasks/;
-            include location_defaults.conf;
-        }
-
-        location /exportService/ {
-            proxy_pass                 http://stroom_upstream/api/export/;
-            include location_defaults.conf;
-        }
+#        location /streamTaskService/ {
+#            proxy_pass                 http://stroom_upstream/api/streamtasks/;
+#            include location_defaults.conf;
+#        }
+#
+#        location /exportService/ {
+#            proxy_pass                 http://stroom_upstream/api/export/;
+#            include location_defaults.conf;
+#        }
 
         ##################
         # ROUTING FOR UI #

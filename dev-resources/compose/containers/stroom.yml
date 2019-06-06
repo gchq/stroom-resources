@@ -1,7 +1,6 @@
-version: '2.4'
+version: "2.4"
 
 services:
-
   stroom:
     container_name: stroom
     image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v7.0-LATEST}"
@@ -25,10 +24,10 @@ services:
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
       # The browser is redirected to this URL so, like the AUTH UI URL, it needs to be the advertised host.
       # Though these look similar they are both needed, one is a base path for swagger and the other is the service
-      - STROOM_AUTH_SERVICES_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authService
+      - STROOM_AUTH_SERVICES_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
         # TODO: remove one of the following
-      - STROOM_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1
-      - STROOM_AUTH_AUTHENTICATION_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1
+      - STROOM_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth/authentication/v1
+      - STROOM_AUTH_AUTHENTICATION_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth/authentication/v1
       - STROOM_AUTH_JWT_ISSUER=${STROOM_AUTH_JWT_ISSUER:-stroom}
       - STROOM_AUTH_JWT_ENABLETOKENREVOCATIONCHECK=${ENABLE_TOKEN_REVOCATION_CHECK:-false}
       - STROOM_UI_URL=${STROOM_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}
