@@ -4,7 +4,6 @@
 
         root <<<NGINX_HTML_ROOT_PATH>>>;
 
-        listen                      80;
         listen                      443 ssl;
         server_name                 <<<NGINX_ADVERTISED_HOST>>> localhost;
 

@@ -37,6 +37,13 @@ http {
 
     index index.html index.htm;
 
+    # Re-direct all http to https
+    server {
+        listen 80 default_server;
+        server_name _;
+        return 301 https://$host$request_uri;
+    }
+
     server {
        
         include server.conf;
@@ -45,12 +52,13 @@ http {
         ########################
 
         location /api/auth/ {
+            include location_defaults.conf;
             proxy_pass http://auth_service_upstream_sticky/;
         }
 
         location /api/ {
-            proxy_pass http://stroom_upstream/api/;
             include location_defaults.conf;
+            proxy_pass http://stroom_upstream/api/;
         }
 
 
@@ -112,27 +120,23 @@ http {
 
         # The following routes mount stroom-ui onto this server. These paths catch 
         # everything that should go to the UI.
-        # Handle the response for the authentication flow, so stroom-ui can authenticate itself.
-        location /handleAuthenticationResponse {
-          proxy_pass https://auth_ui_upstream/handleAuthenticationResponse;
-        }
-        location /login {
-          proxy_pass https://auth_ui_upstream/login;
-        }
+
         # This allows stroom-ui to get its config.
         location /config.json {
           proxy_pass https://auth_ui_upstream/config.json;
         }
+
         # This allows stroom-ui to get its assets, e.g. css and images.
         location /static {
           proxy_pass https://auth_ui_upstream/static;
         }
+
         # This is the path where all non-chrome pages are hosted,
         # i.e. all the normal functionality but without the chrome (navigation, footer).
         location /s {
+          include location_defaults.conf;
           proxy_pass https://auth_ui_upstream/s;
         }
-
 
         # The following should catch websocket requests (wss:) but it doesn't seem to work.
         # location / {
