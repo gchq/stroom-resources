@@ -47,6 +47,7 @@ http {
     server {
        
         include server.conf;
+
         ########################
         # ROUTING FOR SERVICES #
         ########################

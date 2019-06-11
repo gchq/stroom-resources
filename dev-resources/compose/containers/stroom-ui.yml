@@ -9,7 +9,7 @@ services:
       - APP_CLIENT_ID=stroom-ui
       - APP_STROOM_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api
       - APP_AUTH_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
-      - APP_STROOM_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}:8080/stroom
+      - APP_STROOM_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/stroom
       - APP_ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
       # The NGINX_xxx variables configure the NGINX server that serves the app
       - NGINX_HOST=${STROOM_UI_HOST:-$HOST_IP}
