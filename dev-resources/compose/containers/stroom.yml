@@ -24,7 +24,7 @@ services:
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
       # The browser is redirected to this URL so, like the AUTH UI URL, it needs to be the advertised host.
       # Though these look similar they are both needed, one is a base path for swagger and the other is the service
-      - STROOM_AUTH_SERVICES_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
+      - STROOM_AUTH_SERVICES_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
         # TODO: remove one of the following
       - STROOM_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth/authentication/v1
       - STROOM_AUTH_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth/authentication/v1
