@@ -2,7 +2,7 @@ version: '2.4'
 services:
   nginx:
     container_name: nginx
-    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v1.0-LATEST}"
+    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v6.0-LATEST}"
     environment:
       #- ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_URL:-http://$HOST_IP:5001}
       - AUTH_SERVICE_HOST=${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
