@@ -79,8 +79,13 @@ main() {
     copy_file \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
+    # server keystore so dropwizard can listen on https
     copy_file \
       "${SRC_CERTS_DIRECTORY}/server/server.jks" \
+      "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
+    # client keystore so proxy can make https rest calls out to stroom/nginx
+    copy_file \
+      "${SRC_CERTS_DIRECTORY}/client/client.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
   fi
 
@@ -90,8 +95,13 @@ main() {
     copy_file \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
+    # server keystore so dropwizard can listen on https
     copy_file \
       "${SRC_CERTS_DIRECTORY}/server/server.jks" \
+      "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
+    # client keystore so proxy can make https rest calls out to stroom/nginx
+    copy_file \
+      "${SRC_CERTS_DIRECTORY}/client/client.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
   fi
 
