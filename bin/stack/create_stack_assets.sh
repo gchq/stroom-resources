@@ -131,13 +131,28 @@ main() {
     echo -e "  Copying ${YELLOW}nginx${NC} config files"
     local -r DEST_NGINX_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/conf"
     copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/nginx.conf.template" \
+      "${SRC_NGINX_CONF_DIRECTORY}/cors.conf.template" \
+      "${DEST_NGINX_CONF_DIRECTORY}"
+    copy_file \
+      "${SRC_NGINX_CONF_DIRECTORY}/crontab.txt" \
+      "${DEST_NGINX_CONF_DIRECTORY}"
+    copy_file \
+      "${SRC_NGINX_CONF_DIRECTORY}/location_defaults.conf.template" \
+      "${DEST_NGINX_CONF_DIRECTORY}"
+    copy_file \
+      "${SRC_NGINX_CONF_DIRECTORY}/logging.conf.template" \
       "${DEST_NGINX_CONF_DIRECTORY}"
     copy_file \
       "${SRC_NGINX_CONF_DIRECTORY}/logrotate.conf.template" \
       "${DEST_NGINX_CONF_DIRECTORY}"
     copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/crontab.txt" \
+      "${SRC_NGINX_CONF_DIRECTORY}/nginx.conf.template" \
+      "${DEST_NGINX_CONF_DIRECTORY}"
+    copy_file \
+      "${SRC_NGINX_CONF_DIRECTORY}/proxy_location_defaults.conf.template" \
+      "${DEST_NGINX_CONF_DIRECTORY}"
+    copy_file \
+      "${SRC_NGINX_CONF_DIRECTORY}/server.conf.template" \
       "${DEST_NGINX_CONF_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}nginx${NC} html files"
