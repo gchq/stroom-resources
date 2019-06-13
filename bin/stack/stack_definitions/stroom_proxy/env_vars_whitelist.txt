@@ -1,0 +1,36 @@
+# This file contains a whitelist of environemnt variables to
+# extract from the source docker compose yml file. In the source
+# yml file you will see entries like:
+# - XX_XX=${YY_YY:-some_default}
+# In this example if you wanted the environment variable and its default to
+# be included in the stack env file then you would add 'YY_YY' to this
+# whitelist
+# NOTE: Env vars listed here cannot also be in the overrides.env file
+
+
+STROOM_PROXY_DOCKER_REPO
+#STROOM_PROXY_REMOTE_CONTENT_SYNC_ENABLED - commented out as rulesets are not ready for use
+STROOM_PROXY_REMOTE_ADMIN_PORT
+STROOM_PROXY_REMOTE_APP_PORT
+STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_PASSWORD
+STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_PATH
+STROOM_PROXY_REMOTE_CLIENT_TRUSTSTORE_PASSWORD
+STROOM_PROXY_REMOTE_CLIENT_TRUSTSTORE_PATH
+STROOM_PROXY_REMOTE_FEED_STATUS_API_KEY
+STROOM_PROXY_REMOTE_FEED_STATUS_URL
+STROOM_PROXY_REMOTE_FORWARDING_ENABLED
+STROOM_PROXY_REMOTE_FORWARD_URL
+STROOM_PROXY_REMOTE_HTTPS_APP_PORT
+STROOM_PROXY_REMOTE_HTTPS_KEYSTORE_PASSWORD
+STROOM_PROXY_REMOTE_HTTPS_KEYSTORE_PATH
+STROOM_PROXY_REMOTE_HTTPS_TRUSTSTORE_PASSWORD
+STROOM_PROXY_REMOTE_HTTPS_TRUSTSTORE_PATH
+STROOM_PROXY_REMOTE_JERSEY_VERIFY_HOSTNAME
+#STROOM_PROXY_REMOTE_RECEIPT_POLICY_UUID - commented out as rulesets are not ready for use
+STROOM_PROXY_REMOTE_STORING_ENABLED
+#STROOM_PROXY_REMOTE_SYNC_API_KEY - commented out as rulesets are not ready for use
+#STROOM_PROXY_REMOTE_UPSTREAM_DICTIONARY_URL - commented out as rulesets are not ready for use
+#STROOM_PROXY_REMOTE_UPSTREAM_RULE_URL - commented out as rulesets are not ready for use
+
+
+# vim: set filetype=conf:
