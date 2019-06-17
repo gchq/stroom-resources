@@ -22,6 +22,7 @@
 
 set -e
 
+# shellcheck disable=SC1091
 source lib/shell_utils.sh
 
 download_file() {
@@ -40,9 +41,13 @@ download_file() {
 copy_file() {
   local -r src=$1
   local -r dest_dir=$2
-  echo -e "    Copying ${BLUE}${src}${NC} ${YELLOW}=>${NC} ${BLUE}${dest_dir}${NC}"
-  mkdir -p "${dest_dir}"
-  cp "${src}" "${dest_dir}"
+  # src may be a glob so we expand the glob and copy each file it represents
+  # so we have visibility of what is being copied
+  for src_file in ${src}; do
+    echo -e "    Copying ${BLUE}${src_file}${NC} ${YELLOW}=>${NC} ${BLUE}${dest_dir}${NC}"
+    mkdir -p "${dest_dir}"
+    cp "${src_file}" "${dest_dir}"
+  done
 }
 
 main() {
@@ -131,28 +136,10 @@ main() {
     echo -e "  Copying ${YELLOW}nginx${NC} config files"
     local -r DEST_NGINX_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/conf"
     copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/cors.conf.template" \
+      "${SRC_NGINX_CONF_DIRECTORY}/*.conf.template" \
       "${DEST_NGINX_CONF_DIRECTORY}"
     copy_file \
       "${SRC_NGINX_CONF_DIRECTORY}/crontab.txt" \
-      "${DEST_NGINX_CONF_DIRECTORY}"
-    copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/location_defaults.conf.template" \
-      "${DEST_NGINX_CONF_DIRECTORY}"
-    copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/logging.conf.template" \
-      "${DEST_NGINX_CONF_DIRECTORY}"
-    copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/logrotate.conf.template" \
-      "${DEST_NGINX_CONF_DIRECTORY}"
-    copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/nginx.conf.template" \
-      "${DEST_NGINX_CONF_DIRECTORY}"
-    copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/proxy_location_defaults.conf.template" \
-      "${DEST_NGINX_CONF_DIRECTORY}"
-    copy_file \
-      "${SRC_NGINX_CONF_DIRECTORY}/server.conf.template" \
       "${DEST_NGINX_CONF_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}nginx${NC} html files"
