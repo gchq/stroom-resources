@@ -33,14 +33,14 @@ http {
         # Include generic server configuration
         include server.conf;
 
-        # Include server configuration specific to stroom
-        include server.stroom.conf;
+        # Include location configuration specific to stroom
+        include locations.stroom.conf;
 
-        # Include server configuration specific to auth
-        include server.auth.conf;
+        # Include location configuration specific to auth
+        include locations.auth.conf;
 
-        # Include server configuration specific to proxy
-        include server.proxy.conf;
+        # Include location configuration specific to proxy
+        include locations.proxy.conf;
     }
 }
 
