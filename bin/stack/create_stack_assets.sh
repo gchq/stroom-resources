@@ -38,7 +38,7 @@ download_file() {
   fi
 }
 
-copy_file() {
+copy_file_to_dir() {
   local -r src=$1
   local -r dest_dir=$2
   # src may be a glob so we expand the glob and copy each file it represents
@@ -48,6 +48,15 @@ copy_file() {
     mkdir -p "${dest_dir}"
     cp "${src_file}" "${dest_dir}"
   done
+}
+
+copy_file_to_file() {
+  local -r src_file=$1
+  local -r dest_file=$2
+  # src may be a glob so we expand the glob and copy each file it represents
+  # so we have visibility of what is being copied
+  echo -e "    Copying ${BLUE}${src_file}${NC} ${YELLOW}=>${NC} ${BLUE}${dest_file}${NC}"
+  cp "${src_file}" "${dest_file}"
 }
 
 main() {
@@ -81,15 +90,15 @@ main() {
   if element_in "stroom-proxy-remote" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} certificates"
     local -r DEST_PROXY_REMOTE_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-remote/certs"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
     # server keystore so dropwizard can listen on https
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/server/server.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
     # client keystore so proxy can make https rest calls out to stroom/nginx
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
   fi
@@ -97,15 +106,15 @@ main() {
   if element_in "stroom-proxy-local" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} certificates"
     local -r DEST_PROXY_LOCAL_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-local/certs"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
     # server keystore so dropwizard can listen on https
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/server/server.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
     # client keystore so proxy can make https rest calls out to stroom/nginx
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
   fi
@@ -113,19 +122,19 @@ main() {
   if element_in "stroom-auth-ui" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} certificates"
     local -r DEST_AUTH_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/auth-ui/certs"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" \
       "${DEST_AUTH_UI_CERTS_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" \
       "${DEST_AUTH_UI_CERTS_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" \
       "${DEST_AUTH_UI_CERTS_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} config files"
     local -r DEST_AUTH_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/auth-ui/conf"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_AUTH_UI_CONF_DIRECTORY}/nginx.conf.template" \
       "${DEST_AUTH_UI_CONF_DIRECTORY}"
   fi
@@ -133,31 +142,40 @@ main() {
   if element_in "nginx" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}nginx${NC} certificates"
     local -r DEST_NGINX_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/certs"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" \
       "${DEST_NGINX_CERTS_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" \
       "${DEST_NGINX_CERTS_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" \
       "${DEST_NGINX_CERTS_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}nginx${NC} config files"
     local -r DEST_NGINX_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/conf"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_NGINX_CONF_DIRECTORY}/*.conf.template" \
       "${DEST_NGINX_CONF_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_NGINX_CONF_DIRECTORY}/crontab.txt" \
       "${DEST_NGINX_CONF_DIRECTORY}"
 
+    # We need a custom nginx.conf for the stroom_proxy stack as that is just
+    # proxy and nginx.
+    if [ "${BUILD_STACK_NAME}" = "stroom_proxy" ]; then
+      echo -e "  Overriding ${YELLOW}stroom-nginx${NC} configuration for stroom_proxy stack"
+      copy_file_to_file \
+        "${SRC_NGINX_CONF_DIRECTORY}/custom/proxy_nginx.conf.template" \
+        "${DEST_NGINX_CONF_DIRECTORY}/nginx.conf.template"
+    fi
+
     echo -e "  Copying ${YELLOW}nginx${NC} html files"
     local -r DEST_NGINX_HTML_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/html"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_NGINX_HTML_DIRECTORY}/50x.html" \
       "${DEST_NGINX_HTML_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_NGINX_HTML_DIRECTORY}/index.html" \
       "${DEST_NGINX_HTML_DIRECTORY}"
   fi
@@ -169,13 +187,13 @@ main() {
     # Set up the client certs needed for the send_data script
     echo -e "  Copying ${YELLOW}client${NC} certificates"
     local -r DEST_CLIENT_CERTS_DIRECTORY="${WORKING_DIRECTORY}/certs"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" \
       "${DEST_CLIENT_CERTS_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.pem.crt" \
       "${DEST_CLIENT_CERTS_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.unencrypted.key" \
       "${DEST_CLIENT_CERTS_DIRECTORY}"
 
@@ -205,22 +223,22 @@ main() {
 
     echo -e "  Copying ${YELLOW}stroom-log-sender${NC} certificates"
     local -r DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-log-sender/certs"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" \
       "${DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.pem.crt" \
       "${DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.unencrypted.key" \
       "${DEST_STROOM_LOG_SENDER_CERTS_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}stroom-log-sender${NC} config files"
     local -r DEST_STROOM_LOG_SENDER_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-log-sender/conf"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt" \
       "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env" \
       "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
   fi
@@ -228,14 +246,14 @@ main() {
   if element_in "stroom-all-dbs" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} config file"
     local -r DEST_STROOM_ALL_DBS_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-all-dbs/conf"
-    copy_file "${SRC_STROOM_ALL_DBS_CONF_FILE}" "${DEST_STROOM_ALL_DBS_CONF_DIRECTORY}"
+    copy_file_to_dir "${SRC_STROOM_ALL_DBS_CONF_FILE}" "${DEST_STROOM_ALL_DBS_CONF_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} init files"
     local -r DEST_STROOM_ALL_DBS_INIT_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-all-dbs/init"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/000_init_override.sh" \
       "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}"
-    copy_file \
+    copy_file_to_dir \
       "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/001_create_databases.sql.template" \
       "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}"
   fi

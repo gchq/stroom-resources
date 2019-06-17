@@ -1,0 +1,35 @@
+user  nginx;
+
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    # Include generic logging configuration
+    include logging.conf;
+
+    # Include upstreams configuration specific to proxy
+    include upstreams.proxy.conf;
+
+    # Define valid index page filenames
+    index index.html index.htm;
+
+    # Redirect all http traffic to https
+    server {
+        listen 80 default_server;
+        server_name _;
+        return 301 https://$host$request_uri;
+    }
+
+    server {
+        # Include generic server configuration
+        include server.conf;
+
+        # Include location configuration specific to proxy
+        include locations.proxy.conf;
+    }
+}
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
