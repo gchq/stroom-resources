@@ -1,0 +1,24 @@
+# Server configuration for proxy
+
+########################
+# ROUTING FOR SERVICES #
+########################
+
+# datafeed into proxy
+location /stroom/datafeed/ {
+    proxy_pass http://stroom_proxy_upstream/stroom/datafeed/;
+    include proxy_location_defaults.conf;
+}
+
+# datafeed into proxy (exact match)
+location = /stroom/datafeed {
+    proxy_pass http://stroom_proxy_upstream/stroom/datafeed/;
+    include proxy_location_defaults.conf;
+}
+
+##################
+# ROUTING FOR UI #
+##################
+
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
