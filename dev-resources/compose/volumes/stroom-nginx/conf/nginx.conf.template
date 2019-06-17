@@ -7,36 +7,22 @@ events {
 }
 
 http {
+    # Include generic logging configuration
     include logging.conf;
      
-    ####################
-    # Upstream servers #
-    ####################
+    # Include upstreams configuration specific to stroom
+    include upstreams.stroom.conf;
 
-    upstream auth_service_upstream_sticky {
-        ip_hash;
-        server <<<AUTH_SERVICE_HOST>>>:<<<AUTH_SERVICE_PORT>>>;
-    }
+    # Include upstreams configuration specific to auth
+    include upstreams.auth.conf;
 
-    upstream stroom_upstream_sticky {
-        ip_hash;
-        server <<<STROOM_HOST>>>:<<<STROOM_PORT>>>;
-    }
+    # Include upstreams configuration specific to proxy
+    include upstreams.proxy.conf;
 
-    upstream stroom_upstream {
-        server <<<STROOM_HOST>>>:<<<STROOM_PORT>>>;
-    }
-
-    upstream stroom_proxy_upstream {
-        server <<<STROOM_PROXY_HOST>>>:<<<STROOM_PROXY_PORT>>>;
-    }
-
-    upstream auth_ui_upstream {
-        server <<<AUTH_UI_URL>>>;
-    }
-
+    # Define valid index page filenames
     index index.html index.htm;
 
+    # Redirect all http traffic to https
     server {
         listen 80 default_server;
         server_name _;
@@ -44,107 +30,18 @@ http {
     }
     
     server {
+        # Include generic server configuration
         include server.conf;
 
-        ########################
-        # ROUTING FOR SERVICES #
-        ########################
+        # Include server configuration specific to stroom
+        include server.stroom.conf;
 
-        location /api/auth/ {
-            include location_defaults.conf;
-            proxy_pass http://auth_service_upstream_sticky/;
-        }
+        # Include server configuration specific to auth
+        include server.auth.conf;
 
-        location /api/ {
-            include location_defaults.conf;
-            proxy_pass http://stroom_upstream/api/;
-        }
-
-        # datafeed direct into stroom with no prxoy aggregation
-        location /stroom/datafeeddirect/ {
-            proxy_pass http://stroom_upstream/stroom/datafeed/;
-            include proxy_location_defaults.conf;
-        }
-
-        # datafeed direct into stroom with no prxoy aggregation (exact match)
-        location = /stroom/datafeeddirect {
-            proxy_pass http://stroom_upstream/stroom/datafeed/;
-            include proxy_location_defaults.conf;
-        }
-
-        # datafeed into proxy
-        location /stroom/datafeed/ {
-            proxy_pass http://stroom_proxy_upstream/stroom/datafeed/;
-            include proxy_location_defaults.conf;
-        }
-
-        # datafeed into proxy (exact match)
-        location = /stroom/datafeed {
-            proxy_pass http://stroom_proxy_upstream/stroom/datafeed/;
-            include proxy_location_defaults.conf;
-        }
-
-        ##################
-        # ROUTING FOR UI #
-        ##################
-
-        ## ROUTING FOR STROOM
-
-        location = / {
-             return 302 https://<<<NGINX_ADVERTISED_HOST>>>/stroom/ui;
-        }
-
-        # This is an exact match that directs '/stroom' to the Stroom UI...
-        location ~ /stroom$ {
-             return 302 https://<<<NGINX_ADVERTISED_HOST>>>/stroom/ui;
-        }
-
-        location ~ .*/clustercall.rpc$ {
-            deny all;
-        }
-
-        # ... and everything else gets reverse-proxied to stroom.
-        location /stroom {
-            proxy_pass http://<<<STROOM_HOST>>>:<<<STROOM_PORT>>>/stroom;
-            include location_defaults.conf;
-        }
-
-        ## ROUTING FOR OTHER UI
-        # TODO: We don't really want this path. Auth has several responsibilities.
-        # Some of them are mapped to more helpful locations, as above, but really 
-        # should be non-root. E.g. passwordReset is root, so we need this location.
-        location /authui {
-            proxy_pass https://auth_ui_upstream;
-        }
-
-        # The following routes mount stroom-ui onto this server. These paths catch
-        # everything that should go to the UI.
-
-        # This allows stroom-ui to get its conf# This allows stroom-ui to get its config.ig.
-        location /config.json {
-            proxy_pass https://auth_ui_upstream/config.json;
-        }
-
-        # This allows stroom-ui to get its assets, e.g. css and images.
-        location /static {
-            proxy_pass https://auth_ui_upstream/static;
-        }
-
-        # This is the path where all non-chrome pages are hosted,
-        # i.e. all the normal functionality but without the chrome (navigation, footer).
-        location /s {
-            include location_defaults.conf;
-            proxy_pass https://auth_ui_upstream/s;
-        }
-
-        # The following should catch websocket requests (wss:) but it doesn't seem to work.
-        # location / {
-        #   proxy_pass https://auth_ui_upstream/;
-        #   proxy_http_version 1.1;
-        #   proxy_set_header Upgrade $http_upgrade;
-        #   proxy_set_header Connection "upgrade"; 
-        # }
+        # Include server configuration specific to proxy
+        include server.proxy.conf;
     }
 }
 
-# vim: set filetype=text:
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
