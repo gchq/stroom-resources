@@ -93,6 +93,9 @@ main() {
   local -r STROOM_PROXY_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_PROXY_TAG}/stroom-app"
   local -r STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR="${STROOM_CONFIG_YAML_SNAPSHOT_DIR}"
   local -r STROOM_PROXY_CONFIG_YAML_FILENAME="proxy-prod.yml"
+  local -r STROOM_AUTH_SVC_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-auth/${STROOM_AUTH_SERVICE_TAG}/stroom-auth-svc"
+  local -r STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_AUTH_REPO_DIR:-UNKNOWN_LOCAL_STROOM_AUTH_REPO_DIR}/stroom-auth-svc"
+  local -r STROOM_AUTH_SVC_CONFIG_YAML_FILENAME="config.yml"
 
   if element_in "stroom" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom${NC} config"
@@ -170,6 +173,26 @@ main() {
     copy_file \
       "${SRC_CERTS_DIRECTORY}/server/server.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
+  fi
+
+  if element_in "stroom-auth-service" "${services[@]}"; then
+    echo -e "  Copying ${YELLOW}stroom-auth-service${NC} config"
+    local -r DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-service/config"
+    if [[ "${STROOM_AUTH_SERVICE_TAG}" =~ local-SNAPSHOT ]]; then
+      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_AUTH_SERVICE_TAG${NC}=${BLUE}${STROOM_AUTH_SERVICE_TAG}${NC}"
+      if [ ! -n "${LOCAL_STROOM_AUTH_REPO_DIR}" ]; then
+        echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_AUTH_REPO_DIR${NC} to your local stroom repo"
+      fi
+      copy_file \
+        "${STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}" \
+        "${DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY}" \
+        "config.yml"
+    else
+      download_file \
+        "${DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY}" \
+        "${STROOM_AUTH_SVC_CONFIG_YAML_URL_BASE}" \
+        "${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}"
+    fi
   fi
 
   if element_in "stroom-auth-ui" "${services[@]}"; then
