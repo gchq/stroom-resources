@@ -41,12 +41,17 @@ download_file() {
 copy_file() {
   local -r src=$1
   local -r dest_dir=$2
+  local -r new_filename=$3
   # src may be a glob so we expand the glob and copy each file it represents
   # so we have visibility of what is being copied
   for src_file in ${src}; do
-    echo -e "    Copying ${BLUE}${src_file}${NC} ${YELLOW}=>${NC} ${BLUE}${dest_dir}${NC}"
+    echo -e "    Copying ${BLUE}${src_file}${NC} ${YELLOW}=>${NC} ${BLUE}${dest_dir}/${new_filename}${NC}"
     mkdir -p "${dest_dir}"
-    cp "${src_file}" "${dest_dir}"
+    if [ ! -e "${src_file}" ]; then
+      echo -e "      ${RED}ERROR${NC}: File ${BLUE}${src_file}${NC} doesn't exist${NC}"
+      exit 1
+    fi
+    cp "${src_file}" "${dest_dir}/${new_filename}"
   done
 }
 
@@ -57,6 +62,11 @@ main() {
     "${BLUE}build.sh stackName serviceX serviceY etc.${NC}"
 
   echo -e "${GREEN}Copying assets${NC}"
+
+  # We need access to the release tags for downloading specific versions of files
+  # from github
+  # shellcheck disable=SC1091
+  source container_versions.env
 
   local -r BUILD_STACK_NAME=$1
   local -r VERSION=$2
@@ -77,8 +87,52 @@ main() {
   local -r SRC_AUTH_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
   local -r SEND_TO_STROOM_VERSION="send-to-stroom-v2.0"
   local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
+  local -r STROOM_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_TAG}/stroom-app"
+  local -r STROOM_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-app"
+  local -r STROOM_CONFIG_YAML_FILENAME="prod.yml"
+  local -r STROOM_PROXY_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_PROXY_TAG}/stroom-app"
+  local -r STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR="${STROOM_CONFIG_YAML_SNAPSHOT_DIR}"
+  local -r STROOM_PROXY_CONFIG_YAML_FILENAME="proxy-prod.yml"
+
+  if element_in "stroom" "${services[@]}"; then
+    echo -e "  Copying ${YELLOW}stroom${NC} config"
+    local -r DEST_STROOM_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom/config"
+    if [[ "${STROOM_TAG}" =~ local-SNAPSHOT ]]; then
+      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_TAG${NC}=${BLUE}${STROOM_TAG}${NC}"
+      if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
+        echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
+      fi
+      copy_file \
+        "${STROOM_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_CONFIG_YAML_FILENAME}" \
+        "${DEST_STROOM_CONFIG_DIRECTORY}" \
+        "config.yml"
+    else
+      download_file \
+        "${DEST_STROOM_CONFIG_DIRECTORY}" \
+        "${STROOM_CONFIG_YAML_URL_BASE}" \
+        "${STROOM_CONFIG_YAML_FILENAME}"
+    fi
+  fi
 
   if element_in "stroom-proxy-remote" "${services[@]}"; then
+    echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} config"
+    local -r DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-remote/config"
+    if [[ "${STROOM_PROXY_TAG}" =~ local-SNAPSHOT ]]; then
+      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
+      if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
+        echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
+      fi
+      copy_file \
+        "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
+        "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
+        "config.yml"
+    else
+      download_file \
+        "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
+        "${STROOM_PROXY_CONFIG_YAML_URL_BASE}" \
+        "${STROOM_PROXY_CONFIG_YAML_FILENAME}"
+    fi
+
     echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} certificates"
     local -r DEST_PROXY_REMOTE_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-remote/certs"
     copy_file \
@@ -90,6 +144,24 @@ main() {
   fi
 
   if element_in "stroom-proxy-local" "${services[@]}"; then
+    echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} config"
+    local -r DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-local/config"
+    if [[ "${STROOM_PROXY_TAG}" =~ local-SNAPSHOT ]]; then
+      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
+      if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
+        echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
+      fi
+      copy_file \
+        "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
+        "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
+        "config.yml"
+    else
+      download_file \
+        "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
+        "${STROOM_PROXY_CONFIG_YAML_URL_BASE}" \
+        "${STROOM_PROXY_CONFIG_YAML_FILENAME}"
+    fi
+
     echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} certificates"
     local -r DEST_PROXY_LOCAL_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-local/certs"
     copy_file \

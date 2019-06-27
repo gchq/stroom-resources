@@ -72,9 +72,7 @@ services:
       retries: 3
     volumes:
       - ${STROOM_PROXY_REMOTE_VOLUME_CERTS:-../../volumes/stroom-proxy-remote/certs}:/stroom-proxy/certs:ro
-      - type: volume
-        source: stroom-proxy-remote_config
-        target: /stroom-proxy/config
+      - ${STROOM_PROXY_REMOTE_VOLUME_CONFIG:-../../volumes/stroom-proxy-remote/config}:/stroom-proxy/config:ro
       - type: volume
         source: stroom-proxy-remote_content
         target: /stroom-proxy/content
