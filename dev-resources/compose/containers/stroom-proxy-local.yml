@@ -26,8 +26,8 @@ services:
         #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-https://nginx/dictionaryService/v1}
       #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
         #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-https://nginx/rulesetService/v1}
-         #This should really be https://$NGINX_ADVERTISED_HOST/feedStatusService/v1 but with our self signed certs and using IPs we will get a SAN list mis-match
-      - FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-http://$NGINX_ADVERTISED_HOST/api/feedStatus/v1}
+         #This should really be https://$NGINX_ADVERTISED_HOST/feedStatusService/v1 but with our self signed certs and using IPs we will get a SAN list mis-match.  The 'nginx' host will only work inside docker.
+      - FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-https://nginx/api/feedStatus/v1}
         #- FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-http://$HOST:8080/api/feedStatus/v1}
         # This is a copy of STROOM_SECURITY_API_TOKEN to make feed status checking work in development. A different token should be used in operational deployments.
       - FEED_STATUS_API_KEY=${STROOM_PROXY_LOCAL_FEED_STATUS_API_KEY:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsInNpZCI6bnVsbH0.k0Ssb43GCdTunAMeM26fIulYKNUuPUaJJk6GxDmzCPb7kVPwEtdfBSrtwazfEFM97dnmvURkLqs-DAZTXhhf-0VqQx4hkwcCHf83eVptWTy-lufIhQo6FCM223c9ONIhl6CPqknWh9Bo3vFNrNJoKz5Zw2T_iCcQhi2WGjd_tjTG7VbibTIpH3lPQDw1IBD2nMsEqACJSk3IaFe0GYcrAEMwsjj3sjAwByMbj5DJvo_DJbAuzUwS5IVpASEENen5Xd3wALLirrraUfED1OY0G56Ttcwl3uQ2s-grZXBM4JCiIurlWR5iNtNwoPUsZsyMju4FMSXt3Ur1NIpD7XKJlg}
