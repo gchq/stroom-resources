@@ -197,7 +197,7 @@ main() {
 
   if element_in "stroom-auth-ui" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} certificates"
-    local -r DEST_AUTH_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/auth-ui/certs"
+    local -r DEST_AUTH_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-ui/certs"
     copy_file \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" \
       "${DEST_AUTH_UI_CERTS_DIRECTORY}"
@@ -209,7 +209,7 @@ main() {
       "${DEST_AUTH_UI_CERTS_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} config files"
-    local -r DEST_AUTH_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/auth-ui/conf"
+    local -r DEST_AUTH_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-ui/conf"
     copy_file \
       "${SRC_AUTH_UI_CONF_DIRECTORY}/nginx.conf.template" \
       "${DEST_AUTH_UI_CONF_DIRECTORY}"
