@@ -29,12 +29,19 @@ download_file() {
   local -r dest_dir=$1
   local -r url_base=$2
   local -r filename=$3
+  local -r new_filename="${4:-$filename}"
 
   echo -e "    Downloading ${BLUE}${url_base}/${filename}${NC}" \
-    "${YELLOW}=>${NC} ${BLUE}${dest_dir}${NC}"
-  wget --quiet --directory-prefix="${dest_dir}" "${url_base}/${filename}"
-  if [[ "${filename}" =~ .*\.sh$ ]]; then
-    chmod u+x "${dest_dir}/${filename}"
+    "${YELLOW}=>${NC} ${BLUE}${dest_dir}/${new_filename}${NC}"
+      #--directory-prefix="${dest_dir}" \
+
+  mkdir -p "${dest_dir}"
+  wget \
+    --quiet \
+    --output-document="${dest_dir}/${new_filename}" \
+    "${url_base}/${filename}"
+  if [[ "${new_filename}" =~ .*\.sh$ ]]; then
+    chmod u+x "${dest_dir}/${new_filename}"
   fi
 }
 
@@ -96,6 +103,7 @@ main() {
   local -r STROOM_AUTH_SVC_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-auth/${STROOM_AUTH_SERVICE_TAG}/stroom-auth-svc"
   local -r STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_AUTH_REPO_DIR:-UNKNOWN_LOCAL_STROOM_AUTH_REPO_DIR}/stroom-auth-svc"
   local -r STROOM_AUTH_SVC_CONFIG_YAML_FILENAME="config.yml"
+  local -r CONFIG_FILENAME_IN_CONTAINER="config.yml"
 
   if element_in "stroom" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom${NC} config"
@@ -108,12 +116,13 @@ main() {
       copy_file \
         "${STROOM_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_CONFIG_DIRECTORY}" \
-        "config.yml"
+        "${CONFIG_FILENAME_IN_CONTAINER}"
     else
       download_file \
         "${DEST_STROOM_CONFIG_DIRECTORY}" \
         "${STROOM_CONFIG_YAML_URL_BASE}" \
-        "${STROOM_CONFIG_YAML_FILENAME}"
+        "${STROOM_CONFIG_YAML_FILENAME}" \
+        "${CONFIG_FILENAME_IN_CONTAINER}"
     fi
   fi
 
@@ -128,12 +137,13 @@ main() {
       copy_file \
         "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
-        "config.yml"
+        "${CONFIG_FILENAME_IN_CONTAINER}"
     else
       download_file \
         "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
         "${STROOM_PROXY_CONFIG_YAML_URL_BASE}" \
-        "${STROOM_PROXY_CONFIG_YAML_FILENAME}"
+        "${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
+        "${CONFIG_FILENAME_IN_CONTAINER}"
     fi
 
     echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} certificates"
@@ -157,12 +167,13 @@ main() {
       copy_file \
         "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
-        "config.yml"
+        "${CONFIG_FILENAME_IN_CONTAINER}"
     else
       download_file \
         "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
         "${STROOM_PROXY_CONFIG_YAML_URL_BASE}" \
-        "${STROOM_PROXY_CONFIG_YAML_FILENAME}"
+        "${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
+        "${CONFIG_FILENAME_IN_CONTAINER}"
     fi
 
     echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} certificates"
@@ -186,12 +197,13 @@ main() {
       copy_file \
         "${STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY}" \
-        "config.yml"
+        "${CONFIG_FILENAME_IN_CONTAINER}"
     else
       download_file \
         "${DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY}" \
         "${STROOM_AUTH_SVC_CONFIG_YAML_URL_BASE}" \
-        "${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}"
+        "${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}" \
+        "${CONFIG_FILENAME_IN_CONTAINER}"
     fi
   fi
 
