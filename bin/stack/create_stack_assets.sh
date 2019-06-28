@@ -151,11 +151,8 @@ main() {
     copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
-    # server keystore so dropwizard can listen on https
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/server/server.jks" \
-      "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
-    # client keystore so proxy can make https rest calls out to stroom/nginx
+    # client keystore so it can forward to stroom(?:-proxy)? and make
+    # rest calls
     copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
@@ -186,14 +183,11 @@ main() {
     copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
-    # server keystore so dropwizard can listen on https
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/server/server.jks" \
-      "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
-    # client keystore so proxy can make https rest calls out to stroom/nginx
+    # client keystore so it can forward to stroom(?:-proxy)? and make
+    # rest calls
     copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.jks" \
-      "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
+      "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
   fi
 
   if element_in "stroom-auth-service" "${services[@]}"; then
