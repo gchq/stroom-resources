@@ -152,7 +152,7 @@ main() {
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
     copy_file \
-      "${SRC_CERTS_DIRECTORY}/server/server.jks" \
+      "${SRC_CERTS_DIRECTORY}/client/client.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
   fi
 
@@ -182,7 +182,7 @@ main() {
       "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
     copy_file \
-      "${SRC_CERTS_DIRECTORY}/server/server.jks" \
+      "${SRC_CERTS_DIRECTORY}/client/client.jks" \
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
   fi
 
