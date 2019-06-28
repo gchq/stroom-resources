@@ -85,6 +85,7 @@ services:
       timeout: 5s
       retries: 3
     volumes:
+      - ${STROOM_VOLUME_CONFIG:-../../volumes/stroom/config}:/stroom/config:ro
       - type: volume
         source: stroom_logs
         target: /stroom/logs

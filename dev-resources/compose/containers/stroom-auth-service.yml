@@ -3,7 +3,7 @@ version: "2.4"
 services:
   stroom-auth-service:
     container_name: stroom-auth-service
-    image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v1.0-LATEST}"
+    image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v6.0-LATEST}"
     environment:
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - ADVERTISED_HTTP_HOST=https://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
@@ -62,6 +62,7 @@ services:
       timeout: 5s
       retries: 3
     volumes:
+      - ${STROOM_AUTH_SERVICE_VOLUME_CONFIG:-../../volumes/stroom-auth-service/config}:/stroom-auth-service/config:ro
       - type: volume
         source: stroom-auth-service_logs
         target: /stroom-auth-service/logs
