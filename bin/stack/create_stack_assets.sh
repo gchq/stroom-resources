@@ -187,7 +187,7 @@ main() {
     # rest calls
     copy_file_to_dir \
       "${SRC_CERTS_DIRECTORY}/client/client.jks" \
-      "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
+      "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
   fi
 
   if element_in "stroom-auth-service" "${services[@]}"; then
