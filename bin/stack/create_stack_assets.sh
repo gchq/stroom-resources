@@ -113,7 +113,7 @@ main() {
       if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
       fi
-      copy_file \
+      copy_file_to_dir \
         "${STROOM_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_CONFIG_DIRECTORY}" \
         "${CONFIG_FILENAME_IN_CONTAINER}"
@@ -134,7 +134,7 @@ main() {
       if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
       fi
-      copy_file \
+      copy_file_to_dir \
         "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
         "${CONFIG_FILENAME_IN_CONTAINER}"
@@ -166,7 +166,7 @@ main() {
       if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
       fi
-      copy_file \
+      copy_file_to_dir \
         "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
         "${CONFIG_FILENAME_IN_CONTAINER}"
@@ -198,7 +198,7 @@ main() {
       if [ ! -n "${LOCAL_STROOM_AUTH_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_AUTH_REPO_DIR${NC} to your local stroom repo"
       fi
-      copy_file \
+      copy_file_to_dir \
         "${STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY}" \
         "${CONFIG_FILENAME_IN_CONTAINER}"
