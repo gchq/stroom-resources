@@ -5,7 +5,7 @@ services:
 
   hbase:
     container_name: hbase
-    image: "${STROOM_STATS_HBASE_DOCKER_REPO:-gchq/stroom-stats-hbase}:${STROOM_STATS_TAG:-v0.6-LATEST}_hbase-v1.2.0"
+    image: "${STROOM_STATS_HBASE_DOCKER_REPO:-gchq/stroom-stats-hbase}:${STROOM_STATS_TAG:-v0.6-LATEST}_hbase-v2.1"
     hostname: "${HBASE_HOST:-hbase}"
     #The optimal solution here would be to specify '["./wait-for-it_busybox.sh", "${ZOOKEEPER_QUORUM:-zookeeper:2181}", "--"]
     #in entrypoint then let the command from the docker file be tacked on the end, however if you override entrypoint
