@@ -1,3 +1,9 @@
+# stroom-log-sender requires this volume even though auth is not in this stack
+stroom-auth-service_logs
+# stroom-log-sender requires this volume even though proxy is not in this stack
+stroom-proxy-local_logs
 stroom_logs
 stroom_output
 stroom_volumes
+
+# vim: set filetype=conf:
