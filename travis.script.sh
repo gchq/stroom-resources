@@ -226,11 +226,13 @@ do_versioned_stack_build() {
   for archive_filename in *.tar.gz; do
     # Now spin up the stack to make sure it all works
     # TODO we can't test stroom_services as it won't run without a database
-    # TODO we can't test stroom_full as it will blow travis' memory
-    if [[ ! "${archive_filename}" =~ ^stroom_(services|full|full_test)- ]]; then
+    # TODO we can't test stroom_full* as it will blow travis' memory
+    # TODO we can't test stroom_and_proxy as proxy tries to get feed status
+    # from nginx
+    if [[ "${archive_filename}" =~ ^stroom(_core|_core_test|_dbs)?- ]]; then
       test_stack_archive "${archive_filename}"
     else
-      echo -e "Skipping tests for ${GREEN}${archive_filename}${NC}"
+      echo -e "Skipping stack tests for ${GREEN}${archive_filename}${NC}"
     fi
   done
 
