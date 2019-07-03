@@ -1,3 +1,5 @@
+# stroom-log-sender requires this volume even though nginx is not in this stack
+nginx_logs
 # stroom-log-sender requires this volume even though auth is not in this stack
 stroom-auth-service_logs
 # stroom-log-sender requires this volume even though proxy is not in this stack
