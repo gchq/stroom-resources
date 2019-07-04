@@ -242,7 +242,7 @@ do_versioned_stack_build() {
 
 test_stack() {
   stack_name="$1"
-  echo -e "Testing stack ${stack_name} ${BUILD_VERSION}"
+  echo -e "Testing stack ${GREEN}${stack_name}${NC}  - ${GREEN}${BUILD_VERSION}${NC}"
 
   # Bit nasty but there should only be one match in there in both cases
   pushd "./${stack_name}/${stack_name}-${BUILD_VERSION}" > /dev/null
