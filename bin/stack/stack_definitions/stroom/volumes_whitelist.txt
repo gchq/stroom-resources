@@ -4,6 +4,8 @@ nginx_logs
 stroom-auth-service_logs
 # stroom-log-sender requires this volume even though proxy is not in this stack
 stroom-proxy-local_logs
+# stroom requires this volume even though proxy is not in this stack
+stroom-proxy-local_repo
 stroom_logs
 stroom_output
 stroom_volumes
