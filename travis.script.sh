@@ -241,10 +241,11 @@ do_versioned_stack_build() {
 }
 
 test_stack() {
-  echo -e "Testing stack"
+  stack_name="$1"
+  echo -e "Testing stack ${stack_name} ${BUILD_VERSION}"
 
   # Bit nasty but there should only be one match in there in both cases
-  pushd ./stroom_*/stroom_* > /dev/null
+  pushd "./${stack_name}/${stack_name}-${BUILD_VERSION}" > /dev/null
 
   echo -e "In directory ${GREEN}$(pwd)${NC}"
 
@@ -299,6 +300,7 @@ test_stack() {
 
 test_stack_archive() {
   local -r stack_archive_file=$1
+
   echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
   echo -e "Testing stack archive ${GREEN}${stack_archive_file}${NC}"
 
@@ -318,7 +320,9 @@ test_stack_archive() {
   echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
   tar -xvf "../../${stack_archive_file}"
 
-  test_stack
+  stack_name="${stack_archive_file%-*}"
+
+  test_stack "${stack_name}"
 
   popd > /dev/null
   echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
