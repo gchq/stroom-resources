@@ -229,7 +229,8 @@ do_versioned_stack_build() {
     # TODO we can't test stroom_full* as it will blow travis' memory
     # TODO we can't test stroom_and_proxy as proxy tries to get feed status
     # from nginx
-    if [[ "${archive_filename}" =~ ^stroom(_core|_core_test|_dbs)?- ]]; then
+    # We can't test 'stroom' stack as it has no DB
+    if [[ "${archive_filename}" =~ ^stroom_(core|core_test|dbs)?- ]]; then
       test_stack_archive "${archive_filename}"
     else
       echo -e "Skipping stack tests for ${GREEN}${archive_filename}${NC}"
