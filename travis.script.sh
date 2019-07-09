@@ -321,7 +321,7 @@ test_stack_archive() {
   echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
   tar -xvf "../../${stack_archive_file}"
 
-  stack_name="${stack_archive_file%-*}"
+  stack_name="${stack_archive_file%%-*}"
 
   test_stack "${stack_name}"
 
