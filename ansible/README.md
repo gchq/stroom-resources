@@ -6,6 +6,7 @@ This repo contains the ansible scripts necessary for setting up a multi-node Str
 
 - You have a number of machines available. a minimum of 3.
 - These machines don't have any firewalls running.
+- You're using the following host groups/stacks: `stroom_and_proxy`, `stroom_services`, `stroom_dbs`.
 
 This has been tested on AWS. The AMI used is `ami-0ff760d16d9497663`, a Centos 7.0 image.
 
