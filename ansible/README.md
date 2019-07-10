@@ -1,6 +1,6 @@
 # stroom-ansible
 
-This repo contains the ansible scripts necessary for setting up a multi-node Stroom v6.0.
+This directory contains the ansible scripts necessary for setting up a multi-node Stroom v6.0.
 
 ## Assumptions and caveats
 
