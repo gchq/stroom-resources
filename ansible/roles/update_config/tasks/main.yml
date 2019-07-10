@@ -1,0 +1,4 @@
+- name: Copy the '{{stack_type}}' config files to the host
+  copy:
+    src: ./conf/{{stack_type}}/
+    dest: "{{home}}/{{stack_type}}/{{stack_type}}-{{stack_version}}/config/"

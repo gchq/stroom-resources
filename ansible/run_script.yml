@@ -1,0 +1,28 @@
+# Use this to execute operations on host_groups. E.g.
+#   ansible-playbook -i hosts stack_op.yml --extra-vars "op=restart host_group=stroom_services
+---
+- name: Get the operation to perform
+  hosts: all
+  vars_prompt:
+   - name: op
+     prompt: "What operation would you like to perform? [stop|start|remove|health|info|logs|restart|show_config|status]"
+     private: no
+   - name: stack_type
+     prompt: "What host group would you like to perform this on? [stroom_services|stroom_dbs|stroom_and_proxy]"
+     private: no
+  # We can prompt the user for a variable but it won't be  shared with other plays in the playbook.
+  # To share it we can set it as a fact.
+  tasks:
+    - set_fact:
+        op: "{{op}}"
+    - set_fact:
+        stack_type: "{{stack_type}}"
+
+- name: Perform {{op}} on {{stack_type}}
+  vars_files:
+    - ./variables.yml
+  become: yes
+  hosts: "{{stack_type}}"
+  roles:
+    - roles/stack_op
+

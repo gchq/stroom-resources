@@ -1,0 +1,78 @@
+---
+# tasks file for roles/setup
+# Devised from https://docs.docker.com/install/linux/docker-ce/centos/
+
+# Install docker dependencies
+- name: Install docker -> install dependencies -> yum-utils
+  yum:
+    name: yum-utils
+    state: latest
+- name: Install docker -> install dependencies -> device-mapper-persistent-data
+  yum:
+    name: device-mapper-persistent-data 
+    state: latest
+- name: Install docker -> install dependencies -> lvm2
+  yum:
+    name: lvm2
+    state: latest
+    
+# We need the repo
+- name: Install docker -> add docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+
+# And now we need the other dependencies
+- name: Install docker -> install dependencies -> containerd.io
+  yum:
+    name: containerd.io
+    state: latest
+- name: Install docker -> install docker-ce-cli 
+  yum:
+    name:  docker-ce-cli
+    state: latest
+
+# Finally install docker!
+- name: Install docker -> install docker-ce
+  package:
+    name: docker-ce
+    state: latest
+
+# Get Docker started
+- name: Install docker -> Start and enable Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+# We need to add the user (in the case of a centos AWS image it's 'centos)
+# to the docker group, so they can administer it.
+- name: Install docker -> Add user centos to docker group
+  user:
+    name: centos
+    groups: docker
+    append: yes
+
+# Install docker-compose -- a yum install doesn't get a high-enough version
+- name: Remove old docker-compose if there is one
+  file:
+    path: /use/bin/docker-compose
+    state: absent
+    
+- name: Install docker-compose 
+  become: yes
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.24.1/docker-compose-Linux-x86_64
+    dest: /usr/bin/docker-compose
+    mode: +x
+
+# Install other stuff
+- name: Install git 
+  yum:
+    name: git
+    state: latest
+    
+- name: Install iproute, to get the 'ip' command
+  yum:
+    name: iproute
+    state: latest

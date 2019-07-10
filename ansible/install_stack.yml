@@ -1,0 +1,30 @@
+---
+- name: Install services 
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_services
+  become: yes
+  hosts: stroom_services
+  roles:
+    - roles/install_stack
+  
+- name: Install strooms
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_and_proxy
+  become: yes
+  hosts: stroom_and_proxy
+  roles:
+    - roles/install_stack
+
+- name: Install databases
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_dbs
+  become: yes
+  hosts: stroom_dbs
+  roles:
+    - roles/install_stack
