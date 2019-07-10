@@ -8,3 +8,6 @@ stack_version: v6.0-beta.51-2
 #  1. If we use '~/' then if we're elevating we'll install things in /root/ instead
 #  2. We might want to change the user, in which case we'll only want to change it in one place.
 home: /home/centos
+
+# This is a secure location outside this repository where you keep your config.
+conf_path: ../aws/ansible/conf

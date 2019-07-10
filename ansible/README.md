@@ -11,7 +11,16 @@ This has been tested on AWS. The AMI used is `ami-0ff760d16d9497663`, a Centos 7
 
 ## Getting the Ansible scripts
 
-`git clone https://github.com/gchq/stroom-ansible`
+`git clone https://github.com/gchq/stroom-resources`
+
+The ansible scripts are in `stroom-resources/ansible`.
+
+## Setting up your configuration
+
+The repository contains only the ansible scripts. You need to store your Stroom configuration somewhere else, i.e. not a public GitHub repository. You need the following:
+
+ - a `hosts` file -- you need to add this location to `ansible.cfg`, the `inventory` key. An example is in `examples/hosts`.
+ - your stroom configuration files -- these are the files that configure the stroom services themselves, and they're copied onto the hosts when you run the `update_config` playbook. An example is in `examples/conf`.
 
 ## Updating the inventory
 
