@@ -208,6 +208,8 @@ do_stack_build_and_test() {
   local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
   local -r buildDir=${scriptDir}/build/
 
+  echo -e "Building and testing stack variants"
+
   pushd "${scriptDir}" > /dev/null
 
   # Ensure there is no buildDir from a previous build
@@ -465,9 +467,6 @@ main() {
     )"
 
   dump_build_vars
-
-  # No tag so finish
-  echo -e "Not a tagged build so just build the stack and test it"
 
   # If we are releasing a new docker image then that version will not be available
   # on Dockerhub to be able to test the stack against it 
