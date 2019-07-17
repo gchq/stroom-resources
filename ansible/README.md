@@ -14,7 +14,9 @@ This has been tested on AWS. The AMI used is `ami-0ff760d16d9497663`, a Centos 7
 
 ## Getting the Ansible scripts
 
-`git clone https://github.com/gchq/stroom-resources`
+```sh
+git clone https://github.com/gchq/stroom-resources
+```
 
 The ansible scripts are in `stroom-resources/ansible`.
 
@@ -27,7 +29,7 @@ The repository contains only the ansible scripts. You need to store your Stroom 
 
 ## Updating the inventory
 
-The inventory file `./hosts` needs to contain all the host names of the vms. It's split into host groups so enter your VMs under the appropriate section if you've sized them according to their tasks.
+The inventory file `./hosts` needs to contain all the host names of the VMs. It's split into host groups so enter your VMs under the appropriate section if you've sized them according to their tasks.
 
 You need a service name; an FQDN that the user will visit. This name is important and needs to be used in a few places within the configuration. For this name you could take the first host name in the `stroom_services` host group.
 
@@ -83,14 +85,14 @@ A Stroom stack has several scripts to control it.
 NB/TODO: logs doesn't work very well because it tails and doesn't complete.
 
 If you want to execute these on all stacks do the following:
-```
+```sh
 ansible-playbook -i hosts run_script_on_all.yml
 ```
 
 You will then be prompted for the script you want to run. There are currently no checks to make sure you've entered a valid script, so get it right. 
 
 You can also run these on a single host group by running a similarly named script:
-```
+```sh
 ansible-playbook -i hosts run_script.yml
 ```
 
