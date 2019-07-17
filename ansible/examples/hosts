@@ -8,3 +8,7 @@
 [stroom_and_proxy]
 <<<user>>>@<<stroom_and_proxy_host_01>>>
 <<<user>>>@<<stroom_and_proxy_host_02>>>
+
+[stroom_proxy]
+<<<user>>>@<<stroom_proxy_host_01>>>
+<<<user>>>@<<stroom_proxy_host_02>>>
