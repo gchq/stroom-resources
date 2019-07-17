@@ -3,6 +3,9 @@
   # Sometimes get a tput error if we don't do this.
   environment:
     TERM: vt100
+    # This is needed so our scripts can find the ip command as ansible runs with a
+    # different PATH to when you ssh in manually.
+    PATH: "{{ ansible_env.PATH}}:/sbin:/usr/sbin"
   register: stack_op
   # This check is a bit more complicated because 'stdout' doesn't always exist on 'stack_op'
   failed_when: "'stdout' in stack_op and 'UNHEALTHY' in stack_op.stdout"

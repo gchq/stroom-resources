@@ -66,10 +66,33 @@
     dest: /usr/bin/docker-compose
     mode: +x
 
+# Install EPEL yum repo (for jq install)
+- name: 1.Check if EPEL repo is already configured.
+  stat: path={{ epel_repofile_path }}
+  register: epel_repofile_result
+ 
+- name: 2.Install EPEL repo.
+  yum:
+    name: "{{ epel_repo_url }}"
+    state: present
+  register: result
+  when: not epel_repofile_result.stat.exists
+ 
+- name: 3.Import EPEL GPG key.
+  rpm_key:
+    key: "{{ epel_repo_gpg_key_url }}"
+    state: present
+  when: not epel_repofile_result.stat.exists
+
 # Install other stuff
 - name: Install git 
   yum:
     name: git
+    state: latest
+
+- name: Install jq 
+  yum:
+    name: jq
     state: latest
     
 - name: Install iproute, to get the 'ip' command

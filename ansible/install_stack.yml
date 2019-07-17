@@ -1,20 +1,19 @@
 ---
+# TODO don't think we need become: yes in here as none of this needs sudo
 - name: Install services 
   vars_files:
     - ./variables.yml
   vars:
     stack_type: stroom_services
-  become: yes
   hosts: stroom_services
   roles:
     - roles/install_stack
   
-- name: Install strooms
+- name: Install stroom and local storing proxy
   vars_files:
     - ./variables.yml
   vars:
     stack_type: stroom_and_proxy
-  become: yes
   hosts: stroom_and_proxy
   roles:
     - roles/install_stack
@@ -24,7 +23,15 @@
     - ./variables.yml
   vars:
     stack_type: stroom_dbs
-  become: yes
   hosts: stroom_dbs
+  roles:
+    - roles/install_stack
+
+- name: Install remote forwarding proxy
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_proxy
+  hosts: stroom_proxy
   roles:
     - roles/install_stack
