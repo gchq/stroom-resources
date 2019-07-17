@@ -51,25 +51,25 @@ NGINX reverse-proxies everything, so we need to tell nginx where the hosts live.
  - `./conf/nginx/upstreams.auth.conf.template`
  - `./conf/nginx/upstreams.stroom.conf.template`
  - `./conf/nginx/upstreams.proxy.conf.template`
-   
+
 You'll also need to update the two redirects in `./conf/nginx/locations.stroom.conf.template`.
 
 ## Setting up the hosts
 
-```
+```sh
 ansible-playbook -i hosts setup_hosts.yml
 ```
 
 ## Installing the stacks
 
-```
+```sh
 ansible-playbook -i hosts install_stack.yml
 ```
 
 ## Copying the config to the nodes
 
 You have the stacks but you need to make sure the config you changed above is copied to the nodes. 
-```
+```sh
 ansible-playbook -i hosts update_config.yml
 ```
 
@@ -97,18 +97,18 @@ ansible-playbook -i hosts run_script.yml
 This will prompt you for the host group.
 
 You can bypass the prompt for either of these as follows:
-```
+```sh
 ansible-playbook -i hosts run_script_on_all.yml --extra-vars "op=restart"
 ansible-playbook -i hosts run_script_on_all.yml --extra-vars "op=restart stack_type=stroom_services"
 ```
 
 ## Removing a stack
 You can do the following to remove all the containers:
-```
+```sh
 ansible-playbook -i hosts run_script_on_all.yml --extra-vars "op=remove"
 ```
 
 You can then delete all the files that were moved there:
-```
+```sh
 ansible-playbook -i hosts delete.yml
 ```
