@@ -1,5 +1,5 @@
 # This is the stack version we want to install and use.
-stack_version: v6.0-beta.51-2
+stack_version: v6.0-beta.55
 
 # IDEA: we could define a 'previous_version' when we're migrating, and if it exists we could stop and delete
 # before doing an install.
@@ -10,4 +10,4 @@ stack_version: v6.0-beta.51-2
 home: /home/centos
 
 # This is a secure location outside this repository where you keep your config.
-conf_path: ../aws/ansible/conf
+conf_path: ../../aws/ansible/conf
