@@ -9,11 +9,6 @@ location /api/auth/ {
     proxy_pass http://auth_service_upstream_sticky/;
 }
 
-location /api/ {
-    include location_defaults.conf;
-    proxy_pass http://stroom_upstream/api/;
-}
-
 ##################
 # ROUTING FOR UI #
 ##################
@@ -53,4 +48,4 @@ location /s {
     #   proxy_set_header Connection "upgrade"; 
     # }
 
-    # vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
