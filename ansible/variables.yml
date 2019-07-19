@@ -1,0 +1,13 @@
+# This is the stack version we want to install and use.
+stack_version: v6.0-beta.55
+
+# IDEA: we could define a 'previous_version' when we're migrating, and if it exists we could stop and delete
+# before doing an install.
+
+# We define a {{home}} variable because:
+#  1. If we use '~/' then if we're elevating we'll install things in /root/ instead
+#  2. We might want to change the user, in which case we'll only want to change it in one place.
+home: /home/centos
+
+# This is a secure location outside this repository where you keep your config.
+conf_path: ../../aws/ansible/conf

@@ -1,0 +1,42 @@
+# Server configuration for stroom
+
+########################
+# ROUTING FOR SERVICES #
+########################
+
+# datafeed direct into stroom with no prxoy aggregation
+location /stroom/datafeeddirect/ {
+    proxy_pass http://stroom_upstream/stroom/datafeed/;
+    include proxy_location_defaults.conf;
+}
+
+# datafeed direct into stroom with no prxoy aggregation (exact match)
+location = /stroom/datafeeddirect {
+    proxy_pass http://stroom_upstream/stroom/datafeed/;
+    include proxy_location_defaults.conf;
+}
+
+##################
+# ROUTING FOR UI #
+##################
+
+location = / {
+    return 302 https://<<<stroom_services_host_01>>>/stroom/ui;
+}
+
+# This is an exact match that directs '/stroom' to the Stroom UI...
+location ~ /stroom$ {
+    return 302 https://<<<stroom_services_host_01>>>/stroom/ui;
+}
+
+location ~ .*/clustercall.rpc$ {
+    deny all;
+}
+
+# ... and everything else gets reverse-proxied to stroom.
+location /stroom {
+    proxy_pass http://stroom_upstream_sticky/stroom;
+    include location_defaults.conf;
+}
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
