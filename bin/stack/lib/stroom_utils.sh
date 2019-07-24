@@ -27,6 +27,8 @@ setup_echo_colours
 
 stack_services_file="SERVICES.txt"
 
+services_arr=()
+
 SERVICES_WITH_HEALTH_CHECK=(
     "stroom"
     "stroom-auth-service"
@@ -451,7 +453,7 @@ display_stack_info() {
 
   while read -r line; do
     local image_name="${line%%:*}"
-    local image_version="${line#*=}"
+    local image_version="${line#*:}"
     echo_info_line "${padding}" "${image_name}" "${image_version}"
   done < "${DIR}"/VERSIONS.txt
 
@@ -542,13 +544,26 @@ start_stack() {
 
   determing_docker_host_details
 
+  local stack_services=()
+  while read -r service_to_start; do
+    stack_services+=( "${service_to_start}" )
+  done < "${DIR}/${stack_services_file}"
+
+  # Explicitly set services to start so we can use the SERVICES file to
+  # control what services run on the node.
+  if [ "$#" -eq 0 ]; then
+    services_to_start=( "${stack_services[@]}" )
+  else
+    services_to_start=( "${@}" )
+  fi
+
   # shellcheck disable=SC2094
   docker-compose \
     --project-name "${STACK_NAME}" \
     -f "$DIR/config/${STACK_NAME}.yml" \
     up \
     -d \
-    "${@}"
+    "${services_to_start[@]}"
 }
 
 stop_services_if_in_stack() {
