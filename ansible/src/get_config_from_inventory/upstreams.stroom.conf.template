@@ -1,0 +1,12 @@
+# Upstream configuration for stroom
+
+upstream stroom_upstream_sticky {
+    ip_hash;
+<<<STROOM_STICKY_UPSTREAMS>>>
+}
+
+upstream stroom_upstream {
+<<<STROOM_UPSTREAMS>>>
+}
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:

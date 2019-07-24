@@ -1,0 +1,39 @@
+---
+- name: Send updated config to stroom_services 
+  hosts: stroom_services
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_services
+  roles:
+    - roles/update_config
+
+- name: Send updated config to stroom_and_proxy
+  hosts: stroom_and_proxy
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_and_proxy
+  roles:
+    - roles/update_config
+
+- name: Send updated config to stroom_dbs
+  hosts: stroom_dbs
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_dbs
+  roles:
+    - roles/update_config
+
+- name: Update nginx config
+  hosts: stroom_services
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_services
+  tasks:
+    - name: Copy nginx config files
+      copy:
+        src: ./conf/nginx/
+        dest: "{{home}}/stroom_services/volumes/nginx/conf/"

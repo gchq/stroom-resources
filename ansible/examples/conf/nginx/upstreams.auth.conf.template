@@ -1,0 +1,15 @@
+# Upstream configuration for stroom-auth
+
+upstream auth_service_upstream_sticky {
+    ip_hash;
+    server <<<stroom_services_host_01>>>:8099;
+    server <<<stroom_services_host_02>>>:8099;
+}
+
+upstream auth_ui_upstream {
+    server <<<stroom_services_host_01>>>:5000;
+    server <<<stroom_services_host_02>>>:5000;
+}
+
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:

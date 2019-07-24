@@ -9,10 +9,34 @@ NC='\033[0m' # No Color
 
 # docker-compose 
 
+kListTopics() {
+  docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181/kafka"
+}
+
 kConsumeTopic() {
+  if [ -n "$1" ]; then
+    topics="$1"
+  else
+    selectedTopics="$( \
+      kListTopics \
+        | fzf --multi \
+    )"
+
+    # shellcheck disable=SC2039
+    topics="$(echo -e "${selectedTopics}" | paste -s -d,)"
+  fi
+  echo "Consuming from topic(s) [$topics] (comma delimited list of topics)"
+  docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --property print.key=true --property key.separator=\"|\" --zookeeper zookeeper:2181/kafka --whitelist $topics"
+}
+
+kDeleteTopic() {
+  if [ -n "$1" ]; then
     topicName="$1"
-    echo "Consuming from topic(s) [$topicName] (comma delimited list of topics)"
-    docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --property print.key=true --property key.separator=\"|\" --zookeeper zookeeper:2181/kafka --whitelist $topicName"
+    echo "Deleting topic ${topicName}"
+    docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-topics.sh --delete --zookeeper zookeeper:2181/kafka --topic ${topicName}"
+  else
+    echo "ERROR: No topic name supplied"
+  fi
 }
 
 kCreateTopic() {
@@ -30,7 +54,7 @@ execSQL() {
     mysqlArgs="$2"
     sql="$3"
 
-    docker exec -it ${service} bash -c "echo \"${sql}\" | mysql ${mysqlArgs}"
+    docker exec -it "${service}" bash -c "echo \"${sql}\" | mysql ${mysqlArgs}"
 }
 
 # Kafka aliases
@@ -41,8 +65,10 @@ alias kconsume='kConsumeTopic'
 # consume from all topics
 alias kconsumeAll='echo "Consuming from all topics..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --blacklist noSuchTopic --from-beginning --zookeeper zookeeper:2181/kafka"'
 alias kconsumeEvents='echo "Consuming from topics statisticEvents-Count & statisticEvents-Value ..."; docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --zookeeper zookeeper:2181/kafka --whitelist statisticEvents-Count,statisticEvents-Value"'
-alias ktopics='docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181/kafka"'
+alias ktopics='kListTopics'
 alias kcreate='kCreateTopic'
+alias kdelete='kDeleteTopic'
+alias kpurge='kPurgeTopic'
 
 # bash shells in containers
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

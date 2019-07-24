@@ -5,9 +5,6 @@ services:
     container_name: stroom-auth-service
     image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v7.0-LATEST}"
     environment:
-      #- AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/login
-      #- CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/changePassword
-      #- UNAUTHORISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-http}://${STROOM_AUTH_UI_URL:-$HOST_IP:5000}/unauthorised
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - ADVERTISED_HTTP_HOST=https://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
       - ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
@@ -15,13 +12,13 @@ services:
       - APP_PERMISSIONS_SERVICE_URL=${STROOM_APP_PERMISSIONS_SERVICE_URL:-https://$HOST_IP/api/appPermissions/v1}
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
-      - AUTHORISATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/authorisation/v1
+      - AUTHORISATION_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/authorisation/v1
       - AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_HOST:-$HOST_IP}/s/login
       - CERTIFICATE_DN_CAPTURE_GROUP_INDEX=${STROOM_AUTH_CERTIFICATE_DN_CAPTURE_GROUP_INDEX:-1}
       - CERTIFICATE_DN_PATTERN=${STROOM_AUTH_CERTIFICATE_DN_PATTERN:-.*\((.*)\)}
       - CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_HOST:-$HOST_IP}/s/changePassword
       - DB_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
-      - DB_URL=jdbc:mysql://${STROOM_AUTH_DB_HOST:-$HOST_IP}:${STROOM_AUTH_DB_PORT:-3307}/auth?useUnicode=yes&characterEncoding=UTF-8
+      - DB_URL=jdbc:mysql://${STROOM_AUTH_DB_HOST:-$HOST_IP}:${STROOM_AUTH_DB_PORT:-3307}/${STROOM_AUTH_DB_NAME:-auth}?useUnicode=yes&characterEncoding=UTF-8
       - DB_USER=${STROOM_AUTH_DB_USERNAME:-authuser}
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
@@ -66,6 +63,7 @@ services:
       timeout: 5s
       retries: 3
     volumes:
+      - ${STROOM_AUTH_SERVICE_VOLUME_CONFIG:-../../volumes/stroom-auth-service/config}:/stroom-auth-service/config:ro
       - type: volume
         source: stroom-auth-service_logs
         target: /stroom-auth-service/logs

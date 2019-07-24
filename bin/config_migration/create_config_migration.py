@@ -241,6 +241,11 @@ def diff_files(output, from_file, to_file):
             for line in diff:
                 output.write(line)
 
+def write_vim_modeline(output_file_path):
+    # If one of our diffs includes a vim modeline then github respects that for
+    # file type determination. Thus we explicitly set the filetype here.
+    with open(output_file_path, 'a') as output:
+        output.write("<!-- vim: set filetype=markdown -->")
 
 def compare_directories(output_file_path, from_release, to_release, stack_name):
     with open(output_file_path, 'a') as output:
@@ -345,6 +350,8 @@ def main():
                                    repeated_to_vars)
 
     compare_directories(output_file_path, from_release, to_release, stack_name)
+
+    write_vim_modeline(output_file_path)
 
     print("A list of differences has been written to {0}{1}{2}".format(
         Colours.BLUE, output_file_path, Colours.NC))
