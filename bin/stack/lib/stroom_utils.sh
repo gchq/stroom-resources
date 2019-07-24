@@ -451,7 +451,7 @@ display_stack_info() {
 
   while read -r line; do
     local image_name="${line%%:*}"
-    local image_version="${line#*=}"
+    local image_version="${line#*:}"
     echo_info_line "${padding}" "${image_name}" "${image_version}"
   done < "${DIR}"/VERSIONS.txt
 
