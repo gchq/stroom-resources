@@ -41,6 +41,11 @@ http {
 
         # Include location configuration specific to proxy
         include locations.proxy.conf;
+
+        # Include location configuration specific to dev.
+        # Should not be included in production deployments.
+        # Supports hot-loading for stroom-ui
+        include locations.dev.conf;
     }
 }
 

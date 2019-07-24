@@ -40,12 +40,4 @@ location /s {
     proxy_pass https://auth_ui_upstream/s;
 }
 
-# The following should catch websocket requests (wss:) but it doesn't seem to work.
-# location / {
-    #   proxy_pass https://auth_ui_upstream/;
-    #   proxy_http_version 1.1;
-    #   proxy_set_header Upgrade $http_upgrade;
-    #   proxy_set_header Connection "upgrade"; 
-    # }
-
 # vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
