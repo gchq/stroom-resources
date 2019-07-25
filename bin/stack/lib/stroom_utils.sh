@@ -20,11 +20,6 @@
 
 setup_echo_colours
 
-# shellcheck disable=SC1090
-#{
-  #source "$DIR"/lib/stroom_utils.sh
-#}
-
 stack_services_file="SERVICES.txt"
 
 services_arr=()
@@ -83,7 +78,7 @@ show_services_usage_part() {
     echo -e "Valid SERVICE values:"
     while read -r service; do
       echo -e "  ${service}"
-    done < "${DIR}/${stack_services_file}"
+    done <<< "$(cut -d "|" -f 1 < "${DIR}/${stack_services_file}" )"
   fi
 }
 
@@ -143,7 +138,8 @@ is_service_in_stack() {
   local -r service_name="$1"
 
   # return true if service_name is in the file
-  if grep -q "^${service_name}$" "${DIR}/${stack_services_file}"; then
+  # TODO add cut into the mix here
+  if grep -q "^${service_name}|" "${DIR}/${stack_services_file}"; then
     return 0;
   else
     return 1;
@@ -201,6 +197,7 @@ is_at_least_one_service_in_stack() {
 
   # return true if service_name is in the file
   # shellcheck disable=SC2151
+  # TODO add cut into the mix here
   if grep -q "${regex}" "${DIR}/${stack_services_file}"; then
     return 0;
   else
@@ -353,6 +350,7 @@ check_containers() {
 
     total_unhealthy_count=$((total_unhealthy_count + unhealthy_count))
     #((total_unhealthy_count+=unhealthy_count))
+  # TODO add cut into the mix here
   done < "${DIR}/${stack_services_file}"
 }
 
@@ -547,6 +545,7 @@ start_stack() {
   local stack_services=()
   while read -r service_to_start; do
     stack_services+=( "${service_to_start}" )
+  # TODO add cut into the mix here
   done < "${DIR}/${stack_services_file}"
 
   # Explicitly set services to start so we can use the SERVICES file to
@@ -624,6 +623,7 @@ stop_stack_gracefully() {
   local all_services=()
   while read -r service_to_stop; do
     all_services+=( "${service_to_stop}" )
+  # TODO add cut into the mix here
   done < "${DIR}/${stack_services_file}"
 
   stop_services_if_in_stack "${all_services[@]}"

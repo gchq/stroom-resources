@@ -74,10 +74,12 @@ main() {
       die "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not running."
     fi
   done
+  # Extract the services column from the SERVICES file and add each to the array
   local stack_services=()
+  # shellcheck disable=SC2154
   while read -r service_to_start; do
     stack_services+=( "${service_to_start}" )
-  done < "${DIR}/${stack_services_file}"
+  done <<< "$(cut -d "|" -f 1 < "${DIR}/${stack_services_file}" )"
 
   # Explicitly set services to show logs for so we can use the SERVICES file to
   # control what services run on the node.
