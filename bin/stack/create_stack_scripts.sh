@@ -95,6 +95,7 @@ main() {
     create_script send_data
   fi
 
+  create_script set_services
   create_script start
   create_script status
   create_script stop
@@ -104,6 +105,7 @@ main() {
   local -r DEST_LIB="${WORKING_DIRECTORY}/lib"
   mkdir -p "${DEST_LIB}"
   copy_file lib/banner.txt "${DEST_LIB}"
+  copy_file lib/constants.sh "${DEST_LIB}"
   copy_file lib/network_utils.sh "${DEST_LIB}"
   copy_file lib/shell_utils.sh "${DEST_LIB}"
   copy_file lib/stroom_utils.sh "${DEST_LIB}"

@@ -257,7 +257,7 @@ test_stack() {
   # Get the expected count of services
   local services_count
   # shellcheck disable=SC2002
-  services_count="$(cat SERVICES.txt | wc -l)"
+  services_count="$(cat ALL_SERVICES.txt | wc -l)"
   echo -e "services_count:            [${GREEN}${services_count}${NC}]"
 
   ./info.sh

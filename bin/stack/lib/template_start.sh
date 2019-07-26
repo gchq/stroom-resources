@@ -27,9 +27,10 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # shellcheck disable=SC1090
 {
-  source "$DIR"/lib/network_utils.sh
-  source "$DIR"/lib/shell_utils.sh
-  source "$DIR"/lib/stroom_utils.sh
+  source "${DIR}"/lib/network_utils.sh
+  source "${DIR}"/lib/shell_utils.sh
+  source "${DIR}"/lib/stroom_utils.sh
+  source "${DIR}"/lib/constants.sh
 }
 
 # This line MUST be before we source the env file, as HOST_IP may be set
