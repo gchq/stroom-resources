@@ -454,7 +454,7 @@ display_stack_info() {
         "http://localhost:${admin_port}/stroomAdmin"
     fi
     if is_service_in_stack "stroom-stats"; then
-      admin_port="$(get_config_env_var "STROOM_STATS_SERVICE_ADMIN_PORT")"
+      admin_port="$(get_config_env_var "STROOM_STATS_ADMIN_PORT")"
       echo_info_line "${padding}" "Stroom Stats" \
         "http://localhost:${admin_port}/statsAdmin"
     fi
@@ -480,15 +480,17 @@ display_stack_info() {
     echo -e "Data can be POSTed to Stroom using the following URLs (see README for details)"
     echo
     if is_service_in_stack "stroom"; then
-      echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeed"
+      echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeeddirect"
     fi
     if is_service_in_stack "stroom-proxy-local"; then
       echo_info_line "${padding}" "Stroom Proxy (local)" \
-        "https://localhost:${STROOM_PROXY_LOCAL_HTTPS_APP_PORT}/stroom/datafeed"
+        "https://localhost/stroom/datafeed"
     fi
     if is_service_in_stack "stroom-proxy-remote"; then
+      local admin_port
+      admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_APP_PORT")"
       echo_info_line "${padding}" "Stroom Proxy (remote)" \
-        "https://localhost:${STROOM_PROXY_REMOTE_HTTPS_APP_PORT}/stroom/datafeed"
+        "http://localhost:${admin_port}/stroom/datafeed"
     fi
 
     if is_service_in_stack "stroom"; then
