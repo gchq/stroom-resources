@@ -26,7 +26,7 @@ kConsumeTopic() {
     topics="$(echo -e "${selectedTopics}" | paste -s -d,)"
   fi
   echo "Consuming from topic(s) [$topics] (comma delimited list of topics)"
-  docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --property print.key=true --property key.separator=\"|\" --zookeeper zookeeper:2181/kafka --whitelist $topics"
+  docker exec -i -t kafka bash -c "unset JMX_PORT; /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --property print.key=true --property key.separator=\"|\" --whitelist $topics"
 }
 
 kDeleteTopic() {
