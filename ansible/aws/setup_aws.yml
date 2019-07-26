@@ -1,0 +1,60 @@
+---
+
+# NOTES:
+# From the portal copy the 'Login Command' and run this in the shell.
+# This will create ~/.aws/credentials
+# Run export AWS_DEFAULT_PROFILE=<YOUR PROFILE NAME>, where the profile name is taken from
+# the header in the credentials file
+# Copy the values in the credentials file to aws_keys.yml
+# Consider using this to saving having to add hosts to the inventory
+# https://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html#inventory-script-example-aws-ec2
+#
+# https://www.linuxschoolonline.com/use-ansible-to-build-and-manage-aws-ec2-instances/
+
+- hosts: local
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars/aws_vault.yml
+    - vars/aws.yml
+
+  tasks:
+
+    - name: Ensure the ec2 Key Pair exists 
+      ec2_key:
+        name: "{{ ec2_key_pair_name }}"
+        profile: "{{ aws_profile_name }}"
+        region: "{{ aws_region }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ aws_session_token }}"
+      register: ec2_key_creation_result
+
+    - name: Debug key creation
+      debug: var=ec2_key_creation_result
+        
+    - name: The private key is save to a local .pem file
+      copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="./{{ ec2_key_pair_name }}.pem" mode=0600
+      when: ec2_key_creation_result.changed
+
+
+
+    - name: Ensure the ec2 security group exists
+      ec2_group:
+        name: "{{ ec2_security_group }}"
+        description: "{{ ec2_security_group_description }}"
+        profile: "{{ aws_profile_name }}"
+        region: "{{ aws_region }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ aws_session_token }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+
+
