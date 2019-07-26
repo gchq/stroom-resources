@@ -25,8 +25,9 @@ cmd_help_msg="Checks the running state of each service and checks the\nhealth of
 # give the directory relative to the lib script, not this script.
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$DIR"/lib/shell_utils.sh
-source "$DIR"/lib/stroom_utils.sh
+source "${DIR}"/lib/shell_utils.sh
+source "${DIR}"/lib/stroom_utils.sh
+source "${DIR}"/lib/constants.sh
 
 main() {
 
