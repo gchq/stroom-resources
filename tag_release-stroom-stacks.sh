@@ -142,10 +142,10 @@ main() {
     commit_msg+="${stack_name}\n"
     commit_msg+="===========================\n"
 
+    local padding="                            "
     while read -r line; do
       local service_name="${line%%|*}"
       local image_tag="${line#*|}"
-      local -r padding="                            "
       # Uses bash substitution to only print the part of padding beyond the length of padded_string
       commit_msg+="$( \
         printf "  ${GREEN}%s${NC} %s${BLUE}${image_tag}${NC}\n" \
