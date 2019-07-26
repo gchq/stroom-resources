@@ -80,7 +80,7 @@ main() {
   # shellcheck disable=SC2154
   while read -r service_to_start; do
     stack_services+=( "${service_to_start}" )
-  done <<< "$(cut -d "|" -f 1 < "${DIR}/${stack_services_file}" )"
+  done <<< "$( cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" )"
 
   # Explicitly set services to show logs for so we can use the SERVICES file to
   # control what services run on the node.
