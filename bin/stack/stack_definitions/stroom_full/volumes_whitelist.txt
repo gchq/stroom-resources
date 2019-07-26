@@ -17,3 +17,5 @@ stroom-all-dbs_logs
 zookeeper_data
 kafka_data
 kafka_logs
+hbase_data
+hbase_logs

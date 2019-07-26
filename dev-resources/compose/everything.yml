@@ -162,6 +162,9 @@ volumes:
   kafka_data:
   kafka_logs:
 
+  hbase_data:
+  hbase_logs:
+
   fake-smtp_mail:
 # If you want to have a docker managed/named volume but pointing to somewhere
 # other than /var/lib/docker/volumes/..... then you can do stuff like this.

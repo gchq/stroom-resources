@@ -27,5 +27,18 @@ services:
       - 60010:60010
       - 60020:60020
       - 60030:60030
+    volumes:
+      # I don't hink this line is needed, see https://github.com/wurstmeister/kafka-docker/wiki
+      #- /var/run/docker.sock:/var/run/docker.sock
+      - type: volume
+        source: hbase_data
+        target: /hbase-data
+      - type: volume
+        source: hbase_logs
+        target: /hbase/logs
+    logging:
+      options:
+        max-size: "${HBASE_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${HBASE_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
