@@ -146,14 +146,14 @@ main() {
     while read -r line; do
       local service_name="${line%%|*}"
       local image_tag="${line#*|}"
-      # Uses bash substitution to only print the part of padding beyond the length of padded_string
+      # Uses bash substitution to only print the part of padding beyond the length of service_name
       commit_msg+="$( \
-        printf "  ${GREEN}%s${NC} %s${BLUE}${image_tag}${NC}\n" \
-          "${service_name}" "${padding:${#service_name}}"
-        )"
-    done <"${all_services_file}"
+        printf "  %s %s${image_tag}" "${service_name}" "${padding:${#service_name}}"
+        )\n"
+    done < "${all_services_file}"
 
     #commit_msg+="$(<"${all_services_file}")\n\n"
+    commit_msg+="\n"
   done
 
   # Remove any repeated blank lines with cat -s
