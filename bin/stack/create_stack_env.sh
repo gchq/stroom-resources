@@ -10,6 +10,7 @@ set -e
 source lib/shell_utils.sh
 # shellcheck disable=SC1091
 source lib/network_utils.sh
+source lib/constants.sh
 
 # Creates the blank env file and sets some standard header text
 create_config() {
@@ -294,14 +295,17 @@ create_versions_file() {
 
     docker-compose -f "${INPUT_YAML_FILE}" config \
       | ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))' \
-      | jq -r '.services[] | .container_name + "|" + .image' \
-      > "${SERVICES_FILE}"
+      | jq -r '.services[] | .container_name + "|" + .image' > "${STACK_SERVICES_FILE}"
   )
+
+  # Initiall the stack services will be identical to all services
+  cp "${STACK_SERVICES_FILE}" "${ALL_SERVICES_FILE}"
+
   echo -e "${GREEN}Using services and container versions:${NC}"
 
   while read -r line; do
     echo -e "  ${BLUE}${line}${NC}"
-  done < "${SERVICES_FILE}" 
+  done < "${STACK_SERVICES_FILE}" 
 
   # TODO validate tags
   #if docker_tag_exists library/nginx 1.7.5; then
@@ -328,7 +332,10 @@ main() {
   local -r OUTPUT_ENV_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
   local -r OVERRIDE_FILE="${STACK_DEFINITIONS_DIR}/overrides.env"
   local -r WHITELIST_FILE="${STACK_DEFINITIONS_DIR}/env_vars_whitelist.txt"
-  Local -r SERVICES_FILE="${WORKING_DIRECTORY}/../SERVICES.txt"
+  local -r STACK_SERVICES_FILE="${WORKING_DIRECTORY}/../${STACK_SERVICES_FILENAME}"
+  local -r ALL_SERVICES_FILE="${WORKING_DIRECTORY}/../${ALL_SERVICES_FILENAME}"
+  echo ${STACK_SERVICES_FILENAME}
+  echo ${ALL_SERVICES_FILENAME}
 
   echo -e "${GREEN}Setting stack name in yaml file${NC}"
   replace_in_yaml "STACK_NAME" "${BUILD_STACK_NAME}"

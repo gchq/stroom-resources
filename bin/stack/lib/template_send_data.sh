@@ -28,6 +28,7 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${DIR:-.}"/lib/shell_utils.sh
 source "${DIR:-.}"/lib/stroom_utils.sh
+source "${DIR:-.}"/lib/constants.sh
 
 # Read the file containing all the env var exports to make them
 # available to docker-compose

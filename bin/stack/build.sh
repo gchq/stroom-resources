@@ -46,12 +46,12 @@ validate_requested_services() {
 # Produce a file containing the list of services in the stack
 # so the stack can use it to tailor how the start/stop/etc. scripts
 # operate
-create_services_file() {
-  touch "${SERVICES_FILE}"
-  for service in "${SERVICES[@]}"; do
-    echo "${service}" >> "${SERVICES_FILE}"
-  done
-}
+#create_services_file() {
+  #touch "${SERVICES_FILE}"
+  #for service in "${SERVICES[@]}"; do
+    #echo "${service}" >> "${SERVICES_FILE}"
+  #done
+#}
 
 
 main() {
