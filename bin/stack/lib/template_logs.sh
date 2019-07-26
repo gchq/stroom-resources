@@ -85,9 +85,9 @@ main() {
   # Explicitly set services to show logs for so we can use the SERVICES file to
   # control what services run on the node.
   if [ "$#" -eq 0 ]; then
-    extra_compose_args=( "${@}" )
-  else
     extra_compose_args=( "${stack_services[@]}" )
+  else
+    extra_compose_args=( "${@}" )
   fi
 
   #echo "Remaining args: [${*}]"
