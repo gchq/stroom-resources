@@ -1,0 +1,42 @@
+# This is a separate playbook because deleting the key pair
+# is not immediate, and the 'wait' option has been removed.
+# So if there's an issue with access this needs to be run
+# by itself before re-creating the cert and the key pair.
+
+- hosts: local
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars/aws_vault.yml
+    - vars/aws.yml
+
+  tasks:
+    - name: Get the hostnam of the control machine
+      command: hostname
+      register: hostname
+
+    - name: Get the username of the current user
+      command: whoami
+      register: username
+
+    - name: Ensure the ec2 Key Pair does not exist
+      ec2_key:
+        name: "{{ hostname.stdout }}"
+        profile: "{{ aws_profile_name }}"
+        region: "{{ aws_region }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ aws_session_token }}"
+        state: absent
+      register: ec2_key_clean_slate_result
+    - name: Debug ec2_key_clean_slate_result
+      debug: var=ec2_key_clean_slate_result
+     
+
+    - name: Ensure the cert does not exist locally
+      file:
+        path: "~/.ssh/{{ hostname.stdout }}.pem"
+        state: absent
+      register: local_cert_result
+    - name: Debug local_cert_result
+      debug: var=local_cert_result

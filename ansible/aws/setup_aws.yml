@@ -1,5 +1,4 @@
 ---
-
 # NOTES:
 # From the portal copy the 'Login Command' and run this in the shell.
 # This will create ~/.aws/credentials
@@ -19,24 +18,56 @@
     - vars/aws.yml
 
   tasks:
+    - name: Get the hostnam of the control machine
+      command: hostname
+      register: hostname
 
+    - name: Get the username of the current user
+      command: whoami
+      register: username
+
+    - stat:
+        #ppath: ~/.ssh/aws_key_for_"{{ username }}"_at_"{{ hostname }}".pem
+        path: ~/.ssh/"{{ hostname.stdout}}".pem
+      register: key_file_stat
+    - name: Debug key_file_stat
+      debug: var=key_file_stat
+
+    - fail:
+        msg: You don't have a local key
+      when: key_file_stat.stat.exists == False
+
+    - name: Ensure the ec2 Key Pair does not exist if we don't have the cert locally
+      ec2_key:
+        name: "{{ hostname.stdout }}"
+        profile: "{{ aws_profile_name }}"
+        region: "{{ aws_region }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ aws_session_token }}"
+        state: absent
+      register: ec2_key_clean_slate_result
+      when: key_file_stat.stat.exists == False
+    - name: Debug ec2_key_clean_slate_result
+      debug: var=ec2_key_clean_slate_result
+     
     - name: Ensure the ec2 Key Pair exists 
       ec2_key:
-        name: "{{ ec2_key_pair_name }}"
+        name: "{{ hostname.stdout }}"
         profile: "{{ aws_profile_name }}"
         region: "{{ aws_region }}"
         aws_access_key: "{{ aws_access_key }}"
         aws_secret_key: "{{ aws_secret_key }}"
         security_token: "{{ aws_session_token }}"
       register: ec2_key_creation_result
-
-    - name: Debug key creation
-      debug: var=ec2_key_creation_result
-        
+      when: key_file_stat.stat.exists == False
+#
+ #  - name: Debug key creation
+ #    debug: var=ec2_key_creation_result
+#
     - name: The private key is save to a local .pem file
-      copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="./{{ ec2_key_pair_name }}.pem" mode=0600
+      copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="~/.ssh/{{ hostname.stdout }}.pem" mode=0600
       when: ec2_key_creation_result.changed
-
 
 
     - name: Ensure the ec2 security group exists
