@@ -1,0 +1,8 @@
+[stroom_and_proxy]
+centos@ec2-34-244-71-200.eu-west-1.compute.amazonaws.com
+centos@ec2-34-245-27-217.eu-west-1.compute.amazonaws.com
+[stroom_dbs]
+centos@ec2-52-214-224-15.eu-west-1.compute.amazonaws.com
+[stroom_services]
+centos@ec2-34-246-202-143.eu-west-1.compute.amazonaws.com
+centos@ec2-34-241-148-63.eu-west-1.compute.amazonaws.com
