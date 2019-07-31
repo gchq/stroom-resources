@@ -26,8 +26,9 @@ cmd_help_options="  -y   Do not prompt for confirmation, e.g. when run from a sc
 # give the directory relative to the lib script, not this script.
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$DIR"/lib/shell_utils.sh
-source "$DIR"/lib/stroom_utils.sh
+source "${DIR}"/lib/shell_utils.sh
+source "${DIR}"/lib/stroom_utils.sh
+source "${DIR}"/lib/constants.sh
 
 main() {
   local requireConfirmation=true

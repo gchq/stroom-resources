@@ -27,8 +27,9 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # shellcheck disable=SC1090
 {
-  source "$DIR"/lib/shell_utils.sh
-  source "$DIR"/lib/stroom_utils.sh
+  source "${DIR}"/lib/shell_utils.sh
+  source "${DIR}"/lib/stroom_utils.sh
+  source "${DIR}"/lib/constants.sh
 }
 
 setup_echo_colours

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script creates and pushes a git annotated tag with a commit message taken from
-# the VERSIONS.txt file of a local stack build.
+# the ALL_SERVICES.txt file of a local stack build.
 set -e
 
 setup_echo_colours() {
@@ -113,23 +113,23 @@ main() {
   commit_msg+="docker image versions used.\n\n"
 
   for stack_name in ${stack_names}; do
-    local versions_file="${STACK_BUILD_DIR}/${stack_name}/${stack_name}-${VERSION_PART}/VERSIONS.txt"
-    if [ ! -f "${versions_file}" ]; then
-      error_exit "Can't find file ${BLUE}${versions_file}${GREEN} in the stack build${NC}"
+    local all_services_file="${STACK_BUILD_DIR}/${stack_name}/${stack_name}-${VERSION_PART}/ALL_SERVICES.txt"
+    if [ ! -f "${all_services_file}" ]; then
+      error_exit "Can't find file ${BLUE}${all_services_file}${GREEN} in the stack build${NC}"
     fi
 
-    if grep -qi "SNAPSHOT" "${versions_file}"; then
+    if grep -qi "SNAPSHOT" "${all_services_file}"; then
       error_exit "Found a ${BLUE}SNAPSHOT${GREEN} version in the" \
-        "${BLUE}${versions_file}${GREEN} file. You can't release a SNAPSHOT"
+        "${BLUE}${all_services_file}${GREEN} file. You can't release a SNAPSHOT"
     fi
 
     # If the stack includes stroom, make sure the stroom image matches the version
-    if grep -q "${STROOM_IMAGE_PREFIX}:" "${versions_file}"; then
+    if cut -d "|" -f 2 <  "${all_services_file}" | grep -q "${STROOM_IMAGE_PREFIX}:"; then
       # Extract the version part of the tag, e.g. v6.0-beta.20
       local stroom_version="v${version#*-v}"
       # Get the full stroom docker image tag from the VERSIONS.txt file
       local stroom_image_tag
-      stroom_image_tag="$(grep "${STROOM_IMAGE_PREFIX}:.*" "${versions_file}")"
+      stroom_image_tag="$(grep "${STROOM_IMAGE_PREFIX}:.*" "${all_services_file}")"
       # Extract the version part of the stroom tag
       local stroom_image_version="${stroom_image_tag#*:}"
 
@@ -141,7 +141,19 @@ main() {
 
     commit_msg+="${stack_name}\n"
     commit_msg+="===========================\n"
-    commit_msg+="$(<"${versions_file}")\n\n"
+
+    local padding="                            "
+    while read -r line; do
+      local service_name="${line%%|*}"
+      local image_tag="${line#*|}"
+      # Uses bash substitution to only print the part of padding beyond the length of service_name
+      commit_msg+="$( \
+        printf "  %s %s${image_tag}" "${service_name}" "${padding:${#service_name}}"
+        )\n"
+    done < "${all_services_file}"
+
+    #commit_msg+="$(<"${all_services_file}")\n\n"
+    commit_msg+="\n"
   done
 
   # Remove any repeated blank lines with cat -s

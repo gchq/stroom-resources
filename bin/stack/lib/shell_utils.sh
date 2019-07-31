@@ -61,6 +61,14 @@ test_for_bash_version_4() {
   fi
 }
 
+check_binary_is_available() {
+  local binary_name="$1"
+  if ! command -v "${binary_name}" 1>/dev/null; then
+    die "${RED}Error${NC}:  ${BLUE}${binary_name}${NC} is not installed." \
+      "Please install it and try again"
+  fi
+}
+
 dump_call_stack () {
   local stack_length=${#FUNCNAME[@]}
   local last_idx=$(( stack_length - 1 ))
