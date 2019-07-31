@@ -25,7 +25,7 @@ services:
       # will always use the values obtained from ZK.
       # Changing the value in ZK requires the ZK CLI or some other tool.
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      - STATS_KAFKA_BOOTSTRAP=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      - STATS_KAFKA_BOOTSTRAP=${STATS_KAFKA_BOOTSTRAP:-kafka:9092}
       # Comma delimited list of hosts in the ZK quorum (no port or chroot), e.g. host1,host2,host3
       - STATS_HBASE_ZK_QUORUM_HOSTS=${HBASE_ZOOKEEPER_QUORUM_HOSTS:-zookeeper}
       - ADMIN_CONTEXT_PATH=/statsAdmin

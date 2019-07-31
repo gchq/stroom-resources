@@ -1,0 +1,21 @@
+# Creates the ec2 Key Pair and downloads the cert to ~/.ssh.
+#
+# You can only download the cert for the key pair when you
+# first create the key pair. So if you don't have the cert
+# then you need to create a new key pair.
+#
+# This playbook will attempt to use your machines hostname
+# as the name for the key pair and for the cert file in ~/.ssh.
+#
+# This will fail if you already have a cert in ~/.ssh. If
+# that happens then run remove_key_pair.yml.
+
+- hosts: local
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars/aws_vault.yml
+    - vars/aws.yml
+  roles:
+    - roles/remove_key_pair
+    - roles/create_key_pair 

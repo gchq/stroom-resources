@@ -10,6 +10,7 @@ set -e
 source lib/shell_utils.sh
 # shellcheck disable=SC1091
 source lib/network_utils.sh
+source lib/constants.sh
 
 # Creates the blank env file and sets some standard header text
 create_config() {
@@ -285,27 +286,26 @@ add_env_vars() {
 create_versions_file() {
 
   # Produce a list of fully qualified docker image tags by sourcing the OUTPUT_ENV_FILE
-  # that contains all the env vars and using their values to do variable substitution
-  # against the image definitions obtained from the yml (INPUT_YAML_FILE)
-  # Source the env file in a subshell to avoid poluting ours
-  # shellcheck disable=SC1090
-  ( 
+  # and then using docer-compose config to give us the effective yaml.
+  # Then use ruby to convert yaml to json to then use jq to extract the
+  # service name and image, dumping the result to a file.
+  (
+    # shellcheck disable=SC1090
     source "${OUTPUT_ENV_FILE}"
 
-    # Find all image: lines in the yml and turn them into echo statements so we can
-    # eval them so bash does its variable substitution. Bit hacky using eval.
-    grep "image:" "${INPUT_YAML_FILE}" | 
-      sed -e 's/\s*image:\s*/echo /g' | 
-      while read -r line; do
-        eval "${line}"
-      done 
-  ) | sort | uniq > "${VERSIONS_FILE}"
+    docker-compose -f "${INPUT_YAML_FILE}" config \
+      | ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))' \
+      | jq -r '.services[] | .container_name + "|" + .image' > "${STACK_SERVICES_FILE}"
+  )
 
-  echo -e "${GREEN}Using container versions:${NC}"
+  # Initiall the stack services will be identical to all services
+  cp "${STACK_SERVICES_FILE}" "${ALL_SERVICES_FILE}"
+
+  echo -e "${GREEN}Using services and container versions:${NC}"
 
   while read -r line; do
     echo -e "  ${BLUE}${line}${NC}"
-  done < "${VERSIONS_FILE}" 
+  done < "${STACK_SERVICES_FILE}" 
 
   # TODO validate tags
   #if docker_tag_exists library/nginx 1.7.5; then
@@ -332,7 +332,10 @@ main() {
   local -r OUTPUT_ENV_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
   local -r OVERRIDE_FILE="${STACK_DEFINITIONS_DIR}/overrides.env"
   local -r WHITELIST_FILE="${STACK_DEFINITIONS_DIR}/env_vars_whitelist.txt"
-  local -r VERSIONS_FILE="${WORKING_DIRECTORY}/../VERSIONS.txt"
+  local -r STACK_SERVICES_FILE="${WORKING_DIRECTORY}/../${STACK_SERVICES_FILENAME}"
+  local -r ALL_SERVICES_FILE="${WORKING_DIRECTORY}/../${ALL_SERVICES_FILENAME}"
+  echo ${STACK_SERVICES_FILENAME}
+  echo ${ALL_SERVICES_FILENAME}
 
   echo -e "${GREEN}Setting stack name in yaml file${NC}"
   replace_in_yaml "STACK_NAME" "${BUILD_STACK_NAME}"

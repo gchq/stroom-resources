@@ -27,9 +27,10 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # shellcheck disable=SC1090
 {
-  source "$DIR"/lib/network_utils.sh
-  source "$DIR"/lib/shell_utils.sh
-  source "$DIR"/lib/stroom_utils.sh
+  source "${DIR}"/lib/network_utils.sh
+  source "${DIR}"/lib/shell_utils.sh
+  source "${DIR}"/lib/stroom_utils.sh
+  source "${DIR}"/lib/constants.sh
 }
 
 # Read the file containing all the env var exports to make them
@@ -63,12 +64,8 @@ main() {
 
   local error_count=0
 
-  local images
-  images="$("${DIR}/show_config.sh" | grep -oP "(?<=image:)\s\S+")"
-
-   while read -r image; do
-    # remove any leading whitespace
-    image="${image#"${image%%[![:space:]]*}"}"
+  # Extract the image tags from the VERSIONS file.
+  while read -r image; do
     echo 
     echo -e "${GREEN}Pulling image ${BLUE}${image}${GREEN} from the remote repository${NC}"
     docker image pull "${image}" \
@@ -76,7 +73,7 @@ main() {
         echo -e "${RED}Error${GREEN}: Unable to pull ${BLUE}${image}${GREEN}" \
           "from the remote repository${NC}" && error_count=$(( error_count + 1 )) 
       }
-  done <<< "${images}"
+  done <<< "$( get_images_in_stack )"
 
   echo
   if [ "${error_count}" -eq 0 ]; then

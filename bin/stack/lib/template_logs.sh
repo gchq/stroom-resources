@@ -30,8 +30,9 @@ extra_compose_args=()
 # give the directory relative to the lib script, not this script.
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$DIR"/lib/shell_utils.sh
-source "$DIR"/lib/stroom_utils.sh
+source "${DIR}"/lib/shell_utils.sh
+source "${DIR}"/lib/stroom_utils.sh
+source "${DIR}"/lib/constants.sh
 
 main() {
 
@@ -74,7 +75,20 @@ main() {
       die "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not running."
     fi
   done
-  extra_compose_args+=( "${@}" )
+  # Extract the services column from the SERVICES file and add each to the array
+  local stack_services=()
+  # shellcheck disable=SC2154
+  while read -r service_to_start; do
+    stack_services+=( "${service_to_start}" )
+  done <<< "$( cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" )"
+
+  # Explicitly set services to show logs for so we can use the SERVICES file to
+  # control what services run on the node.
+  if [ "$#" -eq 0 ]; then
+    extra_compose_args=( "${stack_services[@]}" )
+  else
+    extra_compose_args=( "${@}" )
+  fi
 
   #echo "Remaining args: [${*}]"
 
@@ -86,6 +100,7 @@ main() {
   else
     echo -e "${GREEN}Tailing the logs from the last ${line_count_per_service} entries onwards${NC}"
   fi
+
 
   # shellcheck disable=SC2094
   docker-compose \

@@ -73,15 +73,23 @@ echo_unhealthy() {
   echo
 }
 
+get_services_in_stack() {
+  cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" 
+}
+
+get_images_in_stack() {
+  cut -d "|" -f 2 < "${DIR}/${STACK_SERVICES_FILENAME}" 
+}
+
 show_services_usage_part() {
   # shellcheck disable=SC2002
-  if [ -f "${DIR}/${stack_services_file}" ] \
-    && [ "$(cat "${DIR}/${stack_services_file}" | wc -l)" -gt 0 ]; then
+  if [ -f "${DIR}/${STACK_SERVICES_FILENAME}" ] \
+    && [ "$(cat "${DIR}/${STACK_SERVICES_FILENAME}" | wc -l)" -gt 0 ]; then
 
     echo -e "Valid SERVICE values:"
     while read -r service; do
       echo -e "  ${service}"
-    done < "${DIR}/${stack_services_file}"
+    done <<< "$( get_services_in_stack )"
   fi
 }
 
@@ -141,7 +149,8 @@ is_service_in_stack() {
   local -r service_name="$1"
 
   # return true if service_name is in the file
-  if grep -q "^${service_name}$" "${DIR}/${stack_services_file}"; then
+  # file is serviceName|fullyQualifiedDockerTag
+  if grep -q "^${service_name}|" "${DIR}/${STACK_SERVICES_FILENAME}"; then
     return 0;
   else
     return 1;
@@ -190,16 +199,20 @@ is_container_running() {
 
 # Return zero if any of the supplied services are in the stack
 is_at_least_one_service_in_stack() {
-  local -r service_names=( "$@" )
-  local regex="^"
-  for service_name in "${service_names[@]}"; do
-    regex+="(${service_name})"
+  local -r service_names_to_check=( "$@" )
+  # trying to build a regex like "^(svc1|svc3|svc4)$"
+  local regex="^("
+  for service_name in "${service_names_to_check[@]}"; do
+    regex+="${service_name}|"
   done
-  regex+="$"
+  regex="${regex%%|}}"
+  regex+=")$"
 
   # return true if service_name is in the file
   # shellcheck disable=SC2151
-  if grep -q "${regex}" "${DIR}/${stack_services_file}"; then
+  # TODO add cut into the mix here
+  #if cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" \
+  if get_services_in_stack | grep -qP "${regex}"; then
     return 0;
   else
     return 1;
@@ -351,7 +364,8 @@ check_containers() {
 
     total_unhealthy_count=$((total_unhealthy_count + unhealthy_count))
     #((total_unhealthy_count+=unhealthy_count))
-  done < "${DIR}/${stack_services_file}"
+  #done <<< "$( cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" )"
+  done <<< "$( get_services_in_stack )"
 }
 
 check_overall_health() {
@@ -426,6 +440,21 @@ echo_info_line() {
     "${padded_string}" "${padding:${#padded_string}}"
 }
 
+display_active_stack_services() {
+  echo
+  echo -e "Active stack services and image versions:"
+  echo
+
+  # Used for right padding 
+  local -r padding="                            "
+
+  while read -r line; do
+    local service_name="${line%%|*}"
+    local image_tag="${line#*|}"
+    echo_info_line "${padding}" "${service_name}" "${image_tag}"
+  done < "${DIR}/${STACK_SERVICES_FILENAME}"
+}
+
 display_stack_info() {
   # see if the terminal supports colors...
   no_of_colours=$(tput colors)
@@ -442,18 +471,7 @@ display_stack_info() {
   cat "${DIR}"/lib/banner.txt
   echo -en "${NC}"
 
-  echo
-  echo -e "Stack image versions:"
-  echo
-
-  # Used for right padding 
-  local -r padding="                            "
-
-  while read -r line; do
-    local image_name="${line%%:*}"
-    local image_version="${line#*=}"
-    echo_info_line "${padding}" "${image_name}" "${image_version}"
-  done < "${DIR}"/VERSIONS.txt
+  display_active_stack_services
 
   if is_at_least_one_service_in_stack "${SERVICES_WITH_HEALTH_CHECK[@]}"; then
 
@@ -467,7 +485,7 @@ display_stack_info() {
         "http://localhost:${admin_port}/stroomAdmin"
     fi
     if is_service_in_stack "stroom-stats"; then
-      admin_port="$(get_config_env_var "STROOM_STATS_SERVICE_ADMIN_PORT")"
+      admin_port="$(get_config_env_var "STROOM_STATS_ADMIN_PORT")"
       echo_info_line "${padding}" "Stroom Stats" \
         "http://localhost:${admin_port}/statsAdmin"
     fi
@@ -493,15 +511,17 @@ display_stack_info() {
     echo -e "Data can be POSTed to Stroom using the following URLs (see README for details)"
     echo
     if is_service_in_stack "stroom"; then
-      echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeed"
+      echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeeddirect"
     fi
     if is_service_in_stack "stroom-proxy-local"; then
       echo_info_line "${padding}" "Stroom Proxy (local)" \
-        "https://localhost:${STROOM_PROXY_LOCAL_HTTPS_APP_PORT}/stroom/datafeed"
+        "https://localhost/stroom/datafeed"
     fi
     if is_service_in_stack "stroom-proxy-remote"; then
+      local admin_port
+      admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_APP_PORT")"
       echo_info_line "${padding}" "Stroom Proxy (remote)" \
-        "https://localhost:${STROOM_PROXY_REMOTE_HTTPS_APP_PORT}/stroom/datafeed"
+        "http://localhost:${admin_port}/stroom/datafeed"
     fi
 
     if is_service_in_stack "stroom"; then
@@ -542,13 +562,27 @@ start_stack() {
 
   determing_docker_host_details
 
+  local stack_services=()
+  while read -r service_to_start; do
+    stack_services+=( "${service_to_start}" )
+  # TODO add cut into the mix here
+  done <<< "$( get_services_in_stack )"
+
+  # Explicitly set services to start so we can use the SERVICES file to
+  # control what services run on the node.
+  if [ "$#" -eq 0 ]; then
+    services_to_start=( "${stack_services[@]}" )
+  else
+    services_to_start=( "${@}" )
+  fi
+
   # shellcheck disable=SC2094
   docker-compose \
     --project-name "${STACK_NAME}" \
     -f "$DIR/config/${STACK_NAME}.yml" \
     up \
     -d \
-    "${@}"
+    "${services_to_start[@]}"
 }
 
 stop_services_if_in_stack() {
@@ -609,7 +643,7 @@ stop_stack_gracefully() {
   local all_services=()
   while read -r service_to_stop; do
     all_services+=( "${service_to_stop}" )
-  done < "${DIR}/${stack_services_file}"
+  done <<< "$( get_services_in_stack )"
 
   stop_services_if_in_stack "${all_services[@]}"
 
