@@ -11,27 +11,27 @@
     ansible_inventory_file: ./build/ansible_inventory
   tasks:
     - include_role:
-        name: roles/ec2/create_inventory
+        name: roles/ec2/inventory/create
       vars:
         instance_tag_name: stroom_services_1
         instance_tag_type: stroom_services
     - include_role:
-        name: roles/ec2/create_inventory
+        name: roles/ec2/inventory/create
       vars:
         instance_tag_name: stroom_services_2
         instance_tag_type: stroom_services
     - include_role:
-        name: roles/ec2/create_inventory
+        name: roles/ec2/inventory/create
       vars:
         instance_tag_name: stroom_and_proxy_1
         instance_tag_type: stroom_and_proxy
     - include_role:
-        name: roles/ec2/create_inventory
+        name: roles/ec2/inventory/create
       vars:
         instance_tag_name: stroom_and_proxy_2
         instance_tag_type: stroom_and_proxy
     - include_role:
-        name: roles/ec2/create_inventory
+        name: roles/ec2/inventory/create
       vars:
         instance_tag_name: stroom_dbs_1
         instance_tag_type: stroom_dbs
