@@ -10,14 +10,28 @@ http {
     # Include generic logging configuration
     include logging.conf;
      
-    # Include upstreams configuration specific to stroom
-    include upstreams.stroom.conf;
 
-    # Include upstreams configuration specific to auth
-    include upstreams.auth.conf;
+    upstream stroom_upstream_sticky {
+        ip_hash;
+        include upstreams.stroom.ui.conf;
+    }
+    
+    upstream stroom_upstream {
+        include upstreams.stroom.processing.conf;
+    }
 
-    # Include upstreams configuration specific to proxy
-    include upstreams.proxy.conf;
+    upstream auth_service_upstream_sticky {
+        ip_hash;
+        include upstreams.auth.service.conf;
+    }
+    
+    upstream auth_ui_upstream {
+        include upstreams.auth.ui.conf;
+    }
+
+    upstream stroom_proxy_upstream {
+        include upstreams.proxy.conf;
+    }
 
     # Define valid index page filenames
     index index.html index.htm;

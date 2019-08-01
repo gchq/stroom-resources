@@ -1,4 +1,3 @@
-server <<<STROOM_PROXY_HOST>>>:<<<STROOM_PROXY_PORT>>>;
+server <<<STROOM_HOST>>>:<<<STROOM_PORT>>>;
 
 # vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
-
