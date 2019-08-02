@@ -1,0 +1,53 @@
+- name: Get the hostname of the control machine
+  command: hostname
+  register: hostname
+
+- name: Get instance-id
+  ec2_instance_facts:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    security_token: "{{ aws_session_token }}"
+    profile: "{{ aws_profile_name }}"
+    region: "{{ aws_region }}"
+    filters:
+      "tag:type": "{{ instance_tag_type }}"
+      "tag:name": "{{ instance_tag_name }}"
+      "tag:environment": "{{ instance_tag_environment }}"
+      instance-state-name: [ 
+        "shutting-down", 
+        "stopping", 
+        "stopped", 
+        "running", 
+        "pending", 
+        "rebooting" ]
+  register: ec2_instance_query_result
+
+- name: Debug check for {{ instance_tag_name }}
+  debug: var=ec2_instance_query_result.instances[0].instance_id
+
+- name: Terminate {{ instance_tag_name }} if it doesn't exist
+  ec2:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    security_token: "{{ aws_session_token }}"
+    profile: "{{ aws_profile_name }}"
+    group: "{{ ec2_security_group }}"
+    region: "{{ aws_region }}"
+    keypair: "{{ hostname.stdout }}"
+    image: "{{ ec2_ami }}"
+    instance_ids: "{{ ec2_instance_query_result.instances[0].instance_id }}"
+    #wait: true 
+    # Actual spec
+    instance_type: "{{ ec2_instance_type }}"
+    count: 0 
+    state: absent
+    instance_tags:
+      name: "{{ instance_tag_name }}"
+      type:  "{{ instance_tag_type }}"
+      environment:  "{{ instance_tag_environment }}"
+      owner: "{{ instance_tag_owner }}" 
+  register: ec2
+
+- name: Debug launch for {{ instance_tag_name }}
+  debug: var=ec2.instances
+  when: ec2 is defined

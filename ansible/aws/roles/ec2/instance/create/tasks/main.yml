@@ -1,4 +1,4 @@
-- name: Get the hostnam of the control machine
+- name: Get the hostname of the control machine
   command: hostname
   register: hostname
 
@@ -54,6 +54,3 @@
 - name: Debug launch for {{ instance_tag_name }}
   debug: var=ec2.instances
   when: ec2 is defined
-
-
-- 
