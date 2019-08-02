@@ -1,19 +1,7 @@
-- name: Make sure the '{{home}}/Downloads' folder exists 
-  file:
-    path: "{{home}}/Downloads"
-    state: directory
-
-- name: Get the {{stack_name}} stack
-  get_url:
-    url: "{{ stack_url }}"
-    dest:  "{{home}}/Downloads/"
-
-# The archive extracts to ./stroom_dbs so we'll put it straight into ~
-- name: Un-tar the downloaded {{stack_name}} stack
-  unarchive:
-    src: "{{home}}/Downloads/{{stack_name}}-{{stack_version}}.tar.gz"
-    dest: "{{home}}/"
-    remote_src: yes
+- name: Copy stack to remote
+  copy:
+    src: "{{releases_path}}/{{stack_name}}-{{stack_version}}"
+    dest: "{{home}}/{{stack_name}}"
 
 - name: Create a symlink to a predictable location
   file:
