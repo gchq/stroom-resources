@@ -29,7 +29,7 @@
   become: yes
   hosts: stroom_dbs
   roles:
-    - roles/stack_op
+    - roles/stack/op
 
 - name: Perform operation on services 
   vars_files:
@@ -39,7 +39,7 @@
   become: yes
   hosts: stroom_services
   roles:
-    - roles/stack_op
+    - roles/stack/op
 
 - name: Perform operation on strooms 
   vars_files:
@@ -49,4 +49,4 @@
   become: yes
   hosts: stroom_and_proxy
   roles:
-    - roles/stack_op
+    - roles/stack/op

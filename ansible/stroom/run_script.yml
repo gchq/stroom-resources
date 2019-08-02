@@ -28,5 +28,5 @@
     - ./variables.yml
   hosts: "{{stack_type}}"
   roles:
-    - roles/stack_op
+    - roles/stack/op
 

@@ -7,5 +7,5 @@
     stack_url: https://github.com/gchq/stroom-resources/releases/download/stroom-stacks-{{stack_version}}/{{stack_name}}-{{stack_version}}.tar.gz
   hosts: all
   roles:
-    - roles/install_stack
+    - roles/stack/install
 

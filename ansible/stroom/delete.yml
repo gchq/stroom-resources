@@ -18,7 +18,7 @@
     stack_type: stroom_and_proxy
     op: remove
   roles:
-    - roles/stack_op
+    - roles/stack/op
 
 - name: Stop and remove all containers for stroom_services
   hosts: stroom_services
@@ -28,7 +28,7 @@
     stack_type: stroom_services
     op: remove
   roles:
-    - roles/stack_op
+    - roles/stack/op
 
 - name: Stop and remove all containers for stroom_dbs
   hosts: stroom_dbs
@@ -38,7 +38,7 @@
     stack_type: stroom_dbs
     op: remove
   roles:
-    - roles/stack_op
+    - roles/stack/op
 
 
 ##############################################################
@@ -53,7 +53,7 @@
   become: yes
   hosts: stroom_dbs
   roles:
-    - roles/delete_stack
+    - roles/stack/delete
     
 - name: Delete files for stroom_services
   vars_files:
@@ -63,7 +63,7 @@
   become: yes
   hosts: stroom_services
   roles:
-    - roles/delete_stack
+    - roles/stack/delete
 
 - name: Delete files for stroom_and_proxy
   vars_files:
@@ -73,4 +73,4 @@
   become: yes
   hosts: stroom_and_proxy
   roles:
-    - roles/delete_stack
+    - roles/stack/delete
