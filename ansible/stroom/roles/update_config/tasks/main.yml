@@ -1,4 +1,4 @@
-- name: Copy the '{{stack_type}}' config files to the host
+- name: Copy the config files to the host
   copy:
-    src: "{{conf_path}}/{{stack_type}}/"
-    dest: "{{home}}/{{stack_type}}/{{stack_type}}-{{stack_version}}/config/"
+    src: "{{releases_path}}/latest/config/{{stack_name}}.env"
+    dest: "{{home}}/{{stack_name}}/latest/config/{{stack_name}}.env"

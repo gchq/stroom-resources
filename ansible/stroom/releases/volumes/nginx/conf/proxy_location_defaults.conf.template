@@ -1,0 +1,8 @@
+include location_defaults.conf;
+# RemoteDN is used by stroom, hence the non-standard name
+proxy_set_header           RemoteDN             $ssl_client_s_dn;
+# This is also used by stroom but has to be translated into RemoteCertExpiry with a sensible date format
+proxy_set_header           X-SSL-Client-V-End   $ssl_client_v_end;
+proxy_set_header           X-SSL-Client-V-Start $ssl_client_v_start;
+proxy_set_header           X-SSL-Client-Verify  $ssl_client_verify;
+proxy_set_header           X-SSL-Protocol       $ssl_protocol;

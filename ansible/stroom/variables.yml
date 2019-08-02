@@ -10,5 +10,4 @@ stack_name: stroom_core
 #  2. We might want to change the user, in which case we'll only want to change it in one place.
 home: /home/centos
 
-# This is a secure location outside this repository where you keep your config.
-conf_path: ../../aws/ansible/conf
+releases_path: ./releases

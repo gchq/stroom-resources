@@ -1,0 +1,441 @@
+version: '2.4'
+services:
+  nginx:
+    container_name: nginx
+    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v6.0-beta.8}"
+    environment:
+      #- ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_URL:-http://$HOST_IP:5001}
+      - AUTH_SERVICE_HOST=${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
+      - AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
+      # In development we need to use port 5000 for http access
+      - AUTH_UI_URL=${STROOM_UI_HOST:-$HOST_IP}:${STROOM_UI_ACTIVE_PORT:-9446}
+        # TODO not sure is this should be 9446 or 5001 or something else
+      - STROOM_UI_URL=${STROOM_UI_HOST:-$HOST_IP}:${STROOM_UI_ACTIVE_PORT:-9446}
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
+      - NGINX_ADVERTISED_HOST=${NGINX_ADVERTISED_HOST:-$HOST_IP}
+      - NGINX_CLIENT_BODY_BUFFER_SIZE=${NGINX_CLIENT_BODY_BUFFER_SIZE:-1M}
+      - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
+      - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
+      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+        # Enabling NGINX_SSL_VERIFY_CLIENT means we can capture the DN and cert expiry
+        # in the datafeed but means the client cert must be imported into the browser
+        # so set it to 'optional' so that it asks the client for a cert and if it
+        # provides one it will inspect it
+      - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-optional}
+      - NGINX_HTML_ROOT_PATH=${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}
+      #- QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP:5002}
+      - STROOM_HOST=${STROOM_HOST:-$HOST_IP}
+      - STROOM_PORT=${STROOM_APP_PORT:-8080}
+      - STROOM_PROXY_HOST=${STROOM_PROXY_HOST:-$HOST_IP}
+      - STROOM_PROXY_PORT=${STROOM_PROXY_APP_PORT:-8090}
+    volumes:
+      - ${NGINX_VOLUME_CERTS:-../../volumes/nginx/certs}:/stroom-nginx/certs:ro
+      # nginx.conf.template - used to create the actual config when the container starts
+      - ${NGINX_VOLUME_CONF:-../../volumes/nginx/conf}:/stroom-nginx/config:ro
+      - ${NGINX_VOLUME_HTML:-../../volumes/nginx/html}:${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}:ro
+      - type: volume
+        source: nginx_logs
+        target: /stroom-nginx/logs
+      - type: volume
+        source: nginx_logrotate
+        target: /stroom-nginx/logrotate
+    ports:
+      - "80:80"
+      - "443:443"
+    logging:
+      options:
+        max-size: "${NGINX_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${NGINX_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-stroom_core}"
+
+  stroom:
+    container_name: stroom
+    image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-beta.66}"
+    environment:
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
+      - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10765,suspend=n }
+      - STROOM_APP_PORT=8080
+      - STROOM_ADMIN_PORT=8081
+      - STROOM_DEBUG_PORT=10765
+      - STROOM_NODE=${STROOM_NODE:-node1a}
+      - STROOM_RACK=${STROOM_RACK:-rack}
+      - STROOM_JPA_DIALECT=org.hibernate.dialect.MySQLInnoDBDialect
+      - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}:${STROOM_DB_PORT:-3307}/${STROOM_DB_NAME:-stroom}?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
+      - STROOM_JDBC_DRIVER_USERNAME=${STROOM_DB_USERNAME:-stroomuser}
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
+      - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-$HOST_IP}:${STROOM_STATS_DB_PORT:-3307}/${STROOM_STATS_DB_NAME:-stats}?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=${STROOM_STATS_DB_USERNAME:-statsuser}
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
+      # The browser is redirected to this URL so, like the AUTH UI URL, it needs to be the advertised host.
+      # Though these look similar they are both needed, one is a base path for swagger and the other is the service
+      - STROOM_AUTH_SERVICES_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
+      - STROOM_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth/authentication/v1
+      - STROOM_AUTH_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth/authentication/v1
+      - STROOM_AUTH_JWT_ISSUER=${STROOM_AUTH_JWT_ISSUER:-stroom}
+      - STROOM_AUTH_JWT_ENABLETOKENREVOCATIONCHECK=${ENABLE_TOKEN_REVOCATION_CHECK:-false}
+      - STROOM_UI_URL=${STROOM_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}
+      - STROOM_UI_PATH=${STROOM_UI_PATH:-/stroom/ui?prompt=login}
+      - STROOM_USERS_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/s/users
+      - STROOM_APIKEYS_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/s/tokens
+      - STROOM_CHANGEPASSWORD_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/s/changepassword
+      - STROOM_ADVERTISED_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}
+      # This needs to be an API token issued for a user, i.e. for the admin user.
+      # Without this Stroom won't be able to make calls to it's RemoteDataSources.
+      - STROOM_SECURITY_API_TOKEN=${STROOM_SECURITY_API_TOKEN:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsInNpZCI6bnVsbH0.k0Ssb43GCdTunAMeM26fIulYKNUuPUaJJk6GxDmzCPb7kVPwEtdfBSrtwazfEFM97dnmvURkLqs-DAZTXhhf-0VqQx4hkwcCHf83eVptWTy-lufIhQo6FCM223c9ONIhl6CPqknWh9Bo3vFNrNJoKz5Zw2T_iCcQhi2WGjd_tjTG7VbibTIpH3lPQDw1IBD2nMsEqACJSk3IaFe0GYcrAEMwsjj3sjAwByMbj5DJvo_DJbAuzUwS5IVpASEENen5Xd3wALLirrraUfED1OY0G56Ttcwl3uQ2s-grZXBM4JCiIurlWR5iNtNwoPUsZsyMju4FMSXt3Ur1NIpD7XKJlg}
+      # Default the API key advance warning to 2 weeks/20160 minutes
+      - STROOM_SECURITY_API_TOKEN_DURATION_TO_WARN_BEFORE_EXPIRY=${STROOM_SECURITY_API_TOKEN_DURATION_TO_WARN_BEFORE_EXPIRY:-30d}
+      - ADMIN_CONTEXT_PATH=${ADMIN_CONTEXT_PATH:-/stroomAdmin}
+      - STROOM_LOGGING_LEVEL=${STROOM_LOGGING_LEVEL:-INFO}
+      - STROOM_PLUGINS_LIB_DIR=${STROOM_PLUGINS_LIB_DIR:-/stroom/plugins}
+      - STROOM_CONNECTORS_KAFKA_DEFAULT_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      - STROOM_CONNECTORS_KAFKA_DEFAULT_CONNECTOR_VERSION=2.1.1
+      #- STROOM_CONNECTORS_ELASTIC_DEFAULT_TRANSPORT_HOSTS=${ELASTIC_HOST:-elastic}:${ELASTIC_BINARY_PORT:-9300}
+      #- STROOM_CONNECTORS_ELASTIC_DEFAULT_ELASTIC_HTTP_URL=http://${ELASTIC_HOST:-elastic}:${ELASTIC_HTTP_PORT:-9200}
+      #- STROOM_CONNECTORS_ELASTIC_DEFAULT_CLUSTER_NAME=${STROOM_CONNECTORS_ELASTIC_DEFAULT_CLUSTER_NAME:-docker-cluster}
+      #- STROOM_CONNECTORS_ELASTIC_DEFAULT_CONNECTOR_VERSION=${STROOM_CONNECTORS_ELASTIC_DEFAULT_CONNECTOR_VERSION:-5.6.4}
+      - STROOM_CONTENT_PACK_IMPORT_ENABLED=${STROOM_CONTENT_PACK_IMPORT_ENABLED:-false}
+      - STROOM_SERVICE_DISCOVERY_ENABLED=${STROOM_SERVICE_DISCOVERY_ENABLED:-false}
+      - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=${ZOOKEEPER_QUORUM:-zookeeper:2181}
+      # expose this so we can set it from the shell's env vars
+      - STROOM_DEVELOPMENT_MODE=${STROOM_DEVELOPMENT_MODE:-true}
+      - STROOM_INTERNALSTATISTICS_BENCHMARK_CLUSTER_DOC_REFS=${STROOM_INTERNALSTATISTICS_BENCHMARK_CLUSTER_DOC_REFS:-docRef(StatisticStore,946a88c6-a59a-11e6-bdc4-0242ac110002,Benchmark-Cluster Test)}
+      - STROOM_INTERNALSTATISTICS_CPU_DOC_REFS=${STROOM_INTERNALSTATISTICS_CPU_DOC_REFS:-docRef(StatisticStore,af08c4a7-ee7c-44e4-8f5e-e9c6be280434,CPU)}
+      - STROOM_INTERNALSTATISTICS_EVENTS_PER_SECOND_DOC_REFS=${STROOM_INTERNALSTATISTICS_EVENTS_PER_SECOND_DOC_REFS:-docRef(StatisticStore,a9936548-2572-448b-9d5b-8543052c4d92,EPS)}
+      - STROOM_INTERNALSTATISTICS_HEAP_HISTOGRAM_BYTES_DOC_REFS=${STROOM_INTERNALSTATISTICS_HEAP_HISTOGRAM_BYTES_DOC_REFS:-docRef(StatisticStore,934a1600-b456-49bf-9aea-f1e84025febd,Heap Histogram Bytes)}
+      - STROOM_INTERNALSTATISTICS_HEAP_HISTOGRAM_INSTANCES_DOC_REFS=${STROOM_INTERNALSTATISTICS_HEAP_HISTOGRAM_INSTANCES_DOC_REFS:-docRef(StatisticStore,e4f243b8-2c70-4d6e-9d5a-16466bf8764f,Heap Histogram Instances)}
+      - STROOM_INTERNALSTATISTICS_MEMORY_DOC_REFS=${STROOM_INTERNALSTATISTICS_MEMORY_DOC_REFS:-docRef(StatisticStore,77c09ccb-e251-4ca5-bca0-56a842654397,Memory)}
+      - STROOM_INTERNALSTATISTICS_META_DATA_STREAM_SIZE_DOC_REFS=${STROOM_INTERNALSTATISTICS_META_DATA_STREAM_SIZE_DOC_REFS:-docRef(StatisticStore,946a8814-a59a-11e6-bdc4-0242ac110002,Meta Data-Stream Size)}
+      - STROOM_INTERNALSTATISTICS_META_DATA_STREAMS_RECEIVED_DOC_REFS=${STROOM_INTERNALSTATISTICS_META_DATA_STREAMS_RECEIVED_DOC_REFS:-docRef(StatisticStore,946a87bc-a59a-11e6-bdc4-0242ac110002,Meta Data-Streams Received)}
+      - STROOM_INTERNALSTATISTICS_PIPELINE_STREAM_PROCESSOR_DOC_REFS=${STROOM_INTERNALSTATISTICS_PIPELINE_STREAM_PROCESSOR_DOC_REFS:-docRef(StatisticStore,946a80fc-a59a-11e6-bdc4-0242ac110002,PipelineStreamProcessor)}
+      - STROOM_INTERNALSTATISTICS_STREAM_TASK_QUEUE_SIZE_DOC_REFS=${STROOM_INTERNALSTATISTICS_STREAM_TASK_QUEUE_SIZE_DOC_REFS:-docRef(StatisticStore,946a7f0f-a59a-11e6-bdc4-0242ac110002,Stream Task Queue Size)}
+      - STROOM_INTERNALSTATISTICS_VOLUMES_DOC_REFS=${STROOM_INTERNALSTATISTICS_VOLUMES_DOC_REFS:-docRef(StatisticStore,ac4d8d10-6f75-4946-9708-18b8cb42a5a3,Volumes)}
+      # External Doc Ref Types
+      #- STROOM_DOCREF_TYPES=${STROOM_DOCREF_TYPES:-AnnotationsIndex,ElasticIndex}
+      #- STROOM_DOCREF_URL_SERVICE__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_SERVICE_URL:-http://$HOST_IP/annotationsService}
+      #- STROOM_DOCREF_URL_SERVICE__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_SERVICE_URL:-http://$HOST_IP/queryElasticService}
+      #- STROOM_DOCREF_URL_UI__ANNOTATIONS_INDEX=${STROOM_ANNOTATIONS_UI_URL:-http://$HOST_IP/annotations}
+      #- STROOM_DOCREF_URL_UI__ELASTIC_INDEX=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP/query-elastic}
+      - STROOM_PROXY_DIR=${STROOM_STROOM_PROXY_DIR:-/stroom/proxy-repo}
+      - STROOM_HELP_URL=${STROOM_HELP_URL:-https://gchq.github.io/stroom-docs/}
+    ports:
+      - "${STROOM_APP_PORT:-8080}:8080"
+      - "${STROOM_ADMIN_PORT:-8081}:8081"
+      - "${STROOM_DEBUG_PORT:-10765}:10765"
+    healthcheck:
+      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
+      start_period: 1m30s
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${STROOM_VOLUME_CONFIG:-../../volumes/stroom/config}:/stroom/config:ro
+      - type: volume
+        source: stroom_logs
+        target: /stroom/logs
+      - type: volume
+        source: stroom_output
+        target: /stroom/output
+      - type: volume
+        source: stroom-proxy-local_repo
+        target: /stroom/proxy-repo
+      - type: volume
+        source: stroom_volumes
+        target: /stroom/volumes
+    logging:
+      options:
+        max-size: "${STROOM_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-stroom_core}"
+
+
+  stroom-all-dbs:
+    # NB: stroom-auth uses a MySQL testcontainer (https://www.testcontainers.org/). This allows the 
+    # integration tests to run without an external database, i.e. without stroom-resources. 
+    # But this does mean that if you change the MySQL version _here_ you should also change it _there_:
+    # https://github.com/gchq/stroom-auth/blob/master/stroom-auth-svc/src/integration-test/java/stroom/auth/service/resources/support/Database_IT.java#L35
+    image: "${MYSQL_DOCKER_REPO:-mysql}:${MYSQL_TAG:-5.6.43}"
+    container_name: stroom-all-dbs
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${STROOM_DB_ROOT_PASSWORD:-my-secret-pw}
+        # The following env vars are used to substitute values in
+        # 001_create_databases.sql.template
+
+        # Database names
+      - STROOM_ANNOTATIONS_DB_NAME=${STROOM_ANNOTATIONS_DB_NAME:-annotations}
+      - STROOM_AUTH_DB_NAME=${STROOM_AUTH_DB_NAME:-auth}
+      - STROOM_CONFIG_DB_NAME=${STROOM_CONFIG_DB_NAME:-config}
+      - STROOM_DATAMETA_DB_NAME=${STROOM_DATAMETA_DB_NAME:-datameta}
+      - STROOM_EXPLORER_DB_NAME=${STROOM_EXPLORER_DB_NAME:-explorer}
+      - STROOM_PROCESS_DB_NAME=${STROOM_PROCESS_DB_NAME:-process}
+      - STROOM_STATS_DB_NAME=${STROOM_STATS_DB_NAME:-stats}
+      - STROOM_DB_NAME=${STROOM_DB_NAME:-stroom}
+
+        # Database users
+      - STROOM_ANNOTATIONS_DB_USERNAME=${STROOM_ANNOTATIONS_DB_USERNAME:-annotationsuser}
+      - STROOM_AUTH_DB_USERNAME=${STROOM_AUTH_DB_USERNAME:-authuser}
+      - STROOM_CONFIG_DB_USERNAME=${STROOM_CONFIG_DB_USERNAME:-configuser}
+      - STROOM_DATAMETA_DB_USERNAME=${STROOM_DATAMETA_DB_USERNAME:-datametauser}
+      - STROOM_EXPLORER_DB_USERNAME=${STROOM_EXPLORER_DB_USERNAME:-exploreruser}
+      - STROOM_PROCESS_DB_USERNAME=${STROOM_PROCESS_DB_USERNAME:-processuser}
+      - STROOM_STATS_DB_USERNAME=${STROOM_STATS_DB_USERNAME:-statsuser}
+      - STROOM_DB_USERNAME=${STROOM_DB_USERNAME:-stroomuser}
+
+        # Database passwords
+      - STROOM_ANNOTATIONS_DB_PASSWORD=${STROOM_ANNOTATIONS_DB_PASSWORD:-stroompassword1}
+      - STROOM_AUTH_DB_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
+      - STROOM_CONFIG_DB_PASSWORD=${STROOM_CONFIG_DB_PASSWORD:-stroompassword1}
+      - STROOM_DATAMETA_DB_PASSWORD=${STROOM_DATAMETA_DB_PASSWORD:-stroompassword1}
+      - STROOM_EXPLORER_DB_PASSWORD=${STROOM_EXPLORER_DB_PASSWORD:-stroompassword1}
+      - STROOM_PROCESS_DB_PASSWORD=${STROOM_PROCESS_DB_PASSWORD:-stroompassword1}
+      - STROOM_STATS_DB_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
+      - STROOM_DB_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
+
+    volumes:
+      - ${MYSQL_VOLUME_CONF_FILE:-../../volumes/stroom-all-dbs/conf/stroom-all-dbs.cnf}:/etc/mysql/conf.d/stroom-all-dbs.cnf:ro
+      - ${MYSQL_VOLUME_INIT:-../../volumes/stroom-all-dbs/init}:/docker-entrypoint-initdb.d:ro
+      - type: volume
+        source: stroom-all-dbs_data
+        target: /var/lib/mysql
+      - type: volume
+        source: stroom-all-dbs_logs
+        target: /var/log/mysql
+    logging:
+      options:
+        max-size: "${MYSQL_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${MYSQL_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-stroom_core}"
+
+  stroom-auth-service:
+    container_name: stroom-auth-service
+    image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v6.0-beta.4}"
+    environment:
+      - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
+      - ADVERTISED_HTTP_HOST=https://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
+      - ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
+      - APPLICATION_CONTEXT_PATH=${STROOM_AUTH_APPLICATION_CONTEXT_PATH:-/}
+      - APP_PERMISSIONS_SERVICE_URL=${STROOM_APP_PERMISSIONS_SERVICE_URL:-https://$HOST_IP/api/appPermissions/v1}
+      - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
+      - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
+      - AUTHORISATION_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/authorisation/v1
+      - AUTH_UI=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_HOST:-$HOST_IP}/s/login
+      - CERTIFICATE_DN_CAPTURE_GROUP_INDEX=${STROOM_AUTH_CERTIFICATE_DN_CAPTURE_GROUP_INDEX:-1}
+      - CERTIFICATE_DN_PATTERN=${STROOM_AUTH_CERTIFICATE_DN_PATTERN:-.*\((.*)\)}
+      - CHANGE_PASSWORD_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_HOST:-$HOST_IP}/s/changePassword
+      - DB_PASSWORD=${STROOM_AUTH_DB_PASSWORD:-stroompassword1}
+      - DB_URL=jdbc:mysql://${STROOM_AUTH_DB_HOST:-$HOST_IP}:${STROOM_AUTH_DB_PORT:-3307}/${STROOM_AUTH_DB_NAME:-auth}?useUnicode=yes&characterEncoding=UTF-8
+      - DB_USER=${STROOM_AUTH_DB_USERNAME:-authuser}
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
+      - DURATION_BETWEEN_CHECKS=${STROOM_AUTH_DURATION_BETWEEN_CHECKS:-PT2M}
+      - EMAIL_FROM_ADDRESS=${STROOM_AUTH_EMAIL_FROM_ADDRESS:-TODO}
+      - EMAIL_FROM_NAME=${STROOM_AUTH_EMAIL_FROM_NAME:-Stroom User Accounts}
+      - EMAIL_RESET_SUBJECT=${STROOM_AUTH_EMAIL_RESET_SUBJECT:-Password reset for Stroom}
+      - EMAIL_RESET_TEXT=${STROOM_AUTH_EMAIL_RESET_TEXT:-A password reset has been requested for this email address. Please visit the following URL to reset your password -- %s.}
+      - EMAIL_RESET_TOKEN_VALIDITY_IN_MINUTES=${STROOM_AUTH_EMAIL_RESET_TOKEN_VALIDITY_IN_MINUTES:-60}
+      - EMAIL_RESET_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_HOST:-$HOST_IP}/s/resetPassword/?token=%s
+      - EMAIL_SMTP_HOST=${STROOM_AUTH_EMAIL_SMTP_HOST:-$HOST_IP}
+      - EMAIL_SMTP_PASSWORD=${STROOM_AUTH_EMAIL_SMTP_PASSWORD:-} # Must be empty, otherwise the email sender will try to use with a username and password
+      - EMAIL_SMTP_PORT=${STROOM_AUTH_EMAIL_SMTP_PORT:-2525}
+      - EMAIL_SMTP_TRANSPORT=${STROOM_AUTH_EMAIL_SMTP_TRANSPORT:-plain}
+      - EMAIL_SMTP_USERNAME=${STROOM_AUTH_EMAIL_SMTP_USERNAME:-} # Must be empty, otherwise the email sender will try to use with a username and password
+      - FAILED_LOGIN_LOCK_THRESHOLD=${STROOM_AUTH_FAILED_LOGIN_LOCK_THRESHOLD:-3}
+      - FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN=${STROOM_AUTH_FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN:-true}
+      - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10769,suspend=n}
+      - JWS_ALGORITHM=${STROOM_AUTH_JWS_ALGORITHM:-RS256}
+      - JWS_ISSUER=stroom
+      - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
+      - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes
+      - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
+      - JWS_REQUIRE_EXPIRATION_TIME=${STROOM_AUTH_JWS_REQUIRE_EXPIRATION_TIME:-false}
+      - MANDATORY_PASSWORD_CHANGE_DURATION=${STROOM_AUTH_MANDATORY_PASSWORD_CHANGE_DURATION:-P30D}
+      - MINIMUM_PASSWORD_LENGTH=${STROOM_AUTH_MINIMUM_PASSWORD_LENGTH:-8}
+      - NEVER_USED_ACCOUNT_DEACTIVATION_THRESHOLD=${STROOM_AUTH_NEVER_USED_ACCOUNT_DEACTIVATION_THRESHOLD:-P30D}
+      - OWN_PATH=${STROOM_AUTH_SERVICE:-api/auth/authentication}
+      - PASSWORD_COMPLEXITY_REGEX=${STROOM_AUTH_PASSWORD_COMPLEXITY_REGEX:-.*}
+      - STROOM_AUTH_SERVICE_ADMIN_PORT=${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}
+      - STROOM_AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
+      - UNAUTHORISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_AUTH_UI_HOST:-$HOST_IP}/s/unauthorised
+      - UNUSED_ACCOUNT_DEACTIVATION_THRESHOLD=${STROOM_AUTH_UNUSED_ACCOUNT_DEACTIVATION_THRESHOLD:-P90D}
+    ports:
+      - "${STROOM_AUTH_SERVICE_PORT:-8099}:8099"
+      - "${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}:8100"
+      - "${STROOM_AUTH_SERVICE_DEBUG_PORT:-10769}:10769"
+    healthcheck:
+      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:${STROOM_AUTH_SERVICE_ADMIN_PORT:-8100}/authenticationServiceAdmin/healthcheck || exit 1
+      start_period: 1m
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      # TODO: changed this from ro to rw because the stroom-auth-service Dockerfile needs to chown and ro was causing it to fail
+      - ${STROOM_AUTH_SERVICE_VOLUME_CONFIG:-../../volumes/stroom-auth-service/config}:/stroom-auth-service/config:rw
+      - type: volume
+        source: stroom-auth-service_logs
+        target: /stroom-auth-service/logs
+    logging:
+      options:
+        max-size: "${STROOM_AUTH_SERVICE_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_AUTH_SERVICE_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-stroom_core}"
+
+    
+  stroom-log-sender:
+    container_name: stroom-log-sender
+    image: "${STROOM_LOG_SENDER_DOCKER_REPO:-gchq/stroom-log-sender}:${STROOM_LOG_SENDER_TAG:-v0.4}"
+    volumes:
+      # Volume for the crontab configuration
+      - ${STROOM_LOG_SENDER_VOLUME_CONF:-../../volumes/stroom-log-sender/conf}:/stroom-log-sender/config/:ro
+      # Volume for the certs/keys
+      - ${STROOM_LOG_SENDER_VOLUME_CERTS:-../../volumes/stroom-log-sender/certs}:/stroom-log-sender/certs/:ro
+      # A volume for each of the services that this container will ship logs for
+      # Stroom
+      - type: volume
+        source: stroom_logs
+        target: /stroom-log-sender/log-volumes/stroom
+      # Stroom Auth
+      - type: volume
+        source: stroom-auth-service_logs
+        target: /stroom-log-sender/log-volumes/stroom-auth-service
+      # Stroom Proxy (local)
+      - type: volume
+        source: stroom-proxy-local_logs
+        target: /stroom-log-sender/log-volumes/stroom-proxy
+      # Stroom Nginx
+      - type: volume
+        source: nginx_logs
+        target: /stroom-log-sender/log-volumes/stroom-nginx
+    logging:
+      options:
+        max-size: "${STROOM_LOG_SENDER_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_LOG_SENDER_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-stroom_core}"
+
+
+  stroom-proxy-local:
+    container_name: stroom-proxy-local
+    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6.0-beta.66}"
+    environment:
+        #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-http://stroom:8080/api/dictionary/v1}
+      #- CONTENT_SYNC_ENABLED=${STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED:-false}
+      - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
+      - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
+      - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-}
+      - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10766,suspend=n }
+        # Ruleset functionality not ready for use in v6
+      #- RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
+      - STORING_ENABLED=${STROOM_PROXY_LOCAL_STORING_ENABLED:-true}
+      - STROOM_PROXY_ADMIN_PORT=8091
+      - STROOM_PROXY_APP_PORT=8090
+      - STROOM_PROXY_DEBUG_PORT=10766
+        # Ruleset functionality not ready for use in v6
+      #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-}
+        # TODO These two upstream urls should be going via nginx, but in dev I had issues getting the ssl to work
+      #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-http://stroom:8080/api/dictionary/v1}
+        #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-https://nginx/dictionaryService/v1}
+      #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
+        #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-https://nginx/rulesetService/v1}
+         #This should really be https://$NGINX_ADVERTISED_HOST/feedStatusService/v1 but with our self signed certs and using IPs we will get a SAN list mis-match.  The 'nginx' host will only work inside docker.
+      - FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-https://nginx/api/feedStatus/v1}
+        #- FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-http://$HOST:8080/api/feedStatus/v1}
+        # This is a copy of STROOM_SECURITY_API_TOKEN to make feed status checking work in development. A different token should be used in operational deployments.
+      - FEED_STATUS_API_KEY=${STROOM_PROXY_LOCAL_FEED_STATUS_API_KEY:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsInNpZCI6bnVsbH0.k0Ssb43GCdTunAMeM26fIulYKNUuPUaJJk6GxDmzCPb7kVPwEtdfBSrtwazfEFM97dnmvURkLqs-DAZTXhhf-0VqQx4hkwcCHf83eVptWTy-lufIhQo6FCM223c9ONIhl6CPqknWh9Bo3vFNrNJoKz5Zw2T_iCcQhi2WGjd_tjTG7VbibTIpH3lPQDw1IBD2nMsEqACJSk3IaFe0GYcrAEMwsjj3sjAwByMbj5DJvo_DJbAuzUwS5IVpASEENen5Xd3wALLirrraUfED1OY0G56Ttcwl3uQ2s-grZXBM4JCiIurlWR5iNtNwoPUsZsyMju4FMSXt3Ur1NIpD7XKJlg}
+      - STROOM_PROXY_CLIENT_KEYSTORE_PASSWORD=${STROOM_PROXY_LOCAL_CLIENT_KEYSTORE_PASSWORD:-password}
+      - STROOM_PROXY_CLIENT_KEYSTORE_PATH=${STROOM_PROXY_LOCAL_CLIENT_KEYSTORE_PATH:-/stroom-proxy/certs/client.jks}
+      - STROOM_PROXY_CLIENT_KEYSTORE_TYPE=${STROOM_PROXY_LOCAL_CLIENT_KEYSTORE_TYPE:-JKS}
+      - STROOM_PROXY_CLIENT_TRUSTSTORE_PASSWORD=${STROOM_PROXY_LOCAL_CLIENT_TRUSTSTORE_PASSWORD:-password}
+      - STROOM_PROXY_CLIENT_TRUSTSTORE_PATH=${STROOM_PROXY_LOCAL_CLIENT_TRUSTSTORE_PATH:-/stroom-proxy/certs/ca.jks}
+      - STROOM_PROXY_CLIENT_TRUSTSTORE_TYPE=${STROOM_PROXY_LOCAL_CLIENT_TRUSTSTORE_TYPE:-JKS}
+      - JERSEY_TIMEOUT=${STROOM_PROXY_LOCAL_JERSEY_TIMEOUT:-10s}
+      - JERSEY_CONN_TIMEOUT=${STROOM_PROXY_LOCAL_JERSEY_CONN_TIMEOUT:-10s}
+      - JERSEY_TIME_TO_LIVE=${STROOM_PROXY_LOCAL_JERSEY_TIME_TO_LIVE:-1h}
+      - JERSEY_MAX_CONNECTIONS=${STROOM_PROXY_LOCAL_JERSEY_MAX_CONNECTIONS:-1024}
+      - JERSEY_MAX_CONNECTIONS_PER_ROUTE=${STROOM_PROXY_LOCAL_JERSEY_MAX_CONNECTIONS_PER_ROUTE:-1024}
+      - JERSEY_KEEP_ALIVE=${STROOM_PROXY_LOCAL_JERSEY_KEEP_ALIVE:-0ms}
+      - JERSEY_RETRIES=${STROOM_PROXY_LOCAL_JERSEY_RETRIES:-0}
+        # This should really be true but as we are using IPs in dev we need it set to false
+      - JERSEY_VERIFY_HOSTNAME=${STROOM_PROXY_LOCAL_JERSEY_VERIFY_HOSTNAME:-false}
+      - JERSEY_TRUST_SELF_SIGNED=${STROOM_PROXY_LOCAL_JERSEY_TRUST_SELF_SIGNED:-false}
+    ports:
+      - "${STROOM_PROXY_LOCAL_APP_PORT:-8090}:8090"
+      - "${STROOM_PROXY_LOCAL_HTTPS_APP_PORT:-8543}:8543"
+      - "${STROOM_PROXY_LOCAL_ADMIN_PORT:-8091}:8091"
+      - "${STROOM_PROXY_LOCAL_DEBUG_PORT:-10766}:10766"
+    healthcheck:
+      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:8091/proxyAdmin/healthcheck || exit 1
+      start_period: 30s 
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${STROOM_PROXY_LOCAL_VOLUME_CERTS:-../../volumes/stroom-proxy-local/certs}:/stroom-proxy/certs:ro
+      - ${STROOM_PROXY_LOCAL_VOLUME_CONFIG:-../../volumes/stroom-proxy-local/config}:/stroom-proxy/config:ro
+      - type: volume
+        source: stroom-proxy-local_content
+        target: /stroom-proxy/content
+      - type: volume
+        source: stroom-proxy-local_logs
+        target: /stroom-proxy/logs
+      - type: volume
+        source: stroom-proxy-local_repo
+        target: /stroom-proxy/repo
+    logging:
+      options:
+        max-size: "${STROOM_PROXY_LOCAL_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_PROXY_LOCAL_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-stroom_core}"
+
+  stroom-ui:
+    container_name: stroom-ui
+    image: "${STROOM_UI_DOCKER_REPO:-gchq/stroom-ui}:${STROOM_UI_TAG:-v7.0-LATEST}"
+    environment:
+      - APP_ADVERTISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}
+      - APP_CLIENT_ID=stroom-ui
+      - APP_STROOM_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api
+      - APP_AUTH_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
+      - APP_STROOM_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/stroom
+      - APP_ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
+      # The NGINX_xxx variables configure the NGINX server that serves the app
+      - NGINX_HOST=${STROOM_UI_HOST:-$HOST_IP}
+      - NGINX_HTTP_PORT=${STROOM_UI_HTTP_PORT:-5001}
+      - NGINX_HTTPS_PORT=${STROOM_UI_HTTPS_PORT:-9446}
+      - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
+      - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
+      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+    volumes:
+      - ${STROOM_UI_VOLUME_CERTS:-../../volumes/stroom-ui/certs}:/etc/nginx/certs:ro
+      # nginx.conf.template - used to create the actual config when the container starts
+      - ${STROOM_UI_VOLUME_CONF:-../../volumes/stroom-ui/conf}:/etc/nginx/template:ro
+    ports:
+      - "${STROOM_UI_HTTP_PORT:-5001}:5001"
+      - "${STROOM_UI_HTTPS_PORT:-9446}:9446"
+    logging:
+      options:
+        max-size: "${STROOM_UI_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${STROOM_UI_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-stroom_core}"
+volumes:
+  nginx_logs:
+  nginx_logrotate:
+  stroom_logs:
+  stroom_output:
+  stroom_volumes:
+  stroom-proxy-local_content:
+  stroom-proxy-local_logs:
+  stroom-proxy-local_repo:
+  stroom-auth-service_logs:
+  stroom-all-dbs_data:
+  stroom-all-dbs_logs:

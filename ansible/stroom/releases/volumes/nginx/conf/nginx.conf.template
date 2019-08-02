@@ -1,0 +1,66 @@
+user  nginx;
+
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    # Include generic logging configuration
+    include logging.conf;
+     
+
+    upstream stroom_upstream_sticky {
+        ip_hash;
+        include upstreams.stroom.ui.conf;
+    }
+    
+    upstream stroom_upstream {
+        include upstreams.stroom.processing.conf;
+    }
+
+    upstream auth_service_upstream_sticky {
+        ip_hash;
+        include upstreams.auth.service.conf;
+    }
+    
+    upstream auth_ui_upstream {
+        include upstreams.auth.ui.conf;
+    }
+
+    upstream stroom_proxy_upstream {
+        include upstreams.proxy.conf;
+    }
+
+    # Define valid index page filenames
+    index index.html index.htm;
+
+    # Redirect all http traffic to https
+    server {
+        listen 80 default_server;
+        server_name _;
+        return 301 https://$host$request_uri;
+    }
+    
+    server {
+        # Include generic server configuration
+        include server.conf;
+
+        # Include location configuration specific to stroom
+        include locations.stroom.conf;
+
+        # Include location configuration specific to auth
+        include locations.auth.conf;
+
+        # Include location configuration specific to proxy
+        include locations.proxy.conf;
+
+        # Include location configuration specific to dev.
+        # Should not be included in production deployments.
+        # Supports hot-loading for stroom-ui
+        include locations.dev.conf;
+    }
+}
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
