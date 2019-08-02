@@ -22,10 +22,10 @@
         "rebooting" ]
   register: ec2_instance_query_result
 
-- name: Debug check for {{ instance_tag_name }}
+- name: "Debug check for {{ instance_tag_name }}"
   debug: var=ec2_instance_query_result.instances[0].instance_id
 
-- name: Terminate {{ instance_tag_name }} if it doesn't exist
+- name: "Terminate {{ instance_tag_name }} if it doesn't exist"
   ec2:
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
@@ -36,10 +36,6 @@
     keypair: "{{ hostname.stdout }}"
     image: "{{ ec2_ami }}"
     instance_ids: "{{ ec2_instance_query_result.instances[0].instance_id }}"
-    #wait: true 
-    # Actual spec
-    instance_type: "{{ ec2_instance_type }}"
-    count: 0 
     state: absent
     instance_tags:
       name: "{{ instance_tag_name }}"
@@ -47,7 +43,8 @@
       environment:  "{{ instance_tag_environment }}"
       owner: "{{ instance_tag_owner }}" 
   register: ec2
+  when: ec2_instance_query_result.instances | length !=  0
 
-- name: Debug launch for {{ instance_tag_name }}
+- name: "Debug launch for {{ instance_tag_name }}"
   debug: var=ec2.instances
   when: ec2 is defined

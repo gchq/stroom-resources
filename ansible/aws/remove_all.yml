@@ -37,3 +37,9 @@
       vars:
         instance_tag_name: stroom_dbs_1
         instance_tag_type: stroom_dbs
+
+    - include_role:
+        name: roles/ec2/key_pair/remove
+
+    - include_role:
+        name: roles/ec2/security_group/remove
