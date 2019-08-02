@@ -28,6 +28,12 @@
   copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="~/.ssh/{{ hostname.stdout }}.pem" mode=0600
   when: ec2_key_creation_result.changed
 
+- name: Create a symlink to a predictablc location
+  file:
+    state: link
+    src: "~/.ssh/{{ hostname.stdout }}.pem"
+    dest: "~/.ssh/stroom_aws_key.pem"
+  
 - stat:
     path: "~/.ssh/{{ hostname.stdout}}.pem"
   register: key_file_stat

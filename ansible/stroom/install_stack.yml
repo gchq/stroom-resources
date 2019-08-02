@@ -1,37 +1,11 @@
 ---
-# TODO don't think we need become: yes in here as none of this needs sudo
 - name: Install services 
   vars_files:
     - ./variables.yml
   vars:
-    stack_type: stroom_services
-  hosts: stroom_services
-  roles:
-    - roles/install_stack
-  
-- name: Install stroom and local storing proxy
-  vars_files:
-    - ./variables.yml
-  vars:
-    stack_type: stroom_and_proxy
-  hosts: stroom_and_proxy
+    # You'll need to manually change this if you don't have access to the internet from your controller.
+    stack_url: https://github.com/gchq/stroom-resources/releases/download/stroom-stacks-{{stack_version}}/{{stack_name}}-{{stack_version}}.tar.gz
+  hosts: all
   roles:
     - roles/install_stack
 
-- name: Install databases
-  vars_files:
-    - ./variables.yml
-  vars:
-    stack_type: stroom_dbs
-  hosts: stroom_dbs
-  roles:
-    - roles/install_stack
-
-- name: Install remote forwarding proxy
-  vars_files:
-    - ./variables.yml
-  vars:
-    stack_type: stroom_proxy
-  hosts: stroom_proxy
-  roles:
-    - roles/install_stack
