@@ -14,3 +14,9 @@
     src: "{{home}}/Downloads/{{stack_name}}-{{stack_version}}.tar.gz"
     dest: "{{home}}/"
     remote_src: yes
+
+- name: Create a symlink to a predictable location
+  file:
+    state: link
+    src: "{{home}}/{{stack_name}}/{{stack_name}}-{{stack_version}}"
+    dest: "{{home}}/{{stack_name}}/latest"
