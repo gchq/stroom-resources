@@ -1,0 +1,12 @@
+- hosts: local
+  connection: local
+  gather_facts: False
+
+- name: Setup AWS
+  import_playbook: setup_aws.yml
+
+- name: Setup the EC2 instances
+  import_playbook: setup_instances.yml
+
+- name: Write out a file containing the ansible inventory
+  import_playbook: write_out_inventory.yml

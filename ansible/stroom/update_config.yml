@@ -1,0 +1,7 @@
+---
+- name: Updated local config, ready to send to host
+  hosts: localhost
+  vars_files:
+    - ./variables.yml
+  roles:
+    - roles/config/update

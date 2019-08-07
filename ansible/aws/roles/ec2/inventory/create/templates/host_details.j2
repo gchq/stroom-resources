@@ -1,0 +1,1 @@
+{{ instance_tag_type }},{{ instance_tag_name }},{% for instance in ec2_instance_query_result.instances %}{{ instance.public_dns_name }}{% endfor %}

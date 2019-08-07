@@ -1,0 +1,7 @@
+---
+- name: Send updated config to all hosts
+  hosts: all
+  vars_files:
+    - ./variables.yml
+  roles:
+    - roles/config/send

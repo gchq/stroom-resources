@@ -17,5 +17,5 @@
     - vars/aws_vault.yml
     - vars/aws.yml
   roles:
-    - roles/remove_key_pair
-    - roles/create_key_pair 
+    - roles/ec2/key_pair/remove
+    - roles/ec2/key_pair/create
