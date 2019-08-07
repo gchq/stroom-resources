@@ -1,0 +1,45 @@
+- name: Ensure our inventory file has up-to-date public DNS names
+  hosts: local
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/aws_vault.yml
+    - vars/aws.yml
+  vars:
+    temp_hosts_dir: ./build/hosts
+    aws_inventory_file: ./build/aws_inventory.csv 
+    ansible_inventory_file: ./build/ansible_inventory
+  tasks:
+    - include_role:
+        name: roles/ec2/inventory/create
+      vars:
+        instance_tag_name: stroom_services_1
+        instance_tag_type: stroom_services
+    - include_role:
+        name: roles/ec2/inventory/create
+      vars:
+        instance_tag_name: stroom_services_2
+        instance_tag_type: stroom_services
+    - include_role:
+        name: roles/ec2/inventory/create
+      vars:
+        instance_tag_name: stroom_and_proxy_1
+        instance_tag_type: stroom_and_proxy
+    - include_role:
+        name: roles/ec2/inventory/create
+      vars:
+        instance_tag_name: stroom_and_proxy_2
+        instance_tag_type: stroom_and_proxy
+    - include_role:
+        name: roles/ec2/inventory/create
+      vars:
+        instance_tag_name: stroom_dbs_1
+        instance_tag_type: stroom_dbs
+    - name: Concatenate all the inventory files
+      shell: cat {{temp_hosts_dir}}/* > {{aws_inventory_file}}
+    - name: Remove temp inventory files
+      file:
+        path: "{{ temp_hosts_dir }}"
+        state: absent
+    - name: Create ansible format inventory
+      command: python3 ./scripts/create_ansible_inventory.py {{ aws_inventory_file }} {{  ansible_inventory_file }}

@@ -1,0 +1,14 @@
+# The following need to be changed
+## The user profile the access creds belong to.
+vault_aws_profile_name: <your profile name>
+## The following expire after 12 hours
+vault_aws_access_key: <your access key> 
+vault_aws_secret_key: <your secret key>
+vault_aws_session_token: <your session token>
+
+# Other configuration
+vault_aws_region: <your region, e.g. eu-west-1>
+vault_ec2_ami: <your prefered AMI>
+vault_ec2_security_group: <the name of your new security group>
+vault_ec2_security_group_description: <the description for your new security group>
+vault_ec2_subnet_id: <the id of tyhe subnet you want to use>

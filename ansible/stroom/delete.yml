@@ -1,0 +1,76 @@
+---
+- name: Stop everything first
+  hosts: all
+  vars_prompt:
+    - name: Ask if they want to continue
+      prompt: This will remove all traces of Stroom from your hosts. Are you sure you want to continue? It will not remove yum dependencies we've already installed. Press ctrl-c to cancel, enter to continue
+
+
+##############################################################
+# Run remove.sh -y on everything                             #
+##############################################################
+
+- name: Stop and remove all containers for stroom_and_proxy
+  hosts: stroom_and_proxy
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_and_proxy
+    op: remove.sh -y
+  roles:
+    - roles/stack/op
+
+- name: Stop and remove all containers for stroom_services
+  hosts: stroom_services
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_services
+    op: remove.sh -y
+  roles:
+    - roles/stack/op
+
+- name: Stop and remove all containers for stroom_dbs
+  hosts: stroom_dbs
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_dbs
+    op: remove
+  roles:
+    - roles/stack/op
+
+
+##############################################################
+# Delete the folders containing our releases from everything #
+##############################################################
+
+- name: Delete files for stroom_dbs
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_dbs
+  become: yes
+  hosts: stroom_dbs
+  roles:
+    - roles/stack/delete
+    
+- name: Delete files for stroom_services
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_services
+  become: yes
+  hosts: stroom_services
+  roles:
+    - roles/stack/delete
+
+- name: Delete files for stroom_and_proxy
+  vars_files:
+    - ./variables.yml
+  vars:
+    stack_type: stroom_and_proxy
+  become: yes
+  hosts: stroom_and_proxy
+  roles:
+    - roles/stack/delete

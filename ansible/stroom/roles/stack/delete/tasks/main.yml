@@ -1,0 +1,17 @@
+- name: Stop any remaining containers
+  shell: "if [ -n \"$(docker ps --all --quiet)\" ]; then docker stop $(docker ps --all --quiet); else echo \"Nothing to stop\"; fi"
+  register: stop
+
+- name: Delete any remaining containers
+  shell: "if [ -n \"$(docker ps --all --quiet)\" ]; then docker rm $(docker ps --all --quiet); else echo \"Nothing to remove\"; fi"
+  register: rm
+
+- name: Delete Docker images
+  shell: "if [ -n \"$(docker ps --all --quiet)\" ]; then docker rmi $(docker ps --all --quiet); else echo \"Nothing to remove\"; fi"
+  register: rmi
+  
+- name: Delete '~/{{stack_name}}'
+  become: yes
+  file:
+    path: "{{home}}/{{stack_name}}"
+    state: absent

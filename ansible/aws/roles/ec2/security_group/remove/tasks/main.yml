@@ -1,0 +1,18 @@
+- name: Ensure the ec2 security group does not exist
+  ec2_group:
+    name: "{{ ec2_security_group }}"
+    description: "{{ ec2_security_group_description }}"
+    profile: "{{ aws_profile_name }}"
+    region: "{{ aws_region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    security_token: "{{ aws_session_token }}"
+    state: absent
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0

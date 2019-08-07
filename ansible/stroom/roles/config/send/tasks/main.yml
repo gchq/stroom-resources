@@ -1,0 +1,11 @@
+
+- name: Copy the config files to the host
+  copy:
+    src: "{{releases_path}}/latest/config/{{stack_name}}.env"
+    dest: "{{home}}/{{stack_name}}/latest/config/{{stack_name}}.env"
+
+- name: Copy the nginx template files to the host
+  become: yes # Need this because docker changes ownerships to root
+  copy:
+    src: "{{releases_path}}/volumes/nginx/conf/"
+    dest: "{{home}}/{{stack_name}}/volumes/nginx/conf/"

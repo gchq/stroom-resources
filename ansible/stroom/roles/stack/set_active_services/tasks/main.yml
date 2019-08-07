@@ -1,0 +1,2 @@
+- name: Set the services that are running on a host
+  command: "{{home}}/{{stack_name}}/{{stack_name}}-{{stack_version}}/set_services.sh {{services_to_run}}"
