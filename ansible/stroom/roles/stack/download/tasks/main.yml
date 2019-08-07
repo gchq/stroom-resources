@@ -1,0 +1,13 @@
+- name: Download stack
+  get_url:
+    url: "{{ stroom_url }}"
+    dest: "./releases"
+    checksum: "sha256:{{ stroom_url }}.sha256"
+  register: download_info
+
+- name: Show download_info
+  debug: var=download_info
+- name: Unpack Stroom's distribution tar
+  unarchive:
+    src: "{{ download_info.dest }}"
+    dest: "./releases"

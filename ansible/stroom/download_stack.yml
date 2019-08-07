@@ -1,0 +1,6 @@
+- name: Downloads, unpacks, and links in a stack
+  hosts: localhost
+  vars:
+    - stroom_url: https://github.com/gchq/stroom-resources/releases/download/stroom-stacks-v6.0-beta.66-4/stroom_core-v6.0-beta.66-4.tar.gz
+  roles:
+    - roles/stack/download
