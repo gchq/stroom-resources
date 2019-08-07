@@ -1,0 +1,17 @@
+- name: Setup all hosts
+  import_playbook: setup_hosts.yml
+
+- name: Install stack on all hosts
+  import_playbook: install_stack.yml
+
+- name: Set active services on all hosts
+  import_playbook: set_services.yml
+
+- name: Set up config
+  import_playbook: update_config.yml
+
+- name: Send config to all hosts
+  import_playbook: send_config.yml
+
+- name: Start all stacks
+  import_playbook: run_script_on_all.yml

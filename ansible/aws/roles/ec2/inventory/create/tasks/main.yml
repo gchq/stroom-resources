@@ -12,7 +12,6 @@
     profile: "{{ aws_profile_name }}"
     region: "{{ aws_region }}"
     filters:
-      "tag:type": "{{ instance_tag_type }}"
       "tag:name": "{{ instance_tag_name }}"
       "tag:environment": "{{ instance_tag_environment }}"
       instance-state-name: [ 

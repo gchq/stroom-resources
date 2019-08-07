@@ -35,7 +35,7 @@ def write_inventory_to_file(inventory, output_file):
     
 def main():
     if len(sys.argv) != 3:
-        print('Expecting a single argument -- the location of the aws_inventory.csv file')
+        print('Expecting two argument -- the location of the aws_inventory.csv file and where to write the output inventory file.')
     else:
         input_file = sys.argv[1]
         output_file = sys.argv[2]

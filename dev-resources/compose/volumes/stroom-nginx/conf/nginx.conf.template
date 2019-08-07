@@ -36,6 +36,10 @@ http {
     # Define valid index page filenames
     index index.html index.htm;
 
+    # Necessary where we have long server names, i.e. aws.
+    # Increasing by default because I'm not clear of the downsides?
+    server_names_hash_bucket_size  64;
+
     # Redirect all http traffic to https
     server {
         listen 80 default_server;

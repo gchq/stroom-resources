@@ -1,10 +1,11 @@
 - name: Delete '~/{{stack_type}}'
+  become: yes
   file:
     path: "{{home}}/{{stack_type}}"
     state: absent
 
-# TODO: We could use docker_image here, to specifically delete the images one-by-one.
-#       But we don't yet have any image names in our ansible setup, so it's easier
-#       to just run a command to delete them all. 
 - name: Delete Docker images
-  command: docker rmi $(docker images -q)
+  shell: docker rmi $(docker images --quiet)
+  register: rmi
+  failed_when: "'requires at least 1 argument.' not in rmi.stderr"
+  

@@ -24,8 +24,6 @@
 - name: Perform operation on databases 
   vars_files:
     - ./variables.yml
-  vars:
-    stack_type: stroom_dbs
   become: yes
   hosts: stroom_dbs
   roles:
@@ -34,8 +32,6 @@
 - name: Perform operation on services 
   vars_files:
     - ./variables.yml
-  vars:
-    stack_type: stroom_services
   become: yes
   hosts: stroom_services
   roles:
@@ -44,8 +40,6 @@
 - name: Perform operation on strooms 
   vars_files:
     - ./variables.yml
-  vars:
-    stack_type: stroom_and_proxy
   become: yes
   hosts: stroom_and_proxy
   roles:

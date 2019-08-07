@@ -1,0 +1,8 @@
+- name: Update the local env file from the inventory
+  command: "python3 ./scripts/update_env_file.py"
+
+- name: Update the local upstream files from the inventory
+  command: "python3 ./scripts/update_upstream_files.py"
+  
+- name: Update the local server.conf file from the inventory
+  command: "python3 ./scripts/update_server_conf.py"

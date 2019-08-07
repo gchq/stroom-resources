@@ -20,16 +20,16 @@ git clone https://github.com/gchq/stroom-resources
 
 The ansible scripts are in `stroom-resources/ansible`.
 
-## Setting up your configuration
-
-The repository contains only the ansible scripts. You need to store your Stroom configuration somewhere else, i.e. not a public GitHub repository. You need the following:
-
- - a `hosts` file -- you need to add this location to `ansible.cfg`, the `inventory` key. An example is in `examples/hosts`.
- - your stroom configuration files -- these are the files that configure the stroom services themselves, and they're copied onto the hosts when you run the `update_config` playbook. An example is in `examples/conf`.
-
+ 
 ## Updating the inventory
 
-The inventory file `./hosts` needs to contain all the host names of the VMs. It's split into host groups so enter your VMs under the appropriate section if you've sized them according to their tasks.
+The location of the Ansible inventory file is defined in `ansible.cfg`. If you're using aws you can use the aws playbooks (also in this repository) to create your hosts and generate this file, otherwise you'll need to write it yourself, put it somewhere sensible, and update `ansible.cfg` with that location.
+
+## The Stroom configuration
+The `releases` folder contains stack releases. The symlink `latest` should always point to the most recent one. That's the location used by the playbooks to find the config it needs to send to the hosts.
+
+
+ - your stroom configuration files -- these are the files that configure the stroom services themselves, and they're copied onto the hosts when you run the `update_config` playbook. An example is in `examples/conf`.
 
 You need a service name; an FQDN that the user will visit. This name is important and needs to be used in a few places within the configuration. For this name you could take the first host name in the `stroom_services` host group.
 
