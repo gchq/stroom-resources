@@ -22,10 +22,3 @@
   file:
     path: "/etc/ansible/facts.d"
     state: "directory"
-
-- name: "Insert custom fact file - status"
-  become: yes
-  copy:
-    src: custom_facts/status.fact
-    dest: /etc/ansible/facts.d/status.fact
-    mode: 0755
