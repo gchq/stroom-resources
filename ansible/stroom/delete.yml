@@ -16,7 +16,7 @@
     - ./variables.yml
   vars:
     stack_type: stroom_and_proxy
-    op: remove
+    op: remove.sh -y
   roles:
     - roles/stack/op
 
@@ -26,7 +26,7 @@
     - ./variables.yml
   vars:
     stack_type: stroom_services
-    op: remove
+    op: remove.sh -y
   roles:
     - roles/stack/op
 

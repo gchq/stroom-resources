@@ -14,4 +14,6 @@
   import_playbook: send_config.yml
 
 - name: Start all stacks
+  vars:
+    op: start
   import_playbook: run_script_on_all.yml

@@ -1,5 +1,5 @@
 # This is the stack version we want to install and use.
-stack_version: v6.0-beta.66-4
+stack_version: v6.0.4
 stack_name: stroom_core
 
 # IDEA: we could define a 'previous_version' when we're migrating, and if it exists we could stop and delete

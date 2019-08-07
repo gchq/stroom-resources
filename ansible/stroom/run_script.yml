@@ -5,7 +5,7 @@
   hosts: all
   vars_prompt:
    - name: op
-     prompt: "What operation would you like to perform? [stop|start|remove|health|info|logs|restart|show_config|status]"
+     prompt: "What operation would you like to perform? Give the full script name plus arguments. E.g. remove.sh -y"
      private: no
    - name: stack_type
      prompt: "What host group would you like to perform this on? [stroom_services|stroom_dbs|stroom_and_proxy]"

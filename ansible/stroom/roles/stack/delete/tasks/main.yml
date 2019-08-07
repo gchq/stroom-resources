@@ -4,8 +4,15 @@
     path: "{{home}}/{{stack_type}}"
     state: absent
 
+- name: Stop any remaining containers
+  shell: "if [ -n \"$(docker ps --all --quiet)\" ]; then docker stop $(docker ps --all --quiet); else echo \"Nothing to stop\"; fi"
+  register: stop
+
+- name: Delete any remaining containers
+  shell: "if [ -n \"$(docker ps --all --quiet)\" ]; then docker rm $(docker ps --all --quiet); else echo \"Nothing to remove\"; fi"
+  register: rm
+
 - name: Delete Docker images
-  shell: docker rmi $(docker images --quiet)
+  shell: "if [ -n \"$(docker ps --all --quiet)\" ]; then docker rmi $(docker ps --all --quiet); else echo \"Nothing to remove\"; fi"
   register: rmi
-  failed_when: "'requires at least 1 argument.' not in rmi.stderr"
   
