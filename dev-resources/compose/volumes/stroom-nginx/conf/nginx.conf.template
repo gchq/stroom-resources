@@ -37,7 +37,7 @@ http {
 
     # Necessary where we have long server names, i.e. aws.
     # Increasing by default because I'm not clear of the downsides?
-    server_names_hash_bucket_size  64;
+    server_names_hash_bucket_size 128;
 
     # Redirect all http traffic to https
     server {

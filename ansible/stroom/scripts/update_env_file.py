@@ -17,6 +17,6 @@ def main():
     inventory = get_inventory()
 
     add_export_line('export HOST_IP', get_service_fqdn(inventory))
-    add_export_line('export DB_HOST_IP', get_db_fqdn(inventory))
+    add_export_line('DB_HOST_IP', get_db_fqdn(inventory))
 
 main()

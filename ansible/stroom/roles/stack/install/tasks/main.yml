@@ -2,7 +2,7 @@
   copy:
     src: "{{releases_path}}/{{stack_name}}-{{stack_version}}"
     dest: "{{home}}/{{stack_name}}"
-    mode: preserve # 'preserve' keeps the file permissions, i.e. it keeps .sh files executable
+    mode: "u+rwx" # 'preserve' keeps the file permissions, i.e. it keeps .sh files executable
 
 - name: Create a symlink to a predictable location
   file:
