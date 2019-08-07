@@ -17,6 +17,12 @@ def get_service_fqdn(inventory):
     return fqdn
 
 
+def get_db_fqdn(inventory):
+    # We'll use the first database host as the fqdn. YMMV.
+    host_line = inventory["stroom_dbs"]["hosts"][0]
+    fqdn = host_line.split('@')[1]
+    return fqdn
+
 def remove_line_from_file(path, line_contents):
     with open(path, "r") as f:
         lines = f.readlines()

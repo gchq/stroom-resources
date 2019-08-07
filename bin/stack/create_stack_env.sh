@@ -42,6 +42,10 @@ add_header_to_env_file() {
     echo '# and use that.'
     echo '#HOST_IP=<enter you hostname here>'
     echo
+    echo '# The following defaults to the same value as HOST_IP,'
+    echo '# but you can override it If you need to.'
+    echo 'DB_HOST_IP=$HOST_IP'
+    echo
     echo '# The following lines can be un-commented and set if you want to specify the'
     echo '# host/ip used to identify the source when sending audit logs to stroom.'
     echo '# They are typically used by a script in the container called'
