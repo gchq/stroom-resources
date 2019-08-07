@@ -1,3 +1,4 @@
 *.retry
 downloads
 **/__pycache__
+releases
