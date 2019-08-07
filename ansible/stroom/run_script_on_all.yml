@@ -12,7 +12,7 @@
   hosts: all
   vars_prompt:
    - name: op
-     prompt: "What operation would you like to perform? [stop|start|remove|health|info|logs|restart|show_config|status]"
+     prompt: "What operation would you like to perform? You can pass arguments. [stop.sh|start.sh|remove.sh|health.sh|info.sh|logs.sh|restart.sh|show_config.sh|status.sh]"
      private: no
   # We can prompt the user for a variable but it won't be
   # shared with other plays in the playbook. To share it

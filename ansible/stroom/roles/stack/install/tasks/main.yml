@@ -14,7 +14,7 @@
   become: yes # We need to escalate because volumes become owned by root, because docker
   copy:
     src: "{{releases_path}}/volumes/"
-    dest: "{{home}}/{{stack_name}}/"
+    dest: "{{home}}/{{stack_name}}/volumes/"
     mode: preserve # 'preserve' keeps the file permissions, i.e. it keeps .sh files executable
 
 - name: "Create custom fact directory"
