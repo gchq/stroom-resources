@@ -32,7 +32,7 @@ def main():
     write_upstream_file(
         inventory["stroom_services"]["hosts"],
         open_files_for_writing(['auth_ui']),
-        "server {0};\n")
+        "server <<<AUTH_UI_URL>>>;\n")
 
     write_upstream_file(
         inventory["stroom_services"]["hosts"],

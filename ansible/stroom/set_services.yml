@@ -5,7 +5,7 @@
   vars_files:
     - ./variables.yml
   vars:
-    services_to_run: nginx stroom-auth-service stroom-log-sender
+    services_to_run: nginx stroom-auth-service stroom-log-sender stroom-auth-ui
   roles:
     - roles/stack/set_active_services
 

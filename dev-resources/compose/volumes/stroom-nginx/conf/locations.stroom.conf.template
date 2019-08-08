@@ -41,7 +41,7 @@ location ~ .*/clustercall.rpc$ {
 
 # ... and everything else gets reverse-proxied to stroom.
 location /stroom {
-    proxy_pass http://<<<STROOM_HOST>>>:<<<STROOM_PORT>>>/stroom;
+    proxy_pass http://stroom_upstream_sticky/stroom;
     include location_defaults.conf;
 }
 
