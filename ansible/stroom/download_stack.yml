@@ -1,4 +1,6 @@
 - name: Downloads, unpacks, and links in a stack
+  vars_files:
+    - variables.yml
   hosts: localhost
   tasks:
     - name: Download a specific stack

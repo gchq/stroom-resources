@@ -1,4 +1,4 @@
-- name: Ensure instances are running
+- name: Terminate all instances
   hosts: localhost
   connection: localhost
   gather_facts: false
@@ -7,34 +7,33 @@
     - vars/aws.yml
   tasks:
     - include_role:
-        name: roles/ec2/instance/create
+        name: roles/ec2/instance/terminate
       vars:
         instance_tag_name: stroom_services_1
         instance_tag_type: stroom_services
 
     - include_role:
-        name: roles/ec2/instance/create
+        name: roles/ec2/instance/terminate
       vars:
         instance_tag_name: stroom_services_2
         instance_tag_type: stroom_services
 
     - include_role:
-        name: roles/ec2/instance/create
+        name: roles/ec2/instance/terminate
       vars:
         instance_tag_name: stroom_and_proxy_1
         ec2_instance_type: t2.medium
         instance_tag_type: stroom_and_proxy
 
     - include_role:
-        name: roles/ec2/instance/create
+        name: roles/ec2/instance/terminate
       vars:
         instance_tag_name: stroom_and_proxy_2 
         ec2_instance_type: t2.medium
         instance_tag_type: stroom_and_proxy
 
     - include_role:
-        name: roles/ec2/instance/create
+        name: roles/ec2/instance/terminate
       vars:
         instance_tag_name: stroom_dbs_1
         instance_tag_type: stroom_dbs
-

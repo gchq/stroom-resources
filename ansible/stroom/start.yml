@@ -1,9 +1,10 @@
-
 - name: Perform operation on databases 
   vars_files:
     - ./variables.yml
   become: yes
   hosts: stroom_dbs
+  vars:
+    op: 'start.sh -q'
   roles:
     - roles/stack/op
 
@@ -12,6 +13,8 @@
     - ./variables.yml
   become: yes
   hosts: stroom_services
+  vars:
+    op: 'start.sh -q'
   roles:
     - roles/stack/op
 
@@ -20,5 +23,7 @@
     - ./variables.yml
   become: yes
   hosts: stroom_and_proxy
+  vars:
+    op: 'start.sh -q'
   roles:
     - roles/stack/op
