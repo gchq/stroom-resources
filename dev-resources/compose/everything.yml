@@ -47,6 +47,11 @@ services:
           file: ./containers/nginx.yml
           service: nginx
 
+  solr:
+      extends:
+          file: ./containers/solr.yml
+          service: solr
+
   stroom:
       extends:
           file: ./containers/stroom.yml
