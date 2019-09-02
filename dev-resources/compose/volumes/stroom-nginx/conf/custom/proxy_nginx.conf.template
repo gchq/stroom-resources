@@ -11,7 +11,9 @@ http {
     include logging.conf;
 
     # Include upstreams configuration specific to proxy
-    include upstreams.proxy.conf;
+    upstream stroom_proxy_upstream { 
+        include upstreams.proxy.conf;
+    }
 
     # Define valid index page filenames
     index index.html index.htm;

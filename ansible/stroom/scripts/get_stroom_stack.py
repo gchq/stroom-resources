@@ -1,14 +1,13 @@
-import sys
-import urllib.request
-from shutil import copyfile
-import tempfile
-import tarfile
 from colorama import Fore, Back, Style
+from distutils.dir_util import copy_tree
 from os import listdir, symlink, remove, readlink
 from pathlib import Path
-from distutils.dir_util import copy_tree
+from shutil import copyfile
 import os
-import wget
+import sys
+import tarfile
+import tempfile
+import urllib.request
 
 if len(sys.argv) != 2:
     print(f"{Fore.RED}Please supply the stack version to download. E.g. v6.0.5")
@@ -23,7 +22,7 @@ else:
         url = f"https://github.com/gchq/stroom-resources/releases/download/stroom-stacks-{version}/stroom_core-{version}.tar.gz"
         print(f"Downloading {Fore.BLUE}{url}")
         tar_file = f"{temp_dir}/stroom_core-{version}.tar.gz"
-        wget.download(url, tar_file)
+        urllib.request.urlretrieve(url, tar_file)
         print(f"{Style.RESET_ALL}") # wget prints progress but not a carriage return (◔_◔). We're also resetting the colour.
 
 

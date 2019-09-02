@@ -1,6 +1,6 @@
 - name: Ensure our inventory file has up-to-date public DNS names
-  hosts: local
-  connection: local
+  hosts: localhost
+  connection: localhost
   gather_facts: false
   vars_files:
     - vars/aws_vault.yml

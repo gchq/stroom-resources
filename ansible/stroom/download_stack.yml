@@ -1,7 +1,7 @@
 - name: Downloads, unpacks, and links in a stack
+  vars_files:
+    - variables.yml
   hosts: localhost
   tasks:
     - name: Download a specific stack
-      vars:
-        version: v6.0.5-1
-      command: "python3 ./scripts/get_stroom_stack.py {{ version }}"
+      command: "python3 ./scripts/get_stroom_stack.py {{ stack_version }}"
