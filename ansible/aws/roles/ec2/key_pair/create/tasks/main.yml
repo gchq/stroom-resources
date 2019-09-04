@@ -28,6 +28,12 @@
   copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="{{ local_key_pair_path }}" mode=0600
   when: ec2_key_creation_result.changed
 
+- name: Create a symlink to a predictable location
+  file:
+    state: link
+    src: "{{ local_key_pair_path }}"
+    dest: "~/.ssh/stroom_aws_key.pem"
+
 - stat:
     path: "{{ local_key_pair_path }}"
   register: key_file_stat
