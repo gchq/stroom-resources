@@ -37,7 +37,7 @@
     profile: "{{ aws_profile_name }}"
     group: "{{ ec2_security_group }}"
     region: "{{ aws_region }}"
-    keypair: "{{ hostname.stdout }}"
+    keypair: "{{ aws_key_pair_name }}"
     image: "{{ ec2_ami }}"
     #wait: true 
     # Actual spec

@@ -10,8 +10,8 @@
 # This will fail if you already have a cert in ~/.ssh. If
 # that happens then run remove_key_pair.yml.
 
-- hosts: local
-  connection: local
+- hosts: localhost
+  connection: localhost
   gather_facts: False
   vars_files:
     - vars/aws_vault.yml
