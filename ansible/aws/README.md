@@ -38,7 +38,7 @@ Paste in the values from `vars/aws_vault.template.yml` and edit them for your AW
 You'll need to configure the password somewhere. We do this by adding a file containing the password to `~/.ansible/aws_vault_password_file`. This is configured in `ansible.cfg`.
 
 ## How do I securely access AWS when I've done all this?
-These ansible scripts generate a key pair in AWS. You only get this once, when you create it. It's stored locally in `local_key_pair_path`, see `vars/aws.yml`. If you don't have it you'll need to get it from someone else or re-create it. If you're setting this up for a team you'll probably want to share it somewhere, along with things like the admin password for Stroom.
+These ansible scripts generate a key pair in AWS. You only get this once, when you create it. It's stored locally in `local_key_pair_path`, see `vars/aws.yml`. If you don't have it you'll need to get it from someone else or re-create it. If you're setting this up for a team you'll probably want to share it somewhere, along with things like the admin password for Stroom. Then you'll need to put the pem file in `~/.ssh/stroom_aws_key.pem`.
 
 Here's how to re-create the key pair:
 ``` bash
