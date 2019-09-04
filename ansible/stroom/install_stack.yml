@@ -1,6 +1,7 @@
 ---
 - name: Install services 
   vars_files:
+    - ../user_variables.yml
     - ./variables.yml
   vars:
     # You'll need to manually change this if you don't have access to the internet from your controller.

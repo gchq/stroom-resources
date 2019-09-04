@@ -13,6 +13,7 @@
 - name: Stop and remove all containers for stroom_and_proxy
   hosts: stroom_and_proxy
   vars_files:
+    - ../user_variables.yml
     - ./variables.yml
   vars:
     stack_type: stroom_and_proxy
@@ -33,6 +34,7 @@
 - name: Stop and remove all containers for stroom_dbs
   hosts: stroom_dbs
   vars_files:
+    - ../user_variables.yml
     - ./variables.yml
   vars:
     stack_type: stroom_dbs
@@ -47,6 +49,7 @@
 
 - name: Delete files for stroom_dbs
   vars_files:
+    - ../user_variables.yml
     - ./variables.yml
   vars:
     stack_type: stroom_dbs
@@ -57,6 +60,7 @@
     
 - name: Delete files for stroom_services
   vars_files:
+    - ../user_variables.yml
     - ./variables.yml
   vars:
     stack_type: stroom_services
@@ -67,6 +71,7 @@
 
 - name: Delete files for stroom_and_proxy
   vars_files:
+    - ../user_variables.yml
     - ./variables.yml
   vars:
     stack_type: stroom_and_proxy

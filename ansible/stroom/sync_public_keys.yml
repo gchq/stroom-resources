@@ -2,6 +2,7 @@
   hosts: all
   vars_files:
     - variables.yml
+    - ../user_variables.yml
   tasks:
     - name: Copy a devops public keys to the hosts
       authorized_key:
@@ -9,4 +10,4 @@
         exclusive: yes # We don't want any keys that aren't in this list, i.e. we're locking it down to these user keys.
         state: present
         # Why not just get the keys straight from github? E.g. key: "https://github.com/jc064522.keys"? Because we want this playbook to be runnable where github cannot be accessed. A seperate play, 'fetch_github_public_keys.yml' will get the keys, otherwise the user will need to construct the ./build/authorized_keys file themselves.
-        key: "{{ lookup('file', '../authorized_keys') }}" 
+        key: "{{ lookup('file', authorized_keys_path) }}" 

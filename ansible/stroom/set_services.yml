@@ -4,6 +4,7 @@
   hosts: stroom_services
   vars_files:
     - ./variables.yml
+    - ../user_variables.yml
   vars:
     services_to_run: nginx stroom-auth-service stroom-log-sender
   roles:
@@ -14,6 +15,7 @@
   hosts: stroom_and_proxy
   vars_files:
     - ./variables.yml
+    - ../user_variables.yml
   vars:
     services_to_run: stroom stroom-proxy-local stroom-log-sender
   roles:
@@ -24,6 +26,7 @@
   hosts: stroom_dbs
   vars_files:
     - ./variables.yml
+    - ../user_variables.yml
   vars:
     services_to_run: stroom-all-dbs
   roles:

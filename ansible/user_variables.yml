@@ -1,0 +1,11 @@
+# This is the stack version we want to install and use.
+stack_version: v6.0.4
+stack_name: stroom_core
+
+# These are the github users authorized to manage this instance. 
+authorized_github_users: jc064522 at055612 stroomdev66
+
+# Where to store generated files
+generated_path: "~/.stroom/instances/{{stack_name}}"
+# The name of the inventory file
+ansible_inventory_file: "{{ generated_path }}/ansible_inventory"

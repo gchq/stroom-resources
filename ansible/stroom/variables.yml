@@ -1,7 +1,5 @@
-# This is the stack version we want to install and use.
-stack_version: v6.0.4
-stack_name: stroom_core
-
+# This is where we store generated files
+authorized_keys_path: "{{ generated_path }}/authorized_keys"
 # IDEA: we could define a 'previous_version' when we're migrating, and if it exists we could stop and delete
 # before doing an install.
 
@@ -10,4 +8,5 @@ stack_name: stroom_core
 #  2. We might want to change the user, in which case we'll only want to change it in one place.
 home: /home/centos
 
+# This is where we download stack releases to
 releases_path: ./releases

@@ -3,12 +3,12 @@
   connection: local
   gather_facts: false
   vars_files:
+    - ../user_variables.yml
     - vars/aws_vault.yml
     - vars/aws.yml
   vars:
     temp_hosts_dir: ./build/hosts
     aws_inventory_file: ./build/aws_inventory.csv 
-    ansible_inventory_file: ./build/ansible_inventory
   tasks:
     - include_role:
         name: roles/ec2/inventory/create
@@ -42,4 +42,4 @@
         path: "{{ temp_hosts_dir }}"
         state: absent
     - name: Create ansible format inventory
-      command: python3 ./scripts/create_ansible_inventory.py {{ aws_inventory_file }} {{  ansible_inventory_file }}
+      command: "python3 ./scripts/create_ansible_inventory.py {{ aws_inventory_file }} {{  ansible_inventory_file }}"

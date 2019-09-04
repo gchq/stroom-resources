@@ -1,7 +1,7 @@
-- name: Fetches and concatenates public keys
-  hosts: localhost
-  vars:
-    github_users_to_fetch: jc064522 at055612 stroomdev66
+- hosts: localhost
+  vars_files:
+    - ../user_variables.yml
+    - ./variables.yml
   tasks:
-    - name: Fetches
-      command: "python3 ../stroom/scripts/fetch_github_public_keys.py ../authorized_keys  {{ github_users_to_fetch }}"
+    - name: Fetches and concatenates public keys
+      command: "python3 ../stroom/scripts/fetch_github_public_keys.py {{ authorized_keys_path }}  {{ authorized_github_users }}"

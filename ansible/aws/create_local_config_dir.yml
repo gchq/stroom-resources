@@ -1,0 +1,8 @@
+- name: Create the default configuration folder
+  vars_files:
+    - ../user_variables.yml
+  hosts: localhost
+  tasks:
+    - file:
+        path: "{{ generated_path }}"
+        state: directory

@@ -3,5 +3,6 @@
   hosts: all
   vars_files:
     - ./variables.yml
+    - ../user_variables.yml
   roles:
     - roles/config/send
