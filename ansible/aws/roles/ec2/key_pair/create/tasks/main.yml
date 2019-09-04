@@ -8,7 +8,7 @@
 
 - name: Ensure the ec2 Key Pair exists 
   ec2_key:
-    name: "{{ hostname.stdout }}"
+    name: "{{ aws_key_pair_name }}"
     profile: "{{ aws_profile_name }}"
     region: "{{ aws_region }}"
     aws_access_key: "{{ aws_access_key }}"
@@ -25,17 +25,11 @@
     verbosity: 2
 
 - name: The private key is save to a local .pem file
-  copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="~/.ssh/{{ hostname.stdout }}.pem" mode=0600
+  copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="{{ local_key_pair_path }}" mode=0600
   when: ec2_key_creation_result.changed
 
-- name: Create a symlink to a predictablc location
-  file:
-    state: link
-    src: "~/.ssh/{{ hostname.stdout }}.pem"
-    dest: "~/.ssh/stroom_aws_key.pem"
-  
 - stat:
-    path: "~/.ssh/{{ hostname.stdout}}.pem"
+    path: "{{ local_key_pair_path }}"
   register: key_file_stat
 
 - fail:
