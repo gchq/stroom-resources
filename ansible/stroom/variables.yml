@@ -6,7 +6,7 @@ authorized_keys_path: "{{ generated_path }}/authorized_keys"
 # We define a {{home}} variable because:
 #  1. If we use '~/' then if we're elevating we'll install things in /root/ instead
 #  2. We might want to change the user, in which case we'll only want to change it in one place.
-home: /home/centos
+home: "/home/{{ user }}"
 
 # This is where we download stack releases to
-releases_path: ./releases
+releases_path: "{{ generated_path }}/releases"
