@@ -14,6 +14,8 @@
   connection: local
   gather_facts: False
   vars_files:
+    - ../user_variables.yml
+    - vars/variables.yml
     - vars/aws_vault.yml
     - vars/aws.yml
 
