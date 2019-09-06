@@ -8,8 +8,8 @@
     - vars/aws_vault.yml
     - vars/aws.yml
   vars:
-    temp_hosts_dir: ./build/hosts
-    aws_inventory_file: ./build/aws_inventory.csv 
+    temp_hosts_dir: "{{ generated_path }}/hosts"
+    aws_inventory_file: "{{ generated_path }}/aws_inventory.csv"
   tasks:
     - include_role:
         name: roles/ec2/inventory/create

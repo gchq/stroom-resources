@@ -10,4 +10,4 @@
 - name: Unpack Stroom's distribution tar
   unarchive:
     src: "{{playbook_dir}}/{{download_info.dest }}"
-    dest: "./releases/argh"
+    dest: "./releases"
