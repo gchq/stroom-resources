@@ -1,6 +1,7 @@
 # This is the stack version we want to install and use.
 stack_version: v6.0.4
 stack_name: stroom_core
+environment_name: stroom_test
 
 # The user on the hosts
 user: centos

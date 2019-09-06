@@ -1,11 +1,3 @@
-- name: Get the hostnam of the control machine
-  command: hostname
-  register: hostname
-
-- name: Get the username of the current user
-  command: whoami
-  register: username
-
 - name: Ensure the ec2 Key Pair does not exist
   ec2_key:
     name: "{{ aws_key_pair_name }}"
