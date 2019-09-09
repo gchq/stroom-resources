@@ -296,8 +296,8 @@ def compare_container_versions(output_file_path, from_release, to_release, stack
                     diff = difflib.unified_diff(
                         from_file_handle.readlines(),
                         to_file_handle.readlines(),
-                        fromfile=os.path.basename(from_file),
-                        tofile=os.path.basename(to_file),
+                        '',
+                        '',
                         n=0,
                     )
                     is_different = False

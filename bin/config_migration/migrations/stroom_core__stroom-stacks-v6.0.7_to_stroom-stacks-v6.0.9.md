@@ -49,13 +49,13 @@
     * certs/
     * config/
 
-Changed config file count: **0**
+Changed config file count in volumes directory: **0**
 
 ## Changes to the Docker image versions
 
 ```diff
---- ALL_SERVICES.txt
-+++ ALL_SERVICES.txt
+--- 
++++ 
 @@ -2 +2 @@
 -stroom|gchq/stroom:v6.0.7
 +stroom|gchq/stroom:v6.0.9
