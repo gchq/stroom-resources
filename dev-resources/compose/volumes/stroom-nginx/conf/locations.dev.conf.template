@@ -1,3 +1,6 @@
+# NOTE: This file is for dev use only, for hot-loading stroom-ui
+# It should NOT be included in a production deployment
+
 # These locations allow webpack dev server requests to get through to our app.
 
 location /__webpack_dev_server__ {
