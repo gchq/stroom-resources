@@ -93,18 +93,21 @@ def download_release(release_name, stack_name):
                 .format(Colours.BLUE, downloaded_file, Colours.NC))
         raise
 
-
 def get_path_to_config(release_name, stack_name):
     version = get_version_from_release(release_name)
     from_version_path = "{0}/{1}/{2}/{2}-{3}/config/{2}.env" \
         .format(Config.BUILD_DIR, release_name, stack_name, version)
     return from_version_path
 
-
 def get_path_to_volumes_dir(release_name, stack_name):
     return "{0}/{1}/{2}/volumes" \
         .format(Config.BUILD_DIR, release_name, stack_name)
 
+def get_path_to_all_services_file(release_name, stack_name):
+    version = get_version_from_release(release_name)
+    print("release_name: " + release_name)
+    return "{0}/{1}/{2}/{2}-{3}/ALL_SERVICES.txt" \
+        .format(Config.BUILD_DIR, release_name, stack_name, version)
 
 def extract_variables_from_env_file(path):
     print("Extracting variables from file {0}{1}{2}" \
@@ -176,14 +179,16 @@ def create_output_file(
     output.write("# Differences between `{0}` and `{1}`\n\n"
                  .format(from_release, to_release))
 
-    write_heading_2(output, "Added")
+    write_heading_2(output, "Environment variable changes")
+
+    write_heading_3(output, "Added")
     output.write(FENCE_OPEN_BASH)
     for added_var in sorted(added_vars):
         output.write("{0}={1}\n".format(added_var, added_vars[added_var]))
     output.write(FENCE_CLOSE)
 
     output.write("\n")
-    write_heading_2(output, "Removed")
+    write_heading_3(output, "Removed")
     output.write(FENCE_OPEN_BASH)
     for removed_var in sorted(removed_vars):
         output.write("{0}={1}\n"
@@ -191,7 +196,7 @@ def create_output_file(
     output.write(FENCE_CLOSE)
 
     output.write("\n")
-    write_heading_2(output, "Changed default values")
+    write_heading_3(output, "Changed default values")
     output.write(FENCE_OPEN_BASH)
     for changed_var in changed_vars:
         output.write("{0} has changed from \"{1}\" to \"{2}\"\n"
@@ -205,7 +210,7 @@ def add_repetitions_to_output_file(
                output_file_path, release_name, repeated_vars):
     output = open(output_file_path, 'a')
     output.write("\n")
-    write_heading_2(
+    write_heading_3(
             output,
             "Variables that occur more than once within the `{0}` env file"
             .format(release_name))
@@ -245,17 +250,25 @@ def write_vim_modeline(output_file_path):
     # If one of our diffs includes a vim modeline then github respects that for
     # file type determination. Thus we explicitly set the filetype here.
     with open(output_file_path, 'a') as output:
+        output.write("\n")
         output.write("<!-- vim: set filetype=markdown -->")
 
 def compare_directories(output_file_path, from_release, to_release, stack_name):
     with open(output_file_path, 'a') as output:
-        write_heading_2(output, "Changes to the volumes directory")
+        write_heading_2(
+                output, 
+                "Changes to the volumes directory (the directory tree will always be displayed)")
         from_dir = get_path_to_volumes_dir(from_release, stack_name)
         to_dir = get_path_to_volumes_dir(to_release, stack_name)
         # filecmp.dircmp(from_dir, to_dir).report_full_closure()
         dir_comp = filecmp.dircmp(from_dir, to_dir)
         changed_files=[]
         process_directory_comparison(output, dir_comp, "", changed_files) 
+
+        output.write("\n")
+        output.write("Changed config file count: **{0}**".format(
+            len(changed_files)))
+        output.write("\n")
 
         for pair in changed_files:
             output.write("\n")
@@ -267,6 +280,41 @@ def compare_directories(output_file_path, from_release, to_release, stack_name):
             output.write(FENCE_OPEN_DIFF)
             diff_files(output, pair[1], pair[2])
             output.write(FENCE_CLOSE)
+
+def compare_container_versions(output_file_path, from_release, to_release, stack_name):
+    with open(output_file_path, 'a') as output:
+        output.write("\n")
+        write_heading_2(
+                output, 
+                "Changes to the Docker image versions")
+        from_file = get_path_to_all_services_file(from_release, stack_name)
+        to_file = get_path_to_all_services_file(to_release, stack_name)
+
+        if (os.path.isfile(from_file) and os.path.isfile(to_file)):
+            with open(from_file, 'r') as from_file_handle:
+                with open(to_file, 'r') as to_file_handle:
+                    diff = difflib.unified_diff(
+                        from_file_handle.readlines(),
+                        to_file_handle.readlines(),
+                        fromfile=os.path.basename(from_file),
+                        tofile=os.path.basename(to_file),
+                        n=0,
+                    )
+                    is_different = False
+
+                    output.write(FENCE_OPEN_DIFF)
+                    for line in diff:
+                        is_different = True
+                        output.write(line)
+                    output.write(FENCE_CLOSE)
+
+                    if (not is_different):
+                        output.write("[No differences found]")
+                        output.write("\n")
+        else:
+            output.write("[ALL_SERVICES.txt file doesn't exist in both releases so unable to produce a diff]")
+            output.write("\n")
+
 
 
 def process_directory_comparison(output, dir_comp, indent, changed_files):
@@ -341,6 +389,7 @@ def main():
 
     (from_vars, repeated_from_vars) = setup_release(from_release, stack_name)
     (to_vars, repeated_to_vars) = setup_release(to_release, stack_name)
+
     comparisons = compare(from_vars, to_vars)
     create_output_file(output_file_path, from_release, to_release, comparisons)
 
@@ -350,6 +399,8 @@ def main():
                                    repeated_to_vars)
 
     compare_directories(output_file_path, from_release, to_release, stack_name)
+
+    compare_container_versions(output_file_path, from_release, to_release, stack_name)
 
     write_vim_modeline(output_file_path)
 
