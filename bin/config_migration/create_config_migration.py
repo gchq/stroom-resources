@@ -266,7 +266,7 @@ def compare_directories(output_file_path, from_release, to_release, stack_name):
         process_directory_comparison(output, dir_comp, "", changed_files) 
 
         output.write("\n")
-        output.write("Changed config file count: **{0}**".format(
+        output.write("Changed config file count in volumes directory: **{0}**".format(
             len(changed_files)))
         output.write("\n")
 
