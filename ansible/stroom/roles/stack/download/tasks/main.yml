@@ -9,3 +9,8 @@
   # to handle the archive. It untars manually without problems, so I'l just do that.
 - name: Unpack Stroom's distribution tar
   command: "tar -xvf {{playbook_dir}}/{{download_info.dest}} --directory {{ generated_path }}"
+
+- name: Delete the archive
+  file:
+    path: "{{ download_info.dest }}"
+    state: absent

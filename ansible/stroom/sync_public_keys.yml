@@ -1,4 +1,4 @@
-- name: Send our devop's public keys to the hosts. This assumes they've already been collected in authorized_keys.
+- name: Send our devop's public keys to the hosts. This assumes they have already been collected in authorized_keys.
   hosts: all
   vars_files:
     - variables.yml
