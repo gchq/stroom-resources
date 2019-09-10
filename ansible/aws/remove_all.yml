@@ -1,6 +1,6 @@
 - name: Terminate all instances
-  hosts: local
-  connection: local
+  hosts: localhost
+  connection: localhost
   gather_facts: false
   vars_files:
     - ../user_variables.yml

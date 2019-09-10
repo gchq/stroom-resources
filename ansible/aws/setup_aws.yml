@@ -10,8 +10,8 @@
 #
 # https://www.linuxschoolonline.com/use-ansible-to-build-and-manage-aws-ec2-instances/
 
-- hosts: local
-  connection: local
+- hosts: localhost
+  connection: localhost
   gather_facts: False
   vars_files:
     - ../user_variables.yml
