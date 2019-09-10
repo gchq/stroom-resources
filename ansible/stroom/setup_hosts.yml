@@ -2,5 +2,8 @@
 - name: Setup all hosts, installing dependencies such as docker
   become: yes
   hosts: all
+  vars_files:
+    - ../user_variables.yml
+    - ./variables.yml
   roles:
     - roles/setup

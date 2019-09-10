@@ -1,3 +1,6 @@
+- name: Download a stack
+  import_playbook: download_stack.yml
+  
 - name: Setup all hosts
   import_playbook: setup_hosts.yml
 

@@ -1,5 +1,8 @@
 - name: Downloads, unpacks, and links in a stack
   hosts: localhost
+  vars_files:
+    - ../user_variables.yml
+    - ./variables.yml
   vars:
     - stroom_url: https://github.com/gchq/stroom-resources/releases/download/stroom-stacks-v6.0.4/stroom_core-v6.0.4.tar.gz
   roles:
