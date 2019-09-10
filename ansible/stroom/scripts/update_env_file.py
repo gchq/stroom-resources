@@ -1,5 +1,5 @@
 from utils import get_inventory, get_service_fqdn, remove_line_from_file
-
+import sys
 
 def prepend_line(path, line):
     file = open(path, "r+")
@@ -9,7 +9,8 @@ def prepend_line(path, line):
 
 
 def main():
-    env_file_path = './releases/latest/config/stroom_core.env'
+    path_to_stack = sys.argv[1]
+    env_file_path = f'{path_to_stack}/latest/config/stroom_core.env'
     inventory = get_inventory()
     fqdn = get_service_fqdn(inventory)
     export_text = 'export HOST_IP'

@@ -1,20 +1,20 @@
 from utils import get_inventory
+import sys
 
 
-CONF = './releases/volumes/nginx/conf'
 UPSTREAMS = {
-    "auth_service":f"{CONF}/upstreams.auth.service.conf.template",
-    "auth_ui":f"{CONF}/upstreams.auth.ui.conf.template",
-    "proxy":f"{CONF}/upstreams.proxy.conf.template",
-    "stroom_processing":f"{CONF}/upstreams.stroom.processing.conf.template",
-    "stroom_ui":f"{CONF}/upstreams.stroom.ui.conf.template",
+    "auth_service":"{}/upstreams.auth.service.conf.template",
+    "auth_ui":"{}/upstreams.auth.ui.conf.template",
+    "proxy":"{}/upstreams.proxy.conf.template",
+    "stroom_processing":"{}/upstreams.stroom.processing.conf.template",
+    "stroom_ui":"{}/upstreams.stroom.ui.conf.template",
     }
 
 
-def open_files_for_writing(services):
+def open_files_for_writing(services, path_to_stack):
     files = []
     for service in services:
-        files.append(open(UPSTREAMS[service], "w"))
+        files.append(open(UPSTREAMS[service].format(path_to_stack), "w"))
     return files
 
 
@@ -27,14 +27,15 @@ def write_upstream_file(hosts, open_files):
 
 
 def main():
+    path_to_stack = sys.argv[1]
     inventory = get_inventory()
 
     write_upstream_file(
         inventory["stroom_services"]["hosts"],
-        open_files_for_writing(['auth_service', 'auth_ui']))
+        open_files_for_writing(['auth_service', 'auth_ui'], path_to_stack))
     
     write_upstream_file(
         inventory["stroom_and_proxy"]["hosts"],
-        open_files_for_writing(['proxy', 'stroom_processing','stroom_ui']))
+        open_files_for_writing(['proxy', 'stroom_processing','stroom_ui'], path_to_stack))
 
 main()
