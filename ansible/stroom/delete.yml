@@ -24,6 +24,7 @@
 - name: Stop and remove all containers for stroom_services
   hosts: stroom_services
   vars_files:
+    - ../user_variables.yml
     - ./variables.yml
   vars:
     stack_type: stroom_services

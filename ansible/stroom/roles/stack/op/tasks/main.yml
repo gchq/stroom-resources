@@ -1,4 +1,4 @@
-- name: Performing '{{op}}' on '{{stack_name}}'
+- name: "Performing '{{op}}' on '{{stack_name}}'"
   # -y to agree to not ask questions
   # -q to not wait for startups -- this matters because we're not dictating order of startup.
   #    E.g. stroom-auth-service needs the db to finish starting, but what if the db hasn't been asked to start yet?
