@@ -4,6 +4,6 @@
     - ../user_variables.yml
     - ./variables.yml
   vars:
-    - stroom_url: https://github.com/gchq/stroom-resources/releases/download/stroom-stacks-v6.0.4/stroom_core-v6.0.4.tar.gz
+    - stroom_url: "https://github.com/gchq/stroom-resources/releases/download/stroom-stacks-{{ stack_version }}/{{ stack_name }}-{{ stack_version}}.tar.gz"
   roles:
     - roles/stack/download
