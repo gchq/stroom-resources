@@ -9,4 +9,4 @@ authorized_keys_path: "{{ generated_path }}/authorized_keys"
 home: "/home/{{ user }}"
 
 # This is where we download stack releases to
-releases_path: "{{ generated_path }}/{{ stack_name }]"
+releases_path: "{{ generated_path }}/{{ stack_name }}"

@@ -14,3 +14,14 @@
   file:
     path: "{{ download_info.dest }}"
     state: absent
+
+- name: Get absolute path so we can create a symlink elsewhere using the potentially relative generated_path
+  command: "realpath {{ generated_path }}"
+  register: absolute_path
+  
+- name: Create a symlink for 'latest'
+  file:
+    state: link
+    force: yes
+    src: "{{ absolute_path.stdout }}/{{ stack_name }}/{{ stack_name }}-{{ stack_version }}"
+    dest: "{{ absolute_path.stdout }}/{{ stack_name }}/latest"
