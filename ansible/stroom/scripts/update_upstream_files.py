@@ -11,10 +11,10 @@ UPSTREAMS = {
     }
 
 
-def open_files_for_writing(services, path_to_stack):
+def open_files_for_writing(services, path_to_nginx_conf):
     files = []
     for service in services:
-        files.append(open(UPSTREAMS[service].format(path_to_stack), "w"))
+        files.append(open(UPSTREAMS[service].format(path_to_nginx_conf), "w"))
     return files
 
 
@@ -28,14 +28,15 @@ def write_upstream_file(hosts, open_files):
 
 def main():
     path_to_stack = sys.argv[1]
+    path_to_nginx_conf = f"{path_to_stack}/volumes/nginx/conf"
     inventory = get_inventory()
 
     write_upstream_file(
         inventory["stroom_services"]["hosts"],
-        open_files_for_writing(['auth_service', 'auth_ui'], path_to_stack))
+        open_files_for_writing(['auth_service', 'auth_ui'], path_to_nginx_conf))
     
     write_upstream_file(
         inventory["stroom_and_proxy"]["hosts"],
-        open_files_for_writing(['proxy', 'stroom_processing','stroom_ui'], path_to_stack))
+        open_files_for_writing(['proxy', 'stroom_processing','stroom_ui'], path_to_nginx_conf))
 
 main()
