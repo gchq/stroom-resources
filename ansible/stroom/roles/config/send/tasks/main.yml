@@ -15,4 +15,4 @@
   copy:
     src: "{{releases_path}}/volumes"
     dest: "{{home}}/{{stack_name}}"
-    preserve: yes
+    mode: preserve
