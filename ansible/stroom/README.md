@@ -20,6 +20,15 @@ git clone https://github.com/gchq/stroom-resources
 
 The ansible scripts are in `stroom-resources/ansible`.
 
+
+## Choosing the location of your configuration
+
+Nothing changes in this repository when configuring and running an environment. The files that are generated and used to configure the environment should be stored elsewhere and source controlled as you wish. You need to symlink to wherever these files reside, or will reside after they've been generated automatically. Do this, replacing the path where obvious:
+
+``` sh
+# Or 'ln -sf ...' if you're so inclined
+ln --symbolic --force /path/to/your/config config 
+```
  
 ## Updating the inventory
 

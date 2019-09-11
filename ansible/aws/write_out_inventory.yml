@@ -3,10 +3,11 @@
   connection: localhost
   gather_facts: false
   vars_files:
-    - ../user_variables.yml
     - vars/variables.yml
     - vars/aws_vault.yml
     - vars/aws.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
     temp_hosts_dir: "{{ generated_path }}/hosts"
     aws_inventory_file: "{{ generated_path }}/aws_inventory.csv"

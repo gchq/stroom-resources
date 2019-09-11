@@ -25,8 +25,9 @@
 
 - name: asda 
   vars_files:
-    - ../user_variables.yml
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   hosts: all
   roles:
     - roles/stack/op

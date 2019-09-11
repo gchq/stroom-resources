@@ -23,8 +23,9 @@
 
 - name: Perform operation on databases 
   vars_files:
-    - ../user_variables.yml
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   become: yes
   hosts: stroom_dbs
   roles:
@@ -33,7 +34,8 @@
 - name: Perform operation on services 
   vars_files:
     - ./variables.yml
-    - ../user_variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   become: yes
   hosts: stroom_services
   roles:
@@ -42,7 +44,8 @@
 - name: Perform operation on strooms 
   vars_files:
     - ./variables.yml
-    - ../user_variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   become: yes
   hosts: stroom_and_proxy
   roles:
