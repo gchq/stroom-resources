@@ -82,6 +82,21 @@ A Stroom stack has several scripts to control it.
  - To get information about the stack: health/info/show_config/logs/status
  - To clean up: remove
 
+### Controlling the stack using tmux
+Although tmux involves opening several ssh sessions to the boxes and is therefore terribly old-school, it is also much easier to work with than using ansible to control and monitor a stack. I.e. you can use ansible to set up your environments, install and update stroom and its config, but you might have more joy using tmux for control and monitoring.
+
+You can create a tmuxinator layout from your ansible inventory by running:
+
+``` 
+./scripts/create_tmuxinator_layout.sh stroom_test
+```
+In the above `stroom_test` is the name of the layout. Then you can use that name to start a tmux session, automatically connecting to your hosts:
+
+``` sh
+tmuxinator stroom_test
+```
+
+### Controlling the stack using ansible
 NB/TODO: logs doesn't work very well because it tails and doesn't complete.
 
 If you want to execute these on all stacks do the following:
