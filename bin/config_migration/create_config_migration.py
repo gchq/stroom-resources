@@ -19,11 +19,15 @@ FENCE_OPEN_BASH = "```bash\n"
 FENCE_OPEN_DIFF = "```diff\n"
 FENCE_CLOSE = "```\n"
 
+DEFAULT_RELEASE_PREFIX = "stroom-stacks-"
+
 USAGE_TXT= "" \
         + "Script to generate a list of configuration changes between two releases\n" \
         + "Usage: create_config_migration.py <from_release> <to_release> <stack_name>\n" \
         + "E.g: \n" \
-        + "./create_config_migration.py stroom-stacks-v6.0-beta.30 stroom-stacks-v6.0-beta.31 stroom_core" \
+        + "./create_config_migration.py v6.0-beta.30 v6.0-beta.31 stroom_core\n" \
+        + "or\n" \
+        + "./create_config_migration.py stroom-stacks-v6.0-beta.30 stroom-stacks-v6.0-beta.31 stroom_core\n" \
 
 
 class Colours:
@@ -83,13 +87,19 @@ def download_release(release_name, stack_name):
     extracted_files = "{0}/{1}".format(Config.BUILD_DIR, release_name)
     print("Downloading file {0}{1}{2}" \
         .format(Colours.BLUE, url, Colours.NC))
-    urllib.request.urlretrieve(url, downloaded_file)
+    try:
+        urllib.request.urlretrieve(url, downloaded_file)
+    except:
+        log_error("Downloading file {0}{1}{2}, the url may not exist or the version is incorrect. Verify the file exists on github."
+                .format(Colours.BLUE, url, Colours.NC))
+        raise
+
     try:
         with tarfile.open(downloaded_file) as tar:
             tar = tarfile.open(downloaded_file)
             tar.extractall(extracted_files)
     except:
-        log_error("Opening file {0}{1}{2}, the url may not exist or the file may be corrupt."
+        log_error("Opening file {0}{1}{2}, the file may be corrupt."
                 .format(Colours.BLUE, downloaded_file, Colours.NC))
         raise
 
@@ -376,6 +386,14 @@ def main():
     from_release = sys.argv[1]
     to_release = sys.argv[2]
     stack_name = sys.argv[3]
+
+    version_no_pattern = re.compile("^v[0-9]+\..*$")
+
+    if (version_no_pattern.match(from_release)):
+        from_release = DEFAULT_RELEASE_PREFIX + from_release
+
+    if (version_no_pattern.match(to_release)):
+        to_release = DEFAULT_RELEASE_PREFIX + to_release
 
     print("Comparing the environment variable files of {0}{1}{2}" \
         .format(Colours.BLUE, from_release, Colours.NC) \
