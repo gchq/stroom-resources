@@ -2,6 +2,12 @@
 
 You can use these scripts and configurations to set up an AWS ansible environment for Stroom. 
 
+# Dependencies
+
+``` bash
+sudo pip3 install boto
+```
+
 ## I'm part of the Stroom team. How do I set everything up?
 Just run:
 ``` bash

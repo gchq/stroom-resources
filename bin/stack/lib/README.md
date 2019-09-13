@@ -45,8 +45,7 @@ sudo firewall-cmd --zone=public --permanent --add-port=8080/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8081/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8090/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8091/tcp
-sudo firewall-cmd --zone=public --permanent --add-port=8443/tcp
-sudo firewall-cmd --zone=public --permanent --add-port=8543/tcp
+sudo firewall-cmd --zone=public --permanent --add-port=8099/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=5000/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=2888/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=443/tcp

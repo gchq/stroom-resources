@@ -1,8 +1,0 @@
-# Upstream configuration for stroom
-
-upstream stroom_proxy_upstream {
-<<<PROXY_UPSTREAMS>>>
-}
-
-# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
-
