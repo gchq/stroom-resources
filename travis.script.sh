@@ -171,16 +171,16 @@ release_to_docker_hub() {
 
 derive_docker_tags() {
   # This is a tagged commit, so create a docker image with that tag
-  VERSION_FIXED_TAG="${BUILD_VERSION}"
+  VERSION_FIXED_TAG="${VERSION_NO}"
 
   # Extract the major version part for a floating tag
-  majorVer=$(echo "${BUILD_VERSION}" | grep -oP "^v[0-9]+")
+  majorVer=$(echo "${VERSION_NO}" | grep -oP "^v[0-9]+")
   if [ -n "${majorVer}" ]; then
     MAJOR_VER_FLOATING_TAG="${majorVer}${LATEST_SUFFIX}"
   fi
 
   # Extract the minor version part for a floating tag
-  minorVer=$(echo "${BUILD_VERSION}" | grep -oP "^v[0-9]+\.[0-9]+")
+  minorVer=$(echo "${VERSION_NO}" | grep -oP "^v[0-9]+\.[0-9]+")
   if [ -n "${minorVer}" ]; then
     MINOR_VER_FLOATING_TAG="${minorVer}${LATEST_SUFFIX}"
   fi
