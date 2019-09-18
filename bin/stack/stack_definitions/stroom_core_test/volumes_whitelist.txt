@@ -3,12 +3,12 @@
   stroom_logs
   stroom_output
   stroom_volumes
-  stroom-proxy-local_config
-  stroom-proxy-local_content
+#  stroom-proxy-local_config
+#  stroom-proxy-local_content
   stroom-proxy-local_logs
   stroom-proxy-local_repo
-  stroom-proxy-remote_config
-  stroom-proxy-remote_content
+#  stroom-proxy-remote_config
+#  stroom-proxy-remote_content
   stroom-proxy-remote_logs
   stroom-proxy-remote_repo
   stroom-auth-service_logs
