@@ -17,6 +17,8 @@ main() {
   SERVICES+=("stroom-all-dbs")
   SERVICES+=("stroom-auth-service")
   SERVICES+=("stroom-log-sender")
+  SERVICES+=("stroom-proxy-local")
+  SERVICES+=("stroom-proxy-remote")
   SERVICES+=("stroom-ui")
 
   ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"
