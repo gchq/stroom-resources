@@ -3,7 +3,6 @@
   connection: localhost
   gather_facts: false
   vars_files:
-    - vars/variables.yml
     - vars/aws_vault.yml
     - vars/aws.yml
     - ../global_variables.yml

@@ -34,7 +34,7 @@
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
     security_token: "{{ aws_session_token }}"
-    profile: "{{ aws_profile_nam }}"
+    profile: "{{ aws_profile_name }}"
     group: "{{ ec2_security_group }}"
     region: "{{ aws_region }}"
     keypair: "{{ aws_key_pair_name }}"

@@ -1,5 +1,0 @@
-aws_key_pair_name: "{{ environment_name }}_key_pair"
-local_key_pair_path: "~/.ssh/{{ aws_key_pair_name }}.pem"
-ec2_instance_type: t2.micro
-instance_tag_environment: test
-instance_tag_owner: "{{ environment_name }}"
