@@ -23,14 +23,22 @@ location /authui {
 # The following routes mount stroom-ui onto this server. These paths catch
 # everything that should go to the UI.
 
-# This allows stroom-ui to get its conf# This allows stroom-ui to get its config.ig.
+# This allows stroom-ui to get its config.
 location /config.json {
     proxy_pass https://auth_ui_upstream/config.json;
+
+    # Enable caching for the static ui content, caching requires buffering
+    proxy_buffering             on;
+    proxy_cache                 stroom_auth_ui_cache;
 }
 
 # This allows stroom-ui to get its assets, e.g. css and images.
 location /static {
     proxy_pass https://auth_ui_upstream/static;
+
+    # Enable caching for the static ui content, caching requires buffering
+    proxy_buffering             on;
+    proxy_cache                 stroom_auth_ui_cache;
 }
 
 # This is the path where all non-chrome pages are hosted,

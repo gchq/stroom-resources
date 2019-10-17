@@ -39,6 +39,16 @@ client_body_buffer_size     <<<NGINX_CLIENT_BODY_BUFFER_SIZE>>>;
 # TODO: Possibly this should be set just for /datafeed.
 proxy_request_buffering     off;
 
+# Stroom is typically run in an intranet environment with fast client connections.
+# Therefore, with the exception of static content that we want to cache, this is no
+# benefit to buffering responses.
+proxy_buffering             off;
+
+# By default nginx proxies requests to an upstream on http 1.0. If a client sends http 1.1
+# requests with chunked encoding the whole request has to be buffered to determine the
+# content length and is then proxied as 1.0 without chunking.
+proxy_http_version          1.1;
+
 # TODO - May want to consider this approach for large file uploads
 # https://stackoverflow.com/questions/44371643/nginx-php-failing-with-large-file-uploads-over-6-gb
 # i.e. getting nginx to persist the body to disk then only pass the persisted filename to stroom.

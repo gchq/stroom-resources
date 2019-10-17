@@ -26,6 +26,11 @@ location /api/ {
 # ROUTING FOR UI #
 ##################
 
+# If you hit https://<host>/ you get a 404 on the favicon.
+location = /favicon.ico {
+    return 302 https://<<<NGINX_ADVERTISED_HOST>>>/stroom/favicon.ico;
+}
+
 location = / {
     return 302 https://<<<NGINX_ADVERTISED_HOST>>>/stroom/ui;
 }
@@ -37,6 +42,15 @@ location ~ /stroom$ {
 
 location ~ .*/clustercall.rpc$ {
     deny all;
+}
+
+location /stroom/ui {
+    proxy_pass http://stroom_upstream_sticky/stroom/ui;
+    include location_defaults.conf;
+
+    # Enable caching for the static ui content, caching requires buffering
+    proxy_buffering             on;
+    proxy_cache                 stroom_ui_cache;
 }
 
 # ... and everything else gets reverse-proxied to stroom.

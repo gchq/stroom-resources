@@ -137,8 +137,9 @@ services:
 
 volumes:
 
-  nginx_logs:
+  nginx_cache:
   nginx_logrotate:
+  nginx_logs:
 
   stroom_logs:
   stroom_output:

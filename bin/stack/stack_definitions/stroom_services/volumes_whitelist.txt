@@ -1,3 +1,4 @@
+nginx_cache
 nginx_logrotate
 nginx_logs
 stroom-auth-service_logs

@@ -1,5 +1,6 @@
-nginx_logs
+nginx_cache
 nginx_logrotate
+nginx_logs
 stroom-proxy-remote_config
 stroom-proxy-remote_content
 stroom-proxy-remote_logs
