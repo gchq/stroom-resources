@@ -58,7 +58,7 @@ main(){
         http https://api.github.com/repos/gchq/stroom-resources/releases | 
         jq -r "[.[]][].tag_name" | 
         sort |
-        fzf)
+        fzf --border --header="Select the stack release version to download" --height=15)
 
     [ $? -eq 0 ] || error_exit "Something went wrong looking up the tag"
 
@@ -66,15 +66,21 @@ main(){
 
     ! find . | grep -q "${tag}"  || error_exit "${RED}Tag ${BLUE}${tag}${RED} appears to already be installed"
 
-    local url
-    url=$( \
-        http https://api.github.com/repos/gchq/stroom-resources/releases/tags/"${tag}" | 
-        jq -r '.assets[] | select(.content_type == "application/gzip") | .browser_download_url')
-
+    # Use FZF to select the file to download
     local file
     file=$( \
         http https://api.github.com/repos/gchq/stroom-resources/releases/tags/"${tag}" | 
-        jq -r '.assets[] | select(.content_type == "application/gzip") | .name')
+        jq -r '.assets[] | select(.content_type == "application/gzip") | .name' |
+        sort |
+        fzf --border --header="Select the stack variant to download" --height=15)
+
+    [ $? -eq 0 ] || error_exit "Something went wrong getting the asset file name"
+
+    # get the download url of the chosen archive file
+    local url
+    url=$( \
+        http https://api.github.com/repos/gchq/stroom-resources/releases/tags/"${tag}" | 
+        jq -r ".assets[] | select(.name == \"${file}\") | .browser_download_url")
 
     [ $? -eq 0 ] || error_exit "Something went wrong getting the asset url"
 
