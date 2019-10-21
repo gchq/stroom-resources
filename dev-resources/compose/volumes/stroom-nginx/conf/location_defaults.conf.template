@@ -4,3 +4,5 @@ proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
 proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
 proxy_pass_request_body    on;
 proxy_pass_request_headers on;
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
