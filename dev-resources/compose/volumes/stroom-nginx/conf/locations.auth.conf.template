@@ -21,29 +21,19 @@ location /authui {
     proxy_pass https://auth_ui_upstream;
 
     # Enable caching for the static ui content, caching requires buffering
-    proxy_buffering             on;
-    proxy_cache                 stroom_auth_ui_cache;
-    proxy_buffers               16 16k;  
-    proxy_buffer_size           2k;
-    proxy_max_temp_file_size    0;
-    proxy_cache_revalidate      on;
+    include cache_defaults.conf;
 }
 
 # The following routes mount stroom-ui onto this server. These paths catch
 # everything that should go to the UI.
 
 # This allows stroom-ui to get its config.
-location ~* /(:?config|manifest).json$ {
+location ~* ^/(:?config|manifest).json$ {
     #add_header                  location-debug auth_config-manifest;
     proxy_pass https://auth_ui_upstream/$1.json;
 
     # Enable caching for the static ui content, caching requires buffering
-    proxy_buffering             on;
-    proxy_cache                 stroom_auth_ui_cache;
-    proxy_buffers               16 16k;  
-    proxy_buffer_size           2k;
-    proxy_max_temp_file_size    0;
-    proxy_cache_revalidate      on;
+    include cache_defaults.conf;
 }
 
 # This allows stroom-ui to get its assets, e.g. css and images.
@@ -52,12 +42,7 @@ location /static {
     proxy_pass https://auth_ui_upstream/static;
 
     # Enable caching for the static ui content, caching requires buffering
-    proxy_buffering             on;
-    proxy_cache                 stroom_auth_ui_cache;
-    proxy_buffers               16 16k;  
-    proxy_buffer_size           2k;
-    proxy_max_temp_file_size    0;
-    proxy_cache_revalidate      on;
+    include cache_defaults.conf;
 }
 
 # This is the path where all non-chrome pages are hosted,
@@ -67,13 +52,8 @@ location /s {
     include location_defaults.conf;
     proxy_pass https://auth_ui_upstream/s;
 
-    # Enable caching for the static ui content, caching requires buffering
-    proxy_buffering             on;
-    proxy_cache                 stroom_auth_ui_cache;
-    proxy_buffers               16 16k;  
-    proxy_buffer_size           2k;
-    proxy_max_temp_file_size    0;
-    proxy_cache_revalidate      on;
+    # Use response buffering and caching
+    include cache_defaults.conf;
 
     # Don't cache unless we match on the file type
     set $no_cache "1";
