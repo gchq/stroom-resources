@@ -57,3 +57,5 @@ proxy_request_buffering     off;
 #location / {
 #  include cors.conf;
 #}
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
