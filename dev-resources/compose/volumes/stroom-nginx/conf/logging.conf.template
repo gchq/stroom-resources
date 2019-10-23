@@ -35,3 +35,5 @@ error_log /var/log/nginx/app.log warn;
 # Additional file based logging for collection by stroom-log-sender
 access_log /stroom-nginx/logs/access/access.log stroom_combined_format;
 error_log /stroom-nginx/logs/app/app.log warn;
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
