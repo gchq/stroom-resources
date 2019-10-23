@@ -29,5 +29,11 @@ proxy_cache                 stroom_cache;
 # the “If-Modified-Since” and “If-None-Match” header fields.
 proxy_cache_revalidate      on;
 
+# Add details of the reverse proxy cache hit/miss status to the response headers
+add_header X-Proxy-Cache-Status $upstream_cache_status;
+
+# Add details of the date the response was obtained from the upstream
+add_header X-Proxy-Cached-Date $upstream_http_date;
+
 # vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
 

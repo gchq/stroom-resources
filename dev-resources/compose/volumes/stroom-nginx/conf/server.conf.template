@@ -68,8 +68,4 @@ proxy_http_version          1.1;
 #  include cors.conf;
 #}
 
-# Add details of the caching to the response headers
-add_header X-GG-Cache-Status $upstream_cache_status;
-add_header X-GG-Cache-Date $upstream_http_date;
-
 # vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
