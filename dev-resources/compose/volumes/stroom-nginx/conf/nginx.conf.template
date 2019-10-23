@@ -16,7 +16,7 @@ http {
     include logging.conf;
 
     # Create a cache for caching responses from upstream
-    proxy_cache_path /var/nginx/cache/stroom_cache keys_zone=stroom_ui_cache:10m levels=1:2 inactive=600s max_size=100m use_temp_path=off;
+    proxy_cache_path /var/nginx/cache/stroom_cache keys_zone=stroom_cache:10m levels=1:2 inactive=600s max_size=100m use_temp_path=off;
 
     upstream stroom_upstream_sticky { 
         ip_hash;
