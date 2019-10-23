@@ -99,7 +99,7 @@ main() {
   local -r STROOM_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-app"
   local -r STROOM_CONFIG_YAML_FILENAME="dev.yml"
   local -r STROOM_PROXY_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_PROXY_TAG}/stroom-app"
-  local -r STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR="${STROOM_CONFIG_YAML_SNAPSHOT_DIR}"
+  local -r STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-proxy/stroom-proxy-app"
   local -r STROOM_PROXY_CONFIG_YAML_FILENAME="proxy-prod.yml"
   local -r STROOM_AUTH_SVC_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-auth/${STROOM_AUTH_SERVICE_TAG}/stroom-auth-svc"
   local -r STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_AUTH_REPO_DIR:-UNKNOWN_LOCAL_STROOM_AUTH_REPO_DIR}/stroom-auth-svc"
