@@ -18,7 +18,7 @@ location = /stroom/datafeeddirect {
 
 # All REST services
 location /api/ {
-    proxy_pass http://stroom_upstream/api/;
+    proxy_pass http://stroom_upstream_sticky/api/;
     include location_defaults.conf;
 }
 
