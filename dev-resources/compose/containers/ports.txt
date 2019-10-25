@@ -22,6 +22,7 @@
  8299 - stroom-elastic-query-service (app)
  8300 - stroom-elastic-query-service (admin)
  8543 - stroom-proxy-local (app https)
+ 8983 - solr (http)
  9000 - HDFS
  9090 - stroom-proxy-remote (app http)
  9091 - stroom-proxy-remote (admin)
