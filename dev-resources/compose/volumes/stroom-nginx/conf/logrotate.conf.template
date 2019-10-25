@@ -33,3 +33,5 @@
         [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid` &>/dev/null    
     endscript
 }
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:

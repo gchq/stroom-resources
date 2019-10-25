@@ -112,6 +112,7 @@ main() {
       echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_TAG${NC}=${BLUE}${STROOM_TAG}${NC}"
       if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
+        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
       fi
       copy_file_to_dir \
         "${STROOM_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_CONFIG_YAML_FILENAME}" \
@@ -133,6 +134,7 @@ main() {
       echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
       if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
+        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
       fi
       copy_file_to_dir \
         "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
@@ -165,6 +167,7 @@ main() {
       echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
       if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
+        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
       fi
       copy_file_to_dir \
         "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
@@ -197,6 +200,7 @@ main() {
       echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_AUTH_SERVICE_TAG${NC}=${BLUE}${STROOM_AUTH_SERVICE_TAG}${NC}"
       if [ ! -n "${LOCAL_STROOM_AUTH_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_AUTH_REPO_DIR${NC} to your local stroom repo"
+        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
       fi
       copy_file_to_dir \
         "${STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}" \
