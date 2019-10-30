@@ -78,9 +78,10 @@ showUsage() {
     echo -e "OPTIONs:"
     echo -e "  ${GREEN}-d${NC} - Enable DEBUG mode. This will output additional information to aid diagnosing problems"
     echo -e "  ${GREEN}-e${NC} - Rely on existing environment variables for any docker tags, the ${BLUE}local.env${NC} file will be ignored"
-    echo -e "  ${GREEN}-f${NC} - Use a custom configuration file to supply service names, tags and environment values, e.g. \"${BLUE}-f ./stroom5.env${NC}\""
+    echo -e "  ${GREEN}-f <file>${NC} - Use a custom configuration file to supply service names, tags and environment values, e.g. \"${BLUE}-f ./stroom5.env${NC}\""
     echo -e "  ${GREEN}-h${NC} - Show this help text"
     echo -e "  ${GREEN}-i${NC} - Do not check dockerhub for more recent versions of tagged images"
+    echo -e "  ${GREEN}-p <id>${NC} - Use id as the name of the docker compose project"
     echo -e "  ${GREEN}-x${NC} - Do not check hosts file for docker related entries"
     echo -e "  ${GREEN}-y${NC} - Do not prompt for confirmation, e.g. when run from a script"
     echo -e "  NOTE: if nether -f or -e are specified the file ${BLUE}${TAGS_FILE}${NC} will be used (and created if it doesn't exist)"
@@ -206,6 +207,7 @@ runStopCmdFirst=false
 isDebugModeEnabled=false
 ymlFile=${ALL_SERVICES_COMPOSE_FILE}
 projectName=$(basename $ymlFile | sed 's/\.yml$//')
+
 #redirect stderr to /dev/null as running compose before we have exported env vars means we get a load
 #of warnings about empty env vars. In this case we only want service names so don't care about stderr
 allServices=$(docker-compose -f ${ymlFile} config --services 2>/dev/null | sort)
@@ -223,7 +225,7 @@ fi
 
 extraComposeArguments=""
 
-optspec=":def:hiyx"
+optspec=":def:hip:yx"
 while getopts "$optspec" optchar; do
     #echo "Parsing $optchar"
     case "${optchar}" in
@@ -234,12 +236,6 @@ while getopts "$optspec" optchar; do
             useEnvironmentVariables=true
             ;;
         f)
-            if [ "${OPTARG}x" = "x" ]; then
-                echo -e "${RED}-f argument requires a file path to be specified${NC}" >&2
-                echo
-                showUsage
-                exit 1
-            fi
             customEnvFile="${OPTARG}"
             ;;
         h)
@@ -250,12 +246,21 @@ while getopts "$optspec" optchar; do
         i)
             requireLatestImageCheck=false
             ;;
+	p)
+	    projectName=${OPTARG}
+	    ;;
         x)
             requireHostFileCheck=false
             ;;
         y)
             requireConfirmation=false
             ;;
+	:)
+	    echo -e "${RED}-${OPTARG} argument requires an argument ${NC}" >&2
+	    echo
+	    showUsage
+	    exit 1
+	    ;;
         *)
             echo -e "${RED}ERROR${NC} Unknown argument: '-${OPTARG}'" >&2
             echo
@@ -380,6 +385,9 @@ if $requireHostFileCheck && [[ "$REQUIRE_HOSTS_FILE_CHECK" != "false" ]]; then
         exit 1
     fi
 fi
+
+echo
+echo -e "The docker compose project [${GREEN}${projectName}${NC}] will be used"
 
 #'docker-compose config' will perform any tag substitution so the tags here will have come from the TAGS_FILE or env vars or defaults
 # This first line is a dry run so that we can see any errors
