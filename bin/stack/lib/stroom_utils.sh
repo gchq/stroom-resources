@@ -46,8 +46,27 @@ get_services_in_stack() {
   cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" 
 }
 
-get_images_in_stack() {
-  cut -d "|" -f 2 < "${DIR}/${STACK_SERVICES_FILENAME}" 
+get_active_images_in_stack() {
+  while read -r image; do
+    non_namespaced_tag="${image#*/}"
+    #echo "checking image $image $non_namespaced_tag"
+    # Make sure the non namespaced part, e.g.stroom-proxy:v6.0.18 
+    # is in the list of active services
+    if grep -qF "${non_namespaced_tag}" "${STACK_SERVICES_FILENAME}"; then
+      echo "${image}"
+    fi
+  done <<< "$( get_all_images_in_stack )"
+}
+
+get_all_images_in_stack() {
+  # Grepping yaml is not ideal, we could do with something like yq or
+  # ruby + jq to parse it properly, but that means more prereqs
+  docker-compose \
+    --project-name "${STACK_NAME}" \
+    -f "$DIR/config/${STACK_NAME}.yml" \
+    config \
+    | grep -P "^\s+image:.*$" \
+    | grep -oP "(?<=image: ).*"
 }
 
 show_services_usage_part() {
