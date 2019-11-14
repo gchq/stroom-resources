@@ -55,6 +55,8 @@ main() {
   # shellcheck disable=SC2034
   STACK_NAME="<STACK_NAME>" 
 
+  check_prerequisites || exit 1
+
   display_stack_info
 }
 

@@ -700,3 +700,128 @@ wait_for_service_to_start() {
   # If we fall out here then we have nothing useful to wait for
 }
 
+check_installed_version() {
+  local default_version_regex="(?<=[\s,])\d+\.\d+\.\d+(?=[\s,])"
+
+  local cmd="$1"; shift
+  local version_arg="$1"; shift
+  local min_version="$1"; shift
+  if [ "$#" -gt 0 ]; then
+    local version_regex="$1"; shift
+  else
+    local version_regex="${default_version_regex}"
+  fi
+
+  if check_is_installed "${cmd}"; then
+    local installed_version
+    installed_version="$("${cmd}" "${version_arg}" | head -n1)"
+    installed_version="$(grep -oP "${version_regex}" <<<"${installed_version}" )"
+    echo "[$min_version]"
+    echo "[$installed_version]"
+  fi
+}
+
+check_for_gnu_version() {
+  local cmd="$1"; shift
+  local version_arg="$1"; shift
+
+  if check_is_installed "${cmd}"; then
+    local installed_version
+    installed_version="$("${cmd}" "${version_arg}" | head -n1)"
+    echo "[$min_version]"
+    echo "[$installed_version]"
+    if [[ ! "${installed_version}" =~ .*\(GNU\) ]]; then
+      echo -e "  ${RED}Error${GREEN}:" \
+        "${BLUE}${cmd}${GREEN} is installed but is not the GNU version${NC}"
+    fi
+  fi
+}
+
+check_is_installed() {
+  local commands=( "${@}" )
+  local was_found=false
+  local cmds_text=""
+
+  for cmd in "${commands[@]}"; do
+    cmds_text="${cmds_text} or ${BLUE}${cmd}${NC}"
+  done
+  # strip trailing ' or '
+  cmds_text="${cmds_text# or }"
+
+  #echo 
+  #echo -e "${GREEN}Checking if ${BLUE}${cmds_text}${GREEN} is insalled${NC}"
+
+  for cmd in "${commands[@]}"; do
+    if command -v "${cmd}" > /dev/null; then
+      #echo
+      #echo "  ${cmd} is installed"
+      was_found=true
+      break
+    fi
+  done
+
+  local return_code=0;
+  if [ "${was_found}" = false ]; then
+    echo -e "  ${RED}Error${GREEN}:" \
+      "${BLUE}${cmds_text}${GREEN} is not installed${NC}"
+    error_count=$(( error_count + 1 ))
+    return_code=1
+  fi
+}
+
+compare_versions() {
+  local cmd="$1"; shift
+  local expected_version="$1"; shift
+  local actual_version="$1"; shift
+  local whole_regex="\d+\.\d+\.\d+"
+
+  if [ "${actual_version}" != "${expected_version}" ]; then
+    # Not an exact match so see if we can parse the version number
+    if [[ "${actual_version}" =~ ${whole_regex} ]]; then
+      local major_regex="^\d+"
+      local minor_regex="(?<=\.)\d+(?=\.)"
+      local patch_regex="\d+$"
+
+      local expected_major
+      expected_major="$(grep -oP "${major_regex}" <<<"${expected_version}" )"
+      local actual_major
+      actual_major="$(grep -oP "${major_regex}" <<<"${actual_version}" )"
+      local expected_minor
+      expected_minor="$(grep -oP "${minor_regex}" <<<"${expected_version}" )"
+      local actual_minor="$(grep -oP "${minor_regex}" <<<"${actual_version}" )"
+      local expected_patch="$(grep -oP "${patch_regex}" <<<"${expected_version}" )"
+      local actual_patch="$(grep -oP "${patch_regex}" <<<"${actual_version}" )"
+    else
+      # Not a version number we recognise 
+      echo -e "  ${RED}Error${GREEN}:" \
+        "${BLUE}${cmd} ${actual_version}${GREEN} is installed," \
+        "expecting ${BLUE}${expected_version}${NC}"
+    fi
+  fi
+}
+
+check_prerequisites() {
+  local error_count=0
+  echo "Checking prerequisites"
+
+  # BSD sed/grep as used on fruit based devices differs in behaviour
+  # from GNU sed/grep
+  # need to check for grep first as we use grep in some checks
+  check_for_gnu_version "grep"
+  check_for_gnu_version "sed"
+
+  check_is_installed "bash"
+  check_is_installed "curl"
+  check_is_installed "gzip"
+  check_is_installed "jq"
+
+  check_installed_version "docker" "--version" "17.12.0"
+  check_installed_version "docker-compose" "--version" "1.21.0"
+
+  if [ "${error_count}" -eq 0 ]; then
+    echo -e "All prerequisites passed"
+  else
+    echo -e "Failed ${RED}${error_count}${NC} prerequisites"
+  fi
+  return ${error_count}
+}
