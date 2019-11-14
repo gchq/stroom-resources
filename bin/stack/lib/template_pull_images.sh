@@ -67,13 +67,8 @@ main() {
 
   local error_count=0
 
-  get_active_images_in_stack
-
-  echo "---"
-
-  get_all_images_in_stack
-
-  # Extract the image tags from the VERSIONS file.
+  # Attempt to pull the docker image for each service in the active
+  # services file
   while read -r image; do
     echo 
     echo -e "${GREEN}Pulling image ${BLUE}${image}${GREEN} from the remote repository${NC}"

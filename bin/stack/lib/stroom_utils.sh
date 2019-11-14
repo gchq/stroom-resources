@@ -47,6 +47,8 @@ get_services_in_stack() {
 }
 
 get_active_images_in_stack() {
+  # Loop over all images in the stack then output the ones whose
+  # non-namepsaced part is in the STACK_SERVICES_FILENAME file.
   while read -r image; do
     non_namespaced_tag="${image#*/}"
     #echo "checking image $image $non_namespaced_tag"
@@ -59,8 +61,10 @@ get_active_images_in_stack() {
 }
 
 get_all_images_in_stack() {
-  # Grepping yaml is not ideal, we could do with something like yq or
-  # ruby + jq to parse it properly, but that means more prereqs
+  # Grepping yaml is far from ideal, we could do with something like yq or
+  # ruby + jq to parse it properly, but that means more prereqs.
+  # However the yaml is output from docker-compose so is in a fairly
+  # consistent format.
   docker-compose \
     --project-name "${STACK_NAME}" \
     -f "$DIR/config/${STACK_NAME}.yml" \
