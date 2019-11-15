@@ -964,14 +964,11 @@ check_prerequisites() {
   # The version numbers mentioned here are mostly governed by the docker
   # compose syntax version that we use in the yml files, currently 2.4, see
   # https://docs.docker.com/compose/compose-file/compose-versioning/
-  check_installed_version_at_least "xxx" "--version" "17.12.0"
-  check_installed_version_at_least "docker" "--version" "37.12.0"
   check_installed_version_at_least "docker" "--version" "17.12.0"
   check_installed_version_at_least "docker-compose" "--version" "1.21.0"
 
   # Function returns 0/1 so need to OR with true to stop it triggering the
   # ERR trap
-  check_is_installed "ksjdksdjskd" || true
   check_is_installed "awk" || true
   check_is_installed "basename" || true
   check_is_installed "curl" || true
