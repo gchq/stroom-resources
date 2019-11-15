@@ -62,9 +62,13 @@ main() {
   # shellcheck disable=SC1090
   source "$DIR"/config/<STACK_NAME>.env
 
+  # shellcheck disable=SC2034
+  STACK_NAME="<STACK_NAME>" 
+
   local error_count=0
 
-  # Extract the image tags from the VERSIONS file.
+  # Attempt to pull the docker image for each service in the active
+  # services file
   while read -r image; do
     echo 
     echo -e "${GREEN}Pulling image ${BLUE}${image}${GREEN} from the remote repository${NC}"
@@ -73,7 +77,7 @@ main() {
         echo -e "${RED}Error${GREEN}: Unable to pull ${BLUE}${image}${GREEN}" \
           "from the remote repository${NC}" && error_count=$(( error_count + 1 )) 
       }
-  done <<< "$( get_images_in_stack )"
+  done <<< "$( get_active_images_in_stack )"
 
   echo
   if [ "${error_count}" -eq 0 ]; then
