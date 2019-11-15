@@ -18,8 +18,6 @@
 # 
 ############################################################################
 
-set -e
-
 CMD_HELP_MSG="Sets the list of services that will be used on this node."
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will

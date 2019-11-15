@@ -18,8 +18,6 @@
 # 
 ############################################################################
 
-set -e
-
 # Starts the stack, using the configuration defined in the .env file.
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will

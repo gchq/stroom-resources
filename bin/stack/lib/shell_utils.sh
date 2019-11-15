@@ -18,12 +18,52 @@
 # 
 ############################################################################
 
+# Needed for ERR trap to work
+set -o errtrace
+
+# Array to hold any temp files to clean up at the end
+# e.g. tempfiles+=( "$my_temp_file" )
+tempfiles=( )
+
+cleanup() {
+  rm -f "${tempfiles[@]}"
+}
+
+# Code adapted from https://stackoverflow.com/questions/64786/error-handling-in-bash
+unexpected_error() {
+
+  local parent_lineno="$1"
+  local message="$2"
+  local code="${3:-1}"
+  if [[ -n "$message" ]] ; then
+    echo -e "${RED}Error${NC}: Script failed on or near line" \
+      "${BLUE}${parent_lineno}${NC}:" \
+      "${BLUE}${message}${NC}; exiting with status ${BLUE}${code}${NC}"
+  else
+    echo -e "${RED}Error${NC}: Script failed on or near line" \
+      "${BLUE}${parent_lineno}${NC};" \
+      "exiting with status ${BLUE}${code}${NC}"
+  fi
+  #dump_call_stack
+  exit "${code}"
+}
+
+ctrl_c() {
+  echo -e "Script cancelled by user!"
+  exit 1
+}
+
+trap 'unexpected_error ${LINENO}' ERR
+
+trap ctrl_c SIGINT
+trap ctrl_c SIGTERM
+
+# Run cleanup on successful exit
+trap cleanup 0
+
 # Re-usable shell functions 
 
 setup_echo_colours() {
-  # Exit the script on any error
-  set -e
-
   # shellcheck disable=SC2034
   if [ "${MONOCHROME}" = true ]; then
     RED=''
@@ -51,6 +91,18 @@ err() {
 die () {
   echo -e "$@" >&2
   exit 1
+}
+
+debug() {
+  if [ "${IS_DEBUG_ENABLED}" = true ]; then
+    echo -e "${YELLOW}DEBUG${NC}: $*"
+  fi
+}
+
+debug_arguments() {
+  if [ "${IS_DEBUG_ENABLED}" = true ]; then
+    debug "${FUNCNAME[1]}() called with [$*]"
+  fi
 }
 
 test_for_bash_version_4() {
@@ -98,8 +150,8 @@ check_arg_count() {
 
   if [[ "${actual_count}" -ne "${expected_count}" ]]; then
     echo -e "${RED}ERROR${NC}:" \
-      "Incorrect number of arguments, expected ${expected_count}\n" \
-      "Arguments [$*]"
+      "Incorrect number of arguments, expected ${expected_count}." \
+      "Arguments passed: [${*:2}]"
     dump_call_stack
     exit 1
   fi
@@ -112,8 +164,8 @@ check_arg_count_at_least() {
 
   if [[ "${actual_count}" -lt "${expected_min_count}" ]]; then
     echo -e "${RED}ERROR${NC}:" \
-      "Incorrect number of arguments, expected at least ${expected_min_count}\n" \
-      "Arguments [$*]"
+      "Incorrect number of arguments, expected at least ${expected_min_count}" \
+      "Arguments passed: [${*:2}]"
     dump_call_stack
     exit 1
   fi
