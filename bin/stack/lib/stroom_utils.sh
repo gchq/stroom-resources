@@ -715,7 +715,6 @@ check_installed_version_at_least() {
   else
     local version_regex="${default_version_regex}"
   fi
-  local return_code=0
 
   if check_is_installed "${cmd}"; then
     local version_output
@@ -740,11 +739,7 @@ check_installed_version_at_least() {
       echo -e "${RED}Warn${NC}: Unable to determine installed" \
         "version of ${BLUE}${cmd}${NC}"
     fi
-  else
-    return_code=1
   fi
-
-  #return "${return_code}"
 }
 
 check_for_gnu_version() {
@@ -772,7 +767,6 @@ check_bash_version_at_least() {
   check_arg_count_at_least 1 "$@"
 
   local min_version="$1"; shift
-  #local return_code=0
 
   if check_is_installed "bash"; then
     local version_output
@@ -788,19 +782,13 @@ check_bash_version_at_least() {
 
         compare_versions "${cmd}" "${min_version}" "${installed_version}" \
           || error_count=$(( error_count + 1 ))
-          #local return_code="$?"
-          
       else
         echo -e "${RED}Error${NC}: Unable to determine installed version of bash"
       fi
     else
       echo -e "${RED}Error${NC}: Unable to determine installed version of bash"
     fi
-  #else
-    #return_code=1
   fi
-
-  #return "${return_code}"
 }
 
 check_is_installed() {
@@ -816,24 +804,22 @@ check_is_installed() {
   # strip trailing ' or '
   cmds_text="${cmds_text# or }"
 
-  #echo 
-  #echo -e "${GREEN}Checking if ${BLUE}${cmds_text}${GREEN} is insalled${NC}"
-
   for cmd in "${commands[@]}"; do
     if command -v "${cmd}" > /dev/null; then
-      #debug "  ${cmd} is installed"
+      debug "${cmd} is installed"
       was_found=true
       break
     fi
   done
 
-  #local return_code=0;
+  local return_code=0;
   if [ "${was_found}" = false ]; then
     echo -e "  ${RED}Error${GREEN}:" \
       "${BLUE}${cmds_text}${GREEN} is not installed${NC}"
     error_count=$(( error_count + 1 ))
-    #return_code=1
+    return_code=1
   fi
+  return ${return_code}
 }
 
 compare_versions() {
@@ -955,25 +941,30 @@ check_prerequisites() {
   # The version numbers mentioned here are mostly governed by the docker
   # compose syntax version that we use in the yml files, currently 2.4, see
   # https://docs.docker.com/compose/compose-file/compose-versioning/
+  check_installed_version_at_least "xxx" "--version" "17.12.0"
+  check_installed_version_at_least "docker" "--version" "37.12.0"
   check_installed_version_at_least "docker" "--version" "17.12.0"
   check_installed_version_at_least "docker-compose" "--version" "1.21.0"
 
-  check_is_installed "awk"
-  check_is_installed "basename"
-  check_is_installed "curl"
-  check_is_installed "cut"
-  check_is_installed "gzip"
-  check_is_installed "jq"
+  # Function returns 0/1 so need to OR with true to stop it triggering the
+  # ERR trap
+  check_is_installed "ksjdksdjskd" || true
+  check_is_installed "awk" || true
+  check_is_installed "basename" || true
+  check_is_installed "curl" || true
+  check_is_installed "cut" || true
+  check_is_installed "gzip" || true
+  check_is_installed "jq" || true
 
   if [ "$(uname)" == "Darwin" ]; then
     # Fruit based devices only
-    check_is_installed "ifconfig"
+    check_is_installed "ifconfig" || true
   else
-    check_is_installed "ip"
+    check_is_installed "ip" || true
   fi
 
   if [ "${error_count}" -gt 0 ]; then
-    echo -e "Failed ${error_count} prerequisites"
+    echo -e "Failed ${error_count} prerequisite(s)"
   fi
   return ${error_count}
 }

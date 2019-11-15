@@ -130,3 +130,6 @@ if [ $# -ne ${required_arg_count} ]; then
 fi
 
 main "$@"
+
+# Reset trap status
+trap - EXIT ERR

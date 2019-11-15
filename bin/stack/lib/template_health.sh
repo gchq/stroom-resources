@@ -63,3 +63,6 @@ main() {
 }
 
 main "${@}"
+
+# Reset trap status
+trap - EXIT ERR
