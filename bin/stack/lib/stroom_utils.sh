@@ -742,6 +742,7 @@ check_installed_version_at_least() {
   if check_is_installed "${cmd}"; then
     local version_output
     version_output="$("${cmd}" "${version_arg}" | head -n1)"
+    echo "version_output: [${version_output}]"
 
     if [ -n "${version_output}" ]; then
       local installed_version
