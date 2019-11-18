@@ -17,8 +17,13 @@ sudo: required
 #   # We can't test stroom_services as it relies on a database that is not there
 #   #- STACK_NAME=stroom_services
 
-services:
-  - docker
+#services:
+  #- docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
 
 before_script: ./travis.before.sh
 
