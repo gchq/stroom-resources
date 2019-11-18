@@ -17,9 +17,8 @@ sudo: required
 #   # We can't test stroom_services as it relies on a database that is not there
 #   #- STACK_NAME=stroom_services
 
-#services:
-  #- docker
-
+# Ensure we have an up to date version of docker.  Using services:\n docker
+# gives us an old version of docker.
 addons:
   apt:
     packages:
