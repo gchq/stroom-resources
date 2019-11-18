@@ -727,7 +727,7 @@ wait_for_service_to_start() {
 
 check_installed_version_at_least() {
   debug_arguments "$@"
-  local default_version_regex="(?<=[\s,])\d+\.\d+\.\d+(?=[\s,])"
+  local default_version_regex="\d+\.\d+\.\d+"
   check_arg_count_at_least 3 "$@"
 
   local cmd="$1"; shift
@@ -742,7 +742,7 @@ check_installed_version_at_least() {
   if check_is_installed "${cmd}"; then
     local version_output
     version_output="$("${cmd}" "${version_arg}" | head -n1)"
-    echo "version_output: [${version_output}]"
+    debug "version_output: [${version_output}]"
 
     if [ -n "${version_output}" ]; then
       local installed_version
