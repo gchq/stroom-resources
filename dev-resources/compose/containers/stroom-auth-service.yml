@@ -63,8 +63,7 @@ services:
       timeout: 5s
       retries: 3
     volumes:
-      # TODO: changed this from ro to rw because the stroom-auth-service Dockerfile needs to chown and ro was causing it to fail
-      - ${STROOM_AUTH_SERVICE_VOLUME_CONFIG:-../../volumes/stroom-auth-service/config}:/stroom-auth-service/config:rw
+      - ${STROOM_AUTH_SERVICE_VOLUME_CONFIG:-../../volumes/stroom-auth-service/config}:/stroom-auth-service/config:ro
       - type: volume
         source: stroom-auth-service_logs
         target: /stroom-auth-service/logs
