@@ -187,6 +187,8 @@ create_client_certs() {
     echo
     echo -e "${GREEN}Creating client certificate${NC}"
     openssl x509 \
+        -extfile client.ssl.conf \
+        -extensions x509_ext \
         -req \
         -in client/client.csr \
         -CA certificate-authority/ca.pem.crt \
