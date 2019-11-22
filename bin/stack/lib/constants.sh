@@ -20,6 +20,8 @@
 
 # shellcheck disable=SC2034
 {
+  MONOCHROME=false
+  QUIET_MODE=false
   STACK_SERVICES_FILENAME="ACTIVE_SERVICES.txt"
   ALL_SERVICES_FILENAME="ALL_SERVICES.txt"
 
@@ -36,7 +38,7 @@
     "stroom-proxy-remote"
     "stroom-proxy-local"
     "nginx"
-    "stroom-auth-ui"
+    "stroom-ui"
     "stroom-auth-service"
     "stroom"
     "stroom-stats"
