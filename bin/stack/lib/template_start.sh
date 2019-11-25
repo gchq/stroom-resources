@@ -46,28 +46,6 @@ source "$DIR"/config/<STACK_NAME>.env
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>" 
 
-check_installed_binaries() {
-  # The version numbers mentioned here are mostly governed by the docker
-  # compose syntax version that we use in the yml files, currently 2.4, see
-  # https://docs.docker.com/compose/compose-file/compose-versioning/
-
-  if ! command -v docker 1>/dev/null; then 
-    echo -e "${RED}ERROR${NC}: Docker CE is not installed!"
-    echo -e "See ${BLUE}https://docs.docker.com/install/#supported-platforms${NC}" \
-      "for details on how to install it"
-    echo -e "Version ${BLUE}17.12.0${NC} or higher is required"
-    exit 1
-  fi
-
-  if ! command -v docker-compose 1>/dev/null; then 
-    echo -e "${RED}ERROR${NC}: Docker Compose is not installed!"
-    echo -e "See ${BLUE}https://docs.docker.com/compose/install/${NC} for" \
-      "details on how to install it"
-    echo -e "Version ${BLUE}1.23.1${NC} or higher is required"
-    exit 1
-  fi
-}
-
 main() {
   local wait_for_health_checks=true
   # leading colon means silent error reporting by getopts
@@ -97,7 +75,7 @@ main() {
 
   setup_echo_colours
 
-  check_installed_binaries
+  check_prerequisites || exit 1
 
   start_stack "$@"
 
@@ -113,3 +91,6 @@ main() {
 }
 
 main "$@"
+
+# Reset trap status
+trap - EXIT ERR

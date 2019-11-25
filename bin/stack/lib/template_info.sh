@@ -55,7 +55,13 @@ main() {
   # shellcheck disable=SC2034
   STACK_NAME="<STACK_NAME>" 
 
+  # Don't exit if any fail
+  check_prerequisites || true
+
   display_stack_info
 }
 
 main "${@}"
+
+# Reset trap status
+trap - EXIT ERR

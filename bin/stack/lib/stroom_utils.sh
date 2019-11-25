@@ -150,6 +150,7 @@ get_config_env_var() {
     )"
     var_value="${env_var_name_value#*:}"
   fi
+  # return the value via stdout
   echo "${var_value}"
 }
 
@@ -251,6 +252,7 @@ check_container_health() {
 }
 
 check_service_health() {
+  debug_arguments "$@"
   if [ $# -ne 4 ]; then
     echo -e "${RED}ERROR${NC}:" \
       "Invalid arguments. Usage: ${BLUE}health.sh HOST PORT PATH${NC},\n" \
@@ -279,7 +281,7 @@ check_service_health() {
       -w "%{http_code}" \
       "${health_check_url}"\
   )
-  #echo "http_status_code: $http_status_code"
+  debug "http_status_code: $http_status_code"
 
   # First hit the url to see if it is there
   if [ "x501" = "x${http_status_code}" ]; then
@@ -296,7 +298,7 @@ check_service_health() {
         curl -s "${health_check_url}" | 
       jq '[to_entries[] | {key: .key, value: .value.healthy}] | map(select(.value == false)) | length')
 
-      #echo "unhealthy_count: $unhealthy_count"
+      debug "unhealthy_count: $unhealthy_count"
       if [ "${unhealthy_count}" -eq 0 ]; then
         echo_healthy
       else
@@ -722,3 +724,267 @@ wait_for_service_to_start() {
   # If we fall out here then we have nothing useful to wait for
 }
 
+check_installed_version_at_least() {
+  debug_arguments "$@"
+  local default_version_regex="\d+\.\d+\.\d+"
+  check_arg_count_at_least 3 "$@"
+
+  local cmd="$1"; shift
+  local version_arg="$1"; shift
+  local min_version="$1"; shift
+  if [ "$#" -gt 0 ]; then
+    local version_regex="$1"; shift
+  else
+    local version_regex="${default_version_regex}"
+  fi
+
+  if check_is_installed "${cmd}"; then
+    local version_output
+    version_output="$("${cmd}" "${version_arg}" | head -n1)"
+    debug "version_output: [${version_output}]"
+
+    if [ -n "${version_output}" ]; then
+      local installed_version
+      installed_version="$( \
+        grep -oP "${version_regex}" <<<"${version_output}" || true)" 
+
+      if [ -n "${installed_version}" ]; then
+        debug "min_version: [$min_version], installed_version: [$installed_version]"
+
+        compare_versions "${cmd}" "${min_version}" "${installed_version}"
+        local return_code="$?"
+        error_count=$(( error_count + return_code ))
+      else
+        echo -e "${RED}Warn${NC}: Unable to determine installed" \
+          "version of ${BLUE}${cmd}${NC}"
+      fi
+    else
+      echo -e "${RED}Warn${NC}: Unable to determine installed" \
+        "version of ${BLUE}${cmd}${NC}"
+    fi
+  fi
+}
+
+check_for_gnu_version() {
+  debug_arguments "$@"
+  check_arg_count 2 "$@"
+  local cmd="$1"; shift
+  local version_arg="$1"; shift
+
+  if check_is_installed "${cmd}"; then
+    local installed_version
+    installed_version="$("${cmd}" "${version_arg}" | head -n1)"
+    debug "installed_version: [$installed_version]"
+
+    if [[ ! "${installed_version}" =~ \(GNU.*?\) ]]; then
+      echo -e "  ${RED}Error${GREEN}:" \
+        "${BLUE}${cmd}${GREEN} is installed but is not the GNU version${NC}"
+      error_count=$(( error_count + 1 ))
+    fi
+  fi
+}
+
+check_bash_version_at_least() {
+  debug_arguments "$@"
+  local version_regex="\d+\.\d+\.\d"
+  check_arg_count_at_least 1 "$@"
+
+  local min_version="$1"; shift
+
+  if check_is_installed "bash"; then
+    local version_output
+    version_output="${BASH_VERSION}"
+
+    if [ -n "${version_output}" ]; then
+      local installed_version
+      installed_version="$( \
+        grep -oP "${version_regex}" <<<"${version_output}" || true)" 
+
+      if [ -n "${installed_version}" ]; then
+        debug "min_version: [$min_version], installed_version: [$installed_version]"
+
+        compare_versions "${cmd}" "${min_version}" "${installed_version}" \
+          || error_count=$(( error_count + 1 ))
+      else
+        echo -e "${RED}Error${NC}: Unable to determine installed version of bash"
+      fi
+    else
+      echo -e "${RED}Error${NC}: Unable to determine installed version of bash"
+    fi
+  fi
+}
+
+check_is_installed() {
+  debug_arguments "$@"
+  check_arg_count_at_least 1 "$@"
+  local commands=( "${@}" )
+  local was_found=false
+  local cmds_text=""
+
+  for cmd in "${commands[@]}"; do
+    cmds_text="${cmds_text} or ${BLUE}${cmd}${NC}"
+  done
+  # strip trailing ' or '
+  cmds_text="${cmds_text# or }"
+
+  for cmd in "${commands[@]}"; do
+    if command -v "${cmd}" > /dev/null; then
+      debug "${cmd} is installed"
+      was_found=true
+      break
+    fi
+  done
+
+  local return_code=0;
+  if [ "${was_found}" = false ]; then
+    echo -e "  ${RED}Error${GREEN}:" \
+      "${BLUE}${cmds_text}${GREEN} is not installed${NC}"
+    error_count=$(( error_count + 1 ))
+    return_code=1
+  fi
+  return ${return_code}
+}
+
+compare_versions() {
+  debug_arguments "$@"
+  check_arg_count 3 "$@"
+  local cmd="$1"; shift
+  local expected_version="$1"; shift
+  local actual_version="$1"; shift
+  local whole_regex='[0-9]+\.[0-9]+\.[0-9]+'
+  local return_code=0
+  local is_verion_too_old=false
+
+  if [ "${expected_version}" != "${actual_version}" ]; then
+    # Not an exact match so see if we can parse the version number
+    if [[ "${actual_version}" =~ ${whole_regex} ]]; then
+      local major_regex='^[0-9]+'
+      local minor_regex='(?<=\.)[0-9]+(?=\.)'
+      local patch_regex='[0-9]+$'
+
+      # $((10#$x)) is basically doing convert from base10 to base10 to
+      # strip leading zeros
+      local expected_major
+      expected_major="$(grep -oP "${major_regex}" <<<"${expected_version}" )"
+      expected_major=$((10#$expected_major))
+
+      local actual_major
+      actual_major="$(grep -oP "${major_regex}" <<<"${actual_version}" )"
+      actual_major=$((10#$actual_major))
+
+      debug "major [$expected_major] [$actual_major]"
+
+      if [ "${actual_major}" -lt "${expected_major}" ]; then
+        is_verion_too_old=true
+      elif [ "${actual_major}" -eq "${expected_major}" ]; then
+        # Now check minor as major matches
+        local expected_minor
+        expected_minor="$(grep -oP "${minor_regex}" <<<"${expected_version}" )"
+        expected_minor=$((10#$expected_minor))
+        local actual_minor
+        actual_minor="$(grep -oP "${minor_regex}" <<<"${actual_version}" )"
+        actual_minor=$((10#$actual_minor))
+        debug "minor [$expected_minor] [$actual_minor]"
+
+        if [ "${actual_minor}" -lt "${expected_minor}" ]; then
+          is_verion_too_old=true
+        elif [ "${actual_minor}" -eq "${expected_minor}" ]; then
+          # Now check patch as minor matches
+          local expected_patch
+          expected_patch="$(grep -oP "${patch_regex}" <<<"${expected_version}" )"
+          expected_patch=$((10#$expected_patch))
+          local actual_patch
+          actual_patch="$(grep -oP "${patch_regex}" <<<"${actual_version}" )"
+          actual_patch=$((10#$actual_patch))
+          debug "patch [$expected_patch] [$actual_patch]"
+
+          if [ "${actual_patch}" -lt "${expected_patch}" ]; then
+            is_verion_too_old=true
+          fi
+        fi
+      fi
+    else
+      # Not a version number we recognise, so it may be ok, but we don't know
+      is_verion_too_old=true
+    fi
+
+    if [ "${is_verion_too_old}" = true ]; then
+      return_code=1
+      echo -e "  ${RED}Error${GREEN}:" \
+        "${BLUE}${cmd}${GREEN} version ${BLUE}${actual_version}${GREEN}" \
+        "is installed, expecting at least ${BLUE}${expected_version}${NC}"
+    fi
+  fi
+  return "${return_code}"
+}
+
+# Function taken from https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+vercomp() {
+    if [[ "$1" == "$2" ]]; then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 2
+        fi
+    done
+    return 0
+}
+
+check_prerequisites() {
+  local error_count=0
+  echo -e "Checking prerequisites"
+
+  # BSD sed/grep as used on fruit based devices differs in behaviour
+  # from GNU sed/grep
+  # need to check for grep first as we use grep in some checks
+  check_for_gnu_version "grep" "-V"
+  check_for_gnu_version "sed" "--version"
+
+  check_bash_version_at_least "4.0.0"
+
+  # The version numbers mentioned here are mostly governed by the docker
+  # compose syntax version that we use in the yml files, currently 2.4, see
+  # https://docs.docker.com/compose/compose-file/compose-versioning/
+  check_installed_version_at_least "docker" "--version" "17.12.0"
+  check_installed_version_at_least "docker-compose" "--version" "1.21.0"
+
+  # Function returns 0/1 so need to OR with true to stop it triggering the
+  # ERR trap
+  check_is_installed "awk" || true
+  check_is_installed "basename" || true
+  check_is_installed "curl" || true
+  check_is_installed "cut" || true
+  check_is_installed "gzip" || true
+  check_is_installed "jq" || true
+
+  if [ "$(uname)" == "Darwin" ]; then
+    # Fruit based devices only
+    check_is_installed "ifconfig" || true
+  else
+    check_is_installed "ip" || true
+  fi
+
+  if [ "${error_count}" -gt 0 ]; then
+    echo -e "Failed ${error_count} prerequisite(s)"
+  fi
+  return ${error_count}
+}
