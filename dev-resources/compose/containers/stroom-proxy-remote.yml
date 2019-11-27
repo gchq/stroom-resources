@@ -4,7 +4,7 @@ services:
 
   stroom-proxy-remote:
     container_name: stroom-proxy-remote
-    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
+    image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v7-LATEST}"
     environment:
       #- SYNC_API_KEY=${STROOM_PROXY_REMOTE_SYNC_API_KEY:-http://stroom:8080/api/dictionary/v1}
       #- CONTENT_SYNC_ENABLED=${STROOM_PROXY_REMOTE_CONTENT_SYNC_ENABLED:-false}
