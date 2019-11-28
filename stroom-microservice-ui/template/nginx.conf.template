@@ -32,8 +32,9 @@ http {
 
         # Enable Content Security Policy (CSP) so the browser only downloads content 
         # from our domain. 
-        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'"; 
-
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'";
+        # Prevent mime based attacks
+        add_header X-Content-Type-Options "nosniff";
 
         location / {
             try_files $uri /index.html;
