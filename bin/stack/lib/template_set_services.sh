@@ -105,6 +105,9 @@ main() {
   done
   shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
+  # Setup colours now we know monochrome state
+  setup_echo_colours
+
   if [ "$#" -eq 0 ]; then
       die "${RED}Error${NC}: Must supply at least one service"
   fi

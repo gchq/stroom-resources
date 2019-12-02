@@ -50,7 +50,7 @@ main() {
       *)
         echo -e "Error: Unknown argument: '-${OPTARG}'" >&2
         echo
-        showUsage
+        show_default_usage "${cmd_help_args}" "${cmd_help_msg}" "${cmd_help_options}"
         exit 1
         ;;
     esac
