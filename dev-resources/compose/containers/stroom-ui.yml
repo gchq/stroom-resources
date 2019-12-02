@@ -6,7 +6,7 @@ services:
     image: "${STROOM_UI_DOCKER_REPO:-gchq/stroom-ui}:${STROOM_UI_TAG:-v7.0-LATEST}"
     environment:
       - APP_ADVERTISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}
-      - APP_CLIENT_ID=stroom-ui
+      - APP_CLIENT_ID=PZnJr8kHRKqnlJRQThSIi
       - APP_STROOM_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api
       - APP_AUTH_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
       - APP_STROOM_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/stroom
