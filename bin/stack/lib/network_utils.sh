@@ -27,7 +27,21 @@ determine_host_address() {
     # Code required to find IP address is different in MacOS
     ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk 'NR==1{print $2}')
   else
-    ip=$(ip route get 1 |awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
+    local ip_binary
+    # If ip is not on the path (as seems to be the case with ansible) then
+    # try using /sbin instead.
+    if command -v ip > /dev/null; then
+      ip_binary="ip"
+    elif command -v /sbin/ip > /dev/null; then
+      ip_binary="/sbin/ip"
+    else
+      echo
+      echo -e "${RED}ERROR${NC} Unable to locate ${BLUE}ip${NC} command." >&2
+      exit 1
+    fi
+    ip=$( \
+      "${ip_binary}" route get 1 \
+      | awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
   fi
 
   if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
