@@ -1,36 +1,36 @@
 version: '2.4'
 
-services: 
+services:
 
   stroom-proxy-local:
     container_name: stroom-proxy-local
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v6-LATEST}"
     environment:
-        #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-http://stroom:8080/api/dictionary/v1}
+      #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-http://stroom:8080/api/dictionary/v1}
       #- CONTENT_SYNC_ENABLED=${STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED:-false}
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
       - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-}
       - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10766,suspend=n }
-        # Ruleset functionality not ready for use in v6
+      # Ruleset functionality not ready for use in v6
       #- RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
       - STORING_ENABLED=${STROOM_PROXY_LOCAL_STORING_ENABLED:-true}
       - STROOM_PROXY_ADMIN_PORT=8091
       - STROOM_PROXY_APP_PORT=8090
       - STROOM_PROXY_DEBUG_PORT=10766
         # Ruleset functionality not ready for use in v6
-      #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-}
+        #- SYNC_API_KEY=${STROOM_PROXY_LOCAL_SYNC_API_KEY:-}
         # TODO These two upstream urls should be going via nginx, but in dev I had issues getting the ssl to work
-      #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-http://stroom:8080/api/dictionary/v1}
+        #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-http://stroom:8080/api/dictionary/v1}
         #- UPSTREAM_DICTIONARY_URL=${STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL:-https://nginx/dictionaryService/v1}
-      #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
+        #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-http://stroom:8080/api/ruleset/v1}
         #- UPSTREAM_RULE_URL=${STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL:-https://nginx/rulesetService/v1}
-         #This should really be https://$NGINX_ADVERTISED_HOST/feedStatusService/v1 but with our self signed certs and using IPs we will get a SAN list mis-match.  The 'nginx' host will only work inside docker.
+      #This should really be https://$NGINX_ADVERTISED_HOST/feedStatusService/v1 but with our self signed certs and using IPs we will get a SAN list mis-match.  The 'nginx' host will only work inside docker.
       - FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-https://nginx/api/feedStatus/v1}
         #- FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-http://$HOST:8080/api/feedStatus/v1}
-        # This is a copy of STROOM_SECURITY_API_TOKEN to make feed status checking work in development. A different token should be used in operational deployments.
-      - FEED_STATUS_API_KEY=${STROOM_PROXY_LOCAL_FEED_STATUS_API_KEY:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsInNpZCI6bnVsbH0.k0Ssb43GCdTunAMeM26fIulYKNUuPUaJJk6GxDmzCPb7kVPwEtdfBSrtwazfEFM97dnmvURkLqs-DAZTXhhf-0VqQx4hkwcCHf83eVptWTy-lufIhQo6FCM223c9ONIhl6CPqknWh9Bo3vFNrNJoKz5Zw2T_iCcQhi2WGjd_tjTG7VbibTIpH3lPQDw1IBD2nMsEqACJSk3IaFe0GYcrAEMwsjj3sjAwByMbj5DJvo_DJbAuzUwS5IVpASEENen5Xd3wALLirrraUfED1OY0G56Ttcwl3uQ2s-grZXBM4JCiIurlWR5iNtNwoPUsZsyMju4FMSXt3Ur1NIpD7XKJlg}
+      # This is a copy of STROOM_SECURITY_API_TOKEN to make feed status checking work in development. A different token should be used in operational deployments.
+      - FEED_STATUS_API_KEY=${STROOM_PROXY_LOCAL_FEED_STATUS_API_KEY:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsImF1ZCI6IlBabkpyOGtIUktxbmxKUlFUaFNJIn0.qT5jdPWBpN9me0L3OqUT0VFT2mvVX9mCp0gPFyTVg8DkFTPLLYIuXjOslvrllJDBbqefEtqS9OwQs3RmRnZxror676stTP6JHN76YqJWj2yJYyJGuggbXjZnfTiZGO3SOxl5FP4nmRRvPxA3XqV9kippKBpHfqm5RuTpFTU8uses2iaHFm7lY4zXmKDmwVizXybBQBtpxrBNQkeQjQyg7UFkpsRO8-PmIdbTldRhGlud5VpntwI1_ahwOzK-einUJQOWrcOBmXAMPRYBI6tSLT1xS_c5XpFX1Rxoj3FGjI-Myqp_2Nt_lZuQ3h-0Qh8WkZMnWQ76G7CKawXzRAwd7Q}
       - STROOM_PROXY_CLIENT_KEYSTORE_PASSWORD=${STROOM_PROXY_LOCAL_CLIENT_KEYSTORE_PASSWORD:-password}
       - STROOM_PROXY_CLIENT_KEYSTORE_PATH=${STROOM_PROXY_LOCAL_CLIENT_KEYSTORE_PATH:-/stroom-proxy/certs/client.jks}
       - STROOM_PROXY_CLIENT_KEYSTORE_TYPE=${STROOM_PROXY_LOCAL_CLIENT_KEYSTORE_TYPE:-JKS}
@@ -44,7 +44,7 @@ services:
       - JERSEY_MAX_CONNECTIONS_PER_ROUTE=${STROOM_PROXY_LOCAL_JERSEY_MAX_CONNECTIONS_PER_ROUTE:-1024}
       - JERSEY_KEEP_ALIVE=${STROOM_PROXY_LOCAL_JERSEY_KEEP_ALIVE:-0ms}
       - JERSEY_RETRIES=${STROOM_PROXY_LOCAL_JERSEY_RETRIES:-0}
-        # This should really be true but as we are using IPs in dev we need it set to false
+      # This should really be true but as we are using IPs in dev we need it set to false
       - JERSEY_VERIFY_HOSTNAME=${STROOM_PROXY_LOCAL_JERSEY_VERIFY_HOSTNAME:-false}
       - JERSEY_TRUST_SELF_SIGNED=${STROOM_PROXY_LOCAL_JERSEY_TRUST_SELF_SIGNED:-false}
     ports:
@@ -53,7 +53,7 @@ services:
       - "${STROOM_PROXY_LOCAL_DEBUG_PORT:-10766}:10766"
     healthcheck:
       test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:8091/proxyAdmin/healthcheck || exit 1
-      start_period: 30s 
+      start_period: 30s
       interval: 1m
       timeout: 5s
       retries: 3
