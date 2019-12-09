@@ -1,0 +1,6 @@
+#Defines all the named volumes for the kafka service
+version: '2.4'
+
+volumes:
+  kafka_data:
+  kafka_logs:

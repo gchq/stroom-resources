@@ -1,0 +1,6 @@
+#Defines all the named volumes for the stroom-all-dbs service
+version: '2.4'
+
+volumes:
+  stroom-all-dbs_data:
+  stroom-all-dbs_logs:

@@ -63,6 +63,9 @@ services:
       - type: volume
         source: stroom-proxy-local_content
         target: /stroom-proxy/content
+        # This volume is shared with stroom. If we ever want to run stroom without
+        # a local proxy then we need to move this out into in override yml as is done with
+        # stroom-log-sender
       - type: volume
         source: stroom-proxy-local_logs
         target: /stroom-proxy/logs

@@ -1,0 +1,7 @@
+#Defines all the named volumes for the nginx service
+version: '2.4'
+
+volumes:
+  nginx_logs:
+  nginx_logrotate:
+

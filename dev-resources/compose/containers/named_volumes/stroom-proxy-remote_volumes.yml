@@ -1,0 +1,8 @@
+#Defines all the named volumes for the stroom-proxy-remote service
+version: '2.4'
+
+volumes:
+  stroom-proxy-remote_content:
+  stroom-proxy-remote_logs:
+  stroom-proxy-remote_repo:
+
