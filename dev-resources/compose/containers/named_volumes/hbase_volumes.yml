@@ -1,6 +1,0 @@
-#Defines all the named volumes for the hbase service
-version: '2.4'
-
-volumes:
-  hbase_data:
-  hbase_logs:

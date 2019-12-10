@@ -1,5 +1,0 @@
-version: '2.4'
-
-# This empty file allows us to use this as the first file in the list of
-# files passed to docker-compose so that all otehr files are releative to
-# this root file.

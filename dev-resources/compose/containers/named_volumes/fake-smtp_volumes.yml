@@ -1,5 +1,0 @@
-#Defines all the named volumes for the fake-smtp service
-version: '2.4'
-
-volumes:
-  fake-smtp_mail:

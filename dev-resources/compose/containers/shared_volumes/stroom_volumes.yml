@@ -1,7 +1,5 @@
 #Defines all the named volumes for the stroom service
 version: '2.4'
 
-volumes:
-  stroom_logs:
-  stroom_output:
-  stroom_volumes:
+#volumes:
+  #stroom_logs:

@@ -1,5 +1,5 @@
 #Defines all the named volumes for the zookeeper service
 version: '2.4'
 
-volumes:
-  zookeeper_data:
+#volumes:
+  #zookeeper_data:
