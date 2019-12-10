@@ -54,15 +54,6 @@ create_stack_from_services() {
   local target_file
   local file_counter=0
 
-  # Add any named volume files first (if the service has one)
-  #for service in "${SERVICES[@]}"; do
-    #target_file="${SHARED_VOLUMES_DIR}/${service}${SHARED_VOLUMES_SUFFIX}.yml"
-
-    #if [ -f "${target_file}" ]; then
-      #add_yaml_file_to_stack "${target_file}"
-    #fi
-  #done
-
   # Add the actual service files
   for service in "${SERVICES[@]}"; do
     target_file="${CONTAINERS_DIR}/${service}.yml"
@@ -102,10 +93,7 @@ main() {
 
   mkdir -p "$WORKING_DIRECTORY"
   local -r CONTAINERS_DIR="../compose/containers"
-  local -r SHARED_VOLUMES_DIR="${CONTAINERS_DIR}/shared_volumes"
   local -r NAMED_VOLUME_MOUNTS_DIR="${CONTAINERS_DIR}/named_volume_mounts"
-
-  local -r SHARED_VOLUMES_SUFFIX="_volumes"
 
   create_stack_from_services "${SERVICES[@]}"
 }

@@ -1,8 +1,0 @@
-#Defines all the named volumes for the stroom-proxy-local service
-version: '2.4'
-
-#volumes:
-  #stroom-proxy-local_content:
-  #stroom-proxy-local_logs:
-  #stroom-proxy-local_repo:
-
