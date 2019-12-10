@@ -66,9 +66,7 @@ main() {
   determing_docker_host_details
 
   #shellcheck disable=SC2094
-  docker-compose \
-    --project-name <STACK_NAME> \
-    -f "$DIR"/config/<STACK_NAME>.yml \
+  run_docker_compose_cmd \
     config
 }
 

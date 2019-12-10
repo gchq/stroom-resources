@@ -12,11 +12,10 @@ source lib/shell_utils.sh
 source lib/network_utils.sh
 source lib/constants.sh
 
-# Creates the blank env file and sets some standard header text
+# Creates the blank env file
 create_config() {
   rm -f "${OUTPUT_ENV_FILE}"
   touch "${OUTPUT_ENV_FILE}"
-  chmod +x "${OUTPUT_ENV_FILE}"
 }
 
 # Write a header block to the env file
@@ -74,10 +73,14 @@ replace_in_yaml() {
 
   #echo "${regex}"
 
-  if grep -E --silent "${regex}" "${INPUT_YAML_FILE}"; then
-    echo -e "  Overriding the value of ${YELLOW}${var_name}${NC} to ${BLUE}${replacement_value}${NC}"
-    sed -i'' -E "s|${regex}|${replacement_value}|g" "${INPUT_YAML_FILE}"
-  fi
+  # TODO look in each file for the regex
+  for yaml_file in "${WORKING_DIRECTORY}"/*.yml; do
+    if grep -E --silent "${regex}" "${yaml_file}"; then
+      echo -e "  Overriding the value of ${YELLOW}${var_name}${NC} to" \
+        "${BLUE}${replacement_value}${NC} in ${BLUE}${yaml_file}${NC}"
+      sed -i'' -E "s|${regex}|${replacement_value}|g" "${yaml_file}"
+    fi
+  done
 }
 
 # Given the path to a file of environemnt variables of the form
@@ -105,7 +108,8 @@ apply_overrides_to_yaml() {
       # overriding then having the env var in the env file will have no
       # effect.
       if element_in "${var_name}" "${env_vars_whitelist[@]}"; then
-        die "${RED}ERROR${NC}: Variable ${YELLOW}${var_name}${NC} cannot be both white-listed and overridden"
+        die "${RED}ERROR${NC}: Variable ${YELLOW}${var_name}${NC} cannot" \
+          "be both white-listed and overridden"
       fi
 
       # We have sourced the container version file so use bash indirect expansion
@@ -158,23 +162,22 @@ add_env_vars() {
     local use_whitelist=false
   fi
 
-  # Scan the yml file to extract the default value to build an env file
+  # Scan all the yml files to extract the default value to build an env file
   # In the yaml there are lines like:
   # - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}:${STROOM_DB_PORT:-3307}/stroom
   # and from lines like those we want to extract/transform to
   # STROOM_DB_HOST="$HOST_IP"
   # STROOM_DB_PORT="3307"
   all_env_vars=$( \
-    # Bit of a fudge to ignore the echo lines in stroom-all-dbs.yml
-    grep -v "\s* echoXXXXX" "${INPUT_YAML_FILE}" |
-      # ignore commented lines
-      grep -v '^\s*#' |
+    # ignore commented lines
+    grep --no-filename -v '^\s*#' "${WORKING_DIRECTORY}"/*.yml |
       # Extracts the params
       grep -Po "(?<=\\$\\{).*?(?=\\})" |
       # Replaces ':-' with '='
       sed "s/:-/=/g" |
       uniq |
-      sort )
+      sort \
+  )
 
   # associative array to hold var_name => count
   declare -A usage_counters
@@ -275,14 +278,14 @@ add_env_vars() {
   # The yaml file contains stuff like "${STROOM_TAG:-v6.0-LATEST}", 
   # i.e. development docker tags, so we need to replace them with fixed versions 
   # from CONTAINER_VERSIONS_FILE. 
-  echo -e "${GREEN}Setting container versions in YAML file${NC}"
+  echo -e "${GREEN}Setting container versions in YAML files${NC}"
   apply_overrides_to_yaml "${CONTAINER_VERSIONS_FILE}"
 
   # If there is a override file then replace any matching env
   # vars found in the OUTPUT_ENV_FILE with the values from the override file.
   # This allows a stack to differ slightly from the defaults taken from the yml
   if [ -f "${OVERRIDE_FILE}" ]; then
-    echo -e "${GREEN}Applying variable overrides to YAML file${NC}"
+    echo -e "${GREEN}Applying variable overrides to YAML files${NC}"
     apply_overrides_to_yaml "${OVERRIDE_FILE}"
   fi
 }
@@ -297,7 +300,12 @@ create_versions_file() {
     # shellcheck disable=SC1090
     source "${OUTPUT_ENV_FILE}"
 
-    docker-compose -f "${INPUT_YAML_FILE}" config \
+    compose_file_args=()
+    for yaml_file in "${WORKING_DIRECTORY}"/*.yml; do
+      compose_file_args+=( "-f" "${yaml_file}" )
+    done
+
+    docker-compose "${compose_file_args[@]}" config \
       | ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))' \
       | jq -r '.services[] | .container_name + "|" + .image' > "${STACK_SERVICES_FILE}"
   )
@@ -332,17 +340,13 @@ main() {
   local -r STACK_DEFINITIONS_DIR="stack_definitions/${BUILD_STACK_NAME}"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}/config"
   mkdir -p "${WORKING_DIRECTORY}"
-  local -r INPUT_YAML_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
   local -r OUTPUT_ENV_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
   local -r OVERRIDE_FILE="${STACK_DEFINITIONS_DIR}/overrides.env"
   local -r WHITELIST_FILE="${STACK_DEFINITIONS_DIR}/env_vars_whitelist.txt"
   local -r STACK_SERVICES_FILE="${WORKING_DIRECTORY}/../${STACK_SERVICES_FILENAME}"
   local -r ALL_SERVICES_FILE="${WORKING_DIRECTORY}/../${ALL_SERVICES_FILENAME}"
-  echo ${STACK_SERVICES_FILENAME}
-  echo ${ALL_SERVICES_FILENAME}
-
-  echo -e "${GREEN}Setting stack name in yaml file${NC}"
-  replace_in_yaml "STACK_NAME" "${BUILD_STACK_NAME}"
+  #echo "${STACK_SERVICES_FILENAME}"
+  #echo "${ALL_SERVICES_FILENAME}"
 
   create_config
   add_env_vars
