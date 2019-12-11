@@ -36,6 +36,7 @@ TAGS_FILE="${SCRIPT_DIR}/local.env"
 #TEMPORARY_ENV_FILE="${SCRIPT_DIR}/.temp.env"
 
 YAML_FILES_DIR="${SCRIPT_DIR}/compose/containers"
+YAML_OVERRIDES_DIR="${YAML_FILES_DIR}/overrides"
 
 #Header text for use when creating a new local.env file
 #to generate the list of _HOST variables run the following 
@@ -60,8 +61,13 @@ COMPOSE_PROJECT_NAME="bounceit"
 run_docker_compose_cmd() {
     # We now have multiple yaml files that make up the project so we need
     # to add them all as -f args
+    # First the base service definitions
     compose_file_args=()
-    for yaml_file in "${YAML_FILES_DIR}"/**/*.yml; do
+    for yaml_file in "${YAML_FILES_DIR}"/*.yml; do
+        compose_file_args+=( "-f" "${yaml_file}" )
+    done
+    # Second any override yml files that bring in mounts to shared volumes
+    for yaml_file in "${YAML_OVERRIDES_DIR}"/*.yml; do
         compose_file_args+=( "-f" "${yaml_file}" )
     done
 

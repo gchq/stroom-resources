@@ -61,7 +61,7 @@ create_stack_from_services() {
   done
 
   # Add any volume mount files if they are applicable for this stack
-  for vol_mount_file in ${NAMED_VOLUME_MOUNTS_DIR}/*.yml; do
+  for vol_mount_file in ${OVERRIDES_DIR}/*.yml; do
     # filename format is serviceX_serviceY.yml, where serviceX is the service
     # that is having the volume mount and serviceY is the service it is sharing
     # it with.
@@ -93,7 +93,7 @@ main() {
 
   mkdir -p "$WORKING_DIRECTORY"
   local -r CONTAINERS_DIR="../compose/containers"
-  local -r NAMED_VOLUME_MOUNTS_DIR="${CONTAINERS_DIR}/named_volume_mounts"
+  local -r OVERRIDES_DIR="${CONTAINERS_DIR}/overrides"
 
   create_stack_from_services "${SERVICES[@]}"
 }
