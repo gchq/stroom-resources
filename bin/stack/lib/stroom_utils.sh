@@ -77,15 +77,17 @@ get_active_images_in_stack() {
 }
 
 run_docker_compose_cmd() {
+  extra_args=( "$@" )
+
   compose_file_args=()
-  for yaml_file in "${DIR}/config"/*.yml; do
+  for yaml_file in "${DIR}"/config/*.yml; do
     compose_file_args+=( "-f" "${yaml_file}" )
   done
 
   docker-compose \
     --project-name "${STACK_NAME}" \
     "${compose_file_args[@]}" \
-    "${@}"
+    "${extra_args[@]}"
 }
 
 get_all_images_in_stack() {
@@ -148,11 +150,10 @@ get_config_env_var() {
 
   if [ -z "${var_value}" ]; then
     # Not set so try getting it from the yaml
-    local -r yaml_file="${DIR}/config/${STACK_NAME}.yml"
 
     local env_var_name_value
     env_var_name_value="$( \
-      grep -v "\w* echo " "${yaml_file}" \
+      grep --no-filename -v "\w* echo " "${DIR}"/config/*.yml \
         | grep -v "^\w*#" \
         | grep -oP "(?<=\\$\\{)${var_name}[^}]+(?=\\})" \
         | head -n1 \
@@ -353,7 +354,6 @@ check_service_health_if_in_stack() {
 
     local admin_port
     admin_port="$(get_config_env_var "${admin_port_var_name}")"
-
 
     total_unhealthy_count=$((total_unhealthy_count + unhealthy_count))
 
