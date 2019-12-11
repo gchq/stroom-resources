@@ -62,6 +62,51 @@ copy_file_to_dir() {
   done
 }
 
+# Removes blocks of conditional content in a file if the content is for a
+# service that is not in the stack, e.g. 
+# 
+#   X=Y
+#   # ------------IF_stroom_IN_STACK------------
+#   STROOM_BASE_LOGS_DIR="${ROOT_LOGS_DIR}/stroom"
+#   # ------------FI_stroom_IN_STACK------------
+#   Y=Z
+#
+# becomes (if stroom is not in the services array)
+# 
+#   X=Y
+#   Y=Z
+remove_conditional_content() {
+  local file="$1"; shift
+
+  [ -f "${file}" ] \
+    || echo -e "      ${RED}ERROR${NC}: File ${BLUE}${file}${NC} doesn't exist${NC}"
+
+  local cond_content_service_regex="(?<=IF_)[^_]+(?=_IN_STACK)"
+
+  while read -r cond_content_service_name; do
+    if ! element_in "${cond_content_service_name}" "${services[@]}"; then
+      # This content is for a service that is NOT in the stack, so remove it
+      echo -e "      Removing conditional content for" \
+        "${YELLOW}${cond_content_service_name}${NC} in ${BLUE}${file}${NC}"
+
+      local block_start_regex="IF_${cond_content_service_name}_IN_STACK"
+      local block_end_regex="FI_${cond_content_service_name}_IN_STACK"
+
+      # Delete from the start pattern (inc.) to the end pattern (inc.)
+      # It will delete multiple blocks for this service
+      sed -i "/${block_start_regex}/,/${block_end_regex}/d" "${file}"
+    fi
+  done < <( \
+    grep -oP "${cond_content_service_regex}" "${file}"  \
+    | sort  \
+    | uniq \
+  )
+
+  # All remaining conditional blocks are now valid for our services so
+  # remove the IF_ and FI_ tags
+  sed -i -r "/(IF|FI)_[^_]+_IN_STACK/d" "${file}"
+}
+
 main() {
   setup_echo_colours
 
@@ -335,9 +380,12 @@ main() {
     copy_file_to_dir \
       "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt" \
       "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
+    remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt"
+
     copy_file_to_dir \
       "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env" \
       "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
+    remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env"
   fi
 
   if element_in "stroom-all-dbs" "${services[@]}"; then
