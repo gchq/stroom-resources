@@ -362,6 +362,10 @@ main() {
     delete_file \
       "${DEST_NGINX_CONF_DIRECTORY}/locations.dev.conf.template" 
 
+    # Remove the reference to the dev locations file
+    remove_conditional_content \
+      "${DEST_NGINX_CONF_DIRECTORY}/nginx.conf.template" 
+
     echo -e "  Copying ${YELLOW}nginx${NC} html files"
     local -r DEST_NGINX_HTML_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/html"
     copy_file_to_dir \
