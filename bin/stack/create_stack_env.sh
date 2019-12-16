@@ -133,7 +133,6 @@ is_variable_overridden() {
 }
 
 add_env_vars() {
-  local -r CONTAINER_VERSIONS_FILE="container_versions.env"
   # Associative array to hold whitelisted_var_name => use_count
   declare -A whitelisted_use_counters
 
@@ -243,14 +242,51 @@ add_env_vars() {
     fi
   done <<< "${all_env_vars}"
 
+  # Sort the env var keys so they can be added to the file in a consistent order
+  local sorted_env_var_names
+  sorted_env_var_names="$( \
+    for var_name in "${!output_env_vars[@]}"; do
+      echo "${var_name}"
+    done | sort
+  )"
+
+  # Read the varaible docs file into an assoc. array keyed on the env var
+  # name.  Each line of the docs is prefixed with a comment char.
+  declare -A docs_arr
+  local have_seen_first_env_var=false
+  while read -r line; do
+    if [[ "${line}" =~ ^[#][#][[:space:]]+[A-Z_]+ ]]; then 
+      local var_name
+      var_name="${line##[#][#][[:space:]]}"
+      have_seen_first_env_var=true
+    else 
+      if [[ ! "${line}" =~ ^[[:space:]]*$ ]] && [ "${have_seen_first_env_var}" = "true" ]; then 
+        # Append the line to the assoc array entry, with new line if needed
+        if [[ -n "${docs_arr["${var_name}"]}" ]]; then
+          docs_arr["${var_name}"]+="\n# ${line}"
+        else
+          docs_arr["${var_name}"]+="# ${line}"
+        fi
+      fi
+    fi
+  done < "${VARIABLE_DOCS_FILE}"
+
   # Now write our env var out to a file
   echo -e "${GREEN}Writing environment variables file ${BLUE}${OUTPUT_ENV_FILE}${NC}"
-  for var_name in "${!output_env_vars[@]}"; do
+  # Loop over the keys in the assoc. array
+  for var_name in ${sorted_env_var_names}; do
     local var_value="${output_env_vars[${var_name}]}"
+    local var_docs="${docs_arr[${var_name}]}"
     # OUTPUT_ENV_FILE already exists at this point
-    # They must be exported as they need to be available to child processes,
-    # i.e. docker-compose.
-    echo "export ${var_name}=\"${var_value}\"" >> "${OUTPUT_ENV_FILE}"
+    {
+      # If we have any docs for this env var add it above it the variable
+      if [ -n "${var_docs}" ]; then
+        echo -e "${var_docs}"
+      fi
+      # They must be exported as they need to be available to child processes,
+      # i.e. docker-compose.
+      echo "export ${var_name}=\"${var_value}\"" 
+    } >> "${OUTPUT_ENV_FILE}"
   done
 
   # Error if any whitelisted env var is not used anywhere in the yaml
@@ -338,6 +374,8 @@ main() {
   local -r SERVICES=("${@:3}")
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
   local -r STACK_DEFINITIONS_DIR="stack_definitions/${BUILD_STACK_NAME}"
+  local -r CONTAINER_VERSIONS_FILE="container_versions.env"
+  local -r VARIABLE_DOCS_FILE="variable_documentation.md"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}/config"
   mkdir -p "${WORKING_DIRECTORY}"
   local -r OUTPUT_ENV_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
@@ -351,8 +389,6 @@ main() {
   create_config
   add_env_vars
 
-  # Sort and de-duplicate param list before we do anything else with the file
-  sort -o "${OUTPUT_ENV_FILE}" -u "${OUTPUT_ENV_FILE}"
   add_header_to_env_file
   create_versions_file
 }
