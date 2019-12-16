@@ -62,6 +62,17 @@ copy_file_to_dir() {
   done
 }
 
+delete_file() {
+  local file="$1"; shift
+
+  echo -e "    Deleting file ${BLUE}${file}${NC}"
+  if [ ! -e "${file}" ]; then
+    echo -e "      ${RED}ERROR${NC}: File ${BLUE}${file}${NC} doesn't exist${NC}"
+    exit 1
+  fi
+  rm "${file}"
+}
+
 # Removes blocks of conditional content in a file if the content is for a
 # service that is not in the stack, e.g. 
 # 
@@ -172,6 +183,10 @@ main() {
     fi
   fi
 
+  #########################
+  #  stroom-remote-proxy  #
+  #########################
+
   if element_in "stroom-proxy-remote" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} config"
     local -r DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-remote/config"
@@ -204,6 +219,10 @@ main() {
       "${SRC_CERTS_DIRECTORY}/client/client.jks" \
       "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
   fi
+
+  ########################
+  #  stroom-proxy-local  #
+  ########################
 
   if element_in "stroom-proxy-local" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} config"
@@ -238,6 +257,10 @@ main() {
       "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
   fi
 
+  #########################
+  #  stroom-auth-service  #
+  #########################
+
   if element_in "stroom-auth-service" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-auth-service${NC} config"
     local -r DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-service/config"
@@ -260,6 +283,10 @@ main() {
     fi
   fi
 
+  ####################
+  #  stroom-auth-ui  #
+  ####################
+
   if element_in "stroom-auth-ui" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} certificates"
     local -r DEST_AUTH_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-ui/certs"
@@ -280,6 +307,10 @@ main() {
       "${DEST_AUTH_UI_CONF_DIRECTORY}"
   fi
 
+  ###########
+  #  nginx  #
+  ###########
+  
   if element_in "nginx" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}nginx${NC} certificates"
     local -r DEST_NGINX_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/certs"
@@ -310,7 +341,26 @@ main() {
         "${SRC_NGINX_CONF_DIRECTORY}/custom/proxy_nginx.conf.template" \
         "${DEST_NGINX_CONF_DIRECTORY}" \
         "nginx.conf.template"
+
+      # Remove files not applicable to the remote proxy stack
+      delete_file \
+        "${DEST_NGINX_CONF_DIRECTORY}/locations.stroom.conf.template" 
+      delete_file \
+        "${DEST_NGINX_CONF_DIRECTORY}/upstreams.stroom.processing.conf.template" 
+      delete_file \
+        "${DEST_NGINX_CONF_DIRECTORY}/upstreams.stroom.ui.conf.template" 
+      delete_file \
+        "${DEST_NGINX_CONF_DIRECTORY}/locations.auth.conf.template" 
+      delete_file \
+        "${DEST_NGINX_CONF_DIRECTORY}/upstreams.auth.service.conf.template" 
+      delete_file \
+        "${DEST_NGINX_CONF_DIRECTORY}/upstreams.auth.ui.conf.template" 
     fi
+
+    # Delete the dev conf file as this is not applicable to a released
+    # stack
+    delete_file \
+      "${DEST_NGINX_CONF_DIRECTORY}/locations.dev.conf.template" 
 
     echo -e "  Copying ${YELLOW}nginx${NC} html files"
     local -r DEST_NGINX_HTML_DIRECTORY="${VOLUMES_DIRECTORY}/nginx/html"
@@ -322,6 +372,10 @@ main() {
       "${DEST_NGINX_HTML_DIRECTORY}"
   fi
 
+  #############################
+  #  stroom / stroom-proxy-*  #
+  #############################
+  
   if element_in "stroom" "${services[@]}" \
     || element_in "stroom-proxy-local" "${services[@]}" \
     || element_in "stroom-proxy-remote" "${services[@]}"; then
@@ -352,6 +406,10 @@ main() {
       "send_to_stroom_args.sh"
   fi
 
+  ####################
+  #  elastic-search  #
+  ####################
+  
   # If elasticsearch is in the list of services add its volume
   if element_in "elasticsearch" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}elasticsearch${NC} config files"
@@ -360,6 +418,10 @@ main() {
     cp ${SRC_ELASTIC_CONF_DIRECTORY}/* "${DEST_ELASTIC_CONF_DIRECTORY}"
   fi
 
+  #######################
+  #  stroom-log-sender  #
+  #######################
+  
   # If stroom-log-sender is in the list of services add its volume
   if element_in "stroom-log-sender" "${services[@]}"; then
 
@@ -388,6 +450,10 @@ main() {
     remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env"
   fi
 
+  ####################
+  #  stroom-all-dbs  #
+  ####################
+  
   if element_in "stroom-all-dbs" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} config file"
     local -r DEST_STROOM_ALL_DBS_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-all-dbs/conf"
@@ -403,6 +469,9 @@ main() {
       "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}"
   fi
 
+  ############
+  #  kibana  #
+  ############
 
   # If kibana is in the list of services add its volume
   if element_in "kibana" "${services[@]}"; then
