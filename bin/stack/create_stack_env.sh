@@ -279,6 +279,7 @@ add_env_vars() {
     local var_docs="${docs_arr[${var_name}]}"
     # OUTPUT_ENV_FILE already exists at this point
     {
+      echo
       # If we have any docs for this env var add it above it the variable
       if [ -n "${var_docs}" ]; then
         echo -e "${var_docs}"
