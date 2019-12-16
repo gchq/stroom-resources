@@ -15,7 +15,7 @@ services:
       - NGINX_CLIENT_BODY_BUFFER_SIZE=${NGINX_CLIENT_BODY_BUFFER_SIZE:-1M}
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
-      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+      - NGINX_SSL_CA_CERTIFICATE=${NGINX_SSL_CA_CERTIFICATE:-ca.pem.crt}
         # Enabling NGINX_SSL_VERIFY_CLIENT means we can capture the DN and cert expiry
         # in the datafeed but means the client cert must be imported into the browser
         # so set it to 'optional' so that it asks the client for a cert and if it

@@ -20,7 +20,7 @@ http {
 
         ssl_certificate         /etc/nginx/certs/${NGINX_SSL_CERTIFICATE};
         ssl_certificate_key     /etc/nginx/certs/${NGINX_SSL_CERTIFICATE_KEY};
-        ssl_client_certificate  /etc/nginx/certs/${NGINX_SSL_CLIENT_CERTIFICATE};
+        ssl_client_certificate  /etc/nginx/certs/${NGINX_SSL_CA_CERTIFICATE};
 
         # Prevent clickjacking attacks. More details here:
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
