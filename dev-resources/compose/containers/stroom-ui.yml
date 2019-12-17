@@ -8,11 +8,12 @@ services:
     # All URLs are accessed from a browser, and so need to refer to the advertised host.
     environment:
       # The AUTH_UI_xxx variables configure the app as loaded in the browser
-      - STROOM_UI_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1
-      - STROOM_UI_AUTHORISATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authorisationService/v1
-      - STROOM_UI_STREAM_TASK_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/streamTaskService/v1
-      - STROOM_UI_ADVERTISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}:${STROOM_UI_ACTIVE_PORT:-9444}
-      - STROOM_UI_APP_CLIENT_ID=stroom-ui
+      - APP_ADVERTISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}
+      - APP_CLIENT_ID=PZnJr8kHRKqnlJRQThSIi
+      - APP_STROOM_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api
+      - APP_AUTH_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
+      - APP_STROOM_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/stroom
+      - APP_ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
       # The NGINX_xxx variables configure the NGINX server that serves the app
       - NGINX_HOST=${STROOM_UI_HOST:-$HOST_IP}
       - NGINX_HTTP_PORT=${STROOM_UI_HTTP_PORT:-5001}

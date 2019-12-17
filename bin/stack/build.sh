@@ -23,6 +23,7 @@ validate_requested_services() {
     "stroom-annotations-ui" \
     "stroom-auth-service" \
     "stroom-auth-ui" \
+    "stroom-ui" \
     "stroom-log-sender" \
     "stroom-proxy-local" \
     "stroom-proxy-remote" \

@@ -92,6 +92,7 @@ main() {
   local -r SRC_STROOM_ALL_DBS_CONF_FILE="${SRC_VOLUMES_DIRECTORY}/stroom-all-dbs/conf/stroom-all-dbs.cnf"
   local -r SRC_STROOM_ALL_DBS_INIT_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-all-dbs/init"
   local -r SRC_AUTH_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
+  local -r SRC_STROOM_UI_CONF_DIRECTORY="../../stroom-microservice-ui/template"
   local -r SEND_TO_STROOM_VERSION="send-to-stroom-v2.0"
   local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
   local -r STROOM_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_TAG}/stroom-app"
@@ -200,7 +201,7 @@ main() {
       echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_AUTH_SERVICE_TAG${NC}=${BLUE}${STROOM_AUTH_SERVICE_TAG}${NC}"
       if [ ! -n "${LOCAL_STROOM_AUTH_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_AUTH_REPO_DIR${NC} to your local stroom repo"
-        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
+        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_AUTH_REPO_DIR=/home/dev/git_work/stroom-auth${NC}'"
       fi
       copy_file_to_dir \
         "${STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}" \
@@ -233,6 +234,26 @@ main() {
     copy_file_to_dir \
       "${SRC_AUTH_UI_CONF_DIRECTORY}/nginx.conf.template" \
       "${DEST_AUTH_UI_CONF_DIRECTORY}"
+  fi
+
+  if element_in "stroom-ui" "${services[@]}"; then
+    echo -e "  Copying ${YELLOW}stroom-ui${NC} certificates"
+    local -r DEST_STROOM_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/certs"
+    copy_file_to_dir \
+      "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" \
+      "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+    copy_file_to_dir \
+      "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" \
+      "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+    copy_file_to_dir \
+      "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" \
+      "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+
+    echo -e "  Copying ${YELLOW}stroom-ui${NC} config files"
+    local -r DEST_STROOM_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/conf"
+    copy_file_to_dir \
+      "${SRC_STROOM_UI_CONF_DIRECTORY}/nginx.conf.template" \
+      "${DEST_STROOM_UI_CONF_DIRECTORY}"
   fi
 
   if element_in "nginx" "${services[@]}"; then
