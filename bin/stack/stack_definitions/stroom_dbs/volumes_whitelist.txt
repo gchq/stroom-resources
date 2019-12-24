@@ -1,2 +1,0 @@
-stroom-all-dbs_data
-stroom-all-dbs_logs
