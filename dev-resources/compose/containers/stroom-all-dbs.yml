@@ -61,3 +61,6 @@ services:
         max-file: "${MYSQL_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+volumes:
+  stroom-all-dbs_data:
+  stroom-all-dbs_logs:
