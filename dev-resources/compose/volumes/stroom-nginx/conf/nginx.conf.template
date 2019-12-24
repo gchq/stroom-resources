@@ -67,10 +67,16 @@ http {
         # Include location configuration specific to proxy
         include locations.proxy.conf;
 
+        # ########### IF_development-only_IN_STACK ###########
+        # This conditional block will be removed in a stack release
+        # as development-only is not a valid service
+        # See create_stack_assets.sh
+
         # Include location configuration specific to dev.
         # Should not be included in production deployments.
         # Supports hot-loading for stroom-ui
         include locations.dev.conf;
+        # ########### FI_development-only_IN_STACK ###########
     }
 }
 

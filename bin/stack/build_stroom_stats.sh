@@ -6,15 +6,14 @@ set -e
 
 main() {
     local -r VERSION=$1
-    local -r BUILD_STACK_NAME="stroom_proxy"
+    local -r BUILD_STACK_NAME="stroom_stats"
 
     local SERVICES=()
 
     # Define all the services that make up the stack
     # Array created like this to allow lines to commneted out
-    SERVICES+=("nginx")
     SERVICES+=("stroom-log-sender")
-    SERVICES+=("stroom-proxy-remote")
+    SERVICES+=("stroom-stats")
 
     ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"
 }

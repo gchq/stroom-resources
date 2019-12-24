@@ -76,14 +76,26 @@ get_active_images_in_stack() {
   done <<< "$( get_all_images_in_stack )"
 }
 
+run_docker_compose_cmd() {
+  extra_args=( "$@" )
+
+  compose_file_args=()
+  for yaml_file in "${DIR}"/config/*.yml; do
+    compose_file_args+=( "-f" "${yaml_file}" )
+  done
+
+  docker-compose \
+    --project-name "${STACK_NAME}" \
+    "${compose_file_args[@]}" \
+    "${extra_args[@]}"
+}
+
 get_all_images_in_stack() {
   # Grepping yaml is far from ideal, we could do with something like yq or
   # ruby + jq to parse it properly, but that means more prereqs.
   # However the yaml is output from docker-compose so is in a fairly
   # consistent format.
-  docker-compose \
-    --project-name "${STACK_NAME}" \
-    -f "$DIR/config/${STACK_NAME}.yml" \
+  run_docker_compose_cmd \
     config \
     | grep -P "^\s+image:.*$" \
     | grep -oP "(?<=image: ).*"
@@ -138,11 +150,10 @@ get_config_env_var() {
 
   if [ -z "${var_value}" ]; then
     # Not set so try getting it from the yaml
-    local -r yaml_file="${DIR}/config/${STACK_NAME}.yml"
 
     local env_var_name_value
     env_var_name_value="$( \
-      grep -v "\w* echo " "${yaml_file}" \
+      grep --no-filename -v "\w* echo " "${DIR}"/config/*.yml \
         | grep -v "^\w*#" \
         | grep -oP "(?<=\\$\\{)${var_name}[^}]+(?=\\})" \
         | head -n1 \
@@ -343,7 +354,6 @@ check_service_health_if_in_stack() {
 
     local admin_port
     admin_port="$(get_config_env_var "${admin_port_var_name}")"
-
 
     total_unhealthy_count=$((total_unhealthy_count + unhealthy_count))
 
@@ -570,9 +580,7 @@ start_stack() {
   fi
 
   # shellcheck disable=SC2094
-  docker-compose \
-    --project-name "${STACK_NAME}" \
-    -f "$DIR/config/${STACK_NAME}.yml" \
+  run_docker_compose_cmd \
     up \
     -d \
     "${services_to_start[@]}"
@@ -605,9 +613,7 @@ stop_service_if_in_stack() {
 
       if [ "${state}" = "true" ]; then
         # shellcheck disable=SC2094
-        docker-compose \
-          --project-name "${STACK_NAME}" \
-          -f "$DIR"/config/"${STACK_NAME}".yml \
+        run_docker_compose_cmd \
           stop \
           "${service_name}"
       else
@@ -622,9 +628,7 @@ stop_service_if_in_stack() {
 stop_stack_quickly() {
   echo -e "${GREEN}Stopping all the docker containers at once${NC}\n"
 
-  docker-compose \
-    --project-name "${STACK_NAME}" \
-    -f "$DIR/config/${STACK_NAME}.yml" \
+  run_docker_compose_cmd \
     stop "$@"
 }
 
@@ -640,9 +644,7 @@ stop_stack_gracefully() {
 
   # In case we have missed any stop the whole project
   echo -e "${GREEN}Stopping any remaining containers in the stack${NC}"
-  docker-compose \
-    --project-name "${STACK_NAME}" \
-    -f "$DIR/config/${STACK_NAME}.yml" \
+  run_docker_compose_cmd \
     stop
 }
 

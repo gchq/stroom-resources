@@ -94,6 +94,9 @@ services:
       - type: volume
         source: stroom_output
         target: /stroom/output
+        # This volume is shared with stroom-proxy-local. If we ever want to run stroom without
+        # a local proxy then we need to move this out into in override yml as is done with
+        # stroom-log-sender
       - type: volume
         source: stroom-proxy-local_repo
         target: /stroom/proxy-repo
@@ -106,3 +109,7 @@ services:
         max-file: "${STROOM_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+volumes:
+  stroom_logs:
+  stroom_output:
+  stroom_volumes:

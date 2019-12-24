@@ -22,7 +22,7 @@ services:
       - NGINX_HTTPS_PORT=${STROOM_AUTH_UI_HTTPS_PORT:-9443}
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
-      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+      - NGINX_SSL_CA_CERTIFICATE=${NGINX_SSL_CA_CERTIFICATE:-ca.pem.crt}
     volumes:
       - ${STROOM_AUTH_UI_VOLUME_CERTS:-../../volumes/stroom-auth-ui/certs}:/etc/nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
