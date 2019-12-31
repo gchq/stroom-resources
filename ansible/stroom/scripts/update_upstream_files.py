@@ -1,51 +1,28 @@
 from utils import get_inventory
+import sys
 
 
-CONF = './releases/volumes/nginx/conf'
-UPSTREAMS = {
-    "auth_service":f"{CONF}/upstreams.auth.service.conf.template",
-    "auth_ui":f"{CONF}/upstreams.auth.ui.conf.template",
-    "proxy":f"{CONF}/upstreams.proxy.conf.template",
-    "stroom_processing":f"{CONF}/upstreams.stroom.processing.conf.template",
-    "stroom_ui":f"{CONF}/upstreams.stroom.ui.conf.template",
-    }
+def write_upstream_file(hosts, path_to_file, port):
+    open_file = open(f"{path_to_file}", "w")
+    for ansible_host in hosts:
+       host = ansible_host.split('@')[1]
+       open_file.write(f"server {host}:{port};\n")
+    open_file.close()
 
-
-def open_files_for_writing(services):
-    files = []
-    for service in services:
-        files.append(open(UPSTREAMS[service], "w"))
-    return files
-
-
-def write_upstream_file(hosts, open_files, upstream_template):
-    for open_file in open_files:
-        for ansible_host in hosts:
-           host = ansible_host.split('@')[1]
-           open_file.write(upstream_template.format(host))
-        open_file.close()
-
-
+    
 def main():
+    path_to_stack = sys.argv[1]
+    path_to_nginx_conf = f"{path_to_stack}/volumes/nginx/conf"
     inventory = get_inventory()
 
-    write_upstream_file(
-        inventory["stroom_services"]["hosts"],
-        open_files_for_writing(['auth_ui']),
-        "server <<<AUTH_UI_URL>>>;\n")
+    service_hosts = inventory["stroom_services"]["hosts"]
+    write_upstream_file(service_hosts, f"{path_to_nginx_conf}/upstreams.auth.service.conf.template", "8099")
+    write_upstream_file(service_hosts, f"{path_to_nginx_conf}/upstreams.auth.ui.conf.template", "9443")
 
-    write_upstream_file(
-        inventory["stroom_services"]["hosts"],
-        open_files_for_writing(['auth_service']),
-        "server {0}:<<<AUTH_SERVICE_PORT>>>;\n")
+    stroom_and_proxy_hosts = inventory["stroom_and_proxy"]["hosts"]
+    write_upstream_file(stroom_and_proxy_hosts, f"{path_to_nginx_conf}/upstreams.proxy.conf.template", "8090")
+    write_upstream_file(stroom_and_proxy_hosts, f"{path_to_nginx_conf}/upstreams.stroom.ui.conf.template", "8080")
+    write_upstream_file(stroom_and_proxy_hosts, f"{path_to_nginx_conf}/upstreams.stroom.processing.conf.template", "8080")
+
     
-    write_upstream_file(
-        inventory["stroom_and_proxy"]["hosts"],
-        open_files_for_writing(['stroom_processing','stroom_ui']),
-        "server {0}:<<<STROOM_PORT>>>;\n")
-
-    write_upstream_file(
-        inventory["stroom_and_proxy"]["hosts"],
-        open_files_for_writing(['proxy']),
-        "server {0}:<<<STROOM_PROXY_PORT>>>;\n")
 main()

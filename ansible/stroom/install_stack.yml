@@ -2,6 +2,8 @@
 - name: Install services 
   vars_files:
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
     # You'll need to manually change this if you don't have access to the internet from your controller.
     stack_url: https://github.com/gchq/stroom-resources/releases/download/stroom-stacks-{{stack_version}}/{{stack_name}}-{{stack_version}}.tar.gz

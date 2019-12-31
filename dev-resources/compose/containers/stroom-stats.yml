@@ -1,7 +1,6 @@
-version: '2.4'
+version: "2.4"
 
-services: 
-
+services:
   stroom-stats:
     container_name: stroom-stats
     image: "${STROOM_STATS_DOCKER_REPO:-gchq/stroom-stats}:${STROOM_STATS_TAG:-v0.6-LATEST}"
@@ -21,8 +20,8 @@ services:
       # host1:2181,host2:2181,host3:2181/myChRoot
       - STATS_ZK_QUORUM=${ZOOKEEPER_QUORUM:-zookeeper:2181}
 
-      # The following env vars set the values used to seed an empty zookeeper. 
-      # Once ZK has been seeded, changing these values has no affect as stroom-stats 
+      # The following env vars set the values used to seed an empty zookeeper.
+      # Once ZK has been seeded, changing these values has no affect as stroom-stats
       # will always use the values obtained from ZK.
       # Changing the value in ZK requires the ZK CLI or some other tool.
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,3 +44,5 @@ services:
         max-file: "${STROOM_STATS_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+volumes:
+  stroom-stats_logs:

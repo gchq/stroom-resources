@@ -25,6 +25,6 @@ location /sockjs-node {
 
 location /main. {
     proxy_pass https://auth_ui_upstream/main.;
-} 
+}
 
 # vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:

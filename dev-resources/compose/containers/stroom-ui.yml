@@ -1,11 +1,9 @@
-version: '2.4'
+version: "2.4"
 
 services:
-
   stroom-ui:
     container_name: stroom-ui
-    image: "${STROOM_UI_DOCKER_REPO:-gchq/stroom-ui}:${STROOM_UI_TAG:-v1.0-LATEST}"
-    # All URLs are accessed from a browser, and so need to refer to the advertised host.
+    image: "${STROOM_UI_DOCKER_REPO:-gchq/stroom-ui}:${STROOM_UI_TAG:-v7.0-LATEST}"
     environment:
       # The AUTH_UI_xxx variables configure the app as loaded in the browser
       - APP_ADVERTISED_URL=${STROOM_AUTH_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}
@@ -14,20 +12,21 @@ services:
       - APP_AUTH_BASE_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
       - APP_STROOM_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/stroom
       - APP_ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
+      - DEFAULT_API_KEY_EXPIRY_IN_MINUTES=525600 # 525600 minutes = 1 year
       # The NGINX_xxx variables configure the NGINX server that serves the app
       - NGINX_HOST=${STROOM_UI_HOST:-$HOST_IP}
       - NGINX_HTTP_PORT=${STROOM_UI_HTTP_PORT:-5001}
-      - NGINX_HTTPS_PORT=${STROOM_UI_HTTPS_PORT:-9444}
+      - NGINX_HTTPS_PORT=${STROOM_UI_HTTPS_PORT:-9446}
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
-      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+      - NGINX_SSL_CA_CERTIFICATE=${NGINX_SSL_CA_CERTIFICATE:-ca.pem.crt}
     volumes:
       - ${STROOM_UI_VOLUME_CERTS:-../../volumes/stroom-ui/certs}:/etc/nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
       - ${STROOM_UI_VOLUME_CONF:-../../volumes/stroom-ui/conf}:/etc/nginx/template:ro
     ports:
       - "${STROOM_UI_HTTP_PORT:-5001}:5001"
-      - "${STROOM_UI_HTTPS_PORT:-9444}:9444"
+      - "${STROOM_UI_HTTPS_PORT:-9446}:9446"
     logging:
       options:
         max-size: "${STROOM_UI_STD_OUT_LOGS_MAX_SIZE:-10m}"

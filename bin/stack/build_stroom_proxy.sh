@@ -13,6 +13,7 @@ main() {
     # Define all the services that make up the stack
     # Array created like this to allow lines to commneted out
     SERVICES+=("nginx")
+    SERVICES+=("stroom-log-sender")
     SERVICES+=("stroom-proxy-remote")
 
     ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"

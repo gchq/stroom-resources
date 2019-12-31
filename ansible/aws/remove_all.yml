@@ -1,10 +1,12 @@
 - name: Terminate all instances
-  hosts: local
-  connection: local
+  hosts: localhost
+  connection: localhost
   gather_facts: false
   vars_files:
     - vars/aws_vault.yml
     - vars/aws.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   tasks:
     - include_role:
         name: roles/ec2/instance/terminate

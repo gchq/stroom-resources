@@ -1,13 +1,12 @@
-# This is the stack version we want to install and use.
-stack_version: v6.0.6-1
-stack_name: stroom_core
-
+# This is where we store generated files
+authorized_keys_path: "{{ generated_path }}/authorized_keys"
 # IDEA: we could define a 'previous_version' when we're migrating, and if it exists we could stop and delete
 # before doing an install.
 
 # We define a {{home}} variable because:
 #  1. If we use '~/' then if we're elevating we'll install things in /root/ instead
 #  2. We might want to change the user, in which case we'll only want to change it in one place.
-home: /home/centos
+home: "/home/{{ user }}"
 
-releases_path: ./releases
+# This is where we download stack releases to
+releases_path: "{{ generated_path }}/{{ stack_name }}"

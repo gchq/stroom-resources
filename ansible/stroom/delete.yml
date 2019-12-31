@@ -14,6 +14,8 @@
   hosts: stroom_and_proxy
   vars_files:
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
     stack_type: stroom_and_proxy
     op: remove.sh -y
@@ -24,6 +26,8 @@
   hosts: stroom_services
   vars_files:
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
     stack_type: stroom_services
     op: remove.sh -y
@@ -34,6 +38,8 @@
   hosts: stroom_dbs
   vars_files:
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
     stack_type: stroom_dbs
     op: remove
@@ -48,6 +54,8 @@
 - name: Delete files for stroom_dbs
   vars_files:
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
     stack_type: stroom_dbs
   become: yes
@@ -58,6 +66,8 @@
 - name: Delete files for stroom_services
   vars_files:
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
     stack_type: stroom_services
   become: yes
@@ -68,6 +78,8 @@
 - name: Delete files for stroom_and_proxy
   vars_files:
     - ./variables.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
     stack_type: stroom_and_proxy
   become: yes

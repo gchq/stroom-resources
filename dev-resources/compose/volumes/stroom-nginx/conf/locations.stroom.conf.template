@@ -6,13 +6,13 @@
 
 # datafeed direct into stroom with no prxoy aggregation
 location /stroom/datafeeddirect/ {
-    proxy_pass http://stroom_upstream/stroom/datafeed/;
+    proxy_pass http://stroom_upstream/stroom/noauth/datafeed/;
     include proxy_location_defaults.conf;
 }
 
 # datafeed direct into stroom with no prxoy aggregation (exact match)
 location = /stroom/datafeeddirect {
-    proxy_pass http://stroom_upstream/stroom/datafeed/;
+    proxy_pass http://stroom_upstream/stroom/noauth/datafeed/;
     include proxy_location_defaults.conf;
 }
 

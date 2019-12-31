@@ -10,12 +10,14 @@
 #
 # https://www.linuxschoolonline.com/use-ansible-to-build-and-manage-aws-ec2-instances/
 
-- hosts: local
-  connection: local
+- hosts: localhost
+  connection: localhost
   gather_facts: False
   vars_files:
     - vars/aws_vault.yml
     - vars/aws.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
 
   roles:
     - roles/ec2/key_pair/create

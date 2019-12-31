@@ -1,14 +1,6 @@
-- name: Get the hostnam of the control machine
-  command: hostname
-  register: hostname
-
-- name: Get the username of the current user
-  command: whoami
-  register: username
-
 - name: Ensure the ec2 Key Pair does not exist
   ec2_key:
-    name: "{{ hostname.stdout }}"
+    name: "{{ aws_key_pair_name }}"
     profile: "{{ aws_profile_name }}"
     region: "{{ aws_region }}"
     aws_access_key: "{{ aws_access_key }}"
@@ -22,7 +14,7 @@
 
 - name: Ensure the cert does not exist locally
   file:
-    path: "~/.ssh/{{ hostname.stdout }}.pem"
+    path: "{{ local_key_pair_path }}"
     state: absent
   register: local_cert_result
 - name: Debug local_cert_result

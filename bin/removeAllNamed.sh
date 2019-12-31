@@ -7,6 +7,7 @@ declare -a containers=(
     "stroom-stats-db"
     "kafka"
     "hbase"
+    "solr"
     "zookeeper")
 
 for container in "${containers[@]}"; do

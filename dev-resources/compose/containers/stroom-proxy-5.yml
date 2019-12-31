@@ -9,16 +9,16 @@ services:
       - 8090:8080
     volumes:
       - type: volume
-        source: stroom-proxy-local_config
+        source: stroom-proxy-5-local_config
         target: /stroom-proxy/config
       - type: volume
-        source: stroom-proxy-local_content
+        source: stroom-proxy-5-local_content
         target: /stroom-proxy/content
       - type: volume
-        source: stroom-proxy-local_logs
+        source: stroom-proxy-5-local_logs
         target: /stroom-proxy/logs
       - type: volume
-        source: stroom-proxy-local_repo
+        source: stroom-proxy-5-local_repo
         target: /stroom-proxy/repo
     logging:
       options:
@@ -26,3 +26,8 @@ services:
         max-file: "${STROOM_PROXY_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+volumes:
+  stroom-proxy-5-local_config:
+  stroom-proxy-5-local_content:
+  stroom-proxy-5-local_logs:
+  stroom-proxy-5-local_repo:

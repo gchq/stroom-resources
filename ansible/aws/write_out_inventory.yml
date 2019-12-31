@@ -5,10 +5,11 @@
   vars_files:
     - vars/aws_vault.yml
     - vars/aws.yml
+    - ../global_variables.yml
+    - ../config/user_settings.yml
   vars:
-    temp_hosts_dir: ./build/hosts
-    aws_inventory_file: ./build/aws_inventory.csv 
-    ansible_inventory_file: ./build/ansible_inventory
+    temp_hosts_dir: "{{ generated_path }}/hosts"
+    aws_inventory_file: "{{ generated_path }}/aws_inventory.csv"
   tasks:
     - include_role:
         name: roles/ec2/inventory/create
@@ -42,4 +43,4 @@
         path: "{{ temp_hosts_dir }}"
         state: absent
     - name: Create ansible format inventory
-      command: python3 ./scripts/create_ansible_inventory.py {{ aws_inventory_file }} {{  ansible_inventory_file }}
+      command: "python3 ./scripts/create_ansible_inventory.py {{ aws_inventory_file }} {{  ansible_inventory_file }}"
