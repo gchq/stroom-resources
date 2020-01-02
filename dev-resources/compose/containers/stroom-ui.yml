@@ -15,7 +15,7 @@ services:
       # The NGINX_xxx variables configure the NGINX server that serves the app
       - NGINX_HOST=${STROOM_UI_HOST:-$HOST_IP}
       - NGINX_HTTP_PORT=${STROOM_UI_HTTP_PORT:-5001}
-      - NGINX_HTTPS_PORT=${STROOM_UI_HTTPS_PORT:-9446}
+      - NGINX_HTTPS_PORT=${STROOM_UI_HTTPS_PORT:-9443}
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
       - NGINX_SSL_CA_CERTIFICATE=${NGINX_SSL_CA_CERTIFICATE:-ca.pem.crt}
@@ -25,7 +25,7 @@ services:
       - ${STROOM_UI_VOLUME_CONF:-../../volumes/stroom-ui/conf}:/etc/nginx/template:ro
     ports:
       - "${STROOM_UI_HTTP_PORT:-5001}:5001"
-      - "${STROOM_UI_HTTPS_PORT:-9446}:9446"
+      - "${STROOM_UI_HTTPS_PORT:-9443}:9443"
     logging:
       options:
         max-size: "${STROOM_UI_STD_OUT_LOGS_MAX_SIZE:-10m}"
