@@ -33,6 +33,11 @@ location /favicon.ico {
     proxy_pass https://auth_ui_upstream/favicon.ico;
 }
 
+# This allows stroom-ui to get its manifest.
+location /manifest.json {
+    proxy_pass https://auth_ui_upstream/manifest.json;
+}
+
 # This allows stroom-ui to get its assets, e.g. css and images.
 location /static {
     proxy_pass https://auth_ui_upstream/static;
