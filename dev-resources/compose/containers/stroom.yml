@@ -16,9 +16,9 @@ services:
       - STROOM_RACK=${STROOM_RACK:-rack}
       - STROOM_JPA_DIALECT=org.hibernate.dialect.MySQLInnoDBDialect
       - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$DB_HOST_IP}:${STROOM_DB_PORT:-3307}/${STROOM_DB_NAME:-stroom}?useUnicode=yes&characterEncoding=UTF-8
-      - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
+      - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
       - STROOM_JDBC_DRIVER_USERNAME=${STROOM_DB_USERNAME:-stroomuser}
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
       - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-$DB_HOST_IP}:${STROOM_STATS_DB_PORT:-3307}/${STROOM_STATS_DB_NAME:-stats}?useUnicode=yes&characterEncoding=UTF-8
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=${STROOM_STATS_DB_USERNAME:-statsuser}
