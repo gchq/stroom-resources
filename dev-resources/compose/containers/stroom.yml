@@ -40,9 +40,6 @@ services:
       - STROOM_ADVERTISED_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}
       # This needs to be an API token issued for a user, i.e. for the admin user.
       # Without this Stroom won't be able to make calls to it's RemoteDataSources.
-      - STROOM_SECURITY_API_TOKEN=${STROOM_SECURITY_API_TOKEN:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsImF1ZCI6IlBabkpyOGtIUktxbmxKUlFUaFNJIn0.qT5jdPWBpN9me0L3OqUT0VFT2mvVX9mCp0gPFyTVg8DkFTPLLYIuXjOslvrllJDBbqefEtqS9OwQs3RmRnZxror676stTP6JHN76YqJWj2yJYyJGuggbXjZnfTiZGO3SOxl5FP4nmRRvPxA3XqV9kippKBpHfqm5RuTpFTU8uses2iaHFm7lY4zXmKDmwVizXybBQBtpxrBNQkeQjQyg7UFkpsRO8-PmIdbTldRhGlud5VpntwI1_ahwOzK-einUJQOWrcOBmXAMPRYBI6tSLT1xS_c5XpFX1Rxoj3FGjI-Myqp_2Nt_lZuQ3h-0Qh8WkZMnWQ76G7CKawXzRAwd7Q}
-      # Default the API key advance warning to 2 weeks/20160 minutes
-      - STROOM_SECURITY_API_TOKEN_DURATION_TO_WARN_BEFORE_EXPIRY=${STROOM_SECURITY_API_TOKEN_DURATION_TO_WARN_BEFORE_EXPIRY:-30d}
       - ADMIN_CONTEXT_PATH=${ADMIN_CONTEXT_PATH:-/stroomAdmin}
       - STROOM_LOGGING_LEVEL=${STROOM_LOGGING_LEVEL:-INFO}
       - STROOM_PLUGINS_LIB_DIR=${STROOM_PLUGINS_LIB_DIR:-/stroom/plugins}
