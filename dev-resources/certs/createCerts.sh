@@ -52,8 +52,8 @@ create_ca_certs() {
         -new \
         -nodes \
         -key certificate-authority/ca.unencrypted.key \
-        -sha256 \
-        -days 99999 \
+        -sha512 \
+        -days 825 \
         -out certificate-authority/ca.pem.crt \
         -batch \
         -config ca.ssl.conf
@@ -113,8 +113,8 @@ create_server_certs() {
         -CAkey certificate-authority/ca.unencrypted.key \
         -CAcreateserial \
         -out server/server.pem.crt \
-        -days 99990 \
-        -sha256
+        -days 825 \
+        -sha512
 
     echo
     echo -e "${GREEN}Verifying server certificate${NC}"
@@ -195,8 +195,8 @@ create_client_certs() {
         -CAkey certificate-authority/ca.unencrypted.key \
         -CAcreateserial \
         -out client/client.pem.crt \
-        -days 99990 \
-        -sha256
+        -days 825 \
+        -sha512
 
     echo
     echo -e "${GREEN}Verifying client certificate${NC}"
