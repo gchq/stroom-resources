@@ -4,7 +4,7 @@ services:
 
   stroom-ui:
     container_name: stroom-ui
-    image: "${STROOM_UI_DOCKER_REPO:-gchq/stroom-ui}:${STROOM_UI_TAG:-v1.0-LATEST}"
+    image: "${STROOM_UI_DOCKER_REPO:-gchq/stroom-ui}:${STROOM_UI_TAG:-v7.0-LATEST}"
     # All URLs are accessed from a browser, and so need to refer to the advertised host.
     environment:
       # The AUTH_UI_xxx variables configure the app as loaded in the browser
