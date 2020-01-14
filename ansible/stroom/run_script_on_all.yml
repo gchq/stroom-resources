@@ -1,31 +1,7 @@
-# Ideally we would be able to run a script on the 'all' host_group by
-# supplying 'all' to 'run_script.yml'. I've not found a way to do this
-# yet, but even if there is one it might be too programmery for YML.
-#
-# You can't loop these because we need to vary the hosts which can only be done at
-# the play level. And you can't loop plays.
-
-# Use this to execute operations on host_groups. E.g.
-#   ansible-playbook -i hosts stack_op.yml --extra-vars "op=restart"
----
-- name: Get the operation to perform
-  hosts: all
-  vars_prompt:
-   - name: op
-     prompt: "What operation would you like to perform? You can pass arguments. [stop.sh|start.sh|remove.sh|health.sh|info.sh|logs.sh|restart.sh|show_config.sh|status.sh]"
-     private: no
-  # We can prompt the user for a variable but it won't be
-  # shared with other plays in the playbook. To share it
-  # we can set it as a fact, and then it'll ba available to other plays.
-  tasks:
-    - set_fact:
-        op: "{{op}}"
 
 - name: Perform operation on databases 
   vars_files:
     - ./variables.yml
-    - ../global_variables.yml
-    - ../config/user_settings.yml
   become: yes
   hosts: stroom_dbs
   roles:
@@ -34,8 +10,6 @@
 - name: Perform operation on services 
   vars_files:
     - ./variables.yml
-    - ../global_variables.yml
-    - ../config/user_settings.yml
   become: yes
   hosts: stroom_services
   roles:
@@ -44,8 +18,6 @@
 - name: Perform operation on strooms 
   vars_files:
     - ./variables.yml
-    - ../global_variables.yml
-    - ../config/user_settings.yml
   become: yes
   hosts: stroom_and_proxy
   roles:

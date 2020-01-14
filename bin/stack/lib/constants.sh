@@ -38,7 +38,7 @@
     "stroom-proxy-remote"
     "stroom-proxy-local"
     "nginx"
-    "stroom-ui"
+    "stroom-auth-ui"
     "stroom-auth-service"
     "stroom"
     "stroom-stats"

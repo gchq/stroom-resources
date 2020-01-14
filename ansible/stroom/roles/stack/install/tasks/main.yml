@@ -2,7 +2,7 @@
   copy:
     src: "{{releases_path}}/{{stack_name}}-{{stack_version}}"
     dest: "{{home}}/{{stack_name}}"
-    mode: preserve # 'preserve' keeps the file permissions, i.e. it keeps .sh files executable
+    mode: "u+rwx" # 'preserve' keeps the file permissions, i.e. it keeps .sh files executable
 
 - name: Create a symlink to a predictable location
   file:
@@ -10,9 +10,15 @@
     src: "{{home}}/{{stack_name}}/{{stack_name}}-{{stack_version}}"
     dest: "{{home}}/{{stack_name}}/latest"
 
-#- name: Copy volumes to remote
-#  become: yes # We need to escalate because volumes become owned by root, because docker
-#  copy:
-#    src: "{{releases_path}}/volumes"
-#    dest: "{{home}}/{{stack_name}}"
-#    mode: preserve # 'preserve' keeps the file permissions, i.e. it keeps .sh files executable
+- name: Copy volumes to remote
+  become: yes # We need to escalate because volumes become owned by root, because docker
+  copy:
+    src: "{{releases_path}}/volumes/"
+    dest: "{{home}}/{{stack_name}}/volumes/"
+    mode: preserve # 'preserve' keeps the file permissions, i.e. it keeps .sh files executable
+
+- name: "Create custom fact directory"
+  become: yes
+  file:
+    path: "/etc/ansible/facts.d"
+    state: "directory"

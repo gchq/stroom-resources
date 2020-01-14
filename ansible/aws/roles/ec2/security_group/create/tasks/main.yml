@@ -8,9 +8,9 @@
     aws_secret_key: "{{ aws_secret_key }}"
     security_token: "{{ aws_session_token }}"
     rules:
-      - proto: all
-        from_port: 0
-        to_port: 65535 
+      - proto: tcp
+        from_port: 22
+        to_port: 22
         cidr_ip: 0.0.0.0/0
     rules_egress:
       - proto: all

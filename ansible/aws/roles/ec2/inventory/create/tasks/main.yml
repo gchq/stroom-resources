@@ -1,3 +1,9 @@
+- name: Get the hostnam of the control machine
+  command: hostname
+  register: hostname
+
+
+
 - name: Check if {{ instance_tag_name }} exists
   ec2_instance_facts:
     aws_access_key: "{{ aws_access_key }}"
@@ -28,5 +34,5 @@
 - name: Write out the details of this instance to a temporary file
   template:
     src: templates/host_details.j2
-    dest: "{{ generated_path }}/hosts/{{ instance_tag_name }}"
+    dest: "./build/hosts/{{ instance_tag_name }}"
     

@@ -2,7 +2,7 @@ version: '2.4'
 services:
   nginx:
     container_name: nginx
-    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v7.0-LATEST}"
+    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v6.0-LATEST}"
     environment:
       #- ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_URL:-http://$HOST_IP:5001}
       - AUTH_SERVICE_HOST=${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
@@ -16,7 +16,7 @@ services:
       - NGINX_CLIENT_BODY_BUFFER_SIZE=${NGINX_CLIENT_BODY_BUFFER_SIZE:-1M}
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
-      - NGINX_SSL_CA_CERTIFICATE=${NGINX_SSL_CA_CERTIFICATE:-ca.pem.crt}
+      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
         # Enabling NGINX_SSL_VERIFY_CLIENT means we can capture the DN and cert expiry
         # in the datafeed but means the client cert must be imported into the browser
         # so set it to 'optional' so that it asks the client for a cert and if it
@@ -48,7 +48,3 @@ services:
         max-file: "${NGINX_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
-volumes:
-  nginx_logrotate:
-  nginx_logs:
-  # Other volumes defined in shared_volumes dir

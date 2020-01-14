@@ -3,13 +3,12 @@ version: "2.4"
 services:
   stroom-auth-service:
     container_name: stroom-auth-service
-    image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v7.0-LATEST}"
+    image: "${STROOM_AUTH_SERVICE_DOCKER_REPO:-gchq/stroom-auth-service}:${STROOM_AUTH_SERVICE_TAG:-v6.0-LATEST}"
     environment:
       - ADMIN_CONTEXT_PATH=/authenticationServiceAdmin
       - ADVERTISED_HTTP_HOST=https://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
       - ALLOW_PASSWORD_RESETS=${STROOM_AUTH_ALLOW_PASSWORD_RESETS:-false}
       - APPLICATION_CONTEXT_PATH=${STROOM_AUTH_APPLICATION_CONTEXT_PATH:-/}
-      - APP_PERMISSIONS_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/appPermissions/v1
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PATH=/canManageUsers
       - AUTHORISATION_SERVICE_CAN_MANAGE_USERS_PERMISSION=Manage Users
       - AUTHORISATION_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/authorisation/v1
@@ -39,7 +38,7 @@ services:
       - JAVA_OPTS=${STROOM_AUTH_SERVICE_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10769,suspend=n}
       - JWS_ALGORITHM=${STROOM_AUTH_JWS_ALGORITHM:-RS256}
       - JWS_ISSUER=stroom
-      # Minutes until expiration for the API token is configured in stroom-ui.
+      - JWS_MINUTES_UNTIL_EXPIRATION_FOR_API_TOKEN=525600 # 525600 minutes = 1 year
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_EMAIL_RESET_TOKEN=5 # Only 5 minutes
       - JWS_MINUTES_UNTIL_EXPIRATION_FOR_USER_TOKEN=43200 # 43200 minutes = 30 days
       - JWS_REQUIRE_EXPIRATION_TIME=${STROOM_AUTH_JWS_REQUIRE_EXPIRATION_TIME:-false}
@@ -73,6 +72,3 @@ services:
         max-file: "${STROOM_AUTH_SERVICE_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
-
-volumes:
-  stroom-auth-service_logs:

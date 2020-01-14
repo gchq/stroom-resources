@@ -30,9 +30,6 @@ source "${DIR}"/lib/shell_utils.sh
 source "${DIR}"/lib/stroom_utils.sh
 source "${DIR}"/lib/constants.sh
 
-# shellcheck disable=SC2034
-STACK_NAME="<STACK_NAME>" 
-
 main() {
   local requireConfirmation=true
 
@@ -96,7 +93,9 @@ main() {
   echo
 
   # shellcheck disable=SC2094
-  run_docker_compose_cmd \
+  docker-compose \
+    --project-name <STACK_NAME> \
+    -f "$DIR"/config/<STACK_NAME>.yml \
     down \
     -v
 }

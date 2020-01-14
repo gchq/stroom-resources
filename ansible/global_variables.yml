@@ -1,7 +1,0 @@
-# Where to store generated files. Points to a symlink, which you must maintain yourself.
-# NB: This is relative to the ansible scripts and not this file! I.e. ./aws../work or ./stroom/../work
-# NB: Unfortunately this is hardcoded in ./stroom/ansible.cfg. If you change this here you'll have to change it there. But you shouldn't need to change it.
-generated_path: "../config"
-
-# The name of the inventory file
-ansible_inventory_file: "{{ generated_path }}/ansible_inventory"

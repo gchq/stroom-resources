@@ -1,6 +1,14 @@
+- name: Get the hostnam of the control machine
+  command: hostname
+  register: hostname
+
+- name: Get the username of the current user
+  command: whoami
+  register: username
+
 - name: Ensure the ec2 Key Pair exists 
   ec2_key:
-    name: "{{ aws_key_pair_name }}"
+    name: "{{ hostname.stdout }}"
     profile: "{{ aws_profile_name }}"
     region: "{{ aws_region }}"
     aws_access_key: "{{ aws_access_key }}"
@@ -17,17 +25,17 @@
     verbosity: 2
 
 - name: The private key is save to a local .pem file
-  copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="{{ local_key_pair_path }}" mode=0600
+  copy: content="{{ ec2_key_creation_result.key.private_key }}" dest="~/.ssh/{{ hostname.stdout }}.pem" mode=0600
   when: ec2_key_creation_result.changed
 
-- name: Create a symlink to a predictable location
+- name: Create a symlink to a predictablc location
   file:
     state: link
-    src: "{{ local_key_pair_path }}"
+    src: "~/.ssh/{{ hostname.stdout }}.pem"
     dest: "~/.ssh/stroom_aws_key.pem"
-
+  
 - stat:
-    path: "{{ local_key_pair_path }}"
+    path: "~/.ssh/{{ hostname.stdout}}.pem"
   register: key_file_stat
 
 - fail:

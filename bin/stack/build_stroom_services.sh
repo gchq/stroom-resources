@@ -15,6 +15,7 @@ main() {
   # Array created like this to allow lines to commneted out
   SERVICES+=("nginx")
   SERVICES+=("stroom-auth-service")
+  SERVICES+=("stroom-auth-ui")
   SERVICES+=("stroom-log-sender")
 
   ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"

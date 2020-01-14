@@ -1,13 +1,6 @@
-"""
-Functions used in several other files
-"""
-from tempfile import mkstemp
-from shutil import move
-from os import fdopen, remove
+
 import subprocess
 import json
-
-
 def get_inventory():
     out = subprocess.Popen(
         ['ansible-inventory', '--list'],
@@ -39,6 +32,9 @@ def remove_line_from_file(path, line_contents):
                 f.write(line)
 
 
+from tempfile import mkstemp
+from shutil import move
+from os import fdopen, remove
 def replace_line(file_path, substring_to_find, new_line):
     temp_file, temp_file_path = mkstemp()
     with fdopen(temp_file,'w') as new_file:

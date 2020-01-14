@@ -1,9 +1,10 @@
-version: "2.4"
+version: '2.4'
 
 services:
+
   stroom:
     container_name: stroom
-    image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v7.0-LATEST}"
+    image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
@@ -90,9 +91,6 @@ services:
       - type: volume
         source: stroom_output
         target: /stroom/output
-        # This volume is shared with stroom-proxy-local. If we ever want to run stroom without
-        # a local proxy then we need to move this out into in override yml as is done with
-        # stroom-log-sender
       - type: volume
         source: stroom-proxy-local_repo
         target: /stroom/proxy-repo
@@ -105,7 +103,3 @@ services:
         max-file: "${STROOM_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
-volumes:
-  stroom_logs:
-  stroom_output:
-  stroom_volumes:

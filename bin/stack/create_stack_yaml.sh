@@ -7,77 +7,53 @@ set -e
 # shellcheck disable=SC1091
 source lib/shell_utils.sh
 
-# If var_name is "STROOM_TAG", replacement_value is "v6.1.2" and a line in
-# ${INPUT_YAML_FILE} looks like:
-#   image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
-# then it becomes 
-#   image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.1.2}"
-# This changes the default value, whilst still allowing it to be overridden
-# via the env file at deployment time.
-replace_in_yaml_file() {
-  local -r file="$1"; shift
-  local -r var_name="$1"; shift
-  local -r replacement_value="\${${var_name}:-$1}"; shift
-  local -r regex="\\$\{${var_name}(:-?[^}]*)?}"
-
-  #echo "${regex}"
-
-  if grep -E --silent "${regex}" "${file}"; then
-    echo -e "    Overriding the value of ${YELLOW}${var_name}${NC} to ${BLUE}${replacement_value}${NC}"
-    sed -i'' -E "s|${regex}|${replacement_value}|g" "${file}"
-  fi
-}
-
-add_yaml_file_to_stack() {
-  local file="$1"; shift
-
-  # The order that the files are used as arguments to docker compose
-  # is important so we need to prefix with a counter
-  printf -v file_prefix "%02d_" "${file_counter}"
-
-  local filename
-  filename="$(basename "${file}")"
-  local new_filename="${file_prefix}${filename}"
-  dest_file="${WORKING_DIRECTORY}/${new_filename}"
-
-  echo -e "  Copying ${BLUE}${file}${NC} ${YELLOW}=>${NC} ${BLUE}${new_filename}${NC}"
-  cp "${file}" "${dest_file}"
-
-  replace_in_yaml_file "${dest_file}" "STACK_NAME" "${BUILD_STACK_NAME}"
-  # Increment the counter
-  file_counter=$((file_counter + 1))
-}
-
 create_stack_from_services() {
-  echo -e "${GREEN}Copying the yaml file(s) to the stack${NC}"
-
-  local target_file
-  local file_counter=0
-
-  # Add the actual service files
-  for service in "${SERVICES[@]}"; do
-    target_file="${CONTAINERS_DIR}/${service}.yml"
-    add_yaml_file_to_stack "${target_file}"
+  local -r PATH_TO_CONTAINERS="../compose/containers"
+  echo version: \'2.4\'
+  echo services:
+  for service in "$@"; do
+    local target_yaml="${PATH_TO_CONTAINERS}/${service}.yml"
+    # TODO: make this a single grep
+    local service
+    service=$(grep -v '^services' "${target_yaml}" | grep -v '^version:')
+    echo "${service}"
   done
+}
 
-  # Add any volume mount files if they are applicable for this stack
-  for vol_mount_file in ${OVERRIDES_DIR}/*.yml; do
-    # filename format is serviceX_serviceY.yml, where serviceX is the service
-    # that is having the volume mount and serviceY is the service it is sharing
-    # it with.
-    local filename
-    filename="$(basename "${vol_mount_file}" )"
-    filename="${filename%%\.yml}"
-    local target_service="${filename%%_*}"
-    local source_service="${filename##*_}"
+append_shared_volumes() {
+  echo -e "${GREEN}Adding volumes to docker compose YAML file${NC}"
+  local -r MASTER_YAML="../compose/everything.yml"
 
-    #echo "[${target_service}] [${source_service}]"
+  # Read the volume whitelist into an array
+  local volume_whitelist=()
+  if [ -f "${VOLUMES_WHITELIST_FILE}" ]; then
+    while read line; do
+      # Add a colon to the end as that is how we see them in the master yml file
+      volume_whitelist+=("${line}")
+    done < "${VOLUMES_WHITELIST_FILE}"
+  else
+    echo -e "${YELLOW}WARN${NC}: Volume whitelist file ${BLUE}${VOLUMES_WHITELIST_FILE}${NC} not found."
+    echo -e "No docker volumes will be added to the stack"
+  fi
 
-    if element_in "${target_service}" "${SERVICES[@]}" \
-      && element_in "${source_service}" "${SERVICES[@]}"; then
-      # both target and source are in the stack servcies so include this
-      # override file
-      add_yaml_file_to_stack "${vol_mount_file}"
+  # grab all content from master yaml file after and including 'volumes:' entry
+  # and ignoring comments and blank lines
+  local all_volumes
+  all_volumes="$(sed -n -e '/^\w*volumes:/,$p' "${MASTER_YAML}" |
+    grep -vP '^\w*#' | 
+    grep -v '^\w*$' )"
+
+  echo "${all_volumes}" | while read vol; do
+    if [ "${vol}" = "volumes:" ]; then
+      echo "${vol}" >> "${OUTPUT_FILE}"
+    else
+      local trimmed_vol="${vol%%:}"
+      if element_in "${trimmed_vol}" "${volume_whitelist[@]}"; then
+        echo -e "  ${BLUE}${trimmed_vol}${NC}"
+
+        # indent is important here as it is yaml
+        echo "  ${vol}" >> "${OUTPUT_FILE}"
+      fi
     fi
   done
 }
@@ -89,13 +65,15 @@ main() {
   local -r VERSION=$2
   local -r SERVICES=("${@:3}")
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
+  local -r STACK_DEFINITIONS_DIR="stack_definitions/${BUILD_STACK_NAME}"
+  local -r VOLUMES_WHITELIST_FILE="${STACK_DEFINITIONS_DIR}/volumes_whitelist.txt"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}/config"
 
   mkdir -p "$WORKING_DIRECTORY"
-  local -r CONTAINERS_DIR="../compose/containers"
-  local -r OVERRIDES_DIR="${CONTAINERS_DIR}/overrides"
+  local -r OUTPUT_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.yml"
 
-  create_stack_from_services "${SERVICES[@]}"
+  create_stack_from_services "${SERVICES[@]}" > "${OUTPUT_FILE}"
+  append_shared_volumes
 }
 
 main "$@"

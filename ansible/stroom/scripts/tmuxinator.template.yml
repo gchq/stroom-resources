@@ -1,6 +1,0 @@
-name: aws
-root: ~/
-windows:
-  - editor:
-      layout: tiled
-      panes:

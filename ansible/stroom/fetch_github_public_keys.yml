@@ -1,8 +1,0 @@
-- hosts: localhost
-  vars_files:
-    - ./variables.yml
-    - ../global_variables.yml
-    - ../config/user_settings.yml
-  tasks:
-    - name: Fetches and concatenates public keys
-      command: "python3 ../stroom/scripts/fetch_github_public_keys.py {{ authorized_keys_path }}  {{ authorized_github_users }}"

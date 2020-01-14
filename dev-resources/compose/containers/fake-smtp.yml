@@ -12,5 +12,3 @@ services:
         target: /var/mail
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
-volumes:
-  fake-smtp_mail:

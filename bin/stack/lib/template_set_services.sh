@@ -88,8 +88,6 @@ main() {
   if [ ! -f "${ALL_SERVICES_FILE}" ]; then
     die "${RED}Error${NC}: All services file ${BLUE}${ALL_SERVICES_FILE}${NC}" \
       "can't be found."
-    show_all_services_usage "${CMD_HELP_MSG}"
-    exit 1
   fi
 
   # leading colon means silent error reporting by getopts
@@ -111,23 +109,18 @@ main() {
   setup_echo_colours
 
   if [ "$#" -eq 0 ]; then
-    err "${RED}Error${NC}: Must supply at least one service"
-    show_all_services_usage "${CMD_HELP_MSG}"
-    exit 1
+      die "${RED}Error${NC}: Must supply at least one service"
   fi
 
   for requested_service in "${@}"; do
     if ! is_service_in_all_services "${requested_service}"; then
-      err "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not" \
+      die "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not" \
         "in the list of all services for this stack."
-      show_all_services_usage "${CMD_HELP_MSG}"
-      exit 1
     fi
   done
 
   # clear the list of active services
   > "${STACK_SERVICES_FILE}"
-
   for requested_service in "${@}"; do
     # Add the line from all services for this service to the stack services list
     grep "^${requested_service}|" \

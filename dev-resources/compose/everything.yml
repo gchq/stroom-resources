@@ -1,0 +1,177 @@
+#Defines all the services that make up the stroom estate
+version: '2.4'
+
+services:
+
+  elasticsearch:
+      extends:
+          file: ./containers/elasticsearch.yml
+          service: elasticsearch
+
+  fake-smtp:
+      extends:
+          file: ./containers/fake-smtp.yml
+          service: fake-smtp
+
+  hbase:
+      extends:
+          file: ./containers/hbase.yml
+          service: hbase
+      #override the hostname as stroom-stats will access it from inside the docker network
+      #hostname: hbase
+      depends_on:
+        - zookeeper
+
+  hdfs:
+      extends:
+          file: ./containers/hdfs.yml
+          service: hdfs
+
+  kafka:
+      extends:
+          file: ./containers/kafka.yml
+          service: kafka
+      depends_on:
+        - zookeeper
+
+  kibana:
+      extends:
+          file: ./containers/kibana.yml
+          service: kibana
+      depends_on:
+          - elasticsearch
+
+
+  nginx:
+      extends:
+          file: ./containers/nginx.yml
+          service: nginx
+
+  stroom:
+      extends:
+          file: ./containers/stroom.yml
+          service: stroom
+      depends_on:
+        - stroom-all-dbs
+
+  stroom-5:
+      extends:
+          file: ./containers/stroom.yml
+          service: stroom
+      depends_on:
+        - stroom-all-dbs
+
+  stroom-annotations-service:
+      extends:
+          file: ./containers/stroom-annotations-service.yml
+          service: stroom-annotations-service
+      depends_on:
+          - stroom-all-dbs
+
+  stroom-annotations-ui:
+      extends:
+          file: ./containers/stroom-annotations-ui.yml
+          service: stroom-annotations-ui
+
+  stroom-auth-service:
+      extends:
+          file: ./containers/stroom-auth-service.yml
+          service: stroom-auth-service
+      depends_on:
+          - stroom-all-dbs
+
+  stroom-auth-ui:
+      extends:
+          file: ./containers/stroom-auth-ui.yml
+          service: stroom-auth-ui
+  
+  stroom-ui:
+      extends:
+          file: ./containers/stroom-ui.yml
+          service: stroom-ui
+
+  stroom-proxy-local:
+      extends:
+          file: ./containers/stroom-proxy-local.yml
+          service: stroom-proxy-local
+
+  stroom-proxy-remote:
+      extends:
+          file: ./containers/stroom-proxy-remote.yml
+          service: stroom-proxy-remote
+
+  stroom-query-elastic-ui:
+      extends:
+          file: ./containers/stroom-query-elastic-ui.yml
+          service: stroom-query-elastic-ui
+
+  stroom-query-elastic-service:
+      extends:
+          file: ./containers/stroom-query-elastic-service.yml
+          service: stroom-query-elastic-service
+
+  stroom-stats:
+      extends:
+          file: ./containers/stroom-stats.yml
+          service: stroom-stats
+      depends_on:
+        - stroom-all-dbs
+        - zookeeper
+        - kafka
+        - hbase
+
+  stroom-all-dbs:
+      extends:
+          file: ./containers/stroom-all-dbs.yml
+          service: stroom-all-dbs
+
+  stroom-log-sender:
+      extends:
+          file: ./containers/stroom-log-sender.yml
+          service: stroom-log-sender
+
+  zookeeper:
+      extends:
+          file: ./containers/zookeeper.yml
+          service: zookeeper
+
+volumes:
+
+  nginx_logs:
+  nginx_logrotate:
+
+  stroom_logs:
+  stroom_output:
+  stroom_volumes:
+
+  stroom-proxy-local_content:
+  stroom-proxy-local_logs:
+  stroom-proxy-local_repo:
+
+  stroom-proxy-remote_content:
+  stroom-proxy-remote_logs:
+  stroom-proxy-remote_repo:
+
+  stroom-auth-service_logs:
+
+  stroom-all-dbs_data:
+  stroom-all-dbs_logs:
+
+  zookeeper_data:
+
+  kafka_data:
+  kafka_logs:
+
+  hbase_data:
+  hbase_logs:
+
+  fake-smtp_mail:
+# If you want to have a docker managed/named volume but pointing to somewhere
+# other than /var/lib/docker/volumes/..... then you can do stuff like this.
+# Relative paths are not supported, but you can substitute env vars
+# my-shared-volume:
+#   driver: local
+#   driver_opts:
+#     type: none
+#     o: bind
+#     device: "/my/path/on/host"

@@ -9,7 +9,7 @@ ssl_certificate             /stroom-nginx/certs/<<<NGINX_SSL_CERTIFICATE>>>;
 # The server's private key
 ssl_certificate_key         /stroom-nginx/certs/<<<NGINX_SSL_CERTIFICATE_KEY>>>;
 # The public CA cert for verifying client certs
-ssl_client_certificate      /stroom-nginx/certs/<<<NGINX_SSL_CA_CERTIFICATE>>>;
+ssl_client_certificate      /stroom-nginx/certs/<<<NGINX_SSL_CLIENT_CERTIFICATE>>>;
 
 # These two need to be on otherwise we won't be able to extract the DN or the cert
 # In order to capture the DN in the headers/logs, ssl_client_verify needs to be set

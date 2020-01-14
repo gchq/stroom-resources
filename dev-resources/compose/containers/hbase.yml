@@ -42,6 +42,3 @@ services:
         max-file: "${HBASE_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
-volumes:
-  hbase_data:
-  hbase_logs:

@@ -1,27 +1,13 @@
 - name: Download stack
   get_url:
     url: "{{ stroom_url }}"
-    dest: "{{ generated_path }}"
+    dest: "./releases/"
     checksum: "sha256:{{ stroom_url }}.sha256"
   register: download_info
 
-  # FIXME: I can't get the unarchive module to work on macOS or Ubuntu. Ansible complains about /bin/tar not being able
-  # to handle the archive. It untars manually without problems, so I'l just do that.
+  # FIXME: I can't get this to work on macOS or Ubuntu. Ansible complains about /bin/tar not being able
+  # to handle the archive. It untars manually without problems.
 - name: Unpack Stroom's distribution tar
-  command: "tar -xvf {{playbook_dir}}/{{download_info.dest}} --directory {{ generated_path }}"
-
-- name: Delete the archive
-  file:
-    path: "{{ download_info.dest }}"
-    state: absent
-
-- name: Get absolute path so we can create a symlink elsewhere using the potentially relative generated_path
-  command: "realpath {{ generated_path }}"
-  register: absolute_path
-  
-- name: Create a symlink for 'latest'
-  file:
-    state: link
-    force: yes
-    src: "{{ absolute_path.stdout }}/{{ stack_name }}/{{ stack_name }}-{{ stack_version }}"
-    dest: "{{ absolute_path.stdout }}/{{ stack_name }}/latest"
+  unarchive:
+    src: "{{playbook_dir}}/{{download_info.dest }}"
+    dest: "./releases/argh"

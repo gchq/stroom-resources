@@ -34,9 +34,6 @@ source "${DIR}"/lib/shell_utils.sh
 source "${DIR}"/lib/stroom_utils.sh
 source "${DIR}"/lib/constants.sh
 
-# shellcheck disable=SC2034
-STACK_NAME="<STACK_NAME>" 
-
 main() {
 
   # leading colon means silent error reporting by getopts
@@ -104,7 +101,11 @@ main() {
     echo -e "${GREEN}Tailing the logs from the last ${line_count_per_service} entries onwards${NC}"
   fi
 
-  run_docker_compose_cmd \
+
+  # shellcheck disable=SC2094
+  docker-compose \
+    --project-name <STACK_NAME> \
+    -f "$DIR"/config/<STACK_NAME>.yml \
     logs \
     -f \
     --tail="${line_count_per_service}" \

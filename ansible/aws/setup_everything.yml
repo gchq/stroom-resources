@@ -1,5 +1,5 @@
-- hosts: localhost
-  connection: localhost
+- hosts: local
+  connection: local
   gather_facts: False
 
 - name: Setup AWS
