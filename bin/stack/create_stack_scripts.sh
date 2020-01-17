@@ -72,6 +72,12 @@ main() {
     create_script backup_databases
   fi
 
+  # Only stroom can be migrated
+  # It is possible the DB is running elsewhere
+  if element_in "stroom" "${SERVICES[@]}"; then
+    create_script migrate
+  fi
+
   create_script show_config
   create_script pull_images
 
