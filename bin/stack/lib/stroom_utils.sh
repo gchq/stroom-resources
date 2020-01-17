@@ -579,11 +579,56 @@ start_stack() {
     services_to_start=( "${@}" )
   fi
 
+  extra_args=()
+  if [ "${MONOCHROME}" = true ]; then
+    extra_args+=( "--no-color" )
+  fi
+
   # shellcheck disable=SC2094
   run_docker_compose_cmd \
     up \
+    "${extra_args[@]}" \
     -d \
     "${services_to_start[@]}"
+}
+
+migrate_stack() {
+  echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}\n"
+
+  determing_docker_host_details
+
+  services_to_start=()
+
+  if is_service_in_stack "stroom"; then
+    services_to_start+=( "stroom" )
+  fi
+
+  if is_service_in_stack "stroom-all-dbs"; then
+    services_to_start+=( "stroom-all-dbs" )
+  fi
+
+  # Make the container run the migration on boot instead of starting the app
+  export STROOM_DROPWIZARD_COMMAND="migrate"
+
+  mkdir -p "${DIR}/${LOGS_DIR_NAME}"
+  migrate_log_file="${DIR}/${LOGS_DIR_NAME}/migrate.sh.$(date +%Y%m%d).log"
+
+  # shellcheck disable=SC2094
+  # We want all containers to stop when stroom exits
+  # Tee stdout/stderr to a log file for posterity
+  # no-color as we don't want ascii colour codes in the logs
+  run_docker_compose_cmd \
+    up \
+    --abort-on-container-exit \
+    --no-color \
+    "${services_to_start[@]}" \
+    2>&1 \
+    | tee -a \
+      "${migrate_log_file}"
+
+  echo -e "${GREEN}Process complete, check the logs for errors." \
+    "\nThis log was also written to" \
+    "${BLUE}${migrate_log_file}${NC}"
 }
 
 stop_services_if_in_stack() {
@@ -629,7 +674,8 @@ stop_stack_quickly() {
   echo -e "${GREEN}Stopping all the docker containers at once${NC}\n"
 
   run_docker_compose_cmd \
-    stop "$@"
+    stop \
+    "$@"
 }
 
 stop_stack_gracefully() {

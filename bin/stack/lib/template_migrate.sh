@@ -18,8 +18,9 @@
 # 
 ############################################################################
 
-CMD_HELP_MSG="Starts the specified services or the whole stack if no service name is supplied."
-Q_OPTION_TEXT="  -q   Quiet start. Don't wait for health checks and don't display info."
+cmd_help_args=""
+cmd_help_msg="Runs the stroom database migration as a foreground process then exits."
+cmd_help_options=""
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
@@ -69,20 +70,16 @@ check_installed_binaries() {
 }
 
 main() {
-  local wait_for_health_checks=true
   # leading colon means silent error reporting by getopts
-  while getopts ":hmq" arg; do
+  while getopts ":hm" arg; do
     case $arg in
       h )  
-        show_default_services_usage "${CMD_HELP_MSG}" "${Q_OPTION_TEXT}"
+        show_default_usage "${cmd_help_args}" "${cmd_help_msg}" "${cmd_help_options}"
         exit 0
         ;;
       m )  
         # shellcheck disable=SC2034
         MONOCHROME=true 
-        ;;
-      q )  
-        wait_for_health_checks=false
         ;;
     esac
   done
@@ -90,26 +87,17 @@ main() {
 
   setup_echo_colours
 
-  for requested_service in "${@}"; do
-    if ! is_service_in_stack "${requested_service}"; then
-      die "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not" \
-        "in the stack."
-    fi
-  done
+  if ! is_service_in_stack "stroom"; then
+    die "${RED}Error${NC}: Service ${BLUE}stroom${NC} is not in the stack."
+  fi
+
+  if is_container_running "stroom"; then
+    die "${RED}Error${NC}: Service ${BLUE}stroom${NC} is allready running."
+  fi
 
   check_installed_binaries
 
-  start_stack "$@"
-
-  if [ "${wait_for_health_checks}" = true ]; then
-    wait_for_service_to_start
-
-    # Stroom is now up or we have given up waiting so check the health
-    check_overall_health
-
-    # Display the banner, URLs and login details
-    display_stack_info
-  fi
+  migrate_stack "$@"
 }
 
 main "$@"
