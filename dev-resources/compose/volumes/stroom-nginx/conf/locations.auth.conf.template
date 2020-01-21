@@ -6,7 +6,7 @@
 
 location /api/auth/ {
     include location_defaults.conf;
-    proxy_pass http://auth_service_upstream_sticky/;
+    proxy_pass http://stroom_upstream/api/;
 }
 
 ##################
@@ -36,6 +36,7 @@ location /favicon.ico {
 # This allows stroom-ui to get its manifest.
 location /manifest.json {
     proxy_pass https://auth_ui_upstream/manifest.json;
+    
 }
 
 # This allows stroom-ui to get its assets, e.g. css and images.
