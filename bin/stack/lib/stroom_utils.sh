@@ -599,21 +599,27 @@ migrate_stack() {
 
   services_to_start=()
 
+  # We should have already confirmed that stroom is in the stack by
+  # this point, else we can't run a migration
   if is_service_in_stack "stroom"; then
     services_to_start+=( "stroom" )
   fi
 
+  # DB may be remote to the stack, e.g. physical DB
   if is_service_in_stack "stroom-all-dbs"; then
     services_to_start+=( "stroom-all-dbs" )
   fi
 
   # Make the container run the migration on boot instead of starting the app
+  # This env var will be substituted in the stroom docker-compose yml
   export STROOM_DROPWIZARD_COMMAND="migrate"
 
   mkdir -p "${DIR}/${LOGS_DIR_NAME}"
   migrate_log_file="${DIR}/${LOGS_DIR_NAME}/migrate.sh.$(date +%Y%m%d).log"
 
   # shellcheck disable=SC2094
+  # Start up stroom with the migrate command so it runs the migration as a
+  # foreground process and then exits.
   # We want all containers to stop when stroom exits
   # Tee stdout/stderr to a log file for posterity
   # no-color as we don't want ascii colour codes in the logs
