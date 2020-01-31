@@ -23,7 +23,7 @@ create_config() {
 }
 
 # Write a header block to the env file
-add_env_file_header() {
+add_common_env_file_header() {
   local env_file="${1}"
 
   # shellcheck disable=SC2016
@@ -38,7 +38,17 @@ add_env_file_header() {
     echo '# of stroompassword1. To override the value used set it in this'
     echo '# file like so:'
     echo '# STROOM_DB_PASSWORD=MyNewPassword123'
-    echo 
+    echo
+  } >> "${env_file}"
+}
+
+add_env_file_header() {
+  local env_file="${1}"
+
+  add_common_env_file_header "${env_file}"
+
+  # shellcheck disable=SC2016
+  {
     echo '# The following line can be un-commented and set if you want to specify the'
     echo '# hostname used for all communication between the various services. If left'
     echo '# commented out, the stack scripts will determine the IP address of the host'
@@ -56,6 +66,33 @@ add_env_file_header() {
     echo '# scripts will attempt to determine them.'
     echo '#export DOCKER_HOST_HOSTNAME=<enter your hostname here>'
     echo '#export DOCKER_HOST_IP=<enter your IP address here>'
+    echo
+  } >> "${env_file}"
+}
+
+add_templated_env_file_header() {
+  local env_file="${1}"
+
+  add_common_env_file_header "${env_file}"
+
+  # shellcheck disable=SC2016
+  {
+    echo '# Sets the hostname used for all communication between containers.'
+    echo '# Must be resolveable from withing the containers, i.e. you need a dns'
+    echo '# server in place.'
+    echo 'export HOST_IP="{{ stack_env_host_ip | default(inventory_hostname) }}"'
+    echo
+    echo '# The following defaults to the same value as HOST_IP,'
+    echo '# but you can override it If you need to.'
+    echo 'export DB_HOST_IP="{{ stack_env_db_host_ip | default(inventory_hostname) }}"'
+    echo
+    echo '# The following specify the'
+    echo '# host/ip used to identify the source when sending audit logs to stroom.'
+    echo '# They are typically used by a script in the container called'
+    echo '# add_container_identity_headers.sh. If they are not set here then the'
+    echo '# scripts will attempt to determine them.'
+    echo 'export DOCKER_HOST_HOSTNAME="{{ stack_env_docker_host_hostname | default(inventory_hostname) }}"'
+    echo 'export DOCKER_HOST_IP="{{ stack_env_docker_host_ip | default(inventory_hostname) }}"'
 
     echo
   } >> "${env_file}"
@@ -353,7 +390,7 @@ write_templated_env_file() {
     echo
   } >> "${OUTPUT_TEMPLATE_ENV_FILE}"
 
-  add_env_file_header "${OUTPUT_TEMPLATE_ENV_FILE}"
+  add_templated_env_file_header "${OUTPUT_TEMPLATE_ENV_FILE}"
 
   # Loop over the keys in the assoc. array
   for var_name in ${sorted_env_var_names}; do
