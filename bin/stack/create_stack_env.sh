@@ -10,18 +10,22 @@ set -e
 source lib/shell_utils.sh
 # shellcheck disable=SC1091
 source lib/network_utils.sh
+# shellcheck disable=SC1091
 source lib/constants.sh
 
 # Creates the blank env file
 create_config() {
   rm -f "${OUTPUT_ENV_FILE}"
   touch "${OUTPUT_ENV_FILE}"
+
+  rm -f "${OUTPUT_TEMPLATE_ENV_FILE}"
+  touch "${OUTPUT_TEMPLATE_ENV_FILE}"
 }
 
 # Write a header block to the env file
-add_header_to_env_file() {
-  local temp_env_file
-  temp_env_file="$(mktemp)"
+add_common_env_file_header() {
+  local env_file="${1}"
+
   # shellcheck disable=SC2016
   {
     echo '# This file contains overrides to values used in the <stack name>.yml file'
@@ -34,7 +38,17 @@ add_header_to_env_file() {
     echo '# of stroompassword1. To override the value used set it in this'
     echo '# file like so:'
     echo '# STROOM_DB_PASSWORD=MyNewPassword123'
-    echo 
+    echo
+  } >> "${env_file}"
+}
+
+add_env_file_header() {
+  local env_file="${1}"
+
+  add_common_env_file_header "${env_file}"
+
+  # shellcheck disable=SC2016
+  {
     echo '# The following line can be un-commented and set if you want to specify the'
     echo '# hostname used for all communication between the various services. If left'
     echo '# commented out, the stack scripts will determine the IP address of the host'
@@ -52,11 +66,36 @@ add_header_to_env_file() {
     echo '# scripts will attempt to determine them.'
     echo '#export DOCKER_HOST_HOSTNAME=<enter your hostname here>'
     echo '#export DOCKER_HOST_IP=<enter your IP address here>'
+    echo
+  } >> "${env_file}"
+}
+
+add_templated_env_file_header() {
+  local env_file="${1}"
+
+  add_common_env_file_header "${env_file}"
+
+  # shellcheck disable=SC2016
+  {
+    echo '# Sets the hostname used for all communication between containers.'
+    echo '# Must be resolveable from withing the containers, i.e. you need a dns'
+    echo '# server in place.'
+    echo 'export HOST_IP="{{ stack_env_host_ip | default(inventory_hostname) }}"'
+    echo
+    echo '# The following defaults to the same value as HOST_IP,'
+    echo '# but you can override it If you need to.'
+    echo 'export DB_HOST_IP="{{ stack_env_db_host_ip | default(inventory_hostname) }}"'
+    echo
+    echo '# The following specify the'
+    echo '# host/ip used to identify the source when sending audit logs to stroom.'
+    echo '# They are typically used by a script in the container called'
+    echo '# add_container_identity_headers.sh. If they are not set here then the'
+    echo '# scripts will attempt to determine them.'
+    echo 'export DOCKER_HOST_HOSTNAME="{{ stack_env_docker_host_hostname | default(inventory_hostname) }}"'
+    echo 'export DOCKER_HOST_IP="{{ stack_env_docker_host_ip | default(inventory_hostname) }}"'
 
     echo
-    cat "${OUTPUT_ENV_FILE}"
-  } > "${temp_env_file}"
-  mv "${temp_env_file}" "${OUTPUT_ENV_FILE}"
+  } >> "${env_file}"
 }
 
 # If var_name is "STROOM_TAG", replacement_value is "v6.1.2" and a line in
@@ -271,24 +310,9 @@ add_env_vars() {
     fi
   done < "${VARIABLE_DOCS_FILE}"
 
-  # Now write our env var out to a file
-  echo -e "${GREEN}Writing environment variables file ${BLUE}${OUTPUT_ENV_FILE}${NC}"
-  # Loop over the keys in the assoc. array
-  for var_name in ${sorted_env_var_names}; do
-    local var_value="${output_env_vars[${var_name}]}"
-    local var_docs="${docs_arr[${var_name}]}"
-    # OUTPUT_ENV_FILE already exists at this point
-    {
-      echo
-      # If we have any docs for this env var add it above it the variable
-      if [ -n "${var_docs}" ]; then
-        echo -e "${var_docs}"
-      fi
-      # They must be exported as they need to be available to child processes,
-      # i.e. docker-compose.
-      echo "export ${var_name}=\"${var_value}\"" 
-    } >> "${OUTPUT_ENV_FILE}"
-  done
+  write_env_file
+
+  write_templated_env_file
 
   # Error if any whitelisted env var is not used anywhere in the yaml
   echo -e "${GREEN}Checking for unused white-listed variables.${NC}"
@@ -325,6 +349,69 @@ add_env_vars() {
     echo -e "${GREEN}Applying variable overrides to YAML files${NC}"
     apply_overrides_to_yaml "${OVERRIDE_FILE}"
   fi
+}
+
+write_env_file() {
+  # Now write our env var out to a file
+  echo -e "${GREEN}Writing environment variables file ${BLUE}${OUTPUT_ENV_FILE}${NC}"
+
+  add_env_file_header "${OUTPUT_ENV_FILE}"
+
+  # Loop over the keys in the assoc. array
+  for var_name in ${sorted_env_var_names}; do
+    local var_value="${output_env_vars[${var_name}]}"
+    local var_docs="${docs_arr[${var_name}]}"
+    # OUTPUT_ENV_FILE already exists at this point
+    {
+      echo
+      # If we have any docs for this env var add it above it the variable
+      if [ -n "${var_docs}" ]; then
+        echo -e "${var_docs}"
+      fi
+      # They must be exported as they need to be available to child processes,
+      # i.e. docker-compose.
+      echo "export ${var_name}=\"${var_value}\"" 
+    } >> "${OUTPUT_ENV_FILE}"
+  done
+}
+
+write_templated_env_file() {
+  # Now write our env vars out to a jinja2 template file for use with ansible
+  echo -e "${GREEN}Writing templated environment variables file ${BLUE}${OUTPUT_TEMPLATE_ENV_FILE}${NC}"
+  # Add the file header
+  {
+    echo "# This file is a Jinja2 template version of $(basename "${OUTPUT_ENV_FILE}")."
+    echo "# It is intended for use when deploying the stack with Ansible."
+    echo "# See https://docs.ansible.com/ansible/latest/modules/template_module.html"
+    echo "# for details about using Jinja2 templates with Ansible."
+    echo "# The default values are identical to those specified in the .env file."
+    echo "# This file would need to be copied to the Ansible controller to be used"
+    echo "# by Ansible."
+    echo
+  } >> "${OUTPUT_TEMPLATE_ENV_FILE}"
+
+  add_templated_env_file_header "${OUTPUT_TEMPLATE_ENV_FILE}"
+
+  # Loop over the keys in the assoc. array
+  for var_name in ${sorted_env_var_names}; do
+    local var_value="${output_env_vars[${var_name}]}"
+    local var_docs="${docs_arr[${var_name}]}"
+    # OUTPUT_TEMPLATE_ENV_FILE already exists at this point
+    {
+      echo
+      # If we have any docs for this env var add it above it the variable
+      if [ -n "${var_docs}" ]; then
+        echo -e "${var_docs}"
+      fi
+      # They must be exported as they need to be available to child processes,
+      # i.e. docker-compose.
+      # ${var_name,,} converts var_name to lower case in bash 4+, obviously.
+      # Construct a line like
+      #   export MY_ENV_VAR="{{ stack_env_my_env_var | default('my default value') }}"
+      # That supports jinja2 templating
+      echo "export ${var_name}=\"{{ ${TEMPLATE_ENV_VAR_PREFIX}${var_name,,} | default('${var_value}') }}\"" 
+    } >> "${OUTPUT_TEMPLATE_ENV_FILE}"
+  done
 }
 
 create_versions_file() {
@@ -378,19 +465,24 @@ main() {
   local -r CONTAINER_VERSIONS_FILE="container_versions.env"
   local -r VARIABLE_DOCS_FILE="variable_documentation.md"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}/config"
-  mkdir -p "${WORKING_DIRECTORY}"
+  local -r ANSIBLE_DIRECTORY="${WORKING_DIRECTORY}/ansible"
   local -r OUTPUT_ENV_FILE="${WORKING_DIRECTORY}/${BUILD_STACK_NAME}.env"
+  local -r OUTPUT_TEMPLATE_ENV_FILE="${ANSIBLE_DIRECTORY}/${BUILD_STACK_NAME}.env.j2"
   local -r OVERRIDE_FILE="${STACK_DEFINITIONS_DIR}/overrides.env"
   local -r WHITELIST_FILE="${STACK_DEFINITIONS_DIR}/env_vars_whitelist.txt"
   local -r STACK_SERVICES_FILE="${WORKING_DIRECTORY}/../${STACK_SERVICES_FILENAME}"
   local -r ALL_SERVICES_FILE="${WORKING_DIRECTORY}/../${ALL_SERVICES_FILENAME}"
+  local -r TEMPLATE_ENV_VAR_PREFIX="stack_env_"
   #echo "${STACK_SERVICES_FILENAME}"
   #echo "${ALL_SERVICES_FILENAME}"
 
+  mkdir -p "${WORKING_DIRECTORY}"
+  mkdir -p "${ANSIBLE_DIRECTORY}"
+
   create_config
+
   add_env_vars
 
-  add_header_to_env_file
   create_versions_file
 }
 
