@@ -47,6 +47,33 @@ setup_colours() {
   }
 }
 
+# return 0 if $1 is prefixed by any of $2-$n
+# e.g. is_prefixed_by "stroom-nginx-v1.2.3" "stroom-nginx" "stroom-log-sender"
+is_prefixed_by() {
+  if [ $# -lt 2 ]; then
+    echo "Invald args to is_prefixed_by.  Args: $*"
+    exit 1
+  fi
+  local str="$1"; shift
+  
+  local regex="^("
+  local is_first_prefix=true
+  for prefix in "$@"; do
+    if [ "${is_first_prefix}" = true ]; then
+      is_first_prefix=false
+    else
+      regex="${regex}|"
+    fi
+    regex="${regex}${prefix}"
+  done
+  regex="${regex})"
+
+  # Now test the regex against the string
+  [[ "${str}" =~ ${regex} ]]
+
+  return $?
+}
+
 # Returns 0 if $1 is in the array of elements passed as subsequent args
 # e.g. 
 # arr=( "one" "two" "three" )
@@ -132,8 +159,7 @@ release_to_docker_hub() {
   echo -e "Logging in to DockerHub"
   echo "$DOCKER_PASSWORD" | docker login \
     -u "$DOCKER_USERNAME" \
-    --password-stdin \
-    >/dev/null 2>&1 
+    --password-stdin
 
   echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC}" \
     "with tags: ${GREEN}${allTagArgs[*]}${NC}"
@@ -145,16 +171,16 @@ release_to_docker_hub() {
 
 derive_docker_tags() {
   # This is a tagged commit, so create a docker image with that tag
-  VERSION_FIXED_TAG="${BUILD_VERSION}"
+  VERSION_FIXED_TAG="${VERSION_NO}"
 
   # Extract the major version part for a floating tag
-  majorVer=$(echo "${BUILD_VERSION}" | grep -oP "^v[0-9]+")
+  majorVer=$(echo "${VERSION_NO}" | grep -oP "^v[0-9]+")
   if [ -n "${majorVer}" ]; then
     MAJOR_VER_FLOATING_TAG="${majorVer}${LATEST_SUFFIX}"
   fi
 
   # Extract the minor version part for a floating tag
-  minorVer=$(echo "${BUILD_VERSION}" | grep -oP "^v[0-9]+\.[0-9]+")
+  minorVer=$(echo "${VERSION_NO}" | grep -oP "^v[0-9]+\.[0-9]+")
   if [ -n "${minorVer}" ]; then
     MINOR_VER_FLOATING_TAG="${minorVer}${LATEST_SUFFIX}"
   fi
@@ -176,11 +202,13 @@ derive_docker_tags() {
   )
 }
 
-do_versioned_stack_build() {
+do_stack_build_and_test() {
   #local -r stack_name="$1"
   local -r scriptName="build_ALL.sh"
   local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
   local -r buildDir=${scriptDir}/build/
+
+  echo -e "Building and testing stack variants"
 
   pushd "${scriptDir}" > /dev/null
 
@@ -190,7 +218,7 @@ do_versioned_stack_build() {
   echo -e "Running ${GREEN}${scriptName}${NC} in ${GREEN}${scriptDir}${NC}"
 
   # strip the "stroom-stacks-" part of the tag if it is there
-  ./"${scriptName}" "${BUILD_VERSION//stroom-stacks-/}"
+  ./"${scriptName}" "${VERSION_NO}"
 
   pushd "${buildDir}" > /dev/null
 
@@ -200,11 +228,14 @@ do_versioned_stack_build() {
   for archive_filename in *.tar.gz; do
     # Now spin up the stack to make sure it all works
     # TODO we can't test stroom_services as it won't run without a database
-    # TODO we can't test stroom_full as it will blow travis' memory
-    if [[ ! "${archive_filename}" =~ ^stroom_(services|full|full_test)- ]]; then
+    # TODO we can't test stroom_full* as it will blow travis' memory
+    # TODO we can't test stroom_and_proxy as proxy tries to get feed status
+    # from nginx
+    # We can't test 'stroom' stack as it has no DB
+    if [[ "${archive_filename}" =~ ^stroom_(core|core_test|dbs)?- ]]; then
       test_stack_archive "${archive_filename}"
     else
-      echo -e "Skipping tests for ${GREEN}${archive_filename}${NC}"
+      echo -e "Skipping stack tests for ${GREEN}${archive_filename}${NC}"
     fi
   done
 
@@ -213,10 +244,11 @@ do_versioned_stack_build() {
 }
 
 test_stack() {
-  echo -e "Testing stack"
+  stack_name="$1"
+  echo -e "Testing stack ${GREEN}${stack_name}${NC}  - ${GREEN}${VERSION_NO}${NC}"
 
   # Bit nasty but there should only be one match in there in both cases
-  pushd ./stroom_*/stroom_* > /dev/null
+  pushd "./${stack_name}/${stack_name}-${VERSION_NO}" > /dev/null
 
   echo -e "In directory ${GREEN}$(pwd)${NC}"
 
@@ -225,7 +257,7 @@ test_stack() {
   # Get the expected count of services
   local services_count
   # shellcheck disable=SC2002
-  services_count="$(cat SERVICES.txt | wc -l)"
+  services_count="$(cat ALL_SERVICES.txt | wc -l)"
   echo -e "services_count:            [${GREEN}${services_count}${NC}]"
 
   ./info.sh
@@ -271,6 +303,7 @@ test_stack() {
 
 test_stack_archive() {
   local -r stack_archive_file=$1
+
   echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
   echo -e "Testing stack archive ${GREEN}${stack_archive_file}${NC}"
 
@@ -290,7 +323,9 @@ test_stack_archive() {
   echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
   tar -xvf "../../${stack_archive_file}"
 
-  test_stack
+  stack_name="${stack_archive_file%%-*}"
+
+  test_stack "${stack_name}"
 
   popd > /dev/null
   echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
@@ -311,7 +346,7 @@ create_get_stroom_script() {
   local -r stack_build_dir="${TRAVIS_BUILD_DIR}/bin/stack/build"
   local -r get_stroom_source_file="${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}"
   local -r get_stroom_dest_file="${script_build_dir}/${get_stroom_filename}"
-  local -r hash_file="${stack_build_dir}/${GET_STROOM_STACK_NAME}-${BUILD_VERSION}.tar.gz.sha256"
+  local -r hash_file="${stack_build_dir}/${GET_STROOM_STACK_NAME}-${VERSION_NO}.tar.gz.sha256"
 
   mkdir -p "${script_build_dir}"
 
@@ -330,7 +365,7 @@ create_get_stroom_script() {
 
   substitute_tag "<STACK_NAME>" "${GET_STROOM_STACK_NAME}" "${get_stroom_dest_file}"
   substitute_tag "<STACK_TAG>" "${TRAVIS_TAG}" "${get_stroom_dest_file}"
-  substitute_tag "<STACK_VERSION>" "${BUILD_VERSION}" "${get_stroom_dest_file}"
+  substitute_tag "<STACK_VERSION>" "${VERSION_NO}" "${get_stroom_dest_file}"
   substitute_tag "<HASH_FILE_CONTENTS>" "${hash_file_contents}" "${get_stroom_dest_file}"
 
   # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
@@ -355,74 +390,66 @@ dump_build_vars() {
   # shellcheck disable=SC2153
   echo -e "STACK_NAME:                [${GREEN}${STACK_NAME}${NC}]"
   echo -e "BUILD_VERSION:             [${GREEN}${BUILD_VERSION}${NC}]"
+  echo -e "VERSION_NO:                [${GREEN}${VERSION_NO}${NC}]"
+
 }
 
 do_release() {
-  setup_colours
-  dump_travis_env_vars
 
-  # establish what version we are building
-  if [ -n "$TRAVIS_TAG" ] && [[ "$TRAVIS_TAG" =~ ${RELEASE_VERSION_REGEX} ]] ; then
+  # Tagged commit so use that as our build version, e.g. v6.0.0
+  # shellcheck disable=SC2034
+  local -r tag_prefix="$(echo "${TRAVIS_TAG}" | grep -oP "${PREFIX_PART_REGEX}")"
 
-    # Tagged commit so use that as our build version, e.g. v6.0.0
-    # shellcheck disable=SC2034
-    BUILD_VERSION="$(echo "${TRAVIS_TAG}" | grep -oP "${VERSION_PART_REGEX}")"
-    local -r tag_prefix="$(echo "${TRAVIS_TAG}" | grep -oP "${PREFIX_PART_REGEX}")"
+  dump_build_vars
+  echo -e "tag_prefix:                [${GREEN}${tag_prefix}${NC}]"
 
-    dump_build_vars
-    echo -e "tag_prefix:                [${GREEN}${tag_prefix}${NC}]"
+  if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
+    # This is a stroom-nginx release, so do a docker build/push
+    echo -e "${GREEN}Performing a ${BLUE}stroom-nginx${GREEN} release" \
+      "to dockerhub${NC}"
 
-    if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
-      # This is a stroom-nginx release, so do a docker build/push
-      echo -e "${GREEN}Performing a ${BLUE}stroom-nginx${GREEN} release" \
-        "to dockerhub${NC}"
+    derive_docker_tags
 
-      derive_docker_tags
+    # build and release the image to dockerhub
+    # shellcheck disable=SC2154
+    release_to_docker_hub \
+      "${DOCKER_REPO_STROOM_NGINX}" \
+      "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" \
+      "${allDockerTags[@]}"
 
-      # build and release the image to dockerhub
-      # shellcheck disable=SC2154
-      release_to_docker_hub \
-        "${DOCKER_REPO_STROOM_NGINX}" \
-        "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" \
-        "${allDockerTags[@]}"
+  elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_LOG_SENDER} ]]; then
+    # This is a stroom-log-sender release, so do a docker build/push
+    echo -e "${GREEN}Performing a ${BLUE}stroom-log-sender${GREEN} release" \
+      "to dockerhub${NC}"
 
-    elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_LOG_SENDER} ]]; then
-      # This is a stroom-log-sender release, so do a docker build/push
-      echo -e "${GREEN}Performing a ${BLUE}stroom-log-sender${GREEN} release" \
-        "to dockerhub${NC}"
+    derive_docker_tags
 
-      derive_docker_tags
+    # build and release the image to dockerhub
+    release_to_docker_hub \
+      "${DOCKER_REPO_STROOM_LOG_SENDER}" \
+      "${DOCKER_CONTEXT_ROOT_STROOM_LOG_SENDER}" \
+      "${allDockerTags[@]}"
 
-      # build and release the image to dockerhub
-      release_to_docker_hub \
-        "${DOCKER_REPO_STROOM_LOG_SENDER}" \
-        "${DOCKER_CONTEXT_ROOT_STROOM_LOG_SENDER}" \
-        "${allDockerTags[@]}"
+  elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
+    # This is a stroom-zookeeper release, so do a docker build/push
+    echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release" \
+      "to dockerhub${NC}"
 
-    elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
-      # This is a stroom-zookeeper release, so do a docker build/push
-      echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release" \
-        "to dockerhub${NC}"
+    derive_docker_tags
 
-      derive_docker_tags
+    # build and release the image to dockerhub
+    release_to_docker_hub \
+      "${DOCKER_REPO_STROOM_ZOOKEEPER}" \
+      "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" \
+      "${allDockerTags[@]}"
 
-      # build and release the image to dockerhub
-      release_to_docker_hub \
-        "${DOCKER_REPO_STROOM_ZOOKEEPER}" \
-        "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" \
-        "${allDockerTags[@]}"
+  elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STACKS} ]]; then
+    echo -e "${GREEN}Performing a ${BLUE}${tag_prefix}${GREEN} stack" \
+      "release to github${NC}"
 
-    elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STACKS} ]]; then
-      echo -e "${GREEN}Performing a ${BLUE}${tag_prefix}${GREEN} stack" \
-        "release to github${NC}"
-
-      echo -e "${GREEN}Releasing a new get_stroom.sh script to GitHub pages" \
-        "for stack ${tag_prefix}${NC}"
-      create_get_stroom_script
-    fi
-  else
-    echo -e "${GREEN}Not a tagged commit (or a tag we recognise), nothing to" \
-      "release.${NC}"
+    echo -e "${GREEN}Releasing a new get_stroom.sh script to GitHub pages" \
+      "for stack ${tag_prefix}${NC}"
+    create_get_stroom_script
   fi
 }
 
@@ -430,22 +457,39 @@ main() {
   setup_colours
   dump_travis_env_vars
 
-  # TODO probably want to build the stacks regardless, possibly as travis
-  # build jobs/stages prior to a deploy stage
-  # see https://docs.travis-ci.com/user/build-stages/matrix-expansion/
   # shellcheck disable=SC2034
   BUILD_VERSION="${TRAVIS_TAG:-SNAPSHOT}"
+  # VERSION_NO is just the number part of the tag without the prefix
+  # e.g. v6.0-beta.52
+  VERSION_NO="$( \
+    echo "${BUILD_VERSION}"  \
+    | grep -oP "(${VERSION_PART_REGEX}|SNAPSHOT)" \
+    )"
 
   dump_build_vars
 
-  # No tag so finish
-  echo -e "Not a tagged build so just build the stack and test it"
+  # If we are releasing a new docker image then that version will not be available
+  # on Dockerhub to be able to test the stack against it 
+  if [ -n "${TRAVIS_TAG}" ] && \
+     is_prefixed_by \
+      "${TRAVIS_TAG}" \
+      "${TAG_PREFIX_STROOM_NGINX}" \
+      "${TAG_PREFIX_STROOM_ZOOKEEPER}" \
+      "${TAG_PREFIX_STROOM_LOG_SENDER}"; then
+    echo "This is a docker image build so don't test the stack"
+  else
+    # STACK_NAME is set by the travis build matrix
+    # shellcheck disable=SC2153
+    do_stack_build_and_test
+  fi
 
-  # STACK_NAME is set by the travis build matrix
-  # shellcheck disable=SC2153
-  do_versioned_stack_build
-
-  do_release
+  # Perform a release to github/dockerhub if required
+  if [ -n "$TRAVIS_TAG" ] && [[ "$TRAVIS_TAG" =~ ${RELEASE_VERSION_REGEX} ]] ; then
+    do_release
+  else
+    echo -e "${GREEN}Not a tagged commit (or a tag we recognise), nothing to" \
+      "release.${NC}"
+  fi
 }
 
 # Start of script

@@ -20,68 +20,96 @@
 
 setup_echo_colours
 
-# shellcheck disable=SC1090
-#{
-  #source "$DIR"/lib/stroom_utils.sh
-#}
-
-stack_services_file="SERVICES.txt"
-
-SERVICES_WITH_HEALTH_CHECK=(
-    "stroom"
-    "stroom-auth-service"
-    "stroom-stats"
-    "stroom-proxy-local"
-    "stroom-proxy-remote"
-)
-
-SERVICE_SHUTDOWN_ORDER=(
-  "stroom-log-sender"
-  "stroom-proxy-remote"
-  "stroom-proxy-local"
-  "nginx"
-  "stroom-auth-ui"
-  "stroom-auth-service"
-  "stroom"
-  "stroom-stats"
-  "stroom-all-dbs"
-  "kafka"
-  "hbase"
-  "zookeeper"
-  "hdfs"
-)
+# Only echo to stdout if we are not in QUIET_MODE
+do_echo() {
+  if [ "${QUIET_MODE}" = false ]; then
+    echo -e "$@"
+  fi
+}
 
 echo_running() {
-  echo -e "  Status:   ${GREEN}RUNNING${NC}"
+  if [ "${QUIET_MODE}" = false ]; then
+    echo -e "  Status:   ${GREEN}RUNNING${NC}"
+  fi
 }
 
 echo_stopped() {
-  echo -e "  Status:   ${RED}STOPPED${NC}"
+  if [ "${QUIET_MODE}" = false ]; then
+    echo -e "  Status:   ${RED}STOPPED${NC}"
+  fi
 }
 
 echo_doesnt_exist() {
-  echo -e "  Status:   ${RED}NO CONTAINER${NC}"
+  if [ "${QUIET_MODE}" = false ]; then
+    echo -e "  Status:   ${RED}NO CONTAINER${NC}"
+  fi
 }
 
 echo_healthy() {
-  echo -e "  Status:   ${GREEN}HEALTHY${NC}"
+  if [ "${QUIET_MODE}" = false ]; then
+    echo -e "  Status:   ${GREEN}HEALTHY${NC}"
+  fi
 }
 
 echo_unhealthy() {
-  echo -e "  Status:   ${RED}UNHEALTHY${NC}"
-  echo -e "  Details:"
-  echo
+  if [ "${QUIET_MODE}" = false ]; then
+    echo -e "  Status:   ${RED}UNHEALTHY${NC}"
+    echo -e "  Details:\n"
+  fi
+}
+
+get_active_services_in_stack() {
+  cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" 
+}
+
+get_active_images_in_stack() {
+  # Loop over all images in the stack then output the ones whose
+  # non-namepsaced part is in the STACK_SERVICES_FILENAME file.
+  while read -r image; do
+    non_namespaced_tag="${image#*/}"
+    #echo "checking image $image $non_namespaced_tag"
+    # Make sure the non namespaced part, e.g.stroom-proxy:v6.0.18 
+    # is in the list of active services
+    if grep -qF "${non_namespaced_tag}" "${STACK_SERVICES_FILENAME}"; then
+      echo "${image}"
+    fi
+  done <<< "$( get_all_images_in_stack )"
+}
+
+run_docker_compose_cmd() {
+  extra_args=( "$@" )
+
+  compose_file_args=()
+  for yaml_file in "${DIR}"/config/*.yml; do
+    compose_file_args+=( "-f" "${yaml_file}" )
+  done
+
+  docker-compose \
+    --project-name "${STACK_NAME}" \
+    "${compose_file_args[@]}" \
+    "${extra_args[@]}"
+}
+
+get_all_images_in_stack() {
+  # Grepping yaml is far from ideal, we could do with something like yq or
+  # ruby + jq to parse it properly, but that means more prereqs.
+  # However the yaml is output from docker-compose so is in a fairly
+  # consistent format.
+  run_docker_compose_cmd \
+    config \
+    | grep -P "^\s+image:.*$" \
+    | grep -oP "(?<=image: ).*"
 }
 
 show_services_usage_part() {
   # shellcheck disable=SC2002
-  if [ -f "${DIR}/${stack_services_file}" ] \
-    && [ "$(cat "${DIR}/${stack_services_file}" | wc -l)" -gt 0 ]; then
+  if [ -f "${DIR}/${STACK_SERVICES_FILENAME}" ] \
+    && [ "$(cat "${DIR}/${STACK_SERVICES_FILENAME}" | wc -l)" -gt 0 ]; then
 
     echo -e "Valid SERVICE values:"
     while read -r service; do
       echo -e "  ${service}"
-    done < "${DIR}/${stack_services_file}"
+    done <<< "$( get_active_services_in_stack )"
   fi
 }
 
@@ -122,11 +150,10 @@ get_config_env_var() {
 
   if [ -z "${var_value}" ]; then
     # Not set so try getting it from the yaml
-    local -r yaml_file="${DIR}/config/${STACK_NAME}.yml"
 
     local env_var_name_value
     env_var_name_value="$( \
-      grep -v "\w* echo " "${yaml_file}" \
+      grep --no-filename -v "\w* echo " "${DIR}"/config/*.yml \
         | grep -v "^\w*#" \
         | grep -oP "(?<=\\$\\{)${var_name}[^}]+(?=\\})" \
         | head -n1 \
@@ -141,7 +168,8 @@ is_service_in_stack() {
   local -r service_name="$1"
 
   # return true if service_name is in the file
-  if grep -q "^${service_name}$" "${DIR}/${stack_services_file}"; then
+  # file is serviceName|fullyQualifiedDockerTag
+  if grep -q "^${service_name}|" "${DIR}/${STACK_SERVICES_FILENAME}"; then
     return 0;
   else
     return 1;
@@ -190,16 +218,20 @@ is_container_running() {
 
 # Return zero if any of the supplied services are in the stack
 is_at_least_one_service_in_stack() {
-  local -r service_names=( "$@" )
-  local regex="^"
-  for service_name in "${service_names[@]}"; do
-    regex+="(${service_name})"
+  local -r service_names_to_check=( "$@" )
+  # trying to build a regex like "^(svc1|svc3|svc4)$"
+  local regex="^("
+  for service_name in "${service_names_to_check[@]}"; do
+    regex+="${service_name}|"
   done
-  regex+="$"
+  regex="${regex%%|}}"
+  regex+=")$"
 
   # return true if service_name is in the file
   # shellcheck disable=SC2151
-  if grep -q "${regex}" "${DIR}/${stack_services_file}"; then
+  # TODO add cut into the mix here
+  #if cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" \
+  if get_active_services_in_stack | grep -qP "${regex}"; then
     return 0;
   else
     return 1;
@@ -211,8 +243,7 @@ check_container_health() {
   local -r service_name="$1"
   local return_code=0
 
-  echo
-  echo -e "Checking the run state of container ${GREEN}${service_name}${NC}"
+  do_echo "\nChecking the run state of container ${GREEN}${service_name}${NC}"
 
   if does_container_exist "${service_name}"; then
     if is_container_running "${service_name}"; then
@@ -224,7 +255,7 @@ check_container_health() {
     fi
   else
     echo_doesnt_exist
-    return_code=0
+    return_code=1
   fi
 
   return ${return_code}
@@ -249,9 +280,8 @@ check_service_health() {
   local -r health_check_pretty_url="${health_check_url}?pretty=true"
   local return_code=0
 
-  echo
-  echo -e "Checking the health of ${GREEN}${health_check_service}${NC}" \
-    "using ${BLUE}${health_check_pretty_url}${NC}"
+  do_echo "\nChecking the health of ${GREEN}${health_check_service}${NC}" \
+      "using ${BLUE}${health_check_pretty_url}${NC}"
 
   local -r http_status_code=$( \
     curl \
@@ -287,8 +317,7 @@ check_service_health() {
         curl -s "${health_check_url}" | 
           jq 'to_entries | map(select(.value.healthy == false)) | from_entries'
 
-        echo
-        echo -e "  See ${BLUE}${health_check_url}?pretty=true${NC} for the full report"
+      do_echo "\n  See ${BLUE}${health_check_url}?pretty=true${NC} for the full report"
 
         return_code="${unhealthy_count}"
       fi
@@ -298,7 +327,7 @@ check_service_health() {
         echo_healthy
       elif [ "x500" = "x${http_status_code}" ]; then
         echo_unhealthy
-        echo -e "See ${BLUE}${health_check_pretty_url}${NC} for details"
+      do_echo "See ${BLUE}${health_check_pretty_url}${NC} for details"
         # Don't know how many are unhealthy but it is at least one
         return_code=1
       fi
@@ -307,7 +336,7 @@ check_service_health() {
     echo_unhealthy
     local err_msg
     err_msg="$(curl -s --show-error "${health_check_url}" 2>&1)"
-    echo -e "${RED}${err_msg}${NC}"
+    do_echo "${RED}${err_msg}${NC}"
     return_code=1
   fi
   return ${return_code}
@@ -325,7 +354,6 @@ check_service_health_if_in_stack() {
 
     local admin_port
     admin_port="$(get_config_env_var "${admin_port_var_name}")"
-
 
     total_unhealthy_count=$((total_unhealthy_count + unhealthy_count))
 
@@ -351,7 +379,8 @@ check_containers() {
 
     total_unhealthy_count=$((total_unhealthy_count + unhealthy_count))
     #((total_unhealthy_count+=unhealthy_count))
-  done < "${DIR}/${stack_services_file}"
+  #done <<< "$( cut -d "|" -f 1 < "${DIR}/${STACK_SERVICES_FILENAME}" )"
+  done <<< "$( get_active_services_in_stack )"
 }
 
 check_overall_health() {
@@ -361,16 +390,16 @@ check_overall_health() {
 
   check_containers
 
-  echo
+  do_echo ""
 
   if command -v jq 1>/dev/null; then 
     # jq is available so do a more complex health check
     local is_jq_installed=true
   else
     # jq is not available so do a simple health check
-    echo -e "\n${YELLOW}Warning${NC}: Doing simple health check as" \
+    do_echo "\n${YELLOW}Warning${NC}: Doing simple health check as" \
       "${BLUE}jq${NC} is not installed."
-    echo -e "See ${BLUE}https://stedolan.github.io/jq/${NC} for details on" \
+    do_echo "See ${BLUE}https://stedolan.github.io/jq/${NC} for details on" \
       "how to install it."
     local is_jq_installed=false
   fi 
@@ -405,11 +434,10 @@ check_overall_health() {
     "STROOM_STATS_ADMIN_PORT" \
     "statsAdmin"
 
-  echo
   if [ "${total_unhealthy_count}" -eq 0 ]; then
-    echo -e "Overall system health: ${GREEN}HEALTHY${NC}"
+    do_echo "\nOverall system health: ${GREEN}HEALTHY${NC}"
   else
-    echo -e "Overall system health: ${RED}UNHEALTHY${NC}"
+    do_echo "\nOverall system health: ${RED}UNHEALTHY${NC}"
   fi
 
   return ${total_unhealthy_count}
@@ -426,11 +454,24 @@ echo_info_line() {
     "${padded_string}" "${padding:${#padded_string}}"
 }
 
+display_active_stack_services() {
+  echo -e "\nActive stack services and image versions:\n"
+
+  # Used for right padding 
+  local -r padding="                            "
+
+  while read -r line; do
+    local service_name="${line%%|*}"
+    local image_tag="${line#*|}"
+    echo_info_line "${padding}" "${service_name}" "${image_tag}"
+  done < "${DIR}/${STACK_SERVICES_FILENAME}"
+}
+
 display_stack_info() {
   # see if the terminal supports colors...
   no_of_colours=$(tput colors)
 
-  if [ ! "${MONOCHROME}" = true ]; then
+  if [ "${MONOCHROME}" = false ]; then
     if test -n "$no_of_colours" && test "${no_of_colours}" -eq 256; then
       # 256 colours so print the stroom banner in dirty orange
       echo -en "\e[38;5;202m"
@@ -442,24 +483,11 @@ display_stack_info() {
   cat "${DIR}"/lib/banner.txt
   echo -en "${NC}"
 
-  echo
-  echo -e "Stack image versions:"
-  echo
-
-  # Used for right padding 
-  local -r padding="                            "
-
-  while read -r line; do
-    local image_name="${line%%:*}"
-    local image_version="${line#*=}"
-    echo_info_line "${padding}" "${image_name}" "${image_version}"
-  done < "${DIR}"/VERSIONS.txt
+  display_active_stack_services
 
   if is_at_least_one_service_in_stack "${SERVICES_WITH_HEALTH_CHECK[@]}"; then
 
-    echo
-    echo -e "The following admin pages are available"
-    echo
+    echo -e "\nThe following admin pages are available\n"
     local admin_port
     if is_service_in_stack "stroom"; then
       admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
@@ -467,7 +495,7 @@ display_stack_info() {
         "http://localhost:${admin_port}/stroomAdmin"
     fi
     if is_service_in_stack "stroom-stats"; then
-      admin_port="$(get_config_env_var "STROOM_STATS_SERVICE_ADMIN_PORT")"
+      admin_port="$(get_config_env_var "STROOM_STATS_ADMIN_PORT")"
       echo_info_line "${padding}" "Stroom Stats" \
         "http://localhost:${admin_port}/statsAdmin"
     fi
@@ -489,32 +517,43 @@ display_stack_info() {
   fi
 
   if is_at_least_one_service_in_stack "stroom" "stroom-proxy-local" "stroom-proxy-remote"; then
-    echo
-    echo -e "Data can be POSTed to Stroom using the following URLs (see README for details)"
-    echo
+    echo -e "\nData can be POSTed to Stroom using the following URLs (see README for details)\n"
     if is_service_in_stack "stroom"; then
-      echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeed"
+      echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeeddirect"
     fi
     if is_service_in_stack "stroom-proxy-local"; then
       echo_info_line "${padding}" "Stroom Proxy (local)" \
-        "https://localhost:${STROOM_PROXY_LOCAL_HTTPS_APP_PORT}/stroom/datafeed"
+        "https://localhost/stroom/datafeed"
     fi
     if is_service_in_stack "stroom-proxy-remote"; then
+      local admin_port
+      admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_APP_PORT")"
       echo_info_line "${padding}" "Stroom Proxy (remote)" \
-        "https://localhost:${STROOM_PROXY_REMOTE_HTTPS_APP_PORT}/stroom/datafeed"
+        "http://localhost:${admin_port}/stroom/datafeed"
     fi
 
     if is_service_in_stack "stroom"; then
-      echo
-      echo -e "The Stroom user interface can be accessed at the following URL"
-      echo
+      echo -e "\nThe Stroom user interface can be accessed at the following URL\n"
       echo_info_line "${padding}" "Stroom UI" "https://localhost/stroom"
-      echo
-      echo -e "  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})"
-      echo
+      echo -e "\n  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})\n"
     fi
 
   fi
+}
+
+determing_docker_host_details() {
+  # If they haven't already been set in the env file, capture the hostname/ip
+  # of the host running the containers so they can make it available to
+  # stroom-log-sender. This is typically done by the file
+  # add_container_identity_headers.sh in the container. They have to be
+  # exported so docker-compose can use them.
+  # shellcheck disable=SC2034
+  export DOCKER_HOST_HOSTNAME="${DOCKER_HOST_HOSTNAME:-$(hostname --fqdn)}"
+  # shellcheck disable=SC2034
+  export DOCKER_HOST_IP="${DOCKER_HOST_IP:-$(determine_host_address)}"
+
+  echo -e "${GREEN}Using hostname ${BLUE}${DOCKER_HOST_HOSTNAME}${GREEN} and" \
+    "IP address ${BLUE}${DOCKER_HOST_IP}${GREEN} for audit logging.${NC}"
 }
 
 start_stack() {
@@ -522,23 +561,29 @@ start_stack() {
   #env
   #docker-compose -f "$DIR"/config/"${STACK_NAME}".yml config
 
-  echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}"
-  echo
+  echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}\n"
 
-  # Capture the hostname/ip of the host running the containers so they can
-  # make it available to stroom-log-sender
-  # shellcheck disable=SC2034
-  DOCKER_HOST_HOSTNAME="$(hostname -f)"
-  # shellcheck disable=SC2034
-  DOCKER_HOST_IP="${HOST_IP}"
+  determing_docker_host_details
+
+  local stack_services=()
+  while read -r service_to_start; do
+    stack_services+=( "${service_to_start}" )
+  # TODO add cut into the mix here
+  done <<< "$( get_active_services_in_stack )"
+
+  # Explicitly set services to start so we can use the SERVICES file to
+  # control what services run on the node.
+  if [ "$#" -eq 0 ]; then
+    services_to_start=( "${stack_services[@]}" )
+  else
+    services_to_start=( "${@}" )
+  fi
 
   # shellcheck disable=SC2094
-  docker-compose \
-    --project-name "${STACK_NAME}" \
-    -f "$DIR/config/${STACK_NAME}.yml" \
+  run_docker_compose_cmd \
     up \
     -d \
-    "${@}"
+    "${services_to_start[@]}"
 }
 
 stop_services_if_in_stack() {
@@ -554,7 +599,6 @@ stop_services_if_in_stack() {
   done
 }
 
-
 stop_service_if_in_stack() {
   check_arg_count 1 "$@"
   local -r service_name="$1"
@@ -569,9 +613,7 @@ stop_service_if_in_stack() {
 
       if [ "${state}" = "true" ]; then
         # shellcheck disable=SC2094
-        docker-compose \
-          --project-name "${STACK_NAME}" \
-          -f "$DIR"/config/"${STACK_NAME}".yml \
+        run_docker_compose_cmd \
           stop \
           "${service_name}"
       else
@@ -584,88 +626,79 @@ stop_service_if_in_stack() {
 }
 
 stop_stack_quickly() {
-  echo -e "${GREEN}Stopping all the docker containers at once${NC}"
-  echo
+  echo -e "${GREEN}Stopping all the docker containers at once${NC}\n"
 
-  docker-compose \
-    --project-name "${STACK_NAME}" \
-    -f "$DIR/config/${STACK_NAME}.yml" \
+  run_docker_compose_cmd \
     stop "$@"
 }
 
 stop_stack_gracefully() {
-  echo -e "${GREEN}Stopping the docker containers in graceful order${NC}"
-  echo
+  echo -e "${GREEN}Stopping the docker containers in graceful order${NC}\n"
 
   local all_services=()
   while read -r service_to_stop; do
     all_services+=( "${service_to_stop}" )
-  done < "${DIR}/${stack_services_file}"
+  done <<< "$( get_active_services_in_stack )"
 
   stop_services_if_in_stack "${all_services[@]}"
 
   # In case we have missed any stop the whole project
   echo -e "${GREEN}Stopping any remaining containers in the stack${NC}"
-  docker-compose \
-    --project-name "${STACK_NAME}" \
-    -f "$DIR/config/${STACK_NAME}.yml" \
+  run_docker_compose_cmd \
     stop
 }
 
 wait_for_stroom() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom to complete its start up.${NC}"
-  echo -e "${DGREY}Stroom has to build its database tables when started for the first time,${NC}"
-  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/stroomAdmin"
+  local info_msg="Waiting for Stroom to complete its start up."
+  local sub_info_msg=$'Stroom has to build its database tables when started for the first time,\nso this may take a minute or so. Subsequent starts will be quicker.'
 
-  wait_for_200_response "http://localhost:${admin_port}/stroomAdmin"
+  wait_for_200_response "${url}" "${info_msg}" "${sub_info_msg}"
 }
 
 wait_for_stroom_auth_service() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom Authentication to complete its start up.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_AUTH_SERVICE_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/authenticationServiceAdmin"
+  local info_msg="Waiting for Stroom Authentication to complete its start up."
 
-  wait_for_200_response "http://localhost:${admin_port}/authenticationServiceAdmin"
+  wait_for_200_response "${url}" "${info_msg}"
 }
 
 wait_for_stroom_stats() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom Stats to complete its start up.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_STATS_SERVICE_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/statsAdmin"
+  local info_msg="Waiting for Stroom Stats to complete its start up."
 
-  wait_for_200_response "http://localhost:${admin_port}/statsAdmin"
+  wait_for_200_response "${url}" "${info_msg}"
 }
 
 wait_for_stroom_proxy_local() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom Proxy (local) to complete its start up.${NC}"
-  echo -e "${DGREY}Stroom Proxy has to build its database tables when started for the first time,${NC}"
-  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_PROXY_LOCAL_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/proxyAdmin"
+  local info_msg="Waiting for Stroom Proxy (local) to complete its start up."
+  local sub_info_msg=$'Stroom Proxy has to build its database tables when started for the first time,\nso this may take a minute or so. Subsequent starts will be quicker.'
 
-  wait_for_200_response "http://localhost:${admin_port}/proxyAdmin"
+  wait_for_200_response "${url}" "${info_msg}" "${sub_info_msg}"
 }
 
 wait_for_stroom_proxy_remote() {
-  echo
-  echo -e "${GREEN}Waiting for Stroom Proxy (remote) to complete its start up.${NC}"
-  echo -e "${DGREY}Stroom Proxy has to build its database tables when started for the first time,${NC}"
-  echo -e "${DGREY}so this may take a minute or so. Subsequent starts will be quicker.${NC}"
 
   local admin_port
   admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_ADMIN_PORT")"
+  local url="http://localhost:${admin_port}/proxyAdmin"
+  local info_msg="Waiting for Stroom Proxy (remote) to complete its start up."
+  local sub_info_msg=$'Stroom Proxy has to build its database tables when started for the first time,\nso this may take a minute or so. Subsequent starts will be quicker.'
 
-  wait_for_200_response "http://localhost:${admin_port}/proxyAdmin"
+  wait_for_200_response "${url}" "${info_msg}" "${sub_info_msg}"
 }
 
 wait_for_service_to_start() {
@@ -675,13 +708,17 @@ wait_for_service_to_start() {
   # slowest first
   if is_container_running "stroom"; then
     wait_for_stroom
-  elif is_container_running "stroom-proxy-local"; then
+  fi
+  if is_container_running "stroom-proxy-local"; then
     wait_for_stroom_proxy_local
-  elif is_container_running "stroom-proxy-remote"; then
+  fi
+  if is_container_running "stroom-proxy-remote"; then
     wait_for_stroom_proxy_remote
-  elif is_container_running "stroom-auth-service"; then
+  fi
+  if is_container_running "stroom-auth-service"; then
     wait_for_stroom_auth_service
-  elif is_container_running "stroom-stats"; then
+  fi
+  if is_container_running "stroom-stats"; then
     wait_for_stroom_stats
   fi
   # If we fall out here then we have nothing useful to wait for

@@ -1,0 +1,24 @@
+
+- name: Perform operation on databases 
+  vars_files:
+    - ./variables.yml
+  become: yes
+  hosts: stroom_dbs
+  roles:
+    - roles/stack/op
+
+- name: Perform operation on services 
+  vars_files:
+    - ./variables.yml
+  become: yes
+  hosts: stroom_services
+  roles:
+    - roles/stack/op
+
+- name: Perform operation on strooms 
+  vars_files:
+    - ./variables.yml
+  become: yes
+  hosts: stroom_and_proxy
+  roles:
+    - roles/stack/op

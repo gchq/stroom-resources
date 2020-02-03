@@ -1,0 +1,9 @@
+version: '2.4'
+
+services:
+  stroom-log-sender:
+    volumes:
+      # Stroom
+      - type: volume
+        source: stroom_logs
+        target: /stroom-log-sender/log-volumes/stroom

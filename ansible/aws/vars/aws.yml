@@ -1,0 +1,15 @@
+aws_profile_name: "{{vault_aws_profile_name}}"
+aws_access_key: "{{ vault_aws_access_key }}"
+aws_secret_key: "{{ vault_aws_secret_key }}"
+aws_session_token: "{{ vault_aws_session_token }}"
+aws_region: "{{ vault_aws_region }}"
+
+ec2_ami: "{{ vault_ec2_ami }}"
+ec2_subnet_id: "{{ vault_ec2_subnet_id }}"
+ec2_security_group:  "{{ vault_ec2_security_group }}"
+ec2_security_group_description: "{{ vault_ec2_security_group_description }}" 
+
+
+ec2_instance_type: t2.micro
+instance_tag_environment: test
+instance_tag_owner: stroom_team

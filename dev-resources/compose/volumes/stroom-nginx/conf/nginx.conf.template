@@ -6,514 +6,70 @@ events {
     worker_connections  1024;
 }
 
-
-# The access logs need to mirror the standard nginx/apache 'combined' format
-# but using the subject DN instead of the remote_user. 'logname' doesn't appear
-# to be a thing in nginx, so have hard-coded it to '-'.
-
-#Standard Apache Format 
-#%h - host name should be ok without quotes
-#%l - Remote logname (from identd, if supplied). This will return a dash unless IdentityCheck is set On.
-#\"%u\" - user name should be quoted to deal with DNs
-#%t - time is added in square brackets so is contained for parsing purposes
-#\"%r\" - URL is quoted
-#%>s - Response code doesn't need to be quoted as it is a single number
-#%b - The size in bytes of the response sent to the client
-#\"%{Referer}i\" - Referrer is quoted so that's ok
-#\"%{User-Agent}i\" - User agent is quoted so also ok
-#
-#LogFormat "%h %l \"%u\" %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
-
-# A-Z index of nginx variables - http://nginx.org/en/docs/varindex.html
-
 http {
-    log_format stroom_combined_format 
-        '$remote_addr '
-        '- '
-        '"$ssl_client_s_dn" '
-        '[$time_local] '
-        '"$request" '
-        '$status '
-        '$body_bytes_sent '
-        '"$http_referer" '
-        '"$http_user_agent" ';
+    # Include generic logging configuration
+    include logging.conf;
 
-    # stdout/stderr logging for use with 'docker logs'
-    access_log /var/log/nginx/access.log stroom_combined_format;
-    error_log /var/log/nginx/app.log warn;
-
-    # Additional file based logging for collection by stroom-log-sender
-    access_log /stroom-nginx/logs/access/access.log stroom_combined_format;
-    error_log /stroom-nginx/logs/app/app.log warn;
-
-    ####################
-    # Upstream servers #
-    ####################
-
-    upstream auth_service_upstream_sticky {
-        ip_hash; # Upstream determined by a hash of the clients IP address -- effectively enabling sticky sessions
-        server ${AUTH_SERVICE_HOST}:${AUTH_SERVICE_PORT};
-        # Can add other servers below
-    }
-
-    upstream stroom_upstream_sticky {
-        ip_hash; # Upstream determined by a hash of the clients IP address -- effectively enabling sticky sessions
-        server ${STROOM_HOST}:${STROOM_PORT};
-        # Can add other servers below
+    upstream stroom_upstream_sticky { 
+        ip_hash;
+        include upstreams.stroom.ui.conf;
     }
 
     upstream stroom_upstream {
-        server ${STROOM_HOST}:${STROOM_PORT};
-        # Can add other servers below
+        include upstreams.stroom.processing.conf;
     }
 
-    upstream stroom_proxy_upstream {
-        server ${STROOM_PROXY_HOST}:${STROOM_PROXY_PORT};
-        # Can add other servers below
+    upstream auth_service_upstream_sticky {
+        ip_hash;
+        include upstreams.auth.service.conf;
     }
 
-
-    ######################
-    # Upstream redirects #
-    ######################
-    ### USERS ###
-    upstream users_upstream {
-        server 127.0.0.1:46011;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46011;
-        return 302 https://${AUTH_UI_URL}/userSearch/;
-    }
-
-    ### LOGIN ###
-    upstream login_upstream {
-        server 127.0.0.1:46021;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46021;
-        return 302 https://${AUTH_UI_URL}/login/;
-    }
-
-    ### TOKENS ###
-    upstream tokens_upstream {
-        server 127.0.0.1:46031;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46031;
-        return 302 https://${AUTH_UI_URL}/tokens/;
-    }
-
-    ### CHANGEPASSWORD ###
-    upstream change_password_upstream {
-        server 127.0.0.1:46041;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46041;
-        return 302 https://${AUTH_UI_URL}/changepassword/;
-    }
-
-    ### AUTHUI ###
     upstream auth_ui_upstream {
-        server 127.0.0.1:46051;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46051;
-        return 302 https://${AUTH_UI_URL}/;
+        include upstreams.auth.ui.conf;
     }
 
-    ### ANNOTATIONS ###
-    upstream annotations_upstream {
-        server 127.0.0.1:46061;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46061;
-        return 302 ${ANNOTATIONS_UI_URL}/;
+    upstream stroom_proxy_upstream { 
+        include upstreams.proxy.conf;
     }
 
-    ### QUERY-ELASTIC ###
-    upstream query_elastic_upstream {
-        server 127.0.0.1:46071;
-        #server 127.0.0.1:46012;
-    }
-    server {
-        listen 46071;
-        return 302 ${QUERY_ELASTIC_UI_URL}/;
-    }
-
-
+    # Define valid index page filenames
     index index.html index.htm;
 
+    # Necessary where we have long server names, i.e. aws.
+    # Increasing by default because I'm not clear of the downsides?
+    server_names_hash_bucket_size 128;
+
+    # Redirect all http traffic to https
     server {
-        #rewrite_log    on;
-	#log_not_found  on;
-        #log_subrequest on;
+        listen 80 default_server;
+        server_name _;
+        return 301 https://$host$request_uri;
+    }
+    
+    server {
+        # Include generic server configuration
+        include server.conf;
 
-        root /usr/share/nginx/html;
+        # Include location configuration specific to stroom
+        include locations.stroom.conf;
 
-        listen                      80;
-        listen                      443 ssl;
-        server_name                 ${NGINX_ADVERTISED_HOST} localhost;
+        # Include location configuration specific to auth
+        include locations.auth.conf;
 
-        # The server's public certificate
-        ssl_certificate             /stroom-nginx/certs/${NGINX_SSL_CERTIFICATE};
-        # The server's private key
-        ssl_certificate_key         /stroom-nginx/certs/${NGINX_SSL_CERTIFICATE_KEY};
-        # The public CA cert for verifying client certs
-        ssl_client_certificate      /stroom-nginx/certs/${NGINX_SSL_CLIENT_CERTIFICATE};
+        # Include location configuration specific to proxy
+        include locations.proxy.conf;
 
-        # These two need to be on otherwise we won't be able to extract the DN or the cert
-        # In order to capture the DN in the headers/logs, ssl_client_verify needs to be set
-        # to 'on' or 'optional'. With 'optional' nginx will request that the client provides
-        # a cert and use it if it does. Nginx doedsn't currently (without using multiple server 
-        # blocks) have a way to set ssl_client_verify at the 'location' level which would 
-        # allow us to selectively turn it on.
-        ssl_verify_client           ${NGINX_SSL_VERIFY_CLIENT};
-        ssl_verify_depth            10;
+        # ########### IF_development-only_IN_STACK ###########
+        # This conditional block will be removed in a stack release
+        # as development-only is not a valid service
+        # See create_stack_assets.sh
 
-        # These set the timeouts - the unit is seconds
-        proxy_connect_timeout       300;
-        proxy_send_timeout          300;
-        proxy_read_timeout          300;
-        send_timeout                300;
-
-        # Set the max body sizde to unlimited to allow for large data imports
-        client_max_body_size        0;
-
-        # Set the amount of memory used to buffer client bodies before using temporary files
-        client_body_buffer_size     ${NGINX_CLIENT_BODY_BUFFER_SIZE};
-
-        # If this were on NGINX would buffer all client request bodies. This includes any huge
-        # files sent to datafeed. Turning this off means all requests are immediately sent to
-        # the proxied upstream server. 
-        # TODO: I _think_ this makes client_max_body_size and client_body_buffer_size redundent.
-        # TODO: Possibly this should be set just for /datafeed.
-        proxy_request_buffering     off;
-
-        # TODO - May want to consider this approach for large file uploads
-        # https://stackoverflow.com/questions/44371643/nginx-php-failing-with-large-file-uploads-over-6-gb
-        # i.e. getting nginx to persist the body to disk then only pass the persisted filename to stroom.
-        # This is on the assumption that stroom and nginx can both rw to the same disk location, e.g. a
-        # a common docker volume.
-
-        # Was the CA cert configured with an OCSP responder?
-        #   - If so you can enable the following lines and NGINX will call out to the OCSP
-        #     server to check for revoked certificates.
-        # Are there intermediate CA certs?
-        #   - If so you will need to cat them together to make sure the OCSP server is picked up.
-        #ssl_stapling            on;
-        #ssl_stapling_verify     on;
-        #ssl_trusted_certificate /stroom-nginx/certs/ca.pem.crt;
-
-        ##############
-        # CORS setup #
-        ##############
-        location / {
-            # From https://enable-cors.org/server_nginx.html
-            if ($request_method = 'OPTIONS') {
-                add_header 'Access-Control-Allow-Credentials' true;
-                add_header 'Access-Control-Allow-Origin'      ${AUTH_UI_URL};
-                add_header 'Access-Control-Allow-Methods'     'GET, POST, OPTIONS';
-                #
-                # Custom headers and headers various browsers *should* be OK with but aren't
-                #
-                add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
-                #
-                # Tell client that this pre-flight info is valid for 20 days
-                #
-                add_header 'Access-Control-Max-Age' 1728000;
-                add_header 'Content-Type'           'text/plain; charset=utf-8';
-                add_header 'Content-Length'         0;
-                return 204;
-            }
-            if ($request_method = 'POST') {
-                add_header 'Access-Control-Allow-Credentials' true;
-                add_header 'Access-Control-Allow-Origin'      ${AUTH_UI_URL};
-                add_header 'Access-Control-Allow-Methods'     'GET, POST, OPTIONS';
-                add_header 'Access-Control-Allow-Headers'     'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
-                add_header 'Access-Control-Expose-Headers'    'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
-            }
-            if ($request_method = 'GET') {
-                add_header 'Access-Control-Allow-Credentials' true;
-                add_header 'Access-Control-Allow-Origin'      ${AUTH_UI_URL};
-                add_header 'Access-Control-Allow-Methods'     'GET, POST, OPTIONS';
-                add_header 'Access-Control-Allow-Headers'     'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
-                add_header 'Access-Control-Expose-Headers'    'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
-            }
-        }
-
-
-        ########################
-        # ROUTING FOR SERVICES #
-        ########################
-
-        # This is the root for all services hosted by auth.
-        # It's needed for the Swagger client's baseUrl.
-        location /authService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://auth_service_upstream_sticky/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /authenticationService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://auth_service_upstream_sticky/authentication/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /userService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://auth_service_upstream_sticky/user/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /tokenService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://auth_service_upstream_sticky/token/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /authorisationService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/api/authorisation/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /annotationsService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://${NGINX_ADVERTISED_HOST}:8199/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        # Lucene index query service on Stroom
-        location /indexService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream_sticky/api/stroom-index/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        # SQL Statistics query service on Stroom
-        location /sqlstatisticsService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream_sticky/api/sqlstatistics/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /rulesetService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/api/ruleset/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /dictionaryService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/api/dictionary/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        #Stroom-stats query service on stroom-stats
-        location /stroomstatsService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://${NGINX_ADVERTISED_HOST}:8086/api/stroom-stats/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /queryElasticService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://${NGINX_ADVERTISED_HOST}:8299/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        # TODO may also need location = /stroom/datafeeddirect
-        # see http://nginx.org/en/docs/http/ngx_http_core_module.html#location
-
-        # datafeed direct into stroom with no prxoy aggregation
-        location /stroom/datafeeddirect/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/stroom/datafeed/;
-            proxy_pass_header          Set-Cookie;
-            # RemoteDN is used by stroom, hence the non-standard name
-            proxy_set_header           RemoteDN             $ssl_client_s_dn;
-            # This is also used by stroom but has to be translated into RemoteCertExpiry with a sensible date format
-            proxy_set_header           X-SSL-Client-V-End   $ssl_client_v_end;
-            proxy_set_header           X-SSL-Client-V-Start $ssl_client_v_start;
-            proxy_set_header           X-SSL-Client-Verify  $ssl_client_verify;
-            proxy_set_header           X-SSL-Protocol       $ssl_protocol;
-            proxy_set_header           X-Forwarded-For      $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        # datafeed direct into stroom with no prxoy aggregation (exact match)
-        location = /stroom/datafeeddirect {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/stroom/datafeed/;
-            proxy_pass_header          Set-Cookie;
-            # RemoteDN is used by stroom, hence the non-standard name
-            proxy_set_header           RemoteDN             $ssl_client_s_dn;
-            # This is also used by stroom but has to be translated into RemoteCertExpiry with a sensible date format
-            proxy_set_header           X-SSL-Client-V-End   $ssl_client_v_end;
-            proxy_set_header           X-SSL-Client-V-Start $ssl_client_v_start;
-            proxy_set_header           X-SSL-Client-Verify  $ssl_client_verify;
-            proxy_set_header           X-SSL-Protocol       $ssl_protocol;
-            proxy_set_header           X-Forwarded-For      $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        # datafeed into proxy
-        location /stroom/datafeed/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_proxy_upstream/stroom/datafeed/;
-            proxy_pass_header          Set-Cookie;
-            # RemoteDN is used by stroom, hence the non-standard name
-            proxy_set_header           RemoteDN             $ssl_client_s_dn;
-            # This is also used by stroom but has to be translated into RemoteCertExpiry with a sensible date format
-            proxy_set_header           X-SSL-Client-V-End   $ssl_client_v_end;
-            proxy_set_header           X-SSL-Client-V-Start $ssl_client_v_start;
-            proxy_set_header           X-SSL-Client-Verify  $ssl_client_verify;
-            proxy_set_header           X-SSL-Protocol       $ssl_protocol;
-            proxy_set_header           X-Forwarded-For      $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        # datafeed into proxy (exact match)
-        location = /stroom/datafeed {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_proxy_upstream/stroom/datafeed/;
-            proxy_pass_header          Set-Cookie;
-            # RemoteDN is used by stroom, hence the non-standard name
-            proxy_set_header           RemoteDN             $ssl_client_s_dn;
-            # This is also used by stroom but has to be translated into RemoteCertExpiry with a sensible date format
-            proxy_set_header           X-SSL-Client-V-End   $ssl_client_v_end;
-            proxy_set_header           X-SSL-Client-V-Start $ssl_client_v_start;
-            proxy_set_header           X-SSL-Client-Verify  $ssl_client_verify;
-            proxy_set_header           X-SSL-Protocol       $ssl_protocol;
-            proxy_set_header           X-Forwarded-For      $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /streamTaskService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/api/streamtasks/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        location /exportService/ {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://stroom_upstream/api/export/;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        ##################
-        # ROUTING FOR UI #
-        ##################
-
-        ## ROUTING FOR STROOM
-
-        # This is an exact match that directs '/stroom' to the Stroom UI...
-        location ~ /stroom$ {
-             return 302 https://${STROOM_HOST}/stroom/ui;
-        }
-
-        location ~ .*/clustercall.rpc$ {
-            deny all;
-        }
-
-        # ... and everything else gets reverse-proxied to stroom.
-        location /stroom {
-            proxy_ssl_server_name      on;
-            proxy_pass                 http://${STROOM_HOST}:${STROOM_PORT}/stroom;
-            proxy_pass_header          Set-Cookie;
-            proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass_request_body    on;
-            proxy_pass_request_headers on;
-        }
-
-        ## ROUTING FOR OTHER UI
-
-        location /login {
-            proxy_pass http://login_upstream;
-        }
-
-        location /users {
-            proxy_pass http://users_upstream;
-        }
-
-        location /tokens {
-            proxy_pass http://tokens_upstream;
-        }
-
-        location /changepassword {
-            proxy_pass http://change_password_upstream;
-        }
-
-        # TODO: We don't really want this path. Auth has several responsibilities.
-        # Some of them are mapped to more helpful locations, as above, but really 
-        # should be non-root. E.g. passwordReset is root, so we need this location.
-        location /authui {
-            proxy_pass http://auth_ui_upstream;
-        }
-
-        location /annotations {
-            proxy_pass http://annotations_upstream;
-        }
-
-        location /query-elastic {
-            proxy_pass http://query_elastic_upstream;
-        }
+        # Include location configuration specific to dev.
+        # Should not be included in production deployments.
+        # Supports hot-loading for stroom-ui
+        include locations.dev.conf;
+        # ########### FI_development-only_IN_STACK ###########
     }
 }
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:

@@ -26,8 +26,12 @@ cmd_help_options="  -y   Do not prompt for confirmation, e.g. when run from a sc
 # give the directory relative to the lib script, not this script.
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$DIR"/lib/shell_utils.sh
-source "$DIR"/lib/stroom_utils.sh
+source "${DIR}"/lib/shell_utils.sh
+source "${DIR}"/lib/stroom_utils.sh
+source "${DIR}"/lib/constants.sh
+
+# shellcheck disable=SC2034
+STACK_NAME="<STACK_NAME>" 
 
 main() {
   local requireConfirmation=true
@@ -49,7 +53,7 @@ main() {
       *)
         echo -e "Error: Unknown argument: '-${OPTARG}'" >&2
         echo
-        showUsage
+        show_default_usage "${cmd_help_args}" "${cmd_help_msg}" "${cmd_help_options}"
         exit 1
         ;;
     esac
@@ -92,9 +96,7 @@ main() {
   echo
 
   # shellcheck disable=SC2094
-  docker-compose \
-    --project-name <STACK_NAME> \
-    -f "$DIR"/config/<STACK_NAME>.yml \
+  run_docker_compose_cmd \
     down \
     -v
 }

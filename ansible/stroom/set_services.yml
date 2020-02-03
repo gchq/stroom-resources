@@ -1,0 +1,31 @@
+
+---
+- name: Set services for stroom_services
+  hosts: stroom_services
+  vars_files:
+    - ./variables.yml
+  vars:
+    services_to_run: nginx stroom-auth-service stroom-log-sender stroom-auth-ui
+  roles:
+    - roles/stack/set_active_services
+
+
+- name: Set services for stroom_and_proxy
+  hosts: stroom_and_proxy
+  vars_files:
+    - ./variables.yml
+  vars:
+    services_to_run: stroom stroom-proxy-local stroom-log-sender
+  roles:
+    - roles/stack/set_active_services
+
+
+- name: Set services for stroom_dbs
+  hosts: stroom_dbs
+  vars_files:
+    - ./variables.yml
+  vars:
+    services_to_run: stroom-all-dbs
+  roles:
+    - roles/stack/set_active_services
+

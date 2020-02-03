@@ -4,7 +4,7 @@ services:
 
   stroom:
     container_name: stroom
-    image: "${STROOM_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
+    image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v6.0-LATEST}"
     environment:
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
@@ -15,34 +15,36 @@ services:
       - STROOM_NODE=${STROOM_NODE:-node1a}
       - STROOM_RACK=${STROOM_RACK:-rack}
       - STROOM_JPA_DIALECT=org.hibernate.dialect.MySQLInnoDBDialect
-      - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}:${STROOM_DB_PORT:-3307}/stroom?useUnicode=yes&characterEncoding=UTF-8
-      - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
+      - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$DB_HOST_IP}:${STROOM_DB_PORT:-3307}/${STROOM_DB_NAME:-stroom}?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
       - STROOM_JDBC_DRIVER_USERNAME=${STROOM_DB_USERNAME:-stroomuser}
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_CLASS_NAME=com.mysql.jdbc.Driver
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
       - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
-      - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-$HOST_IP}:${STROOM_STATS_DB_PORT:-3307}/stats?useUnicode=yes&characterEncoding=UTF-8
+      - STROOM_STATISTICS_SQL_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-$DB_HOST_IP}:${STROOM_STATS_DB_PORT:-3307}/${STROOM_STATS_DB_NAME:-stats}?useUnicode=yes&characterEncoding=UTF-8
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME=${STROOM_STATS_DB_USERNAME:-statsuser}
       - STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
       # The browser is redirected to this URL so, like the AUTH UI URL, it needs to be the advertised host.
-      - STROOM_AUTH_SERVICES_URL=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authService
-      - STROOM_AUTH_AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authenticationService/v1
+      # Though these look similar they are both needed, one is a base path for swagger and the other is the service
+      - STROOM_AUTH_SERVICES_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
+      - STROOM_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth/authentication/v1
+      - STROOM_AUTH_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth/authentication/v1
       - STROOM_AUTH_JWT_ISSUER=${STROOM_AUTH_JWT_ISSUER:-stroom}
       - STROOM_AUTH_JWT_ENABLETOKENREVOCATIONCHECK=${ENABLE_TOKEN_REVOCATION_CHECK:-false}
-      - STROOM_UI_URL=${STROOM_UI_URL:-http://localhost:5001/}
-      - STROOM_USERS_UI_URL=https://${STROOM_AUTH_UI_HOST:-$HOST_IP}/users
-      - STROOM_APIKEYS_UI_URL=https://${STROOM_AUTH_UI_HOST:-$HOST_IP}/tokens
-      - STROOM_CHANGEPASSWORD_URL=https://${STROOM_AUTH_UI_HOST:-$HOST_IP}/changepassword
-      - STROOM_ADVERTISED_URL=https://${NGINX_HOST:-$HOST_IP}
+      - STROOM_AUTH_CLIENT_ID=${STROOM_AUTH_CLIENT_ID:-PZnJr8kHRKqnlJRQThSI}
+      - STROOM_AUTH_CLIENT_SECRET=${STROOM_AUTH_CLIENT_SECRET:-OtzHiAWLj8QWcwO2IxXmqxpzE2pyg0pMKCghR2aU}
+      - STROOM_UI_URL=${STROOM_UI_ACTIVE_SCHEME:-https}://${STROOM_UI_HOST:-$HOST_IP}
+      - STROOM_UI_PATH=${STROOM_UI_PATH:-/stroom/ui?prompt=login}
+      - STROOM_USERS_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/s/users
+      - STROOM_APIKEYS_UI_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/s/tokens
+      - STROOM_CHANGEPASSWORD_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/s/changepassword
+      - STROOM_ADVERTISED_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}
       # This needs to be an API token issued for a user, i.e. for the admin user.
       # Without this Stroom won't be able to make calls to it's RemoteDataSources.
-      - STROOM_SECURITY_API_TOKEN=${STROOM_SECURITY_API_TOKEN:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsInNpZCI6bnVsbH0.k0Ssb43GCdTunAMeM26fIulYKNUuPUaJJk6GxDmzCPb7kVPwEtdfBSrtwazfEFM97dnmvURkLqs-DAZTXhhf-0VqQx4hkwcCHf83eVptWTy-lufIhQo6FCM223c9ONIhl6CPqknWh9Bo3vFNrNJoKz5Zw2T_iCcQhi2WGjd_tjTG7VbibTIpH3lPQDw1IBD2nMsEqACJSk3IaFe0GYcrAEMwsjj3sjAwByMbj5DJvo_DJbAuzUwS5IVpASEENen5Xd3wALLirrraUfED1OY0G56Ttcwl3uQ2s-grZXBM4JCiIurlWR5iNtNwoPUsZsyMju4FMSXt3Ur1NIpD7XKJlg}
-      # Default the API key advance warning to 2 weeks/20160 minutes
-      - STROOM_SECURITY_API_TOKEN_DURATION_TO_WARN_BEFORE_EXPIRY=${STROOM_SECURITY_API_TOKEN_DURATION_TO_WARN_BEFORE_EXPIRY:-30d}
       - ADMIN_CONTEXT_PATH=${ADMIN_CONTEXT_PATH:-/stroomAdmin}
       - STROOM_LOGGING_LEVEL=${STROOM_LOGGING_LEVEL:-INFO}
       - STROOM_PLUGINS_LIB_DIR=${STROOM_PLUGINS_LIB_DIR:-/stroom/plugins}
       - STROOM_CONNECTORS_KAFKA_DEFAULT_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
-      - STROOM_CONNECTORS_KAFKA_DEFAULT_CONNECTOR_VERSION=0.10.0.1
+      - STROOM_CONNECTORS_KAFKA_DEFAULT_CONNECTOR_VERSION=2.1.1
       #- STROOM_CONNECTORS_ELASTIC_DEFAULT_TRANSPORT_HOSTS=${ELASTIC_HOST:-elastic}:${ELASTIC_BINARY_PORT:-9300}
       #- STROOM_CONNECTORS_ELASTIC_DEFAULT_ELASTIC_HTTP_URL=http://${ELASTIC_HOST:-elastic}:${ELASTIC_HTTP_PORT:-9200}
       #- STROOM_CONNECTORS_ELASTIC_DEFAULT_CLUSTER_NAME=${STROOM_CONNECTORS_ELASTIC_DEFAULT_CLUSTER_NAME:-docker-cluster}
@@ -82,12 +84,16 @@ services:
       timeout: 5s
       retries: 3
     volumes:
+      - ${STROOM_VOLUME_CONFIG:-../../volumes/stroom/config}:/stroom/config:ro
       - type: volume
         source: stroom_logs
         target: /stroom/logs
       - type: volume
         source: stroom_output
         target: /stroom/output
+        # This volume is shared with stroom-proxy-local. If we ever want to run stroom without
+        # a local proxy then we need to move this out into in override yml as is done with
+        # stroom-log-sender
       - type: volume
         source: stroom-proxy-local_repo
         target: /stroom/proxy-repo
@@ -100,3 +106,7 @@ services:
         max-file: "${STROOM_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+volumes:
+  stroom_logs:
+  stroom_output:
+  stroom_volumes:

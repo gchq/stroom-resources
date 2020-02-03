@@ -23,56 +23,93 @@
 source "${DIR:-.}"/lib/shell_utils.sh
 
 determine_host_address() {
-    if [ "$(uname)" == "Darwin" ]; then
-        # Code required to find IP address is different in MacOS
-        ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk 'NR==1{print $2}')
+  if [ "$(uname)" == "Darwin" ]; then
+    # Code required to find IP address is different in MacOS
+    ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk 'NR==1{print $2}')
+  else
+    local ip_binary
+    # If ip is not on the path (as seems to be the case with ansible) then
+    # try using /sbin instead.
+    if command -v ip > /dev/null; then
+      ip_binary="ip"
+    elif command -v /sbin/ip > /dev/null; then
+      ip_binary="/sbin/ip"
     else
-        ip=$(ip route get 1 |awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
+      echo
+      echo -e "${RED}ERROR${NC} Unable to locate ${BLUE}ip${NC} command." >&2
+      exit 1
     fi
+    ip=$( \
+      "${ip_binary}" route get 1 \
+      | awk 'match($0,"src [0-9\\.]+") {print substr($0,RSTART+4,RLENGTH-4)}')
+  fi
 
-    if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-        echo
-        echo -e "${RED}ERROR${NC} IP address [${GREEN}${ip}${NC}] is not valid, try setting '${BLUE}STROOM_RESOURCES_ADVERTISED_HOST=x.x.x.x${NC}' in ${BLUE}local.env${NC}" >&2
-        exit 1
-    fi
+  if [[ ! "${ip}" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+    echo
+    echo -e "${RED}ERROR${NC} Unable to determine IP address. [${GREEN}${ip}${NC}] is not valid.${NC}" >&2
+    exit 1
+  fi
 
-    echo "$ip"
+  echo "$ip"
 }
 
 
 wait_for_200_response() {
-    if [[ $# -ne 1 ]]; then
-        echo -e "${RED}Invalid arguments to wait_for_200_response(), expecting a URL to wait for${NC}"
-        exit 1
+  if [[ $# -eq 0 ]]; then
+    echo -e "${RED}Invalid arguments to wait_for_200_response(), expecting a URL to wait for${NC}"
+    exit 1
+  fi
+
+  local url=$1; shift
+  if [ "$#" -gt 0 ]; then
+    local msg="$1"; shift
+  fi
+  if [ "$#" -gt 0 ]; then
+    local sub_msg="$1"; shift
+  fi
+
+  local maxWaitSecs=120
+
+  local n=0
+  local were_dots_shown=false
+  # Keep retrying for maxWaitSecs
+  until [ "$n" -ge "${maxWaitSecs}" ]
+  do
+    # OR with true to prevent the non-zero exit code from curl from stopping our script
+    responseCode=$(curl -sL -w "%{http_code}\\n" "${url}" -o /dev/null || true)
+    #echo "Response code: ${responseCode}"
+    if [[ "${responseCode}" = "200" ]]; then
+      break
     fi
 
-    local -r url=$1
-    local -r maxWaitSecs=120
-    echo
+    # Only display the wait msg if the service isn't already up
+    if [ "$n" -eq 0 ]; then
+      if [ -n "${msg}" ]; then
+        echo
+        echo -e "${GREEN}${msg}${NC}"
+      fi
+      if [ -n "${sub_msg}" ]; then
+        echo -e "${DGREY}${sub_msg}${NC}"
+      fi
+    fi
 
-    n=0
-    # Keep retrying for maxWaitSecs
-    until [ "$n" -ge "${maxWaitSecs}" ]
-    do
-        # OR with true to prevent the non-zero exit code from curl from stopping our script
-        responseCode=$(curl -sL -w "%{http_code}\\n" "${url}" -o /dev/null || true)
-        #echo "Response code: ${responseCode}"
-        if [[ "${responseCode}" = "200" ]]; then
-            break
-        fi
-        # print a simple unbounded progress bar, increasing every 2s
-        mod=$(( n % 2 ))
-        if [[ ${mod} -eq 0 ]]; then
-            printf '.'
-        fi
+    # print a simple unbounded progress bar, increasing every 2s
+    mod=$(( n  % 2 ))
+    if [[ ${mod} -eq 0 ]]; then
+      printf '.'
+      were_dots_shown=true
+    fi
 
-        n=$(( n + 1 ))
-        # sleep for two secs
-        sleep 1
-    done
+    n=$(( n + 1 ))
+    # sleep for two secs
+    sleep 1
+  done
+
+  if [ "${were_dots_shown}" = true ]; then
     printf "\n"
+  fi
 
-    if [[ $n -ge ${maxWaitSecs} ]]; then
-        echo -e "${RED}Gave up wating for stroom to start up, check the logs (${BLUE}docker logs stroom${NC}${RED})${NC}"
-    fi
+  if [[ $n -ge ${maxWaitSecs} ]]; then
+    echo -e "${RED}Gave up wating for stroom to start up, check the logs (${BLUE}docker logs stroom${NC}${RED})${NC}"
+  fi
 }

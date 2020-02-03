@@ -13,7 +13,7 @@ services:
       # The 'stats' DB contains legacy SQL stats tables only
       - STATS_DB_USER=${STROOM_DB_USERNAME:-stroomuser}
       - STATS_DB_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
-      - STATS_DB_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}:${STROOM_DB_PORT:-3307}/stroom?useUnicode=yes&characterEncoding=UTF-8
+      - STATS_DB_URL=jdbc:mysql://${STROOM_DB_HOST:-$DB_HOST_IP}:${STROOM_DB_PORT:-3307}/${STROOM_DB_NAME:-stroom}?useUnicode=yes&characterEncoding=UTF-8
       # quorum string of the form along the lines of
       # host1:2181
       # host1:2181/myChRoot
@@ -26,12 +26,14 @@ services:
       # will always use the values obtained from ZK.
       # Changing the value in ZK requires the ZK CLI or some other tool.
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      - STATS_KAFKA_BOOTSTRAP=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      - STATS_KAFKA_BOOTSTRAP=${STATS_KAFKA_BOOTSTRAP:-kafka:9092}
       # Comma delimited list of hosts in the ZK quorum (no port or chroot), e.g. host1,host2,host3
       - STATS_HBASE_ZK_QUORUM_HOSTS=${HBASE_ZOOKEEPER_QUORUM_HOSTS:-zookeeper}
       - ADMIN_CONTEXT_PATH=/statsAdmin
-      - AUTHENTICATION_SERVICE_URL=http://${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}/authService
-      - AUTHORISATION_SERVICE_URL=http://${STROOM_HOST:-$HOST_IP}:8080/api/authorisation/v1
+      - AUTHENTICATION_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/auth
+        # TODO Not sure if the above line should be:
+      #- STROOM_AUTH_AUTHENTICATION_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1
+      - AUTHORISATION_SERVICE_URL=http://${NGINX_ADVERTISED_HOST:-$HOST_IP}/api/authorisation/v1
       - STROOM_STATS_ADVERTISED_HOST_OR_IP=${STROOM_STATS_ADVERTISED_HOST_OR_IP:-$HOST_IP}
     ports:
       - "${STROOM_STATS_APP_PORT:-8086}:8086"
@@ -43,3 +45,5 @@ services:
         max-file: "${STROOM_STATS_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+volumes:
+  stroom-stats_logs:

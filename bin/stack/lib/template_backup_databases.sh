@@ -30,13 +30,16 @@ readonly LOCK_FILE=${DIR}/$(basename "$0").lck
 readonly THIS_PID=$$
 readonly DB_CONTAINER_ID="stroom-all-dbs"
 
+# The list of databases to backup
 readonly DATABASES=( \
-  "auth"
-  "stroom"
-  "stats" )
+  "${STROOM_AUTH_DB_NAME:-auth}"
+  "${STROOM_DB_NAME:-stroom}"
+  "${STROOM_STATS_DB_NAME:-stats}"
+)
 
-source "$DIR"/lib/shell_utils.sh
-source "$DIR"/lib/stroom_utils.sh
+source "${DIR}"/lib/shell_utils.sh
+source "${DIR}"/lib/stroom_utils.sh
+source "${DIR}"/lib/constants.sh
 
 # Read the file containing all the env var exports to make them
 # available to docker-compose

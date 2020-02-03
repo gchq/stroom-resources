@@ -1,0 +1,23 @@
+---
+# NOTES:
+# From the portal copy the 'Login Command' and run this in the shell.
+# This will create ~/.aws/credentials
+# Run export AWS_DEFAULT_PROFILE=<YOUR PROFILE NAME>, where the profile name is taken from
+# the header in the credentials file
+# Copy the values in the credentials file to aws_keys.yml
+# Consider using this to saving having to add hosts to the inventory
+# https://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html#inventory-script-example-aws-ec2
+#
+# https://www.linuxschoolonline.com/use-ansible-to-build-and-manage-aws-ec2-instances/
+
+- hosts: local
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vars/aws_vault.yml
+    - vars/aws.yml
+
+  roles:
+    - roles/ec2/key_pair/create
+    - roles/ec2/security_group/create
+

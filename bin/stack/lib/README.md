@@ -2,7 +2,7 @@
 
 Use the scripts in this directory to control a set of Docker containers that make up a working Stroom stack.
 
-The file _VERSIONS.txt_ defines the version of each container in use.
+The file _ALL_SERVICES.txt_ defines the version of each container in use.
 
 ## Prerequisites
 
@@ -45,8 +45,7 @@ sudo firewall-cmd --zone=public --permanent --add-port=8080/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8081/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8090/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=8091/tcp
-sudo firewall-cmd --zone=public --permanent --add-port=8443/tcp
-sudo firewall-cmd --zone=public --permanent --add-port=8543/tcp
+sudo firewall-cmd --zone=public --permanent --add-port=8099/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=5000/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=2888/tcp
 sudo firewall-cmd --zone=public --permanent --add-port=443/tcp
@@ -65,6 +64,7 @@ The following scripts are available to control the docker containers:
 * `remove.sh` - Removes all the containers in the stack, destroying any state.
 * `restart.sh` - Restarts all the containers in the stack.
 * `send-data.sh` - A script for sending data into Stroom or Stroom Proxy
+* `set_services.sh` - Sets the sub-set of services that will be used on this node.
 * `show_config.sh` - Displays the effective configuration that docker-compose will use.
 * `stack.sh` - A single script for controlling the stack, e.g. `./stack.sh start`
 * `start.sh` - Starts all the containers for the stack.
@@ -81,12 +81,22 @@ The scripts `start.sh`, `stop.sh`, `restart.sh` and `logs.sh` can be run in two 
 You can call them with no arguments, in which case they operate on the whole stack, e.g. `start.sh` will start all services in the stack.
 Alternatively you can supply a list of services that you want the script to apply to, e.g. `start.sh stroom stroom-all-dbs` will start just _stroom_ and _stroom-all-dbs_.
 If you supply one or more service names, those names must be part of the stack.
-The list of services in the stack can be found in the `SERVICES.txt` file, or by running one of the above scripts with the `-h` flag.
+The list of all available services in the stack can be found in the `ALL_SERVICES.txt` file, or by running one of the above scripts with the `-h` flag.
+
 
 ## Docker image versions
 
-The file `VERSION.txt` contains the docker tags and versions used in the stack.
+The file `ALL_SERVICES.txt` contains the service names and docker tags used in the stack.
 This information can also be obtained by running the script `info.sh`.
+
+
+## Active services
+
+The file `ACTIVE_SERVICES.txt` contains either a sub-set of `ALL_SERVICES.txt` or is a copy of it.
+It defines the list of services that will be active on the node.
+This allows the same stack to be deployed onto a number of nodes but with each node running a different set of services.
+The script `set_services.sh` can be used to control the `ACTIVE_SERVICES.txt` file.
+
 
 ## Sending data to Stroom
 

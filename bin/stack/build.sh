@@ -46,18 +46,23 @@ validate_requested_services() {
 # Produce a file containing the list of services in the stack
 # so the stack can use it to tailor how the start/stop/etc. scripts
 # operate
-create_services_file() {
-  touch "${SERVICES_FILE}"
-  for service in "${SERVICES[@]}"; do
-    echo "${service}" >> "${SERVICES_FILE}"
-  done
-}
+#create_services_file() {
+  #touch "${SERVICES_FILE}"
+  #for service in "${SERVICES[@]}"; do
+    #echo "${service}" >> "${SERVICES_FILE}"
+  #done
+#}
+
 
 main() {
   [ "$#" -ge 3 ] || die "${RED}Error${NC}: Invalid arguments, usage: ${BLUE}build.sh stackName version serviceX serviceY etc.${NC}"
 
   # Some of the scripts use associataive arrays which are bash 4 only.
   test_for_bash_version_4
+
+  check_binary_is_available "jq"
+  check_binary_is_available "ruby"
+  check_binary_is_available "docker-compose"
 
   local -r BUILD_STACK_NAME=$1
   local -r VERSION=$2
@@ -81,7 +86,7 @@ main() {
     echo -e "  ${BLUE}${service}${NC}"
   done
 
-  create_services_file
+  #create_services_file
 
   ./create_stack_yaml.sh "${BUILD_STACK_NAME}" "${VERSION}" "${SERVICES[@]}"
   ./create_stack_env.sh "${BUILD_STACK_NAME}" "${VERSION}" "${SERVICES[@]}"

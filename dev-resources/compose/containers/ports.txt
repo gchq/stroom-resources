@@ -1,25 +1,43 @@
 #A list of ports externally exposed by docker containers
-   80 - nginx
-  443 - nginx
+   80 - nginx (http)
+  443 - nginx (https)
  2181 - zookeeper
  3307 - stroom-all-dbs
- 5001 - stroom-annotations-ui
- 5002 - stroom-query-elastic-ui
+ 5000 - stroom-auth-ui (http)
+ 5001 - stroom-annotations-ui (http) # TODO port clash with stroom-ui
+ 5001 - stroom-ui (http)
+ 5002 - stroom-query-elastic-ui (http)
  5601 - Kibana
  8020 - HDFS
- 8080 - stroom (app & admin)
+ 8080 - stroom (app)
+ 8081 - stroom (admin)
  8086 - stroom-stats (app)
  8087 - stroom-stats (admin)
- 8090 - stroom-proxy
- 8096 - stroom-auth-service (app)
+ 8090 - stroom-proxy-local (app http)
+ 8091 - stroom-proxy-local (admin)
+ 8099 - stroom-auth-service (app)
+ 8100 - stroom-auth-service (admin)
  8199 - stroom-annotations-service (app)
  8200 - stroom-annotations-service (admin)
  8299 - stroom-elastic-query-service (app)
  8300 - stroom-elastic-query-service (admin)
+ 8543 - stroom-proxy-local (app https)
  9000 - HDFS
+ 9090 - stroom-proxy-remote (app http)
+ 9091 - stroom-proxy-remote (admin)
+ 9092 - kakfa
  9200 - Elastic Search (TCP)
  9300 - Elastic Search (HTTP)
- 9092 - kakfa
+ 9443 - stroom-auth-ui (https)
+ 9444 - stroom-annotations-ui (https) # TODO port clash with stroom-ui
+ 9444 - stroom-ui (https)
+ 9445 - stroom-query-elastic-ui (https)
+ 9543 - stroom-proxy-remote (app https)
+10765 - stroom (debug)
+10766 - stroom-proxy-local (debug)
+10767 - stroom-proxy-remote (debug)
+10768 - stroom-stats (debug)
+10769 - stroom-auth-service (debug)
 16000 - hbase
 16010 - hbase
 16201 - hbase

@@ -27,9 +27,10 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # shellcheck disable=SC1090
 {
-  source "$DIR"/lib/network_utils.sh
-  source "$DIR"/lib/shell_utils.sh
-  source "$DIR"/lib/stroom_utils.sh
+  source "${DIR}"/lib/network_utils.sh
+  source "${DIR}"/lib/shell_utils.sh
+  source "${DIR}"/lib/stroom_utils.sh
+  source "${DIR}"/lib/constants.sh
 }
 
 # This line MUST be before we source the env file, as HOST_IP may be set
@@ -55,17 +56,17 @@ main() {
 
   setup_echo_colours
 
-  echo -e "Using host IP: ${BLUE}${HOST_IP}${NC}"
+  echo -e "${GREEN}Using host IP: ${BLUE}${HOST_IP}${NC}"
 
   # Read the file containing all the env var exports to make them
   # available to docker-compose
   # shellcheck disable=SC1090
   source "$DIR"/config/<STACK_NAME>.env
 
+  determing_docker_host_details
+
   #shellcheck disable=SC2094
-  docker-compose \
-    --project-name <STACK_NAME> \
-    -f "$DIR"/config/<STACK_NAME>.yml \
+  run_docker_compose_cmd \
     config
 }
 

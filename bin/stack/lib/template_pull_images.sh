@@ -27,9 +27,10 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # shellcheck disable=SC1090
 {
-  source "$DIR"/lib/network_utils.sh
-  source "$DIR"/lib/shell_utils.sh
-  source "$DIR"/lib/stroom_utils.sh
+  source "${DIR}"/lib/network_utils.sh
+  source "${DIR}"/lib/shell_utils.sh
+  source "${DIR}"/lib/stroom_utils.sh
+  source "${DIR}"/lib/constants.sh
 }
 
 # Read the file containing all the env var exports to make them
@@ -61,14 +62,14 @@ main() {
   # shellcheck disable=SC1090
   source "$DIR"/config/<STACK_NAME>.env
 
+  # shellcheck disable=SC2034
+  STACK_NAME="<STACK_NAME>" 
+
   local error_count=0
 
-  local images
-  images="$("${DIR}/show_config.sh" | grep -oP "(?<=image:)\s\S+")"
-
-   while read -r image; do
-    # remove any leading whitespace
-    image="${image#"${image%%[![:space:]]*}"}"
+  # Attempt to pull the docker image for each service in the active
+  # services file
+  while read -r image; do
     echo 
     echo -e "${GREEN}Pulling image ${BLUE}${image}${GREEN} from the remote repository${NC}"
     docker image pull "${image}" \
@@ -76,7 +77,7 @@ main() {
         echo -e "${RED}Error${GREEN}: Unable to pull ${BLUE}${image}${GREEN}" \
           "from the remote repository${NC}" && error_count=$(( error_count + 1 )) 
       }
-  done <<< "${images}"
+  done <<< "$( get_active_images_in_stack )"
 
   echo
   if [ "${error_count}" -eq 0 ]; then

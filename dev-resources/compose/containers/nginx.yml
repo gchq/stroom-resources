@@ -2,25 +2,26 @@ version: '2.4'
 services:
   nginx:
     container_name: nginx
-    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v1.0-LATEST}"
+    image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v6.0-LATEST}"
     environment:
       #- ANNOTATIONS_UI_URL=${STROOM_ANNOTATIONS_UI_URL:-http://$HOST_IP:5001}
       - AUTH_SERVICE_HOST=${STROOM_AUTH_SERVICE_HOST:-$HOST_IP}
       - AUTH_SERVICE_PORT=${STROOM_AUTH_SERVICE_PORT:-8099}
       # In development we need to use port 5000 for http access
-      - AUTH_UI_URL=${STROOM_AUTH_UI_URL:-$HOST_IP:9443}
+      - AUTH_UI_URL=${STROOM_AUTH_UI_HOST:-$HOST_IP}:${STROOM_AUTH_UI_ACTIVE_PORT:-9443}
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - NGINX_ADVERTISED_HOST=${NGINX_ADVERTISED_HOST:-$HOST_IP}
       - NGINX_CLIENT_BODY_BUFFER_SIZE=${NGINX_CLIENT_BODY_BUFFER_SIZE:-1M}
       - NGINX_SSL_CERTIFICATE=${NGINX_SSL_CERTIFICATE:-server.pem.crt}
       - NGINX_SSL_CERTIFICATE_KEY=${NGINX_SSL_CERTIFICATE_KEY:-server.unencrypted.key}
-      - NGINX_SSL_CLIENT_CERTIFICATE=${NGINX_SSL_CLIENT_CERTIFICATE:-ca.pem.crt}
+      - NGINX_SSL_CA_CERTIFICATE=${NGINX_SSL_CA_CERTIFICATE:-ca.pem.crt}
         # Enabling NGINX_SSL_VERIFY_CLIENT means we can capture the DN and cert expiry
         # in the datafeed but means the client cert must be imported into the browser
         # so set it to 'optional' so that it asks the client for a cert and if it
         # provides one it will inspect it
       - NGINX_SSL_VERIFY_CLIENT=${NGINX_SSL_VERIFY_CLIENT:-optional}
+      - NGINX_HTML_ROOT_PATH=${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}
       #- QUERY_ELASTIC_UI_URL=${STROOM_QUERY_ELASTIC_UI_URL:-http://$HOST_IP:5002}
       - STROOM_HOST=${STROOM_HOST:-$HOST_IP}
       - STROOM_PORT=${STROOM_APP_PORT:-8080}
@@ -30,6 +31,7 @@ services:
       - ${NGINX_VOLUME_CERTS:-../../volumes/nginx/certs}:/stroom-nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
       - ${NGINX_VOLUME_CONF:-../../volumes/nginx/conf}:/stroom-nginx/config:ro
+      - ${NGINX_VOLUME_HTML:-../../volumes/nginx/html}:${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}:ro
       - type: volume
         source: nginx_logs
         target: /stroom-nginx/logs
@@ -45,3 +47,7 @@ services:
         max-file: "${NGINX_STD_OUT_LOGS_MAX_FILES:-2}"
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+volumes:
+  nginx_logrotate:
+  nginx_logs:
+  # Other volumes defined in shared_volumes dir
