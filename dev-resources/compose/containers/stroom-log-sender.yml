@@ -5,6 +5,42 @@ services:
   stroom-log-sender:
     container_name: stroom-log-sender
     image: "${STROOM_LOG_SENDER_DOCKER_REPO:-gchq/stroom-log-sender}:${STROOM_LOG_SENDER_TAG:-local-SNAPSHOT}"
+    environment:
+      # The script that sends the logs
+      - LOG_SENDER_SCRIPT=/stroom-log-sender/send_to_stroom.sh
+      # The url the logs will be sent to
+      - DATAFEED_URL=${STROOM_LOG_SENDER_DATAFEED_URL:-https://nginx/stroom/datafeeddirect}
+        # The base path for all stroom logs
+      - STROOM_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom}
+        # The base path for all stroom proxy remote logs
+      - STROOM_PROXY_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_PROXY_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-proxy}
+        # The base path for all stroom proxy remote logs
+      - STROOM_PROXY_REMOTE_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_PROXY_REMOTE_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-proxy-remote}
+        # The base path for all stroom auth service logs
+      - STROOM_AUTH_SVC_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_AUTH_SVC_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-auth-service}
+        # The base path for all stroom nginx logs
+      - STROOM_NGINX_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_NGINX_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-nginx}
+        # The base path for all stroom stats logs
+      - STROOM_STATS_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_STATS_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-stats}
+        # The default regex used to identify log files ready to send
+        # Supposedly any '$' symbols must be escaped to '$$' however, it seems to work with one.
+        # See https://docs.docker.com/compose/compose-file/#variable-substitution
+        # It really doesn't like braces so have just had to do [0-9]+ rather than [0-9]{4}
+        # Check what gets written to container.env inside the container to be sure
+      - DEFAULT_FILE_REGEX=${STROOM_LOG_SENDER_DEFAULT_FILE_REGEX:-.*/[a-z]+-[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+\.log(\.gz)?$}
+        # Regex for logrotate dated files, e.g. access.log-20181130-1543576470.gz
+        # See above about escaping
+      - LOGROTATE_DATED_REGEX=${STROOM_LOG_SENDER_LOGROTATE_DATED_REGEX:-.*/[a-z]+\.log-[0-9]+-[0-9]+(\.gz)?$}
+        # The environment, e.g. DEV/REF/OPS
+      - DEFAULT_ENVIRONMENT=${STROOM_LOG_SENDER_DEFAULT_ENVIRONMENT:-DEV}
+        # The maximum random delay in secs to wait to balance network load
+      - MAX_DELAY_SECS=${STROOM_LOG_SENDER_MAX_DELAY_SECS:-15}
+        # The PEM format private key
+      - PRIVATE_KEY_FILE=${STROOM_LOG_SENDER_PRIVATE_KEY_FILE:-/stroom-log-sender/certs/client.unencrypted.key}
+        # The PEM format certificate
+      - CERT_FILE=${STROOM_LOG_SENDER_CERT_FILE:-/stroom-log-sender/certs/client.pem.crt}
+        # The PEM format CA certificate
+      - CA_CERT_FILE=${STROOM_LOG_SENDER_CA_CERT_FILE:-/stroom-log-sender/certs/ca.pem.crt}
     volumes:
       # Volume for the crontab configuration
       - ${STROOM_LOG_SENDER_VOLUME_CONF:-../../volumes/stroom-log-sender/conf}:/stroom-log-sender/config/:ro
