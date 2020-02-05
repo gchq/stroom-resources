@@ -447,11 +447,6 @@ main() {
       "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt" \
       "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
     remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt"
-
-    copy_file_to_dir \
-      "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env" \
-      "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
-    remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env"
   fi
 
   ####################
