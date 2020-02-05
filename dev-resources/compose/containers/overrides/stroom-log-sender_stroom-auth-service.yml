@@ -6,4 +6,4 @@ services:
       # Stroom Auth
       - type: volume
         source: stroom-auth-service_logs
-        target: /stroom-log-sender/log-volumes/stroom-auth-service
+        target: ${STROOM_LOG_SENDER_STROOM_AUTH_SVC_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-auth-service}

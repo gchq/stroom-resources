@@ -11,13 +11,17 @@ services:
         # The root path of all the logs
       - LOGS_DIR=${STROOM_LOG_SENDER_LOGS_DIR:-/stroom-log-sender/log-volumes}
         # The base path for all stroom logs
-      - STROOM_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_BASE_LOGS_DIR:-${ROOT_LOGS_DIR}/stroom}
-        # The base path for all stroom proxy logs
-      - STROOM_PROXY_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_PROXY_BASE_LOGS_DIR:-${ROOT_LOGS_DIR}/stroom-proxy}
+      - STROOM_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom}
+        # The base path for all stroom proxy remote logs
+      - STROOM_PROXY_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_PROXY_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-proxy}
+        # The base path for all stroom proxy remote logs
+      - STROOM_PROXY_REMOTE_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_PROXY_REMOTE_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-proxy-remote}
         # The base path for all stroom auth service logs
-      - STROOM_AUTH_SVC_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_AUTH_SVC_BASE_LOGS_DIR:-${ROOT_LOGS_DIR}/stroom-auth-service}
+      - STROOM_AUTH_SVC_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_AUTH_SVC_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-auth-service}
         # The base path for all stroom nginx logs
-      - STROOM_NGINX_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_NGINX_BASE_LOGS_DIR:-${ROOT_LOGS_DIR}/stroom-nginx}
+      - STROOM_NGINX_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_NGINX_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-nginx}
+        # The base path for all stroom stats logs
+      - STROOM_STATS_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_STATS_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-stats}
         # The default regex used to identify log files ready to send
         # Any '$' symbols must be escaped to '$$'
       - DEFAULT_FILE_REGEX="${STROOM_LOG_SENDER_DEFAULT_FILE_REGEX:-.*/[a-z]+-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\.log(\.gz)?$$}"

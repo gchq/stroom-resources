@@ -6,5 +6,5 @@ services:
       # Stroom Nginx
       - type: volume
         source: nginx_logs
-        target: /stroom-log-sender/log-volumes/stroom-nginx
+        target: ${STROOM_LOG_SENDER_STROOM_NGINX_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-nginx}
 

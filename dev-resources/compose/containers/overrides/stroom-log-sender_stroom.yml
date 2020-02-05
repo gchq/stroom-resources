@@ -6,4 +6,4 @@ services:
       # Stroom
       - type: volume
         source: stroom_logs
-        target: /stroom-log-sender/log-volumes/stroom
+        target: ${STROOM_LOG_SENDER_STROOM_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom}

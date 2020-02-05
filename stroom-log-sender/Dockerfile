@@ -44,9 +44,9 @@ FROM alpine:3.8 as download-supercronic-stage
 WORKDIR /supercronic
 
 ENV \
-  SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.1.8/supercronic-linux-amd64 \
+  SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.1.9/supercronic-linux-amd64 \
   SUPERCRONIC=supercronic-linux-amd64 \
-  SUPERCRONIC_SHA1SUM=be43e64c45acd6ec4fce5831e03759c89676a0ea
+  SUPERCRONIC_SHA1SUM=5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85
 
 RUN \
   # su-exec required for running as not-root user

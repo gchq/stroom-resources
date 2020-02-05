@@ -6,4 +6,4 @@ services:
       # Stroom Proxy (local)
       - type: volume
         source: stroom-proxy-local_logs
-        target: /stroom-log-sender/log-volumes/stroom-proxy
+        target: ${STROOM_LOG_SENDER_STROOM_PROXY_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-proxy}
