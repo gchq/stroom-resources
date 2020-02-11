@@ -73,6 +73,17 @@ add_env_file_header() {
 add_templated_env_file_header() {
   local env_file="${1}"
 
+  {
+    echo "# This file is a Jinja2 template version of $(basename "${OUTPUT_ENV_FILE}")."
+    echo "# It is intended for use when deploying the stack with Ansible."
+    echo "# See https://docs.ansible.com/ansible/latest/modules/template_module.html"
+    echo "# for details about using Jinja2 templates with Ansible."
+    echo "# The default values are identical to those specified in the .env file."
+    echo "# This file would need to be copied to the Ansible controller to be used"
+    echo "# by Ansible."
+    echo
+  } >> "${OUTPUT_TEMPLATE_ENV_FILE}"
+
   add_common_env_file_header "${env_file}"
 
   # shellcheck disable=SC2016
@@ -367,17 +378,29 @@ write_env_file() {
   for var_name in ${sorted_env_var_names}; do
     local var_value="${whitelisted_output_env_vars[${var_name}]}"
     local var_docs="${docs_arr[${var_name}]}"
-    # OUTPUT_ENV_FILE already exists at this point
-    {
-      echo
-      # If we have any docs for this env var add it above it the variable
-      if [ -n "${var_docs}" ]; then
-        echo -e "${var_docs}"
+
+    # The _TAG env vars are hard coded into the generated yaml so if we read
+    # them from the soucre yaml they will get the wrong values
+    # This feels a bit hacky.
+    if [[ ! "${var_name}" =~ _TAG$ ]]; then
+      # Some env vars may have been hard coded in the header so we don't want to
+      # duplicate them
+      if ! grep -q -E "^export ${var_name}" "${OUTPUT_ENV_FILE}"; then
+        # OUTPUT_ENV_FILE already exists at this point
+        {
+          echo
+          # If we have any docs for this env var add it above it the variable
+          if [ -n "${var_docs}" ]; then
+            echo -e "${var_docs}"
+          fi
+          # They must be exported as they need to be available to child processes,
+          # i.e. docker-compose.
+          echo "export ${var_name}=\"${var_value}\"" 
+        } >> "${OUTPUT_ENV_FILE}"
+      else
+        echo -e "  Ignoring duplicate env var ${YELLOW}${var_name}${NC}"
       fi
-      # They must be exported as they need to be available to child processes,
-      # i.e. docker-compose.
-      echo "export ${var_name}=\"${var_value}\"" 
-    } >> "${OUTPUT_ENV_FILE}"
+    fi
   done
 }
 
@@ -386,17 +409,6 @@ write_env_file() {
 write_templated_env_file() {
   # Now write our env vars out to a jinja2 template file for use with ansible
   echo -e "${GREEN}Writing templated environment variables file ${BLUE}${OUTPUT_TEMPLATE_ENV_FILE}${NC}"
-  # Add the file header
-  {
-    echo "# This file is a Jinja2 template version of $(basename "${OUTPUT_ENV_FILE}")."
-    echo "# It is intended for use when deploying the stack with Ansible."
-    echo "# See https://docs.ansible.com/ansible/latest/modules/template_module.html"
-    echo "# for details about using Jinja2 templates with Ansible."
-    echo "# The default values are identical to those specified in the .env file."
-    echo "# This file would need to be copied to the Ansible controller to be used"
-    echo "# by Ansible."
-    echo
-  } >> "${OUTPUT_TEMPLATE_ENV_FILE}"
 
   add_templated_env_file_header "${OUTPUT_TEMPLATE_ENV_FILE}"
 
@@ -412,21 +424,33 @@ write_templated_env_file() {
   for var_name in ${sorted_env_var_names}; do
     local var_value="${all_output_env_vars[${var_name}]}"
     local var_docs="${docs_arr[${var_name}]}"
-    # OUTPUT_TEMPLATE_ENV_FILE already exists at this point
-    {
-      echo
-      # If we have any docs for this env var add it above it the variable
-      if [ -n "${var_docs}" ]; then
-        echo -e "${var_docs}"
+
+    # The _TAG env vars are hard coded into the generated yaml so if we read
+    # them from the soucre yaml they will get the wrong values
+    # This feels a bit hacky.
+    if [[ ! "${var_name}" =~ _TAG$ ]]; then
+      # Some env vars may have been hard coded in the header so we don't want to
+      # duplicate them
+      if ! grep -q -E "^export ${var_name}" "${OUTPUT_TEMPLATE_ENV_FILE}"; then
+        # OUTPUT_TEMPLATE_ENV_FILE already exists at this point
+        {
+          echo
+          # If we have any docs for this env var add it above it the variable
+          if [ -n "${var_docs}" ]; then
+            echo -e "${var_docs}"
+          fi
+          # They must be exported as they need to be available to child processes,
+          # i.e. docker-compose.
+          # ${var_name,,} converts var_name to lower case in bash 4+, obviously.
+          # Construct a line like
+          #   export MY_ENV_VAR="{{ stack_env_my_env_var | default('my default value') }}"
+          # That supports jinja2 templating
+          echo "export ${var_name}=\"{{ ${TEMPLATE_ENV_VAR_PREFIX}${var_name,,} | default('${var_value}') }}\"" 
+        } >> "${OUTPUT_TEMPLATE_ENV_FILE}"
+      else
+        echo -e "  Ignoring duplicate env var ${YELLOW}${var_name}${NC}"
       fi
-      # They must be exported as they need to be available to child processes,
-      # i.e. docker-compose.
-      # ${var_name,,} converts var_name to lower case in bash 4+, obviously.
-      # Construct a line like
-      #   export MY_ENV_VAR="{{ stack_env_my_env_var | default('my default value') }}"
-      # That supports jinja2 templating
-      echo "export ${var_name}=\"{{ ${TEMPLATE_ENV_VAR_PREFIX}${var_name,,} | default('${var_value}') }}\"" 
-    } >> "${OUTPUT_TEMPLATE_ENV_FILE}"
+    fi
   done
 }
 
