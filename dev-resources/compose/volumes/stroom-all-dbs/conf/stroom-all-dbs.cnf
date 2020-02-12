@@ -1,11 +1,15 @@
 # This configuration file is referenced as an 'include' in /etc/mysql/my.cnf
 
+# This file is bind-mounted in to the container using the inode of the file.
+# If the file is changed/replaced in a way that results in a new inode then the
+# container will see the old version.
+
 [mysqld]
 
 #max_connections=300
 
 # Buffer pool sizes
-# Note innodb-buffer-pool-size MUST equal innodb-buffer-pool-instances * innodb-buffer-pool-chunk-size 
-#innodb-buffer-pool-size=
-#innodb-buffer-pool-instances=
-#innodb-buffer-pool-chunk-size=
+#   https://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_buffer_pool_size
+#   https://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_buffer_pool_instances
+#innodb_buffer_pool_size=2147483648
+#innodb_buffer_pool_instances=8
