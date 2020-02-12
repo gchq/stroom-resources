@@ -6,6 +6,11 @@
 
 [mysqld]
 
+# Mode 0 means tables are stored on the filesystem in the case used in CREATE TABLE and sql is case sensitive
+# Mode 1 means tables are stored on the filesystem in lowercase but sql is case insensitive
+# On linux the default is 0
+# lower_case_table_names=1
+
 #max_connections=300
 
 # Buffer pool sizes
