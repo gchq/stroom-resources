@@ -59,4 +59,5 @@ deploy:
     target_branch: gh-pages
     on:
       tags: true
-      condition: $TRAVIS_TAG =~ ^stroom-stacks-
+      # We only want stable releases to go on GH pages, at the moment , v6 is the stable release
+      condition: $TRAVIS_TAG =~ ^stroom-stacks-v6
