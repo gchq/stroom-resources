@@ -12,13 +12,11 @@
 # require the container to be restarted, as on boot, the container will load
 # this file into cron
 
-# Comments like 
-# IF_name-of-service_IN_STACK 
-# FI_name-of-service_IN_STACK 
-# provide
-# conditional blocks that will only be included in this file if the named
-# service is in the stack. This conditional logic is applied during the stack
-# build.
+# IF_this-is-an-example_IN_STACK 
+# Blocks like this are conditional and will only be included in this file if
+# the named service('this-is-an-example' in this case) is in the stack. This
+# conditional logic is applied during the stack build.
+# FI_this-is-an-example_IN_STACK 
 
 # IF_stroom_IN_STACK
 # stroom logs

@@ -262,6 +262,8 @@ test_stack() {
 
   ./info.sh
 
+  ./pull_images.sh
+
   echo -e "${GREEN}Running start script${NC}"
   # If the stack is unhealthy then start should exit with a non-zero code.
   ./start.sh
@@ -274,6 +276,8 @@ test_stack() {
     echo -e "${GREEN}Running health script${NC}"
     ./health.sh
   fi
+
+  ./status.sh
 
   # Test the restart script
   echo -e "${GREEN}Running stop script${NC}"
