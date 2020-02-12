@@ -70,13 +70,20 @@ main() {
   # Attempt to pull the docker image for each service in the active
   # services file
   while read -r image; do
-    echo 
-    echo -e "${GREEN}Pulling image ${BLUE}${image}${GREEN} from the remote repository${NC}"
-    docker image pull "${image}" \
-      || { \
-        echo -e "${RED}Error${GREEN}: Unable to pull ${BLUE}${image}${GREEN}" \
-          "from the remote repository${NC}" && error_count=$(( error_count + 1 )) 
-      }
+    if docker inspect "${image}" 1>/dev/null 2>&1 \
+      && [[ ! "${image}" =~ :.*(LATEST|SNAPSHOT|latest)$ ]]; then
+      # We already have it and it isn't a floating tag
+      echo 
+      echo -e "${GREEN}Found image ${BLUE}${image}${GREEN} locally${NC}"
+    else
+      echo 
+      echo -e "${GREEN}Pulling image ${BLUE}${image}${GREEN} from the remote repository${NC}"
+      docker image pull "${image}" \
+        || { \
+          echo -e "${RED}Error${GREEN}: Unable to pull ${BLUE}${image}${GREEN}" \
+            "from the remote repository${NC}" && error_count=$(( error_count + 1 )) 
+        }
+    fi
   done <<< "$( get_active_images_in_stack )"
 
   echo
