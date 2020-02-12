@@ -22,15 +22,14 @@ set -e
 }
 
 error_exit() {
-    local -r msg="$1"
-
-    echo -e "${msg}"
+    echo -e "${@}"
     exit 1
 }
 
 check_for_installed_binary() {
     local -r binary_name=$1
-    command -v fzf 1>/dev/null || error_exit "${GREEN}${binary_name}${RED} is not installed"
+    command -v "${binary_name}" 1>/dev/null \
+      || error_exit "${GREEN}${binary_name}${RED} is not installed"
 }
 
 check_for_installed_binaries() {
@@ -42,7 +41,10 @@ check_for_installed_binaries() {
 
 main(){
 
-    [ $# -eq 1 ] || error_exit "${RED}Invalid arguments. \n${NC}Usage: ${BLUE}getReleasedStack.sh /new/path/to/create/stack/in${NC}\ne.g. ${BLUE}getReleasedStack.sh /tmp${NC}"
+    [ $# -eq 1 ] \
+      || error_exit "${RED}Invalid arguments. \n${NC}Usage:" \
+        "${BLUE}getReleasedStack.sh /new/path/to/create/stack/in${NC}\ne.g." \
+        "${BLUE}getReleasedStack.sh /tmp${NC}"
 
     check_for_installed_binaries
 
@@ -64,7 +66,9 @@ main(){
 
     stack_dir="${install_dir}/${tag}"
 
-    ! find . | grep -q "${tag}"  || error_exit "${RED}Tag ${BLUE}${tag}${RED} appears to already be installed"
+    ! find . | grep -q "${tag}" \
+      || error_exit "${RED}Tag ${BLUE}${tag}${RED} appears to already be installed"
+
 
     # Use FZF to select the file to download
     local file
