@@ -25,21 +25,41 @@ set -e
 # shellcheck disable=SC1091
 source lib/shell_utils.sh
 
+DOWNLOAD_DIR="/tmp/stroom_stack_build_downloads"
+
+# Downloads the file to a temporary directory then copies it from their
+# to speed up repeated runs
+# NOTE: This assumes the file being downloaded is immutable
 download_file() {
   local -r dest_dir=$1
   local -r url_base=$2
   local -r filename=$3
   local -r new_filename="${4:-$filename}"
+  local url="${url_base}/${filename}"
 
-  echo -e "    Downloading ${BLUE}${url_base}/${filename}${NC}" \
-    "${YELLOW}=>${NC} ${BLUE}${dest_dir}/${new_filename}${NC}"
-      #--directory-prefix="${dest_dir}" \
+  # replace '/' in url with '_' so we can save it as a file
+  local url_as_filename="${url//\//_}"
 
+  local download_file_path="${DOWNLOAD_DIR}/${url_as_filename}"
+
+  mkdir -p "${DOWNLOAD_DIR}"
   mkdir -p "${dest_dir}"
-  wget \
-    --quiet \
-    --output-document="${dest_dir}/${new_filename}" \
-    "${url_base}/${filename}"
+
+  if [ ! -f "${download_file_path}" ]; then
+
+    # File doesn't exist in downloads dir so download it first
+    echo -e "    Downloading ${BLUE}${url}${NC}" \
+      "${YELLOW}=>${NC} ${BLUE}${download_file_path}${NC}"
+
+    wget \
+      --quiet \
+      --output-document="${download_file_path}" \
+      "${url}"
+  fi
+
+  # Now copy file from the downloads dir
+  copy_file_to_dir "${download_file_path}" "${dest_dir}" "${new_filename}"
+
   if [[ "${new_filename}" =~ .*\.sh$ ]]; then
     chmod u+x "${dest_dir}/${new_filename}"
   fi
@@ -447,11 +467,6 @@ main() {
       "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt" \
       "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
     remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt"
-
-    copy_file_to_dir \
-      "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env" \
-      "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
-    remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.env"
   fi
 
   ####################
@@ -466,11 +481,11 @@ main() {
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} init files"
     local -r DEST_STROOM_ALL_DBS_INIT_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-all-dbs/init"
     copy_file_to_dir \
-      "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/000_init_override.sh" \
+      "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/000_stroom_init.sh" \
       "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}"
     copy_file_to_dir \
-      "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/001_create_databases.sql.template" \
-      "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}"
+      "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom/001_create_databases.sql.template" \
+      "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom"
   fi
 
   ############

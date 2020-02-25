@@ -262,6 +262,8 @@ test_stack() {
 
   ./info.sh
 
+  ./pull_images.sh
+
   echo -e "${GREEN}Running start script${NC}"
   # If the stack is unhealthy then start should exit with a non-zero code.
   ./start.sh
@@ -274,6 +276,8 @@ test_stack() {
     echo -e "${GREEN}Running health script${NC}"
     ./health.sh
   fi
+
+  ./status.sh
 
   # Test the restart script
   echo -e "${GREEN}Running stop script${NC}"
@@ -368,7 +372,10 @@ create_get_stroom_script() {
   substitute_tag "<STACK_VERSION>" "${VERSION_NO}" "${get_stroom_dest_file}"
   substitute_tag "<HASH_FILE_CONTENTS>" "${hash_file_contents}" "${get_stroom_dest_file}"
 
+
   # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
+  # It will only be released to github pages if the condition in .travis.yml
+  # is true
   echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
     "${BLUE}${GH_PAGES_DIR}/${NC}"
   mkdir -p "${GH_PAGES_DIR}"
@@ -447,8 +454,6 @@ do_release() {
     echo -e "${GREEN}Performing a ${BLUE}${tag_prefix}${GREEN} stack" \
       "release to github${NC}"
 
-    echo -e "${GREEN}Releasing a new get_stroom.sh script to GitHub pages" \
-      "for stack ${tag_prefix}${NC}"
     create_get_stroom_script
   fi
 }

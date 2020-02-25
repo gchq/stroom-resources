@@ -61,11 +61,29 @@ test_for_bash_version_4() {
   fi
 }
 
+# Errors if less than one of the passed binaries is installed
 check_binary_is_available() {
-  local binary_name="$1"
-  if ! command -v "${binary_name}" 1>/dev/null; then
-    die "${RED}Error${NC}:  ${BLUE}${binary_name}${NC} is not installed." \
-      "Please install it and try again"
+  check_arg_count_at_least 1 "$@"
+  local have_found_binary=false
+  local binaries=( "$@" )
+  local binary_count=$#
+
+  #echo "binaries: ${binaries[*]}"
+  for binary_name in "${binaries[@]}"; do
+    #echo "binary_name: ${binary_name}"
+    if command -v "${binary_name}" 1>/dev/null; then
+      have_found_binary=true
+    fi
+  done
+
+  if [ "${have_found_binary}" = false ]; then
+    if [ "${binary_count}" -eq 1 ]; then
+      die "${RED}Error${NC}:  ${BLUE}${binaries[*]}${NC} is not installed." \
+        "Please install it and try again"
+    else
+      die "${RED}Error${NC}:  One of ${BLUE}${binaries[*]}${NC} is not installed." \
+        "Please install one of them and try again"
+    fi
   fi
 }
 
