@@ -26,20 +26,16 @@ process_template_file() {
   local template_file="$1"; shift
   echo "Processing template file ${template_file}"
 
-  local temp_dir
-  temp_dir="$(mktemp -d)"
+  # Strip .template off the end
+  local output_file
+  output_file="${template_file%.template}"
 
-  local output_file_name
-  output_file_name="$(basename "${template_file%.template}")"
-  local output_file="${temp_dir}/${output_file_name}"
+  #cp "${template_file}" "${output_file}"
 
   if [ -f "${output_file}" ] ; then
-    # Should never happen given we are using mktemp
     echo "Output file ${output_file} already exists, quitting!"
     exit 1
   fi
-
-  cat "${template_file}" > "${output_file}"
 
   local all_substitution_variables
   all_substitution_variables="$( \
@@ -48,6 +44,7 @@ process_template_file() {
       | uniq
     )"
 
+  sed_args=( )
   while read tag; do
     local tag_name
     # shellcheck disable=SC2001
@@ -60,50 +57,60 @@ process_template_file() {
     echo "Substituting tag ${tag} with value [${value}]"
 
     # Replace the tag with its value
-    sed -i'' "s|${tag}|${value}|g" "${output_file}"
+    sed_args+=( "-e" "s|${tag}|${value}|g" )
 
   done <<< "${all_substitution_variables}"
+
+  #echo "Using sed arguments:" "${sed_args[@]}"
+
+  sed "${sed_args[@]}" "${template_file}" > "${output_file}"
+
+  echo "Deleting ${template_file}"
+  rm "${template_file}"
 
   echo "Completed substitutions. Dumping contents of ${output_file}"
   echo "====================================================================="
   cat "${output_file}"
   echo "====================================================================="
+}
+
+main () {
+
+  # MySQL's entrypoint script will only process files in the root of
+  # /docker-entrypoint-initdb.d/ so we put all our files in a sub dir
+  # and then call there function to process them
+  local init_dir="/docker-entrypoint-initdb.d/stroom"
+  local temp_dir
+  temp_dir="$(mktemp -d)"
+  echo "Created temp directory ${temp_dir}"
+
+  # The file system is read-only so have to create our files in /tmp
+  cp "${init_dir}"/* "${temp_dir}/"
+
+  for template_file in ${temp_dir}/*.template; do
+    process_template_file "${template_file}"
+  done
 
   # Now we have substituted the values call process_init_file again
-  echo "Calling process_init_file on ${output_file}"
+  echo "Calling docker_process_init_files on ${temp_dir}/*"
   echo
 
-  # ${mysql[@]} is set in the original call to process_init_file
-  # If we don't pass it back in the connection details will be unavailable
-  process_init_file "${output_file}" "${mysql[@]}"
-  echo "Deleting directory ${temp_dir}"
+  # **************************************************************
+  # IMPORTANT: This function is declared in
+  # /usr/local/bin/docker-entrypoint.sh (in the container)
+  # If MySQL change that script then this may need to change
+  # Very fragile, not ideal.
+  # **************************************************************
+  #
+  # Now we have processed out template files run mysql's function 
+  # on our sub dir that contains the results of that templating and
+  # any other files.
+  docker_process_init_files "${temp_dir}"/*
+
+  echo "Deleting temp directory ${temp_dir}"
   rm -rf "${temp_dir}"
 }
 
+main "$@"
 
-# IMPORTANT: This function overrides the one declared in
-# /usr/local/bin/docker-entrypoint.sh (in the container)
-# to provide more functionality:
-#   - The additional handling of .template files
-# files. It will be called for each file found in 
-# /docker-entrypoint-initdb.d/
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# usage: process_init_file FILENAME MYSQLCOMMAND...
-#    ie: process_init_file foo.sh mysql -uroot
-# (process a single initializer file, based on its extension. we define this
-# function here, so that initializer scripts (*.sh) can use the same logic,
-# potentially recursively, or override the logic used in subsequent calls)
-process_init_file() {
-  local file="$1"; shift
-  local mysql=( "$@" )
-
-  case "${file}" in
-    *.sh)       echo "$0: running ${file}"; . "${file}" ;;
-    *.sql)      echo "$0: running ${file}"; "${mysql[@]}" < "${file}"; echo ;;
-    *.sql.gz)   echo "$0: running ${file}"; gunzip -c "${file}" | "${mysql[@]}"; echo ;;
-    *.template) echo "$0: processing ${file}"; process_template_file "${file}";;
-    *)          echo "$0: ignoring ${file}" ;;
-  esac
-  echo
-}
-
+echo "Finished $0"
