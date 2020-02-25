@@ -19,7 +19,7 @@ location = /stroom/datafeed {
 # All servlets
 # e.g. the status servlet
 # Needs to be /stroom/proxy/ rather than /stroom/ to distinguish it from the stroom upstream,
-# thus we can serve the servlts on both stroom and a local storing proxy.
+# thus we can serve the servlets on both stroom and a local storing proxy.
 location /stroom/proxy/ {
     proxy_pass http://stroom_proxy_upstream/stroom/;
     include location_defaults.conf;
