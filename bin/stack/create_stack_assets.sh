@@ -481,11 +481,11 @@ main() {
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} init files"
     local -r DEST_STROOM_ALL_DBS_INIT_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-all-dbs/init"
     copy_file_to_dir \
-      "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/000_init_override.sh" \
+      "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/000_stroom_init.sh" \
       "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}"
     copy_file_to_dir \
-      "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/001_create_databases.sql.template" \
-      "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}"
+      "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom/001_create_databases.sql.template" \
+      "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom"
   fi
 
   ############
