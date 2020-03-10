@@ -1,6 +1,6 @@
 # Stroom Environment Variable Documentation
 
-The following environment variable are used to configure the stroom stacks.
+The following environment variables are used to configure the stroom stacks.
 
 This file is also used as a source for adding in-line documentation to the
 `.env` file in the stack configuration (see create_stack_env.sh). For the
@@ -97,10 +97,34 @@ NGINX_ADVERTISED_HOST when nginx is used as the gateway for all requests.
 Any additional java command line options, e.g. `-Xms50m -Xmx1024m`, that will
 be used when running stroom.
 
+## STROOM_LOG_SENDER_CA_CERT_FILE
+
+The certificate authority certificate that stroom-log-sender will use when
+sending logs to a stroom or stroom-proxy instance.
+
+## STROOM_LOG_SENDER_CERT_FILE
+
+The client certificate that stroom-log-sender will use when sending logs to a
+stroom or stroom-proxy instance.
+
+## STROOM_LOG_SENDER_DATAFEED_URL
+
+The URL to send logs to, i.e. stroom's `/stroom/datafeed` endpoint.
+
+## STROOM_LOG_SENDER_DEFAULT_ENVIRONMENT
+
+The environment name (e.g. DEV, REF, OPS, etc) that will be associated with the
+sent logs, unless specified in `crontab.txt`
+
 ## STROOM_LOG_SENDER_DOCKER_REPO
 
-The docker repository for the stroom-log-sender docker image, e.g.
+The docker repository for the stroom docker image, e.g.
 `gchq/stroom-log-sender`. This can be changed to use a local repository.
+
+## STROOM_LOG_SENDER_PRIVATE_KEY_FILE
+
+The client private key that stroom-log-sender will use when sending logs to a
+stroom or stroom-proxy instance.
 
 ## STROOM_NGINX_DOCKER_REPO
 
@@ -185,6 +209,12 @@ status of feeds.
 The URL that will be used by stroom-proxy (remote) to check the receipt status
 of feeds.
 
+## STROOM_PROXY_REMOTE_FORWARDING_ENABLED
+
+True if stroom-proxy should forward data on to a downstream stroom or
+stroom-proxy instance. Typically this will be false for a local proxy, i.e. one
+that is co-located with stroom.
+
 ## STROOM_PROXY_REMOTE_FORWARDING_KEYSTORE_PASSWORD
 
 The password for the keystore file that will be used when forwarding
@@ -210,6 +240,17 @@ format.
 ## STROOM_PROXY_REMOTE_FORWARD_URL
 
 The URL that data should be forwarded to, e.g. a downstream stroom or stroom-proxy.
+
+## STROOM_PROXY_REMOTE_JERSEY_VERIFY_HOSTNAME
+
+True if stroom-proxy should verify the hostname against the server certificate
+when making API call, e.g. when checking the feed receipt status.
+
+## STROOM_PROXY_REMOTE_STORING_ENABLED
+
+True if stroom-proxy should store the received data in its local repository.
+Typically this will be true for a local proxy as stroom will read from this
+repository.
 
 ## STROOM_RACK
 

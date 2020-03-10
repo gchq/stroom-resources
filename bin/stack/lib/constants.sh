@@ -47,4 +47,37 @@
     "zookeeper"
     "hdfs"
   )
+  
+  # Bash 4 associative array or service names to DropWiz admin path names
+  declare -A ADMIN_PATH_NAMES_MAP=(
+      ["stroom"]="stroomAdmin"
+      ["stroom-auth-service"]="authenticationServiceAdmin"
+      ["stroom-stats"]="statsAdmin"
+      ["stroom-proxy-local"]="proxyAdmin"
+      ["stroom-proxy-remote"]="proxyAdmin"
+  )
+
+  declare -A ADMIN_PORT_ENV_VAR_NAMES_MAP=(
+      ["stroom"]="STROOM_ADMIN_PORT"
+      ["stroom-auth-service"]="STROOM_AUTH_SERVICE_ADMIN_PORT"
+      ["stroom-stats"]="STROOM_STATS_SERVICE_ADMIN_PORT"
+      ["stroom-proxy-local"]="STROOM_PROXY_LOCAL_ADMIN_PORT"
+      ["stroom-proxy-remote"]="STROOM_PROXY_REMOTE_ADMIN_PORT"
+  )
+
+  declare -A SERVICE_NAMES_MAP=(
+    ["stroom-log-sender"]="Stroom Log Sender"
+    ["stroom-proxy-remote"]="Stroom Proxy (remote)"
+    ["stroom-proxy-local"]="Stroom Proxy (local)"
+    ["nginx"]="Nginx"
+    ["stroom-auth-ui"]="Stroom Authentication UI"
+    ["stroom-auth-service"]="Stroom Authentication Service"
+    ["stroom"]="Stroom"
+    ["stroom-stats"]="Stroom Stats"
+    ["stroom-all-dbs"]="Stroom Databases"
+    ["kafka"]="Kafa"
+    ["hbase"]="HBase"
+    ["zookeeper"]="Zookeeper"
+    ["hdfs"]="HDFS"
+  )
 }

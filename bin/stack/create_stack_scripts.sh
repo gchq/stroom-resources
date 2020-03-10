@@ -86,6 +86,7 @@ main() {
     || element_in "stroom-proxy-local" "${SERVICES[@]}" \
     || element_in "stroom-proxy-remote" "${SERVICES[@]}"; then
     create_script health
+    create_script set_log_levels
   fi
 
   create_script info

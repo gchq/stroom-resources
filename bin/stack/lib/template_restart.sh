@@ -89,7 +89,7 @@ main() {
   do_restart "$@"
 
   if [ "${wait_for_health_checks}" = true ]; then
-    wait_for_service_to_start
+    wait_for_services_to_start
 
     # Stroom is now up or we have given up waiting so check the health
     check_overall_health
