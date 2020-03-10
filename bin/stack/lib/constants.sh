@@ -28,7 +28,6 @@
 
   SERVICES_WITH_HEALTH_CHECK=(
       "stroom"
-      "stroom-auth-service"
       "stroom-stats"
       "stroom-proxy-local"
       "stroom-proxy-remote"
@@ -40,7 +39,6 @@
     "stroom-proxy-local"
     "nginx"
     "stroom-ui"
-    "stroom-auth-service"
     "stroom"
     "stroom-stats"
     "stroom-all-dbs"

@@ -79,7 +79,6 @@ alias stroombash='docker exec -it --user stroom stroom bash'
 alias statsbash='docker exec -it --user stroomstats stroom-stats bash'
 alias stroomdbbash='docker exec -it stroom-db bash'
 alias nginxbash='docker exec -it nginx bash'
-alias authservicebash='docker exec -it stroom-auth-service bash'
 
 # A generic one that uses FZF to fuzzy find from a list of running containers (but only runs as root).
 alias dbash='service=$(docker ps --format '{{.Names}}' | fzf); docker exec -it $service bash'

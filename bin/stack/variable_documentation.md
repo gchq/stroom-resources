@@ -64,33 +64,6 @@ sending password reset emails from stroom-auth.
 The port of the SMTP mail server that will be used when sending password reset
 emails from stroom-auth.
 
-## STROOM_AUTH_SERVICE_DOCKER_REPO
-
-The docker repository for the stroom-auth-service docker image, e.g.
-`gchq/stroom-auth-service`. This can be changed to use a local repository.
-
-## STROOM_AUTH_SERVICE_HOST
-
-The host/DNS name used to access stroom-auth-service. Typically this will be
-the same as NGINX_ADVERTISED_HOST when nginx is used as the gateway for all
-requests.
-
-## STROOM_AUTH_SERVICE_JAVA_OPTS
-
-Any additional java command line options, e.g. `-Xms50m -Xmx1024m`, that will
-be used when running stroom-auth-service.
-
-## STROOM_AUTH_UI_DOCKER_REPO
-
-The docker repository for the stroom-auth-ui docker image, e.g.
-`gchq/stroom-auth-ui`. This can be changed to use a local repository.
-
-## STROOM_AUTH_UI_HOST
-
-The host/DNS name used to access the stroom-auth user interface. Typically this
-will be the same as NGINX_ADVERTISED_HOST when nginx is used as the gateway for
-all requests.
-
 ## STROOM_DB_HOST
 
 The hostname or IP address of the database host for the _stroom_ database.

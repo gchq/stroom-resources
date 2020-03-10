@@ -21,7 +21,6 @@ main() {
   SERVICES+=("stroom-all-dbs")
   #SERVICES+=("stroom-annotations-service")
   #SERVICES+=("stroom-annotations-ui")
-  SERVICES+=("stroom-auth-service")
   SERVICES+=("stroom-log-sender")
   SERVICES+=("stroom-proxy-local")
   SERVICES+=("stroom-proxy-remote")

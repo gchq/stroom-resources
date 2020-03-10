@@ -1,7 +1,7 @@
 - name: "Performing '{{op}}' on '{{stack_name}}'"
   # -y to agree to not ask questions
   # -q to not wait for startups -- this matters because we're not dictating order of startup.
-  #    E.g. stroom-auth-service needs the db to finish starting, but what if the db hasn't been asked to start yet?
+  #    E.g. stroom needs the db to finish starting, but what if the db hasn't been asked to start yet?
   command: "chdir={{home}}/{{stack_name}}/latest/ ./{{op}}"
   # Sometimes get a tput error if we don't do this.
   environment:

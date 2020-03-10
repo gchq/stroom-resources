@@ -275,32 +275,6 @@ main() {
   fi
 
 
-  #########################
-  #  stroom-auth-service  #
-  #########################
-
-  if element_in "stroom-auth-service" "${services[@]}"; then
-    echo -e "  Copying ${YELLOW}stroom-auth-service${NC} config"
-    local -r DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-service/config"
-    if [[ "${STROOM_AUTH_SERVICE_TAG}" =~ local-SNAPSHOT ]]; then
-      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_AUTH_SERVICE_TAG${NC}=${BLUE}${STROOM_AUTH_SERVICE_TAG}${NC}"
-      if [ ! -n "${LOCAL_STROOM_AUTH_REPO_DIR}" ]; then
-        echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_AUTH_REPO_DIR${NC} to your local stroom repo"
-        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_AUTH_REPO_DIR=/home/dev/git_work/stroom-auth${NC}'"
-      fi
-      copy_file_to_dir \
-        "${STROOM_AUTH_SVC_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}" \
-        "${DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY}" \
-        "${CONFIG_FILENAME_IN_CONTAINER}"
-    else
-      download_file \
-        "${DEST_STROOM_AUTH_SERVICE_CONFIG_DIRECTORY}" \
-        "${STROOM_AUTH_SVC_CONFIG_YAML_URL_BASE}" \
-        "${STROOM_AUTH_SVC_CONFIG_YAML_FILENAME}" \
-        "${CONFIG_FILENAME_IN_CONTAINER}"
-    fi
-  fi
-
   ####################
   #  stroom-auth-ui  #
   ####################

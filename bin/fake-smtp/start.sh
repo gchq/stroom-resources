@@ -24,7 +24,7 @@ NC='\033[0m' # No Color
 # Get the dir that this script lives in, no matter where it is called from
 readonly SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-echo -e "To use fakeSmtp you need to configure ${BLUE}stroom-auth-service's${NC} environment variables. They will need to look like this:"
+echo -e "To use fakeSmtp you need to configure ${BLUE}stroom's${NC} environment variables. They will need to look like this:"
 echo -e "    ${BLUE}STROOM_AUTH_EMAIL_SMTP_HOST=<use '\$HOST_IP' if running a stack>"
 echo -e "    ${BLUE}STROOM_AUTH_EMAIL_SMTP_PORT=2525${NC}"
 echo -e "    ${BLUE}STROOM_AUTH_EMAIL_SMTP_TRANSPORT=\"plain\"${NC}"

@@ -423,12 +423,6 @@ check_overall_health() {
     "proxyAdmin"
 
   check_service_health_if_in_stack \
-    "stroom-auth-service" \
-    "${host}" \
-    "STROOM_AUTH_SERVICE_ADMIN_PORT" \
-    "authenticationServiceAdmin"
-
-  check_service_health_if_in_stack \
     "stroom-stats" \
     "${host}" \
     "STROOM_STATS_ADMIN_PORT" \
@@ -508,11 +502,6 @@ display_stack_info() {
       admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_ADMIN_PORT")"
       echo_info_line "${padding}" "Stroom Proxy (remote)" \
         "http://localhost:${admin_port}/proxyAdmin"
-    fi
-    if is_service_in_stack "stroom-auth-service"; then
-      admin_port="$(get_config_env_var "STROOM_AUTH_SERVICE_ADMIN_PORT")"
-      echo_info_line "${padding}" "Stroom Auth" \
-        "http://localhost:${admin_port}/authenticationServiceAdmin"
     fi
   fi
 
@@ -760,9 +749,6 @@ wait_for_service_to_start() {
   fi
   if is_container_running "stroom-proxy-remote"; then
     wait_for_stroom_proxy_remote
-  fi
-  if is_container_running "stroom-auth-service"; then
-    wait_for_stroom_auth_service
   fi
   if is_container_running "stroom-stats"; then
     wait_for_stroom_stats

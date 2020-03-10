@@ -15,8 +15,6 @@
  8087 - stroom-stats (admin)
  8090 - stroom-proxy-local (app http)
  8091 - stroom-proxy-local (admin)
- 8099 - stroom-auth-service (app)
- 8100 - stroom-auth-service (admin)
  8199 - stroom-annotations-service (app)
  8200 - stroom-annotations-service (admin)
  8299 - stroom-elastic-query-service (app)
@@ -38,7 +36,6 @@
 10766 - stroom-proxy-local (debug)
 10767 - stroom-proxy-remote (debug)
 10768 - stroom-stats (debug)
-10769 - stroom-auth-service (debug)
 16000 - hbase
 16010 - hbase
 16201 - hbase

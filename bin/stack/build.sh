@@ -21,7 +21,6 @@ validate_requested_services() {
     "stroom-all-dbs" \
     "stroom-annotations-service" \
     "stroom-annotations-ui" \
-    "stroom-auth-service" \
     "stroom-auth-ui" \
     "stroom-ui" \
     "stroom-log-sender" \
