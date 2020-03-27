@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    stack_name: stroom_stack
+  creationTimestamp: null
+  name: nginx
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      annotations:
+        stack_name: stroom_stack
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - env:
+        - name: AUTH_SERVICE_HOST
+          value: $HOST_IP
+        - name: AUTH_SERVICE_PORT
+          value: "8099"
+        - name: AUTH_UI_URL
+          value: $HOST_IP:9443
+        - name: DOCKER_HOST_HOSTNAME
+          value: UNKNOWN
+        - name: DOCKER_HOST_IP
+          value: UNKNOWN
+        - name: NGINX_ADVERTISED_HOST
+          value: $HOST_IP
+        - name: NGINX_CLIENT_BODY_BUFFER_SIZE
+          value: 1M
+        - name: NGINX_HTML_ROOT_PATH
+          value: /stroom-nginx/html
+        - name: NGINX_SSL_CA_CERTIFICATE
+          value: ca.pem.crt
+        - name: NGINX_SSL_CERTIFICATE
+          value: server.pem.crt
+        - name: NGINX_SSL_CERTIFICATE_KEY
+          value: server.unencrypted.key
+        - name: NGINX_SSL_VERIFY_CLIENT
+          value: optional
+        - name: STROOM_HOST
+          value: $HOST_IP
+        - name: STROOM_PORT
+          value: "8080"
+        - name: STROOM_PROXY_HOST
+          value: $HOST_IP
+        - name: STROOM_PROXY_PORT
+          value: "8090"
+        image: gchq/stroom-nginx:v6.0-LATEST
+        name: nginx
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources: {}
+        volumeMounts:
+        - mountPath: /stroom-nginx/certs
+          name: nginx-certs
+          readOnly: true
+        - mountPath: /stroom-nginx/config
+          name: nginx-config
+          readOnly: true
+        - mountPath: /stroom-nginx/html
+          name: nginx-html
+          readOnly: true
+        - mountPath: /stroom-nginx/logs
+          name: nginx-logs
+        - mountPath: /stroom-nginx/logrotate
+          name: nginx-logrotate
+      restartPolicy: Always
+      volumes:
+      - name: nginx-certs
+        persistentVolumeClaim:
+          claimName: nginx-certs
+          readOnly: true
+      - name: nginx-config
+        persistentVolumeClaim:
+          claimName: nginx-config
+          readOnly: true
+      - name: nginx-html
+        persistentVolumeClaim:
+          claimName: nginx-html
+          readOnly: true
+      - name: nginx-logs
+        persistentVolumeClaim:
+          claimName: nginx-logs
+      - name: nginx-logrotate
+        persistentVolumeClaim:
+          claimName: nginx-logrotate
+status: {}

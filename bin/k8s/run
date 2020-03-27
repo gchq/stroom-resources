@@ -9,6 +9,7 @@ apply() {
     echo -e "${GREEN}Applying all...${NC}"
     apply_dbs
     apply_stroom
+    apply_nginx
 }
 
 # Delete everything
@@ -48,6 +49,17 @@ apply_stroom() {
 
     kubectl apply -f stroom/stroom-deployment.yaml
     kubectl apply -f stroom/stroom-service.yaml
+}
+
+apply_nginx() {
+    echo -e "${GREEN}Applying nginx configs${NC}"
+    kubectl apply -f nginx/nginx-certs-persistentvolumeclaim.yaml
+    kubectl apply -f nginx/nginx-config-persistentvolumeclaim.yaml
+    kubectl apply -f nginx/nginx-deployment.yaml
+    kubectl apply -f nginx/nginx-html-persistentvolumeclaim.yaml
+    kubectl apply -f nginx/nginx-logrotate-persistentvolumeclaim.yaml
+    kubectl apply -f nginx/nginx-logs-persistentvolumeclaim.yaml
+    kubectl apply -f nginx/nginx-service.yaml
 }
 
 # Clear the decks and start again

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    stack_name: stroom_stack
+  creationTimestamp: null
+  labels:
+    io.kompose.service: nginx
+  name: nginx
+spec:
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: 80
+  - name: "443"
+    port: 443
+    targetPort: 443
+status:
+  loadBalancer: {}
