@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    stack_name: stroom_stack
+  creationTimestamp: null
+  name: stroom-all-dbs
+spec:
+  type: NodePort
+  selector:
+    app: stroom-all-dbs
+  ports:
+  - name: "3307"
+    port: 3307
+    targetPort: 3306
+status:
+  loadBalancer: {}

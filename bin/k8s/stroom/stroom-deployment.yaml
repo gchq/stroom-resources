@@ -1,0 +1,184 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    stack_name: stroom_stack
+  creationTimestamp: null
+  name: stroom
+  labels:
+    app: stroom
+    service: stroom
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: stroom
+  template:
+    metadata:
+      annotations:
+        stack_name: stroom_stack 
+      creationTimestamp: null
+      labels:
+        app: stroom
+    spec:
+      containers:
+      - env:
+        - name: ADMIN_CONTEXT_PATH
+          value: /stroomAdmin
+        - name: DOCKER_HOST_HOSTNAME
+          value: UNKNOWN
+        - name: DOCKER_HOST_IP
+          value: UNKNOWN
+        - name: JAVA_OPTS
+          value: ' -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10765,suspend=n '
+        - name: STROOM_ADMIN_PORT
+          value: "8081"
+        - name: STROOM_ADVERTISED_URL
+          value: https://stroom-all-dbs
+        - name: STROOM_APIKEYS_UI_URL
+          value: https://stroom-all-dbs/s/tokens
+        - name: STROOM_APP_PORT
+          value: "8080"
+        - name: STROOM_AUTHENTICATION_SERVICE_URL
+          value: https://stroom-all-dbs/api/auth/authentication/v1
+        - name: STROOM_AUTH_AUTHENTICATION_SERVICE_URL
+          value: https://stroom-all-dbs/api/auth/authentication/v1
+        - name: STROOM_AUTH_CLIENT_ID
+          value: PZnJr8kHRKqnlJRQThSI
+        - name: STROOM_AUTH_CLIENT_SECRET
+          value: OtzHiAWLj8QWcwO2IxXmqxpzE2pyg0pMKCghR2aU
+        - name: STROOM_AUTH_JWT_ENABLETOKENREVOCATIONCHECK
+          value: "false"
+        - name: STROOM_AUTH_JWT_ISSUER
+          value: stroom
+        - name: STROOM_AUTH_SERVICES_URL
+          value: http://stroom-all-dbs/api/auth
+        - name: STROOM_CHANGEPASSWORD_URL
+          value: https://stroom-all-dbs/s/changepassword
+        - name: STROOM_CONNECTORS_KAFKA_DEFAULT_BOOTSTRAP_SERVERS
+          value: kafka:9092
+        - name: STROOM_CONNECTORS_KAFKA_DEFAULT_CONNECTOR_VERSION
+          value: 2.1.1
+        - name: STROOM_CONTENT_PACK_IMPORT_ENABLED
+          value: "false"
+        - name: STROOM_DEBUG_PORT
+          value: "10765"
+        - name: STROOM_DEVELOPMENT_MODE
+          value: "true"
+        - name: STROOM_HELP_URL
+          value: https://gchq.github.io/stroom-docs/
+        - name: STROOM_INTERNALSTATISTICS_BENCHMARK_CLUSTER_DOC_REFS
+          value: docRef(StatisticStore,946a88c6-a59a-11e6-bdc4-0242ac110002,Benchmark-Cluster
+            Test),docRef(StroomStatsStore,2503f703-5ce0-4432-b9d4-e3272178f47e,Benchmark-Cluster
+            Test)
+        - name: STROOM_INTERNALSTATISTICS_CPU_DOC_REFS
+          value: docRef(StatisticStore,af08c4a7-ee7c-44e4-8f5e-e9c6be280434,CPU),docRef(StroomStatsStore,1edfd582-5e60-413a-b91c-151bd544da47,CPU)
+        - name: STROOM_INTERNALSTATISTICS_EVENTS_PER_SECOND_DOC_REFS
+          value: docRef(StatisticStore,a9936548-2572-448b-9d5b-8543052c4d92,EPS),docRef(StroomStatsStore,cde67df0-0f77-45d3-b2c0-ee8bb7b3c9c6,EPS)
+        - name: STROOM_INTERNALSTATISTICS_HEAP_HISTOGRAM_BYTES_DOC_REFS
+          value: docRef(StatisticStore,934a1600-b456-49bf-9aea-f1e84025febd,Heap Histogram
+            Bytes),docRef(StroomStatsStore,b0110ab4-ac25-4b73-b4f6-96f2b50b456a,Heap
+            Histogram Bytes)
+        - name: STROOM_INTERNALSTATISTICS_HEAP_HISTOGRAM_INSTANCES_DOC_REFS
+          value: docRef(StatisticStore,e4f243b8-2c70-4d6e-9d5a-16466bf8764f,Heap Histogram
+            Instances),docRef(StroomStatsStore,bdd933a4-4309-47fd-98f6-1bc2eb555f20,Heap
+            Histogram Instances)
+        - name: STROOM_INTERNALSTATISTICS_MEMORY_DOC_REFS
+          value: docRef(StatisticStore,77c09ccb-e251-4ca5-bca0-56a842654397,Memory),docRef(StroomStatsStore,d8a7da4f-ef6d-47e0-b16a-af26367a2798,Memory)
+        - name: STROOM_INTERNALSTATISTICS_META_DATA_STREAMS_RECEIVED_DOC_REFS
+          value: docRef(StatisticStore,946a87bc-a59a-11e6-bdc4-0242ac110002,Meta Data-Streams
+            Received),docRef(StroomStatsStore,5535f493-29ae-4ee6-bba6-735aa3104136,Meta
+            Data-Streams Received)
+        - name: STROOM_INTERNALSTATISTICS_META_DATA_STREAM_SIZE_DOC_REFS
+          value: docRef(StatisticStore,946a8814-a59a-11e6-bdc4-0242ac110002,Meta Data-Stream
+            Size),docRef(StroomStatsStore,3b25d63b-5472-44d0-80e8-8eea94f40f14,Meta
+            Data-Stream Size)
+        - name: STROOM_INTERNALSTATISTICS_PIPELINE_STREAM_PROCESSOR_DOC_REFS
+          value: docRef(StatisticStore,946a80fc-a59a-11e6-bdc4-0242ac110002,PipelineStreamProcessor),docRef(StroomStatsStore,efd9bad4-0bab-460f-ae98-79e9717deeaf,PipelineStreamProcessor)
+        - name: STROOM_INTERNALSTATISTICS_STREAM_TASK_QUEUE_SIZE_DOC_REFS
+          value: docRef(StatisticStore,946a7f0f-a59a-11e6-bdc4-0242ac110002,Stream
+            Task Queue Size),docRef(StroomStatsStore,4ce8d6e7-94be-40e1-8294-bf29dd089962,Stream
+            Task Queue Size)
+        - name: STROOM_INTERNALSTATISTICS_VOLUMES_DOC_REFS
+          value: docRef(StatisticStore,ac4d8d10-6f75-4946-9708-18b8cb42a5a3,Volumes),docRef(StroomStatsStore,60f4f5f0-4cc3-42d6-8fe7-21a7cec30f8e,Volumes)
+        - name: STROOM_JDBC_DRIVER_CLASS_NAME
+          value: com.mysql.cj.jdbc.Driver
+        - name: STROOM_JDBC_DRIVER_PASSWORD
+          value: stroompassword1
+          value: my-secret-pw
+        - name: STROOM_JDBC_DRIVER_URL
+          value: jdbc:mysql://stroom-all-dbs:3307/stroom?useUnicode=yes&characterEncoding=UTF-8
+        - name: STROOM_JDBC_DRIVER_USERNAME
+          value: stroomuser
+          value: root
+        - name: STROOM_JPA_DIALECT
+          value: org.hibernate.dialect.MySQLInnoDBDialect
+        - name: STROOM_LOGGING_LEVEL
+          value: INFO
+        - name: STROOM_NODE
+          value: node1a
+        - name: STROOM_PLUGINS_LIB_DIR
+          value: /stroom/plugins
+        - name: STROOM_PROXY_DIR
+          value: /tmp/proxy
+        - name: STROOM_RACK
+          value: rack
+        - name: STROOM_SERVICE_DISCOVERY_ENABLED
+          value: "true"
+        - name: STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL
+          value: zookeeper:2181
+        - name: STROOM_STATISTICS_SQL_JDBC_DRIVER_CLASS_NAME
+          value: com.mysql.cj.jdbc.Driver
+        - name: STROOM_STATISTICS_SQL_JDBC_DRIVER_PASSWORD
+          value: stroompassword1
+        - name: STROOM_STATISTICS_SQL_JDBC_DRIVER_URL
+          value: jdbc:mysql://stroom-all-dbs:3307/stats?useUnicode=yes&characterEncoding=UTF-8
+        - name: STROOM_STATISTICS_SQL_JDBC_DRIVER_USERNAME
+          value: statsuser
+        - name: STROOM_UI_PATH
+          value: /stroom/ui?prompt=login
+        - name: STROOM_UI_URL
+          value: https://stroom-all-dbs
+        - name: STROOM_USERS_UI_URL
+          value: https://stroom-all-dbs/s/users
+        image: gchq/stroom:v6.0-LATEST
+        livenessProbe:
+          exec:
+            command:
+            - curl --connect-timeout 5 --max-time 10 --fail --silent --head --output
+              /dev/null http://localhost:8081/stroomAdmin/healthcheck || exit 1
+          failureThreshold: 3
+          periodSeconds: 60
+          timeoutSeconds: 5
+        name: stroom
+        ports:
+        - containerPort: 8080
+        - containerPort: 8081
+        - containerPort: 10765
+        resources: {}
+        volumeMounts:
+        - mountPath: /stroom/logs
+          name: stroom-logs
+        - mountPath: /stroom/output
+          name: stroom-output
+        - mountPath: /stroom/proxy-repo
+          name: stroom-proxy-local-repo
+        - mountPath: /stroom/volumes
+          name: stroom-volumes
+      restartPolicy: Always
+      volumes:
+      - name: stroom-logs
+        persistentVolumeClaim:
+          claimName: stroom-logs
+      - name: stroom-output
+        persistentVolumeClaim:
+          claimName: stroom-output
+      - name: stroom-proxy-local-repo
+        persistentVolumeClaim:
+          claimName: stroom-proxy-local-repo
+      - name: stroom-volumes
+        persistentVolumeClaim:
+          claimName: stroom-volumes
+status: {}

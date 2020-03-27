@@ -1,0 +1,117 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  annotations:
+    stack_name: stroom_stack
+  creationTimestamp: null
+  name: stroom-all-dbs
+  labels:
+    app: stroom
+    service: stroom-all-dbs
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: stroom-all-dbs
+  template:
+    metadata:
+      annotations:
+        stack_name: stroom_stack 
+      creationTimestamp: null
+      labels:
+        app: stroom-all-dbs
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_ROOT_HOST
+          value: "%"
+        - name: MYSQL_ROOT_PASSWORD
+          value: my-secret-pw
+        - name: STROOM_ANNOTATIONS_DB_NAME
+          value: annotations
+        - name: STROOM_ANNOTATIONS_DB_PASSWORD
+          value: stroompassword1
+        - name: STROOM_ANNOTATIONS_DB_USERNAME
+          value: annotationsuser
+        - name: STROOM_AUTH_DB_NAME
+          value: auth
+        - name: STROOM_AUTH_DB_PASSWORD
+          value: stroompassword1
+        - name: STROOM_AUTH_DB_USERNAME
+          value: authuser
+        - name: STROOM_CONFIG_DB_NAME
+          value: config
+        - name: STROOM_CONFIG_DB_PASSWORD
+          value: stroompassword1
+        - name: STROOM_CONFIG_DB_USERNAME
+          value: configuser
+        - name: STROOM_DATAMETA_DB_NAME
+          value: datameta
+        - name: STROOM_DATAMETA_DB_PASSWORD
+          value: stroompassword1
+        - name: STROOM_DATAMETA_DB_USERNAME
+          value: datametauser
+        - name: STROOM_DB_NAME
+          value: stroom
+        - name: STROOM_DB_PASSWORD
+          value: stroompassword1
+        - name: STROOM_DB_USERNAME
+          value: stroomuser
+        - name: STROOM_EXPLORER_DB_NAME
+          value: explorer
+        - name: STROOM_EXPLORER_DB_PASSWORD
+          value: stroompassword1
+        - name: STROOM_EXPLORER_DB_USERNAME
+          value: exploreruser
+        - name: STROOM_PROCESS_DB_NAME
+          value: process
+        - name: STROOM_PROCESS_DB_PASSWORD
+          value: stroompassword1
+        - name: STROOM_PROCESS_DB_USERNAME
+          value: processuser
+        - name: STROOM_STATS_DB_NAME
+          value: stats
+        - name: STROOM_STATS_DB_PASSWORD
+          value: stroompassword1
+        - name: STROOM_STATS_DB_USERNAME
+          value: statsuser
+        image: mysql:5.6.47
+        name: stroom-all-dbs
+        ports:
+        - containerPort: 3306
+        resources: {}
+        volumeMounts:
+        - mountPath: /etc/mysql/conf.d/stroom-all-dbs.cnf
+          name: stroom-all-dbs-conf
+          readOnly: true
+          subPath: stroom-all-dbs.cnf
+        - mountPath: /docker-entrypoint-initdb.d/000_stroom_init.sh
+          name: stroom-all-dbs-init-000-volume
+          subPath: 000_stroom_init.sh # This is how you mount an individual file
+        - mountPath: /docker-entrypoint-initdb.d/stroom/001_create_databases.sql.template
+          name: stroom-all-dbs-init-001-volume
+          subPath: 001_create_databases.sql.template # This is how you mount an individual file
+        - mountPath: /var/lib/mysql
+          name: stroom-all-dbs-data
+        - mountPath: /var/log/mysql
+          name: stroom-all-dbs-logs
+      restartPolicy: Always
+      volumes:
+      - name: stroom-all-dbs-conf
+        configMap:
+          name: stroom-all-dbs-conf
+      - name: stroom-all-dbs-init-000-volume
+        configMap:
+          name: stroom-all-dbs-init-000
+      - name: stroom-all-dbs-init-001-volume
+        configMap:
+          name: stroom-all-dbs-init-001
+      - name: stroom-all-dbs-data
+        persistentVolumeClaim:
+          claimName: stroom-all-dbs-data
+      - name: stroom-all-dbs-logs
+        persistentVolumeClaim:
+          claimName: stroom-all-dbs-logs
+status: {}

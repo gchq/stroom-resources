@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+#
+# `/run` for help
+# 
+# Then `./run <function_name>`. E.g. ./run apply
+
+# Apply all k8s configs
+apply() {
+    echo -e "${GREEN}Applying all...${NC}"
+    apply_dbs
+    apply_stroom
+}
+
+# Delete everything
+delete() {
+    echo -e "${GREEN}Deleting all...${NC}"
+    kubectl delete all --all
+    kubectl delete pvc --all # Not sure why the above doesn't delete PVCs
+}
+
+# Apply DB configs
+apply_dbs() {
+    echo -e "${GREEN}Applying DB configs${NC}"
+    kubectl delete configmap stroom-all-dbs-init-000
+    kubectl create configmap stroom-all-dbs-init-000 --from-file=../compose/volumes/stroom-all-dbs/init/000_stroom_init.sh
+
+    kubectl delete configmap stroom-all-dbs-init-001
+    kubectl create configmap stroom-all-dbs-init-001 --from-file=../compose/volumes/stroom-all-dbs/init/stroom/001_create_databases.sql.template
+
+    kubectl delete configmap stroom-all-dbs-conf
+    kubectl create configmap stroom-all-dbs-conf --from-file=../compose/volumes/stroom-all-dbs/conf/stroom-all-dbs.cnf
+
+
+    kubectl apply -f dbs/stroom-all-dbs-data-persistentvolumeclaim.yaml
+    kubectl apply -f dbs/stroom-all-dbs-logs-persistentvolumeclaim.yaml
+
+    kubectl apply -f dbs/stroom-all-dbs-deployment.yaml
+    kubectl apply -f dbs/stroom-all-dbs-service.yaml
+}
+
+# Apply Stroom configs
+apply_stroom() {
+    echo -e "${GREEN}Applying Stroom configs${NC}"
+    kubectl apply -f stroom/stroom-logs-persistentvolumeclaim.yaml
+    kubectl apply -f stroom/stroom-output-persistentvolumeclaim.yaml
+    kubectl apply -f stroom/stroom-proxy-local-repo-persistentvolumeclaim.yaml
+    kubectl apply -f stroom/stroom-volumes-persistentvolumeclaim.yaml
+
+    kubectl apply -f stroom/stroom-deployment.yaml
+    kubectl apply -f stroom/stroom-service.yaml
+}
+
+# Clear the decks and start again
+bounce() {
+    echo -e "${GREEN}Clearing the decks and start again${NC}"
+    
+    # For some reason one delete doesn't get rid of the service. Do it twice why not?
+    delete
+    delete
+
+    apply
+}
+
+source run_lib.sh "$@"

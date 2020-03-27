@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    stack_name: stroom_stack
+  creationTimestamp: null
+  name: stroom
+spec:
+  selector:
+    app: stroom
+  ports:
+  - name: "8080"
+    port: 8080
+    targetPort: 8080
+  - name: "8081"
+    port: 8081
+    targetPort: 8081
+  - name: "10765"
+    port: 10765
+    targetPort: 10765
+status:
+  loadBalancer: {}
