@@ -19,17 +19,12 @@ validate_requested_services() {
     "nginx" \
     "stroom" \
     "stroom-all-dbs" \
-    "stroom-annotations-service" \
-    "stroom-annotations-ui" \
-    "stroom-auth-ui" \
-    "stroom-ui" \
     "stroom-log-sender" \
     "stroom-proxy-local" \
     "stroom-proxy-remote" \
     "stroom-query-elastic-service" \
     "stroom-query-elastic-ui" \
     "stroom-stats" \
-    "stroom-ui" \
     "zookeeper" \
   )
 

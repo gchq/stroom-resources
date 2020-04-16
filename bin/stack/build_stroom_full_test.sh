@@ -19,8 +19,6 @@ main() {
   SERVICES+=("nginx")
   SERVICES+=("stroom")
   SERVICES+=("stroom-all-dbs")
-  #SERVICES+=("stroom-annotations-service")
-  #SERVICES+=("stroom-annotations-ui")
   SERVICES+=("stroom-log-sender")
   SERVICES+=("stroom-proxy-local")
   SERVICES+=("stroom-proxy-remote")
