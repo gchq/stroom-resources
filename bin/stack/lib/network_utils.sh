@@ -68,7 +68,7 @@ wait_for_200_response() {
     local sub_msg="$1"; shift
   fi
 
-  local maxWaitSecs=120
+  local maxWaitSecs=240
 
   local n=0
   local were_dots_shown=false
