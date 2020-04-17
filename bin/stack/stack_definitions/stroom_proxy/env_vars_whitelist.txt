@@ -35,6 +35,5 @@ STROOM_PROXY_REMOTE_FORWARD_URL
 #STROOM_PROXY_REMOTE_SYNC_API_KEY - commented out as rulesets are not ready for use
 #STROOM_PROXY_REMOTE_UPSTREAM_DICTIONARY_URL - commented out as rulesets are not ready for use
 #STROOM_PROXY_REMOTE_UPSTREAM_RULE_URL - commented out as rulesets are not ready for use
-STROOM_UI_HOST
 
 # vim: set filetype=conf:
