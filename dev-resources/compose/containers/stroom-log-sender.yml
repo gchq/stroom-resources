@@ -16,8 +16,6 @@ services:
       - STROOM_PROXY_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_PROXY_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-proxy}
         # The base path for all stroom proxy remote logs
       - STROOM_PROXY_REMOTE_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_PROXY_REMOTE_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-proxy-remote}
-        # The base path for all stroom auth service logs
-      - STROOM_AUTH_SVC_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_AUTH_SVC_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-auth-service}
         # The base path for all stroom nginx logs
       - STROOM_NGINX_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_NGINX_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-nginx}
         # The base path for all stroom stats logs

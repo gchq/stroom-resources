@@ -19,15 +19,6 @@ http {
         include upstreams.stroom.processing.conf;
     }
 
-    upstream auth_service_upstream_sticky {
-        ip_hash;
-        include upstreams.auth.service.conf;
-    }
-
-    upstream auth_ui_upstream {
-        include upstreams.auth.ui.conf;
-    }
-
     upstream stroom_proxy_upstream { 
         include upstreams.proxy.conf;
     }
@@ -53,9 +44,6 @@ http {
         # Include location configuration specific to stroom
         include locations.stroom.conf;
 
-        # Include location configuration specific to auth
-        include locations.auth.conf;
-
         # Include location configuration specific to proxy
         include locations.proxy.conf;
 
@@ -66,7 +54,7 @@ http {
 
         # Include location configuration specific to dev.
         # Should not be included in production deployments.
-        # Supports hot-loading for stroom-ui
+        # Supports hot-loading for the new ui
         include locations.dev.conf;
         # ########### FI_development-only_IN_STACK ###########
     }

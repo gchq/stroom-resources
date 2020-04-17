@@ -97,6 +97,8 @@ main() {
   shasum -a 256 "${ARCHIVE_NAME}" > "${HASH_FILE_NAME}"
 
   popd > /dev/null
+
+  echo -e "${GREEN}Build complete!${NC}"
 }
 
 main "$@"
