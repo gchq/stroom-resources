@@ -173,7 +173,7 @@ main() {
   local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
   local -r STROOM_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_TAG}/stroom-app"
   local -r STROOM_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-app"
-  local -r STROOM_CONFIG_YAML_FILENAME="dev.yml"
+  local -r STROOM_CONFIG_YAML_FILENAME="prod.yml"
   local -r STROOM_PROXY_CONFIG_YAML_URL_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_PROXY_TAG}/stroom-proxy/stroom-proxy-app"
   local -r STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-proxy/stroom-proxy-app"
   local -r STROOM_PROXY_CONFIG_YAML_FILENAME="proxy-prod.yml"
