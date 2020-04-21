@@ -1,10 +1,10 @@
-# NOTE: This file is for dev use only, for hot-loading stroom-ui
+# NOTE: This file is for dev use only, for hot-loading the new UI
 # It should NOT be included in a production deployment
 
 # These locations allow webpack dev server requests to get through to our app.
 
 location /__webpack_dev_server__ {
-    proxy_pass https://auth_ui_upstream/__webpack_dev_server__;
+    proxy_pass https://stroom_upstream/__webpack_dev_server__;
 }
 
 # More information here:
@@ -14,7 +14,7 @@ location /sockjs-node {
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header Host $host;
 
-    proxy_pass https://auth_ui_upstream;
+    proxy_pass https://stroom_upstream;
 
     proxy_redirect off;
 
@@ -24,7 +24,7 @@ location /sockjs-node {
 }
 
 location /main. {
-    proxy_pass https://auth_ui_upstream/main.;
+    proxy_pass https://stroom_upstream/main.;
 }
 
 # vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:
