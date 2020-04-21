@@ -7,4 +7,4 @@ proxy_set_header           X-SSL-Client-V-Start $ssl_client_v_start;
 proxy_set_header           X-SSL-Client-Verify  $ssl_client_verify;
 proxy_set_header           X-SSL-Protocol       $ssl_protocol;
 
-# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
+# vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:

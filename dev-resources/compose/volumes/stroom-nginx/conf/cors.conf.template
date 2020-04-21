@@ -33,4 +33,4 @@ if ($request_method = 'GET') {
     add_header 'Access-Control-Expose-Headers'    'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
 }
 
-# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
+# vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:

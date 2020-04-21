@@ -35,4 +35,4 @@ location /api/proxy/ {
     include location_defaults.conf;
 }
 
-# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
+# vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:
