@@ -20,8 +20,8 @@ main() {
   SERVICES+=("stroom")
   SERVICES+=("stroom-all-dbs")
   SERVICES+=("stroom-log-sender")
-  SERVICES+=("stroom-proxy-local")
-  SERVICES+=("stroom-proxy-remote")
+  #SERVICES+=("stroom-proxy-local") TODO - add back in once feed status check is fixed
+  #SERVICES+=("stroom-proxy-remote") TODO - add back in once feed status check is fixed
   #SERVICES+=("stroom-query-elastic-service")
   #SERVICES+=("stroom-query-elastic-ui")
   SERVICES+=("stroom-stats")
