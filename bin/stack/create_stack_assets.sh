@@ -282,42 +282,42 @@ main() {
   #  stroom-ui  #
   ###############
 
-  if element_in "stroom-ui" "${services[@]}"; then
-    echo -e "  Copying ${YELLOW}stroom-ui${NC} certificates"
-    local -r DEST_STROOM_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/certs"
-    copy_file_to_dir "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
-    copy_file_to_dir "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
-    copy_file_to_dir "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+  #if element_in "stroom-ui" "${services[@]}"; then
+    #echo -e "  Copying ${YELLOW}stroom-ui${NC} certificates"
+    #local -r DEST_STROOM_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/certs"
+    #copy_file_to_dir "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+    #copy_file_to_dir "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
+    #copy_file_to_dir "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" "${DEST_STROOM_UI_CERTS_DIRECTORY}"
 
-    echo -e "  Copying ${YELLOW}stroom-ui${NC} config files"
-    local -r DEST_STROOM_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/conf"
-    copy_file_to_dir "${SRC_STROOM_UI_CONF_DIRECTORY}/nginx.conf.template" "${DEST_STROOM_UI_CONF_DIRECTORY}"
-  fi
+    #echo -e "  Copying ${YELLOW}stroom-ui${NC} config files"
+    #local -r DEST_STROOM_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-ui/conf"
+    #copy_file_to_dir "${SRC_STROOM_UI_CONF_DIRECTORY}/nginx.conf.template" "${DEST_STROOM_UI_CONF_DIRECTORY}"
+  #fi
 
 
   ####################
   #  stroom-auth-ui  #
   ####################
 
-  if element_in "stroom-auth-ui" "${services[@]}"; then
-    echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} certificates"
-    local -r DEST_AUTH_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-ui/certs"
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" \
-      "${DEST_AUTH_UI_CERTS_DIRECTORY}"
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/server/server.pem.crt" \
-      "${DEST_AUTH_UI_CERTS_DIRECTORY}"
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" \
-      "${DEST_AUTH_UI_CERTS_DIRECTORY}"
+  #if element_in "stroom-auth-ui" "${services[@]}"; then
+    #echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} certificates"
+    #local -r DEST_AUTH_UI_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-ui/certs"
+    #copy_file_to_dir \
+      #"${SRC_CERTS_DIRECTORY}/certificate-authority/ca.pem.crt" \
+      #"${DEST_AUTH_UI_CERTS_DIRECTORY}"
+    #copy_file_to_dir \
+      #"${SRC_CERTS_DIRECTORY}/server/server.pem.crt" \
+      #"${DEST_AUTH_UI_CERTS_DIRECTORY}"
+    #copy_file_to_dir \
+      #"${SRC_CERTS_DIRECTORY}/server/server.unencrypted.key" \
+      #"${DEST_AUTH_UI_CERTS_DIRECTORY}"
 
-    echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} config files"
-    local -r DEST_AUTH_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-ui/conf"
-    copy_file_to_dir \
-      "${SRC_AUTH_UI_CONF_DIRECTORY}/nginx.conf.template" \
-      "${DEST_AUTH_UI_CONF_DIRECTORY}"
-  fi
+    #echo -e "  Copying ${YELLOW}stroom-auth-ui${NC} config files"
+    #local -r DEST_AUTH_UI_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-auth-ui/conf"
+    #copy_file_to_dir \
+      #"${SRC_AUTH_UI_CONF_DIRECTORY}/nginx.conf.template" \
+      #"${DEST_AUTH_UI_CONF_DIRECTORY}"
+  #fi
 
 
 
@@ -363,12 +363,12 @@ main() {
         "${DEST_NGINX_CONF_DIRECTORY}/upstreams.stroom.processing.conf.template" 
       delete_file \
         "${DEST_NGINX_CONF_DIRECTORY}/upstreams.stroom.ui.conf.template" 
-      delete_file \
-        "${DEST_NGINX_CONF_DIRECTORY}/locations.auth.conf.template" 
-      delete_file \
-        "${DEST_NGINX_CONF_DIRECTORY}/upstreams.auth.service.conf.template" 
-      delete_file \
-        "${DEST_NGINX_CONF_DIRECTORY}/upstreams.auth.ui.conf.template" 
+      #delete_file \
+        #"${DEST_NGINX_CONF_DIRECTORY}/locations.auth.conf.template" 
+      #delete_file \
+        #"${DEST_NGINX_CONF_DIRECTORY}/upstreams.auth.service.conf.template" 
+      #delete_file \
+        #"${DEST_NGINX_CONF_DIRECTORY}/upstreams.auth.ui.conf.template" 
     fi
 
     # Delete the dev conf file as this is not applicable to a released
