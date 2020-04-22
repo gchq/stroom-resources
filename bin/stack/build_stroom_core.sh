@@ -16,7 +16,7 @@ main() {
   SERVICES+=("stroom")
   SERVICES+=("stroom-all-dbs")
   SERVICES+=("stroom-log-sender")
-  #SERVICES+=("stroom-proxy-local") TODO - add back in once feed status check is fixed
+  SERVICES+=("stroom-proxy-local")
 
   ./build.sh "${BUILD_STACK_NAME}" "${VERSION:-SNAPSHOT}" "${SERVICES[@]}"
 }
