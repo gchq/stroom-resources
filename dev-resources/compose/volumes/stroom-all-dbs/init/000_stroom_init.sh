@@ -76,6 +76,16 @@ process_template_file() {
 
 main () {
 
+  # To help debug the running of this script in the container
+  #pwd
+  #echo "args: $0 - " "${@}"
+  #echo "-----------------------------------------"
+  #declare -F
+  #echo "-----------------------------------------"
+  #echo "-----------------------------------------"
+  #env | sort
+  #echo "-----------------------------------------"
+
   # MySQL's entrypoint script will only process files in the root of
   # /docker-entrypoint-initdb.d/ so we put all our files in a sub dir
   # and then call there function to process them
@@ -98,13 +108,18 @@ main () {
   # **************************************************************
   # IMPORTANT: This function is declared in
   # /usr/local/bin/docker-entrypoint.sh (in the container)
-  # If MySQL change that script then this may need to change
+  # If MySQL change that script then this may need to change.
+  # IMPORTANT: This script must NOT have its executable flag set
+  # else their entrypoint script will run this instead of sourcing
+  # it. If that happens we won't have access to the
+  # docker_process_init_files function
   # Very fragile, not ideal.
   # **************************************************************
   #
   # Now we have processed out template files run mysql's function 
   # on our sub dir that contains the results of that templating and
   # any other files.
+
   docker_process_init_files "${temp_dir}"/*
 
   echo "Deleting temp directory ${temp_dir}"
