@@ -15,3 +15,5 @@ When `000_stroom_init.sh` is called it will process any `.template` files
 substituting their tags with environment variables and then remove thier
 `.template` extension. After this all files matching the above list of
 extensions will be processed by MySQL's function.
+
+`000_stroom_init.sh` must NOT be made executable or it won't work.
