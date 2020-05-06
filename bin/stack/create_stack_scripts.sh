@@ -70,6 +70,7 @@ main() {
 
   if element_in "stroom-all-dbs" "${SERVICES[@]}"; then
     create_script backup_databases
+    create_script database_shell
   fi
 
   # Only stroom can be migrated
