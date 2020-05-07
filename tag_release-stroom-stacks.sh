@@ -25,10 +25,61 @@ error_exit() {
   exit 1
 }
 
+display_usage() {
+  echo -e "${GREEN}Usage: ${BLUE}./tag_release.sh [OPTIONS] version${NC}"
+  echo -e "${GREEN}e.g:   ${BLUE}./tag_release.sh stroom-stacks-v6.0-beta.20${NC}"
+  echo -e ""
+  echo -e "${GREEN}Valid OPTION values:${NC}"
+  echo -e "${GREEN} -d    Delay. Wait until the Stroom tag is available on GitHub releases.${NC}"
+  echo -e "${GREEN} -h    Display this help.${NC}"
+  echo
+  echo -e "${GREEN}This script will build all the stack variants and create an annotated git commit using the${NC}"
+  echo -e "${GREEN}version information for each stack. The tag commit will be pushed to the origin.${NC}"
+}
+
+wait_for_stroom_release() {
+
+  # TODO fix extraction of the stroom version from the stack version to
+  # allow for '-2' suffixes.
+
+  # TODO Check that GH has the expected stroom tag, if not bomb out.
+
+  # See if there is a tag with name $stroom_version
+  # Returns name if found, nothing if not
+  http \
+    --body \
+    https://api.github.com/repos/gchq/stroom/tags \
+    | jq \
+    --raw-output \
+    ".[] | select(.name==\${stroom_version}\) | .name"
+
+  # TODO enter wait loop, initial 20 min wait, then poll every 1 min,
+  # give up after 1hr.
+
+
+  # See if a release exists with a particular name
+  # Returns 200 if found, 404 if not
+   http \
+       -h \
+       "https://api.github.com/repos/gchq/stroom/releases/tags/${stroom_version}" \
+     | grep \
+       -P \
+       'HTTP/[\d\.]+ \d+ \w+' \
+     | cut \
+       -d ' ' \
+       -f2
+
+  # TODO if the release is there then continue with the tagging of -resources.
+
+}
+
 main() {
   local version="$1"
   # extract "v1.0.3" from "stroom_stacks-v1.0.3"
   local VERSION_PART="${version//stroom-stacks-/}"
+
+  # Extract the version part of the tag, e.g. v6.0-beta.20
+  local stroom_version="v${version#*-v}"
 
   readonly STROOM_IMAGE_PREFIX='gchq/stroom'
   # Git tags should match this regex to be a release tag
@@ -41,13 +92,11 @@ main() {
   setup_echo_colours
   echo
 
+  # TODO add getopts to allow for a -d arg for delay mode.
+
   if [ $# -ne 1 ]; then
     echo -e "${RED}ERROR${GREEN}: Missing version argument${NC}"
-    echo -e "${GREEN}Usage: ${BLUE}./tag_release.sh version${NC}"
-    echo -e "${GREEN}e.g:   ${BLUE}./tag_release.sh stroom-stacks-v6.0-beta.20${NC}"
-    echo
-    echo -e "${GREEN}This script will build all the stack variants and create an annotated git commit using the${NC}"
-    echo -e "${GREEN}version information for each stack. The tag commit will be pushed to the origin.${NC}"
+    display_usage
     exit 1
   fi
 
@@ -125,8 +174,6 @@ main() {
 
     # If the stack includes stroom, make sure the stroom image matches the version
     if cut -d "|" -f 2 <  "${all_services_file}" | grep -q "${STROOM_IMAGE_PREFIX}:"; then
-      # Extract the version part of the tag, e.g. v6.0-beta.20
-      local stroom_version="v${version#*-v}"
       # Get the full stroom docker image tag from the VERSIONS.txt file
       local stroom_image_tag
       stroom_image_tag="$(grep "${STROOM_IMAGE_PREFIX}:.*" "${all_services_file}")"
@@ -171,6 +218,9 @@ main() {
   read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
 
   if [ "$keyPressed" = 'y' ] || [ "$keyPressed" = 'Y' ]; then
+
+    # TODO Change this so if in delay mode it triggers the waiting for a GH release
+
     echo
     echo -e "${GREEN}Tagging the current commit${NC}"
     echo -e "${commit_msg}" | git tag -a --file - "${version}"
