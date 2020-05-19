@@ -331,7 +331,7 @@ test_stack_archive() {
 
   # TODO when the problems with proxy api keys and feed status check
   # are resolved uncomment this to re-enable testing
-  #test_stack "${stack_name}"
+  test_stack "${stack_name}"
 
   popd > /dev/null
   echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
