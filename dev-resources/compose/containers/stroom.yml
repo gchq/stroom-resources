@@ -10,6 +10,7 @@ services:
       - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10765,suspend=n }
       - STROOM_HOST=${STROOM_HOST:-$HOST_IP}
       - API_GATEWAY_HOST=${NGINX_ADVERTISED_HOST:-$HOST_IP}
+      - API_GATEWAY_HTTPS_PORT=${API_GATEWAY_HTTPS_PORT:-443}
       - STROOM_APP_PORT=8080
       - STROOM_ADMIN_PORT=8081
       - STROOM_DEBUG_PORT=10765
