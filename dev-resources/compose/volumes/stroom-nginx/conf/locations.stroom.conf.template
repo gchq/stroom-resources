@@ -27,12 +27,12 @@ location /api/ {
 ##################
 
 location = / {
-    return 302 https://<<<NGINX_ADVERTISED_HOST>>>:<<<API_GATEWAY_HTTPS_PORT>>>/stroom/ui;
+    return 302 https://<<<NGINX_ADVERTISED_HOST>>>:<<<API_GATEWAY_PORT>>>/stroom/ui;
 }
 
 # This is an exact match that directs '/stroom' to the Stroom UI...
 location ~ /stroom$ {
-    return 302 https://<<<NGINX_ADVERTISED_HOST>>>:<<<API_GATEWAY_HTTPS_PORT>>>/stroom/ui;
+    return 302 https://<<<NGINX_ADVERTISED_HOST>>>:<<<API_GATEWAY_PORT>>>/stroom/ui;
 }
 
 location ~ .*/clustercall.rpc$ {
