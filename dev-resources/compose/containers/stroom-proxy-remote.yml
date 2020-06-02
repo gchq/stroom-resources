@@ -36,8 +36,7 @@ services:
       # This should really be https://$NGINX_ADVERTISED_HOST/feedStatusService/v1 but with our self signed certs and using IPs we will get a SAN list mis-match. The 'nginx' host will only work inside docker.
       - FEED_STATUS_URL=${STROOM_PROXY_REMOTE_FEED_STATUS_URL:-https://nginx/api/proxy/feedStatus/v1}
         #- FEED_STATUS_URL=${STROOM_PROXY_REMOTE_FEED_STATUS_URL:-http://$HOST:8080/api/feedStatus/v1}
-        # This is a copy of STROOM_SECURITY_API_TOKEN to make feed status checking work in development. A different token should be used in operational deployments.
-      - FEED_STATUS_API_KEY=${STROOM_PROXY_REMOTE_FEED_STATUS_API_KEY:-eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6InN0cm9vbSIsImF1ZCI6IlBabkpyOGtIUktxbmxKUlFUaFNJIn0.qT5jdPWBpN9me0L3OqUT0VFT2mvVX9mCp0gPFyTVg8DkFTPLLYIuXjOslvrllJDBbqefEtqS9OwQs3RmRnZxror676stTP6JHN76YqJWj2yJYyJGuggbXjZnfTiZGO3SOxl5FP4nmRRvPxA3XqV9kippKBpHfqm5RuTpFTU8uses2iaHFm7lY4zXmKDmwVizXybBQBtpxrBNQkeQjQyg7UFkpsRO8-PmIdbTldRhGlud5VpntwI1_ahwOzK-einUJQOWrcOBmXAMPRYBI6tSLT1xS_c5XpFX1Rxoj3FGjI-Myqp_2Nt_lZuQ3h-0Qh8WkZMnWQ76G7CKawXzRAwd7Q}
+      - FEED_STATUS_API_KEY=${STROOM_PROXY_REMOTE_FEED_STATUS_API_KEY:-}
       - STROOM_PROXY_CLIENT_KEYSTORE_PASSWORD=${STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_PASSWORD:-password}
       - STROOM_PROXY_CLIENT_KEYSTORE_PATH=${STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_PATH:-/stroom-proxy/certs/client.jks}
       - STROOM_PROXY_CLIENT_KEYSTORE_TYPE=${STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_TYPE:-JKS}
