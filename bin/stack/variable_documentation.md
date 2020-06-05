@@ -64,13 +64,13 @@ sending password reset emails from stroom-auth.
 The port of the SMTP mail server that will be used when sending password reset
 emails from stroom-auth.
 
-## STROOM_CREATE_DEFAULT_INDEX_VOLUMES_ON_BOOTSTRAP
+## STROOM_CREATE_DEFAULT_INDEX_VOLUMES
 
-Whether Stroom should create a default index volume group on startup
+Whether Stroom should create a default index volume group
 
-## STROOM_CREATE_DEFAULT_STREAM_VOLUMES_ON_BOOTSTRAP
+## STROOM_CREATE_DEFAULT_STREAM_VOLUMES
 
-Whether Stroom should create default stream volumes on startup
+Whether Stroom should create default stream volumes
 
 ## STROOM_DEFAULT_INDEX_VOLUME_NODES
 
