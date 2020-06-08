@@ -64,6 +64,30 @@ sending password reset emails from stroom-auth.
 The port of the SMTP mail server that will be used when sending password reset
 emails from stroom-auth.
 
+## STROOM_CREATE_DEFAULT_INDEX_VOLUMES
+
+Whether Stroom should create a default index volume group
+
+## STROOM_CREATE_DEFAULT_STREAM_VOLUMES
+
+Whether Stroom should create default stream volumes
+
+## STROOM_DEFAULT_INDEX_VOLUME_NODES
+
+Comma delimited list of nodes to associate with the volumes of the default index group
+to be created on start-up if STROOM_CREATE_DEFAULT_INDEX_VOLUMES_ON_BOOTSTRAP is true,
+the nodes in the list correspond to the paths defined in STROOM_DEFAULT_INDEX_VOLUME_PATHS.
+      
+##  STROOM_DEFAULT_INDEX_VOLUME_PATHS
+
+Comma delimited list of paths of the volumes of the default index group 
+to be created on start-up if STROOM_CREATE_DEFAULT_INDEX_VOLUMES_ON_BOOTSTRAP is true,
+the paths in this list correspond to the nodes defined in STROOM_DEFAULT_INDEX_VOLUME_NODES.
+
+## STROOM_DEFAULT_STREAM_VOLUME_PATHS
+
+Comma delimited list of paths for the default stream volumes
+
 ## STROOM_DB_HOST
 
 The hostname or IP address of the database host for the _stroom_ database.
