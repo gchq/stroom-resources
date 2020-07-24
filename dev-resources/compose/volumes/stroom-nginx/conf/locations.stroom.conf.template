@@ -16,89 +16,15 @@ location = /stroom/datafeeddirect {
     include proxy_location_defaults.conf;
 }
 
-# All REST services
-location /api/ {
-    proxy_pass http://stroom_upstream_sticky/api/;
-    include location_defaults.conf;
-}
-
-##################
-# ROUTING FOR UI #
-##################
-
-location = / {
-    return 302 https://<<<NGINX_ADVERTISED_HOST>>>:<<<API_GATEWAY_PORT>>>/stroom/ui;
-}
-
-# This is an exact match that directs '/stroom' to the Stroom UI...
-location ~ /stroom$ {
-    return 302 https://<<<NGINX_ADVERTISED_HOST>>>:<<<API_GATEWAY_PORT>>>/stroom/ui;
-}
-
+# Prevent any public access to clustercall.rpc
 location ~ .*/clustercall.rpc$ {
     deny all;
 }
 
-# ... and everything else gets reverse-proxied to stroom.
-location /stroom {
-    proxy_pass http://stroom_upstream_sticky/stroom;
+# By default everything gets reverse-proxied to stroom.
+location / {
+    proxy_pass http://stroom_upstream_sticky/;
     include location_defaults.conf;
-}
-
-
-
-# TODO The following is legacy auth/stroom-ui stuff that needs checking
-# Also check sticky/nonsticky
-
-########################
-# ROUTING FOR SERVICES #
-########################
-
-#location /api/auth/ {
-#    include location_defaults.conf;
-#    proxy_pass http://stroom_upstream_sticky/api/;
-#}
-
-##################
-# ROUTING FOR UI #
-##################
-
-# TODO: We don't really want this path. Auth has several responsibilities.
-# Some of them are mapped to more helpful locations, as above, but really 
-# should be non-root. E.g. passwordReset is root, so we need this location.
-#location /authui {
-#    proxy_pass http://stroom_upstream_sticky;
-#}
-
-# The following routes mount stroom-ui onto this server. These paths catch
-# everything that should go to the UI.
-
-# This allows stroom-ui to get its config.
-location /config.json {
-    proxy_pass http://stroom_upstream_sticky/config.json;
-}
-
-# This allows stroom-ui to get its fav icon.
-location /favicon.ico {
-    proxy_pass http://stroom_upstream_sticky/favicon.ico;
-}
-
-# This allows stroom-ui to get its manifest.
-location /manifest.json {
-    proxy_pass http://stroom_upstream_sticky/manifest.json;
-    
-}
-
-# This allows stroom-ui to get its assets, e.g. css and images.
-location /static {
-    proxy_pass http://stroom_upstream_sticky/static;
-}
-
-# This is the path where all non-chrome pages are hosted,
-# i.e. all the normal functionality but without the chrome (navigation, footer).
-location /s {
-    include location_defaults.conf;
-    proxy_pass http://stroom_upstream_sticky/s;
 }
 
 # vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:
