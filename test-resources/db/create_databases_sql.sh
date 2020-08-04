@@ -80,35 +80,35 @@ process_template_file() {
 
 export STROOM_ANNOTATIONS_DB_NAME='annotations'
 export STROOM_ANNOTATIONS_DB_USERNAME='annotationsuser'
-export STROOM_ANNOTATIONS_DB_PASSWORD='stroompassword1'
+export STROOM_ANNOTATIONS_DB_PASSWORD='Stroompassword1!'
 #Auth
 export STROOM_AUTH_DB_NAME='auth'
 export STROOM_AUTH_DB_USERNAME='authuser'
-export STROOM_AUTH_DB_PASSWORD='stroompassword1'
+export STROOM_AUTH_DB_PASSWORD='Stroompassword1!'
 #config
 export STROOM_CONFIG_DB_NAME='config'
 export STROOM_CONFIG_DB_USERNAME='configuser'
-export STROOM_CONFIG_DB_PASSWORD='stroompassword1'
+export STROOM_CONFIG_DB_PASSWORD='Stroompassword1!'
 #datameta
 export STROOM_DATAMETA_DB_NAME='datameta'
 export STROOM_DATAMETA_DB_USERNAME='datametauser'
-export STROOM_DATAMETA_DB_PASSWORD='stroompassword1'
+export STROOM_DATAMETA_DB_PASSWORD='Stroompassword1!'
 #explorer
 export STROOM_EXPLORER_DB_NAME='explorer'
 export STROOM_EXPLORER_DB_USERNAME='exploreruser'
-export STROOM_EXPLORER_DB_PASSWORD='stroompassword1'
+export STROOM_EXPLORER_DB_PASSWORD='Stroompassword1!'
 #process
 export STROOM_PROCESS_DB_NAME='process'
 export STROOM_PROCESS_DB_USERNAME='processuser'
-export STROOM_PROCESS_DB_PASSWORD='stroompassword1'
+export STROOM_PROCESS_DB_PASSWORD='Stroompassword1!'
 #stats
 export STROOM_STATS_DB_NAME='stats'
 export STROOM_STATS_DB_USERNAME='statsuser'
-export STROOM_STATS_DB_PASSWORD='stroompassword1'
+export STROOM_STATS_DB_PASSWORD='Stroompassword1!'
 #stroom
 export STROOM_DB_NAME='stroom'
 export STROOM_DB_USERNAME='stroomuser'
-export STROOM_DB_PASSWORD='stroompassword1'
+export STROOM_DB_PASSWORD='Stroompassword1!'
 
 process_template_file ../../dev-resources/compose/volumes/stroom-all-dbs/init/stroom/001_create_databases.sql.template \
     ./create_databases.sql
