@@ -479,6 +479,7 @@ display_stack_info() {
 
   display_active_stack_services
 
+  determing_docker_host_details
 
   if is_at_least_one_service_in_stack "${SERVICES_WITH_HEALTH_CHECK[@]}"; then
 
@@ -521,8 +522,12 @@ display_stack_info() {
       echo -e "\nThe Stroom user interface can be accessed at the following URL\n"
       echo_info_line "${padding}" "Stroom UI" "https://localhost/stroom"
       echo -e "\n  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})\n"
-    fi
 
+      # Have to use the IP here rather than localhost else we get CORRS issues.
+      echo -e "The Stroom API description can be accessed at the following URLs\n"
+      echo_info_line "${padding}" "Swagger UI" "https://${DOCKER_HOST_IP}/stroom/noauth/swagger-ui"
+      echo_info_line "${padding}" "Swagger spec." "https://${DOCKER_HOST_IP}/stroom/noauth/swagger/swagger.json\n"
+    fi
   fi
 }
 
