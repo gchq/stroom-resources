@@ -72,6 +72,7 @@ services:
         source: stroom-proxy-local_repo
         target: /stroom-proxy/repo
     logging:
+      driver: "json-file"
       options:
         max-size: "${STROOM_PROXY_LOCAL_STD_OUT_LOGS_MAX_SIZE:-10m}"
         max-file: "${STROOM_PROXY_LOCAL_STD_OUT_LOGS_MAX_FILES:-2}"

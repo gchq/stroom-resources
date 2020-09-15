@@ -37,6 +37,7 @@ services:
         source: hbase_logs
         target: /hbase/logs
     logging:
+      driver: "json-file"
       options:
         max-size: "${HBASE_STD_OUT_LOGS_MAX_SIZE:-10m}"
         max-file: "${HBASE_STD_OUT_LOGS_MAX_FILES:-2}"
