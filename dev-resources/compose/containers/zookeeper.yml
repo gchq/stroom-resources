@@ -14,6 +14,7 @@ services:
         source: zookeeper_data
         target: /var/lib/zookeeper
     logging:
+      driver: "json-file"
       options:
         max-size: "${STROOM_ZOOKEEPER_STD_OUT_LOGS_MAX_SIZE:-10m}"
         max-file: "${STROOM_ZOOKEEPER_STD_OUT_LOGS_MAX_FILES:-2}"

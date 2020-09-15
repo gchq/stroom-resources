@@ -39,6 +39,7 @@ services:
       - "${STROOM_STATS_ADMIN_PORT:-8087}:8087"
       - "${STROOM_STATS_DEBUG_PORT:-10768}:10768"
     logging:
+      driver: "json-file"
       options:
         max-size: "${STROOM_STATS_STD_OUT_LOGS_MAX_SIZE:-10m}"
         max-file: "${STROOM_STATS_STD_OUT_LOGS_MAX_FILES:-2}"

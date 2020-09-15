@@ -51,6 +51,7 @@ services:
       # service that adds in the mouting of a shared named volume to a dir in /stroom-log-sender/log-volumes/.
       # These override files are defined in the named_volume_mounts dir.
     logging:
+      driver: "json-file"
       options:
         max-size: "${STROOM_LOG_SENDER_STD_OUT_LOGS_MAX_SIZE:-10m}"
         max-file: "${STROOM_LOG_SENDER_STD_OUT_LOGS_MAX_FILES:-2}"
