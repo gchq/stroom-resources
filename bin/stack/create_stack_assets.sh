@@ -174,10 +174,9 @@ main() {
   local -r STROOM_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-app/docker/build"
   local -r STROOM_CONFIG_YAML_FILENAME="config.yml"
   local -r STROOM_PROXY_CONFIG_YAML_URL_BASE="https://github.com/gchq/stroom/releases/download/${STROOM_PROXY_TAG}"
-  local -r STROOM_PROXY_CONFIG_YAML_URL_FILENAME="stroom-app-config-${STROOM_PROXY_TAG}.yml"
+  local -r STROOM_PROXY_CONFIG_YAML_URL_FILENAME="stroom-proxy-app-config-${STROOM_PROXY_TAG}.yml"
   local -r STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-proxy/stroom-proxy-app/docker/build"
   local -r STROOM_PROXY_CONFIG_YAML_FILENAME="config.yml"
-  local -r CONFIG_FILENAME_IN_CONTAINER="config.yml"
 
   if element_in "stroom" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom${NC} config"
@@ -196,13 +195,13 @@ main() {
       copy_file_to_dir \
         "${STROOM_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_CONFIG_DIRECTORY}" \
-        "${CONFIG_FILENAME_IN_CONTAINER}"
+        "${STROOM_CONFIG_YAML_FILENAME}"
     else
       download_file \
         "${DEST_STROOM_CONFIG_DIRECTORY}" \
         "${STROOM_CONFIG_YAML_URL_BASE}" \
         "${STROOM_CONFIG_YAML_URL_FILENAME}" \
-        "${CONFIG_FILENAME_IN_CONTAINER}"
+        "${STROOM_CONFIG_YAML_FILENAME}"
     fi
   fi
 
@@ -227,13 +226,13 @@ main() {
       copy_file_to_dir \
         "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
-        "${CONFIG_FILENAME_IN_CONTAINER}"
+        "${STROOM_CONFIG_YAML_FILENAME}"
     else
       download_file \
         "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
         "${STROOM_PROXY_CONFIG_YAML_URL_BASE}" \
         "${STROOM_PROXY_CONFIG_YAML_URL_FILENAME}" \
-        "${CONFIG_FILENAME_IN_CONTAINER}"
+        "${STROOM_CONFIG_YAML_FILENAME}"
     fi
 
     echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} certificates"
@@ -261,16 +260,20 @@ main() {
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
         echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
       fi
+      if [ ! -d "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}" ]; then
+        echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}${NC}, has the stroom build been run?"
+        exit 1
+      fi
       copy_file_to_dir \
         "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
-        "${CONFIG_FILENAME_IN_CONTAINER}"
+        "${STROOM_CONFIG_YAML_FILENAME}"
     else
       download_file \
         "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
         "${STROOM_PROXY_CONFIG_YAML_URL_BASE}" \
-        "${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
-        "${CONFIG_FILENAME_IN_CONTAINER}"
+        "${STROOM_PROXY_CONFIG_YAML_URL_FILENAME}" \
+        "${STROOM_CONFIG_YAML_FILENAME}"
     fi
 
     echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} certificates"
