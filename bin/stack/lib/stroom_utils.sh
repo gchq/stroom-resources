@@ -520,7 +520,7 @@ display_stack_info() {
 
     if is_service_in_stack "stroom"; then
       echo -e "\nThe Stroom user interface can be accessed at the following URL\n"
-      echo_info_line "${padding}" "Stroom UI" "https://localhost/stroom"
+      echo_info_line "${padding}" "Stroom UI" "https://localhost"
       echo -e "\n  (Login with the default username/password: ${BLUE}admin${NC}/${BLUE}admin${NC})\n"
 
       # Have to use the IP here rather than localhost else we get CORRS issues.
