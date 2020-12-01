@@ -59,7 +59,7 @@ services:
       - STROOM_CONTENT_PACK_IMPORT_ENABLED=${STROOM_CONTENT_PACK_IMPORT_ENABLED:-false}
       - STROOM_SERVICE_DISCOVERY_ENABLED=${STROOM_SERVICE_DISCOVERY_ENABLED:-true}
       - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=${ZOOKEEPER_QUORUM:-zookeeper:2181}
-      - STROOM_REF_DATA_STORE_DIR=${STROOM_REF_DATA_STORE_DIR:-/tmp/stroom/refDataOffHeapStore}
+      #- STROOM_REF_DATA_STORE_DIR=${STROOM_REF_DATA_STORE_DIR:-/tmp/stroom/refDataOffHeapStore}
       #- STROOM_INTERNALSTATISTICS_BENCHMARK_CLUSTER_DOC_REFS=${STROOM_INTERNALSTATISTICS_BENCHMARK_CLUSTER_DOC_REFS:-docRef(StatisticStore,946a88c6-a59a-11e6-bdc4-0242ac110002,Benchmark-Cluster Test),docRef(StroomStatsStore,2503f703-5ce0-4432-b9d4-e3272178f47e,Benchmark-Cluster Test)}
       #- STROOM_INTERNALSTATISTICS_CPU_DOC_REFS=${STROOM_INTERNALSTATISTICS_CPU_DOC_REFS:-docRef(StatisticStore,af08c4a7-ee7c-44e4-8f5e-e9c6be280434,CPU),docRef(StroomStatsStore,1edfd582-5e60-413a-b91c-151bd544da47,CPU)}
       #- STROOM_INTERNALSTATISTICS_EVENTS_PER_SECOND_DOC_REFS=${STROOM_INTERNALSTATISTICS_EVENTS_PER_SECOND_DOC_REFS:-docRef(StatisticStore,a9936548-2572-448b-9d5b-8543052c4d92,EPS),docRef(StroomStatsStore,cde67df0-0f77-45d3-b2c0-ee8bb7b3c9c6,EPS)}
@@ -140,6 +140,9 @@ services:
     volumes:
       - ${STROOM_VOLUME_CONFIG:-../../volumes/stroom/config}:/stroom/config:ro
       - type: volume
+        source: stroom_content_pack_import
+        target: /stroom/content_pack_import
+      - type: volume
         source: stroom_logs
         target: /stroom/logs
       - type: volume
@@ -150,10 +153,10 @@ services:
         # stroom-log-sender
       - type: volume
         source: stroom-proxy-local_repo
-        target: /stroom/proxy-repo
+        target: /stroom/proxy_repo
       - type: volume
-        source: stroom_ref_data
-        target: /stroom/ref-data
+        source: stroom_reference_data
+        target: /stroom/reference_data
       - type: volume
         source: stroom_volumes
         target: /stroom/volumes
@@ -167,7 +170,8 @@ services:
     # Allows us to pass other commands to the app, e.g. migrate
     command: ./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}
 volumes:
+  stroom_content_pack_import:
   stroom_logs:
   stroom_output:
-  stroom_ref_data:
+  stroom_reference_data:
   stroom_volumes:
