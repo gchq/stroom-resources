@@ -224,7 +224,7 @@ is_at_least_one_service_in_stack() {
   for service_name in "${service_names_to_check[@]}"; do
     regex+="${service_name}|"
   done
-  regex="${regex%%|}}"
+  regex="${regex%%|}"
   regex+=")$"
 
   # return true if service_name is in the file
@@ -461,21 +461,31 @@ display_active_stack_services() {
   done < "${DIR}/${STACK_SERVICES_FILENAME}"
 }
 
-display_stack_info() {
+display_banner() {
   # see if the terminal supports colors...
   no_of_colours=$(tput colors)
 
   if [ "${MONOCHROME}" = false ]; then
     if test -n "$no_of_colours" && test "${no_of_colours}" -eq 256; then
-      # 256 colours so print the stroom banner in dirty orange
+      # 256 colours so print the stroom banner in glorious dirty amber
       echo -en "\e[38;5;202m"
     else
       # No 256 colour support so fall back to blue
       echo -en "${BLUE}"
     fi
   fi
-  cat "${DIR}"/lib/banner.txt
+
+  if [[ "${STACK_NAME}" = "stroom_proxy" ]]; then
+    cat "${DIR}"/lib/banner_proxy.txt
+  else
+    cat "${DIR}"/lib/banner.txt
+  fi
+
   echo -en "${NC}"
+}
+
+display_stack_info() {
+  display_banner
 
   display_active_stack_services
 
@@ -503,19 +513,34 @@ display_stack_info() {
   fi
 
   if is_at_least_one_service_in_stack "stroom" "stroom-proxy-local" "stroom-proxy-remote"; then
-    echo -e "\nData can be POSTed to Stroom using the following URLs (see README for details)\n"
+    echo -e "\nData can be POSTed to Stroom using the following URLs" \
+      "(see README for details)\n"
+
     if is_service_in_stack "stroom"; then
-      echo_info_line "${padding}" "Stroom (direct)" "https://localhost/stroom/datafeeddirect"
+      echo_info_line "${padding}" "Stroom (direct)" \
+        "https://localhost/stroom/datafeeddirect${NC} (via Nginx)"
     fi
+
     if is_service_in_stack "stroom-proxy-local"; then
       echo_info_line "${padding}" "Stroom Proxy (local)" \
-        "https://localhost/stroom/datafeed"
+        "https://localhost/stroom/datafeed${NC} (via Nginx)"
     fi
+
     if is_service_in_stack "stroom-proxy-remote"; then
-      local admin_port
-      admin_port="$(get_config_env_var "STROOM_PROXY_REMOTE_APP_PORT")"
-      echo_info_line "${padding}" "Stroom Proxy (remote)" \
-        "http://localhost:${admin_port}/stroom/datafeed"
+      # Bit hacky this. If the stack is just proxy then we can go in via nginx as
+      # that routes to the proxy. If it is say core_test then the local proxy
+      # will be wired in to nginx so we have to hit the remote proxy direct on
+      # http, bypassing nginx.
+      if [[ "${STACK_NAME}" = "stroom_proxy" ]]; then
+        
+        echo_info_line "${padding}" "Stroom Proxy" \
+          "https://localhost/stroom/datafeed${NC} (via Nginx)"
+      else
+        local port
+        port="$(get_config_env_var "STROOM_PROXY_REMOTE_APP_PORT")"
+        echo_info_line "${padding}" "Stroom Proxy (remote)" \
+          "http://localhost:${port}/stroom/noauth/datafeed${NC} (bypassing Nginx)"
+      fi
     fi
 
     if is_service_in_stack "stroom"; then
@@ -525,8 +550,10 @@ display_stack_info() {
 
       # Have to use the IP here rather than localhost else we get CORRS issues.
       echo -e "The Stroom API description can be accessed at the following URLs\n"
-      echo_info_line "${padding}" "Swagger UI" "https://${DOCKER_HOST_IP}/stroom/noauth/swagger-ui"
-      echo_info_line "${padding}" "Swagger spec." "https://${DOCKER_HOST_IP}/stroom/noauth/swagger/swagger.json\n"
+      echo_info_line "${padding}" "Swagger UI" \
+        "https://${DOCKER_HOST_IP}/stroom/noauth/swagger-ui"
+      echo_info_line "${padding}" "Swagger spec." \
+        "https://${DOCKER_HOST_IP}/stroom/noauth/swagger/swagger.json\n"
     fi
   fi
 }
