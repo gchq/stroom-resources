@@ -158,6 +158,9 @@ services:
         source: stroom_reference_data
         target: /stroom/reference_data
       - type: volume
+        source: stroom_search_results
+        target: /stroom/search_results
+      - type: volume
         source: stroom_volumes
         target: /stroom/volumes
     logging:
@@ -174,4 +177,5 @@ volumes:
   stroom_logs:
   stroom_output:
   stroom_reference_data:
+  stroom_search_results:
   stroom_volumes:
