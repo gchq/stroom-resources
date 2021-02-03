@@ -15,9 +15,12 @@ if [ "$(id -u)" = '0' ]; then
     # is not available when running in cron as that uses /bin/ash.
     # Thus our docker env vars will be available as shell variables if this
     # file is sourced.
+    # Note docker seems to include the line 'declare -x affinity:container' on
+    # some environments so need to ignore that.
+    # Ignore some common env vars we don't care about
     echo "Writing env vars to ${container_env_file}"
     declare -p \
-      | grep -E "^declare -x" \
+      | grep -E "^declare -x [A-Z_]+=" \
       | grep -Ev " (TERM|SHLVL|PWD|PATH|OLDPWD|HOSTNAME|HOME)(=|$)" \
       | sed 's/declare -x //g' \
       > "${container_env_file}"
