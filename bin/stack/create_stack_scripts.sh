@@ -70,6 +70,7 @@ main() {
 
   if element_in "stroom-all-dbs" "${SERVICES[@]}"; then
     create_script backup_databases
+    create_script restore_database
   fi
 
   create_script show_config
