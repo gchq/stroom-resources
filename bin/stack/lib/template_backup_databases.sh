@@ -53,7 +53,8 @@ check_installed_binaries() {
 
   if ! command -v docker 1>/dev/null; then 
     echo -e "${RED}Error${NC}: Docker CE is not installed!"
-    echo -e "See ${BLUE}https://docs.docker.com/install/#supported-platforms${NC} for details on how to install it"
+    echo -e "See ${BLUE}https://docs.docker.com/install/#supported-platforms${NC}" \
+      "for details on how to install it"
     echo -e "Version ${BLUE}17.12.0${NC} or higher is required"
     exit 1
   fi
@@ -70,11 +71,13 @@ get_lock() {
         local lock_file_pid
         lock_file_pid=$(head -n 1 "${LOCK_FILE}")
         if ps -p "$lock_file_pid" > /dev/null; then
-            err "This script is already running as process ${BLUE}${lock_file_pid}${NC}! Exiting."
+            err "This script is already running as process" \
+              "${BLUE}${lock_file_pid}${NC}! Exiting."
             exit 0
         else 
             echo -e "Found old lock file for a process that is no longer running!"
-            echo -e "Did a previous run of this script fail? I will delete it and create a new one."
+            echo -e "Did a previous run of this script fail? I will delete it" \
+              "and create a new one."
             echo -e "Creating a lock file for process ${BLUE}${THIS_PID}${NC}"
             echo "$$" > "${LOCK_FILE}"
         fi
@@ -101,7 +104,10 @@ verify_db() {
   local -r db_name="$1"
 
   local cmd=""
-  cmd+="echo 'select count(*) from information_schema.tables where table_schema = database();'"
+  cmd+="echo"
+  cmd+=" 'select count(*)"
+  cmd+=" from information_schema.tables"
+  cmd+=" where table_schema = database();'"
   cmd+=" | mysql -uroot -p\"${root_password}\" ${db_name} 2>&1"
   cmd+=" | tail -n1"
 
@@ -129,20 +135,33 @@ backup_db() {
 
   local output_file
   output_file="${output_dir}/${db_name}_${backup_time}.sql.gz"
-  echo -e "${GREEN}Starting backup of database ${BLUE}${db_name}${NC} to ${BLUE}${output_file}${NC}"
+  echo -e "${GREEN}Starting backup of database ${BLUE}${db_name}${NC} to" \
+    "${BLUE}${output_file}${NC}"
 
   local start_time
   local end_time
   start_time="$(date +%s)"
   # Run the backup inside the container, redirecting the output to a gzipped file on the host
+  
+  local cmd=""
+  cmd+="exec mysqldump "
+  cmd+="-uroot -p\"${root_password}\" "
+  cmd+="--single-transaction " # Repeatable read isolation level for consistency
+  cmd+="--routines " # Include stored procs
+  cmd+="--comments " # Include comments about server version
+  cmd+="--add-locks " # Add table locks around generated create tbl stmts for faster import
+  cmd+="--verbose " # Richer output
+  cmd+="${db_name}"
+
   docker exec "${DB_CONTAINER_ID}" \
-    sh -c "exec mysqldump -uroot -p\"${root_password}\" --single-transaction ${db_name}" \
+    sh -c "${cmd}" \
     | gzip > "${output_file}"
 
   end_time="$(date +%s)"
   local duration=$(( end_time - start_time ))
 
-  echo -e "${GREEN}Completed backup of database ${BLUE}${db_name}${NC} in ${BLUE}${duration}${NC} seconds"
+  echo -e "${GREEN}Completed backup of database ${BLUE}${db_name}${NC} in" \
+    "${BLUE}${duration}${NC} seconds"
 }
 
 check_container_is_running() {
@@ -151,7 +170,8 @@ check_container_is_running() {
 
   if [ "${is_running}" != "true" ]; then
       die "${RED}Error${NC}:" \
-        "Docker container ${BLUE}${DB_CONTAINER_ID}${NC} is not running. Unable to perform backup."
+        "Docker container ${BLUE}${DB_CONTAINER_ID}${NC} is not running." \
+        "Unable to perform backup."
   fi
 }
 
@@ -198,7 +218,8 @@ main() {
   run_backups "${output_dir}"
 
   echo -e "Deleting lock file for process ${BLUE}${THIS_PID}${NC}"
-  rm "${LOCK_FILE}" || (err "Unable to delete lock file ${BLUE}${LOCK_FILE}${NC}" && exit 1)
+  rm "${LOCK_FILE}" \
+    || (err "Unable to delete lock file ${BLUE}${LOCK_FILE}${NC}" && exit 1)
   echo -e "${GREEN}Done${NC}"
 }
 
