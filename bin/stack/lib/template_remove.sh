@@ -18,6 +18,10 @@
 # 
 ############################################################################
 
+#######################################################################
+#                  Remove all containers and volumes                  #
+#######################################################################
+
 cmd_help_args=""
 cmd_help_msg="Removes the complete stack from the host.\nAll containers are stopped and removed. So are their volumes!\nAll data (content, events, indexes, etc.) will be lost!"
 cmd_help_options="  -y   Do not prompt for confirmation, e.g. when run from a script"
@@ -32,6 +36,11 @@ source "${DIR}"/lib/constants.sh
 
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>" 
+
+display_usage_and_exit() {
+  echo -e "Usage: $(basename "$0")" >&2
+  exit 1
+}
 
 main() {
   local requireConfirmation=true
@@ -61,6 +70,11 @@ main() {
   shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
   setup_echo_colours
+
+  if [ "$#" -gt 0 ]; then
+    err "${RED}Error${NC}: Expecting no arguments. Removes all containers."
+    display_usage_and_exit
+  fi
 
   if [ "$requireConfirmation" = true ]; then
 
