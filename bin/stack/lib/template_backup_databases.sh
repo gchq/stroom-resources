@@ -18,9 +18,11 @@
 # 
 ############################################################################
 
-set -e
+#######################################################################
+#         Backs up all the databases to one file per database         #
+#######################################################################
 
-# Starts the stack, using the configuration defined in the .env file.
+set -e
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
