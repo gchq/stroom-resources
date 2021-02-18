@@ -19,7 +19,7 @@
 ############################################################################
 
 #######################################################################
-#         Backs up all the databases to one file per database         #
+#    Restores a single database using the provded dump and db name    #
 #######################################################################
 
 set -e
@@ -63,8 +63,9 @@ check_installed_binaries() {
 }
 
 display_usage_and_exit() {
-  echo -e "Usage: $(basename "$0") output_dir" >&2
-  echo -e "output_dir - the directory to write backup files to" >&2
+  echo -e "Usage: $(basename "$0") db_name db_dump_file" >&2
+  echo -e "db_name      - the database to import db_dump_file into" >&2
+  echo -e "db_dump_file - the dump file to import, e.g. stats_20210217134922.sql.gz" >&2
   exit 1
 }
 
@@ -87,19 +88,6 @@ get_lock() {
         echo -e "Creating a lock file for process ${BLUE}${THIS_PID}${NC}"
         echo "$$" > "${LOCK_FILE}"
     fi
-}
-
-run_backups() {
-  local output_dir="$1"
-
-  # Use a consistent backup time for all db backups
-  local backup_time
-  backup_time="$(date +%Y%m%d%H%M%S)"
-
-  for db_name in "${DATABASES[@]}"; do
-    verify_db "${db_name}"
-    backup_db "${db_name}" "${output_dir}" "${backup_time}"
-  done
 }
 
 verify_db() {
@@ -127,42 +115,58 @@ verify_db() {
   else
     echo -e "${GREEN}Verified connection to database ${BLUE}${db_name}${NC}." \
       "Table count: ${BLUE}${output}${NC}"
+
+    if [ "${output}" -gt 0 ]; then
+      echo
+      echo -e "${RED}WARNING:${NC} ${GREEN}This database is not empty do you wish to continue?${NC}"
+      echo
+      read -rsp $'Press "y" to continue, any other key to cancel.\n' -n1 keyPressed
+
+      if [ "$keyPressed" = 'y' ] || [ "$keyPressed" = 'Y' ]; then
+        # Crack on
+        echo
+      else
+        echo
+        echo "Exiting"
+        exit 0
+      fi
+    fi
   fi
 }
 
-backup_db() {
+restore_db() {
   local -r db_name="$1"
-  local -r output_dir="$2"
-  local -r backup_time="$3"
+  local -r db_dump_file="$2"
 
-  local output_file
-  output_file="${output_dir}/${db_name}_${backup_time}.sql.gz"
-  echo -e "${GREEN}Starting backup of database ${BLUE}${db_name}${NC} to" \
-    "${BLUE}${output_file}${NC}"
+  local db_dump_file
+
+  echo -e "${GREEN}Starting restore of ${BLUE}${db_dump_file}${NC} into database" \
+    "${BLUE}${db_name}${NC}"
 
   local start_time
   local end_time
   start_time="$(date +%s)"
   # Run the backup inside the container, redirecting the output to a gzipped file on the host
   
-  local cmd=""
-  cmd+="exec mysqldump "
+  local cmd=()
+  cmd+="/usr/bin/mysql"
   cmd+="-uroot -p\"${root_password}\" "
-  cmd+="--single-transaction " # Repeatable read isolation level for consistency
-  cmd+="--routines " # Include stored procs
-  cmd+="--comments " # Include comments about server version
-  cmd+="--add-locks " # Add table locks around generated create tbl stmts for faster import
-  cmd+="--verbose " # Richer output
   cmd+="${db_name}"
 
-  docker exec "${DB_CONTAINER_ID}" \
-    sh -c "${cmd}" \
-    | gzip > "${output_file}"
+  cmd=(
+    "/usr/bin/mysql"
+    "-uroot"
+    "--password=${root_password}"
+    "${db_name}")
+
+  gunzip < "${db_dump_file}" \
+    | docker exec -i "${DB_CONTAINER_ID}" \
+    "${cmd[@]}"
 
   end_time="$(date +%s)"
   local duration=$(( end_time - start_time ))
 
-  echo -e "${GREEN}Completed backup of database ${BLUE}${db_name}${NC} in" \
+  echo -e "${GREEN}Completed restore of dump file ${BLUE}${db_dump_file}${NC} in" \
     "${BLUE}${duration}${NC} seconds"
 }
 
@@ -202,22 +206,30 @@ main() {
   local root_password
   root_password="$(get_config_env_var "STROOM_DB_ROOT_PASSWORD")"
 
-  local -r output_dir=$1
+  local -r db_name=$1
+  local -r db_dump_file=$2
   check_installed_binaries
 
-  if [ "${output_dir}x" = "x" ]; then
-    err "${RED}Error${NC}: Invalid arguments, missing output_dir"
+  if [ "${db_name}x" = "x" ]; then
+    err "${RED}Error${NC}: Invalid arguments, missing db_name"
     display_usage_and_exit
   fi
 
-  if [ ! -d "${output_dir}" ]; then
-    die "${RED}Error${NC}: output_dir ${BLUE}${output_dir}${NC} doesn't exist"
+  if [ "${db_dump_file}x" = "x" ]; then
+    err "${RED}Error${NC}: Invalid arguments, missing db_dump_file"
+    display_usage_and_exit
+  fi
+
+  if [ ! -f "${db_dump_file}" ]; then
+    die "${RED}Error${NC}: db_dump_file ${BLUE}${db_dump_file}${NC} doesn't exist"
   fi
 
   check_container_is_running
   get_lock
 
-  run_backups "${output_dir}"
+  verify_db "${db_name}"
+
+  restore_db "${db_name}" "${db_dump_file}"
 
   echo -e "Deleting lock file for process ${BLUE}${THIS_PID}${NC}"
   rm "${LOCK_FILE}" \
