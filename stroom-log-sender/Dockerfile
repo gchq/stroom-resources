@@ -54,8 +54,9 @@ ENTRYPOINT ["/sbin/tini", "--", "/stroom-log-sender/docker-entrypoint.sh"]
 # bash required for send_to_stroom.sh
 # coreutils required for 'date' command to output millis
 # curl required for sending logs
-# tini required for process control in the entrypoint
+# gettext needed for 'envsubst' using in the entrypoint script
 # procps needed for a richer 'ps' command as used in send_to_stroom.sh
+# tini required for process control in the entrypoint
 # Create a user with no home and no shell
 # The log-volumes dir is where we expect volumes to be mounted 
 RUN echo "http_proxy: $http_proxy" && \
@@ -64,6 +65,7 @@ RUN echo "http_proxy: $http_proxy" && \
         bash \
         coreutils \
         curl \
+        gettext \
         procps \
         tini && \
     addgroup -g 1000 -S sender && \
@@ -75,10 +77,17 @@ RUN echo "http_proxy: $http_proxy" && \
     chown -R sender:sender /stroom-log-sender
 
 # Copy in all the send logs scripts downloaded in the intermediate build stage
-COPY --chown=sender:sender --from=send-logs-scripts-stage /scripts /stroom-log-sender
+COPY \
+  --chown=sender:sender \
+  --from=send-logs-scripts-stage \
+  /scripts \
+  /stroom-log-sender
 
 # Copy in the scripts for running the container
-COPY --chown=sender:sender docker-entrypoint.sh /stroom-log-sender/
+COPY \
+  --chown=sender:sender \
+  docker-entrypoint.sh \
+  /stroom-log-sender/
 
 # Label the image so we can see what commit/tag it came from
 ARG GIT_COMMIT=unspecified
