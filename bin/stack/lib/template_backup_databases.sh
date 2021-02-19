@@ -32,13 +32,6 @@ readonly LOCK_FILE=${DIR}/$(basename "$0").lck
 readonly THIS_PID=$$
 readonly DB_CONTAINER_ID="stroom-all-dbs"
 
-# The list of databases to backup
-readonly DATABASES=( \
-  "${STROOM_AUTH_DB_NAME:-auth}"
-  "${STROOM_DB_NAME:-stroom}"
-  "${STROOM_STATS_DB_NAME:-stats}"
-)
-
 source "${DIR}"/lib/shell_utils.sh
 source "${DIR}"/lib/stroom_utils.sh
 source "${DIR}"/lib/constants.sh
@@ -48,6 +41,13 @@ source "${DIR}"/lib/constants.sh
 source "$DIR"/config/<STACK_NAME>.env
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>" 
+
+# The list of databases to backup
+readonly DATABASES=( \
+  "${STROOM_AUTH_DB_NAME:-auth}"
+  "${STROOM_DB_NAME:-stroom}"
+  "${STROOM_STATS_DB_NAME:-stats}"
+)
 
 check_installed_binaries() {
   # The version numbers mentioned here are mostly governed by the docker compose syntax version that 
