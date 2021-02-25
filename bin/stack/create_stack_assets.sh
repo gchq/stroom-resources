@@ -18,7 +18,7 @@
 # 
 ############################################################################
 
-# Copies the necessary assets into the build
+# Copies the necessary assets into the stack
 
 set -e
 
@@ -169,39 +169,76 @@ main() {
   local -r SRC_STROOM_ALL_DBS_INIT_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-all-dbs/init"
   local -r SEND_TO_STROOM_VERSION="send-to-stroom-v3.0"
   local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
-  local -r STROOM_CONFIG_YAML_URL_BASE="https://github.com/gchq/stroom/releases/download/${STROOM_TAG}"
-  local -r STROOM_CONFIG_YAML_URL_FILENAME="stroom-app-config-${STROOM_TAG}.yml"
-  local -r STROOM_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-app/docker/build"
-  local -r STROOM_CONFIG_YAML_FILENAME="config.yml"
-  local -r STROOM_PROXY_CONFIG_YAML_URL_BASE="https://github.com/gchq/stroom/releases/download/${STROOM_PROXY_TAG}"
-  local -r STROOM_PROXY_CONFIG_YAML_URL_FILENAME="stroom-proxy-app-config-${STROOM_PROXY_TAG}.yml"
-  local -r STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-proxy/stroom-proxy-app/docker/build"
-  local -r STROOM_PROXY_CONFIG_YAML_FILENAME="config.yml"
 
+  local -r STROOM_RELEASES_BASE="https://github.com/gchq/stroom/releases/download/${STROOM_TAG}"
+  local -r STROOM_CONFIG_YAML_URL_FILENAME="stroom-app-config-${STROOM_TAG}.yml"
+  local -r STROOM_CONFIG_DEFAULTS_YAML_URL_FILENAME="stroom-app-config-defaults-${STROOM_TAG}.yml"
+  local -r STROOM_CONFIG_SCHEMA_YAML_URL_FILENAME="stroom-app-config-schema-${STROOM_TAG}.yml"
+  local -r STROOM_SNAPSHOT_DOCKER_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-app/docker/build"
+  local -r STROOM_SNAPSHOT_RELEASE_CONFIG_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-app/build/release/config"
+
+  local -r STROOM_PROXY_RELEASES_BASE="https://github.com/gchq/stroom/releases/download/${STROOM_PROXY_TAG}"
+  local -r STROOM_PROXY_CONFIG_YAML_URL_FILENAME="stroom-proxy-app-config-${STROOM_PROXY_TAG}.yml"
+  local -r STROOM_PROXY_CONFIG_DEFAULTS_YAML_URL_FILENAME="stroom-proxy-app-config-defaults-${STROOM_PROXY_TAG}.yml"
+  local -r STROOM_PROXY_CONFIG_SCHEMA_YAML_URL_FILENAME="stroom-proxy-app-config-schema-${STROOM_PROXY_TAG}.yml"
+  local -r STROOM_PROXY_SNAPSHOT_DOCKER_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-proxy/stroom-proxy-app/docker/build"
+  local -r STROOM_PROXY_SNAPSHOT_RELEASE_CONFIG_DIR="${LOCAL_STROOM_REPO_DIR:-UNKNOWN_LOCAL_STROOM_REPO_DIR}/stroom-proxy/stroom-proxy-app/build/release/config"
+
+  local -r CONFIG_YAML_FILENAME="config.yml"
+  local -r CONFIG_DEFAULTS_YAML_FILENAME="config-defaults.yml"
+  local -r CONFIG_SCHEMA_YAML_FILENAME="config-schema.yml"
+
+  ############
+  #  stroom  #
+  ############
+  
   if element_in "stroom" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom${NC} config"
     local -r DEST_STROOM_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom/config"
     if [[ "${STROOM_TAG}" =~ local-SNAPSHOT ]]; then
-      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_TAG${NC}=${BLUE}${STROOM_TAG}${NC}"
+      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file" \
+        "because ${YELLOW}STROOM_TAG${NC}=${BLUE}${STROOM_TAG}${NC}"
       if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
         echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
         exit 1
       fi
-      if [ ! -d "${STROOM_CONFIG_YAML_SNAPSHOT_DIR}" ]; then
-        echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_CONFIG_YAML_SNAPSHOT_DIR}${NC}, has the stroom build been run?"
+      if [ ! -d "${STROOM_SNAPSHOT_DOCKER_DIR}" ]; then
+        echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_SNAPSHOT_DOCKER_DIR}${NC}, has the stroom build been run?"
+        exit 1
+      fi
+      if [ ! -d "${STROOM_SNAPSHOT_RELEASE_CONFIG_DIR}" ]; then
+        echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_SNAPSHOT_RELEASE_CONFIG_DIR}${NC}, has the stroom build been run?"
         exit 1
       fi
       copy_file_to_dir \
-        "${STROOM_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_CONFIG_YAML_FILENAME}" \
+        "${STROOM_SNAPSHOT_DOCKER_DIR}/${CONFIG_YAML_FILENAME}" \
         "${DEST_STROOM_CONFIG_DIRECTORY}" \
-        "${STROOM_CONFIG_YAML_FILENAME}"
+        "${CONFIG_YAML_FILENAME}"
+      copy_file_to_dir \
+        "${STROOM_SNAPSHOT_RELEASE_CONFIG_DIR}/${CONFIG_DEFAULTS_YAML_FILENAME}" \
+        "${DEST_STROOM_CONFIG_DIRECTORY}" \
+        "${CONFIG_DEFAULTS_YAML_FILENAME}"
+      copy_file_to_dir \
+        "${STROOM_SNAPSHOT_RELEASE_CONFIG_DIR}/${CONFIG_SCHEMA_YAML_FILENAME}" \
+        "${DEST_STROOM_CONFIG_DIRECTORY}" \
+        "${CONFIG_SCHEMA_YAML_FILENAME}"
     else
       download_file \
         "${DEST_STROOM_CONFIG_DIRECTORY}" \
-        "${STROOM_CONFIG_YAML_URL_BASE}" \
+        "${STROOM_RELEASES_BASE}" \
         "${STROOM_CONFIG_YAML_URL_FILENAME}" \
-        "${STROOM_CONFIG_YAML_FILENAME}"
+        "${CONFIG_YAML_FILENAME}"
+      download_file \
+        "${DEST_STROOM_CONFIG_DIRECTORY}" \
+        "${STROOM_RELEASES_BASE}" \
+        "${STROOM_CONFIG_DEFAULTS_YAML_URL_FILENAME}" \
+        "${CONFIG_DEFAULTS_YAML_FILENAME}"
+      download_file \
+        "${DEST_STROOM_CONFIG_DIRECTORY}" \
+        "${STROOM_RELEASES_BASE}" \
+        "${STROOM_CONFIG_SCHEMA_YAML_URL_FILENAME}" \
+        "${CONFIG_SCHEMA_YAML_FILENAME}"
     fi
   fi
 
@@ -210,41 +247,7 @@ main() {
   #########################
 
   if element_in "stroom-proxy-remote" "${services[@]}"; then
-    echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} config"
-    local -r DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-remote/config"
-    if [[ "${STROOM_PROXY_TAG}" =~ local-SNAPSHOT ]]; then
-      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
-      if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
-        echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
-        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
-        exit 1
-      fi
-      if [ ! -d "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}" ]; then
-        echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}${NC}, has the stroom build been run?"
-        exit 1
-      fi
-      copy_file_to_dir \
-        "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
-        "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
-        "${STROOM_CONFIG_YAML_FILENAME}"
-    else
-      download_file \
-        "${DEST_STROOM_PROXY_REMOTE_CONFIG_DIRECTORY}" \
-        "${STROOM_PROXY_CONFIG_YAML_URL_BASE}" \
-        "${STROOM_PROXY_CONFIG_YAML_URL_FILENAME}" \
-        "${STROOM_CONFIG_YAML_FILENAME}"
-    fi
-
-    echo -e "  Copying ${YELLOW}stroom-proxy-remote${NC} certificates"
-    local -r DEST_PROXY_REMOTE_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-remote/certs"
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
-      "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
-    # client keystore so it can forward to stroom(?:-proxy)? and make
-    # rest calls
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/client/client.jks" \
-      "${DEST_PROXY_REMOTE_CERTS_DIRECTORY}"
+    copy_proxy_config "stroom-proxy-remote"
   fi
 
   ########################
@@ -252,42 +255,8 @@ main() {
   ########################
 
   if element_in "stroom-proxy-local" "${services[@]}"; then
-    echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} config"
-    local -r DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-local/config"
-    if [[ "${STROOM_PROXY_TAG}" =~ local-SNAPSHOT ]]; then
-      echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
-      if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
-        echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
-        echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
-      fi
-      if [ ! -d "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}" ]; then
-        echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}${NC}, has the stroom build been run?"
-        exit 1
-      fi
-      copy_file_to_dir \
-        "${STROOM_PROXY_CONFIG_YAML_SNAPSHOT_DIR}/${STROOM_PROXY_CONFIG_YAML_FILENAME}" \
-        "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
-        "${STROOM_CONFIG_YAML_FILENAME}"
-    else
-      download_file \
-        "${DEST_STROOM_PROXY_LOCAL_CONFIG_DIRECTORY}" \
-        "${STROOM_PROXY_CONFIG_YAML_URL_BASE}" \
-        "${STROOM_PROXY_CONFIG_YAML_URL_FILENAME}" \
-        "${STROOM_CONFIG_YAML_FILENAME}"
-    fi
-
-    echo -e "  Copying ${YELLOW}stroom-proxy-local${NC} certificates"
-    local -r DEST_PROXY_LOCAL_CERTS_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-proxy-local/certs"
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
-      "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
-    # client keystore so it can forward to stroom(?:-proxy)? and make
-    # rest calls
-    copy_file_to_dir \
-      "${SRC_CERTS_DIRECTORY}/client/client.jks" \
-      "${DEST_PROXY_LOCAL_CERTS_DIRECTORY}"
+    copy_proxy_config "stroom-proxy-local"
   fi
-
 
   ###########
   #  nginx  #
@@ -455,6 +424,69 @@ main() {
     mkdir -p "${DEST_KIBANA_CONF_DIRECTORY}"
     cp ${SRC_KIBANA_CONF_DIRECTORY}/* "${DEST_KIBANA_CONF_DIRECTORY}"
   fi
+
+}
+
+copy_proxy_config() {
+  local service_name="$1"; shift
+  
+  echo -e "  Copying ${YELLOW}${service_name}${NC} config"
+  local -r dest_config_dir="${VOLUMES_DIRECTORY}/${service_name}/config"
+  if [[ "${STROOM_PROXY_TAG}" =~ local-SNAPSHOT ]]; then
+    echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
+    if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
+      echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
+      echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
+      exit 1
+    fi
+    if [ ! -d "${STROOM_PROXY_SNAPSHOT_DOCKER_DIR}" ]; then
+      echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_PROXY_SNAPSHOT_DOCKER_DIR}${NC}, has the stroom build been run?"
+      exit 1
+    fi
+    if [ ! -d "${STROOM_PROXY_SNAPSHOT_RELEASE_CONFIG_DIR}" ]; then
+      echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_PROXY_SNAPSHOT_RELEASE_CONFIG_DIR}${NC}, has the stroom build been run?"
+      exit 1
+    fi
+    copy_file_to_dir \
+      "${STROOM_PROXY_SNAPSHOT_DOCKER_DIR}/${CONFIG_YAML_FILENAME}" \
+      "${dest_config_dir}" \
+      "${CONFIG_YAML_FILENAME}"
+    copy_file_to_dir \
+      "${STROOM_PROXY_SNAPSHOT_RELEASE_CONFIG_DIR}/${CONFIG_DEFAULTS_YAML_FILENAME}" \
+      "${dest_config_dir}" \
+      "${CONFIG_DEFAULTS_YAML_FILENAME}"
+    copy_file_to_dir \
+      "${STROOM_PROXY_SNAPSHOT_RELEASE_CONFIG_DIR}/${CONFIG_SCHEMA_YAML_FILENAME}" \
+      "${dest_config_dir}" \
+      "${CONFIG_SCHEMA_YAML_FILENAME}"
+  else
+    download_file \
+      "${dest_config_dir}" \
+      "${STROOM_PROXY_RELEASES_BASE}" \
+      "${STROOM_PROXY_CONFIG_YAML_URL_FILENAME}" \
+      "${CONFIG_YAML_FILENAME}"
+    download_file \
+      "${dest_config_dir}" \
+      "${STROOM_PROXY_RELEASES_BASE}" \
+      "${STROOM_PROXY_CONFIG_DEFAULTS_YAML_URL_FILENAME}" \
+      "${CONFIG_DEFAULTS_YAML_FILENAME}"
+    download_file \
+      "${dest_config_dir}" \
+      "${STROOM_PROXY_RELEASES_BASE}" \
+      "${STROOM_PROXY_CONFIG_SCHEMA_YAML_URL_FILENAME}" \
+      "${CONFIG_SCHEMA_YAML_FILENAME}"
+  fi
+
+  echo -e "  Copying ${YELLOW}${service_name}${NC} certificates"
+  local -r dest_certs_dir="${VOLUMES_DIRECTORY}/${service_name}/certs"
+  copy_file_to_dir \
+    "${SRC_CERTS_DIRECTORY}/certificate-authority/ca.jks" \
+    "${dest_certs_dir}"
+  # client keystore so it can forward to stroom(?:-proxy)? and make
+  # rest calls
+  copy_file_to_dir \
+    "${SRC_CERTS_DIRECTORY}/client/client.jks" \
+    "${dest_certs_dir}"
 
 }
 
