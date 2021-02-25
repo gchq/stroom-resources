@@ -20,7 +20,7 @@
 
 cmd_help_args=""
 cmd_help_msg="Runs the stroom database migration as a foreground process then exits."
-cmd_help_options=""
+cmd_help_options="  -q   Quiet. Run the migration in the background."
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
@@ -70,8 +70,9 @@ check_installed_binaries() {
 }
 
 main() {
+  local run_in_background=false
   # leading colon means silent error reporting by getopts
-  while getopts ":hm" arg; do
+  while getopts ":hmq" arg; do
     case $arg in
       h )  
         show_default_usage "${cmd_help_args}" "${cmd_help_msg}" "${cmd_help_options}"
@@ -80,6 +81,9 @@ main() {
       m )  
         # shellcheck disable=SC2034
         MONOCHROME=true 
+        ;;
+      q )  
+        run_in_background=true
         ;;
     esac
   done
@@ -97,7 +101,7 @@ main() {
 
   check_installed_binaries
 
-  migrate_stack "$@"
+  migrate_stack "${run_in_background}"
 }
 
 main "$@"
