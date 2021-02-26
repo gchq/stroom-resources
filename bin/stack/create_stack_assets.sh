@@ -433,18 +433,25 @@ copy_proxy_config() {
   echo -e "  Copying ${YELLOW}${service_name}${NC} config"
   local -r dest_config_dir="${VOLUMES_DIRECTORY}/${service_name}/config"
   if [[ "${STROOM_PROXY_TAG}" =~ local-SNAPSHOT ]]; then
-    echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
+    echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file" \
+      "because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
     if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
-      echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
-      echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
+      echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC}" \
+        "to your local stroom repo"
+      echo -e "    ${RED}${NC}         E.g. '${BLUE}export" \
+        "LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
       exit 1
     fi
     if [ ! -d "${STROOM_PROXY_SNAPSHOT_DOCKER_DIR}" ]; then
-      echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_PROXY_SNAPSHOT_DOCKER_DIR}${NC}, has the stroom build been run?"
+      echo -e "    ${RED}${NC}         Can't find" \
+        "${BLUE}${STROOM_PROXY_SNAPSHOT_DOCKER_DIR}${NC}, has the stroom" \
+        "build been run?"
       exit 1
     fi
     if [ ! -d "${STROOM_PROXY_SNAPSHOT_RELEASE_CONFIG_DIR}" ]; then
-      echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_PROXY_SNAPSHOT_RELEASE_CONFIG_DIR}${NC}, has the stroom build been run?"
+      echo -e "    ${RED}${NC}         Can't find" \
+        "${BLUE}${STROOM_PROXY_SNAPSHOT_RELEASE_CONFIG_DIR}${NC}, has" \
+        "the stroom build been run?"
       exit 1
     fi
     copy_file_to_dir \
@@ -487,7 +494,6 @@ copy_proxy_config() {
   copy_file_to_dir \
     "${SRC_CERTS_DIRECTORY}/client/client.jks" \
     "${dest_certs_dir}"
-
 }
 
 main "$@"
