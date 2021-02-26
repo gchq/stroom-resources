@@ -257,8 +257,10 @@ test_stack() {
     # check not fail we need to run with hard coded insecure open id creds.
     # Some stacks already have this set, i.e. the -test stacks.
     local env_var_line="export USE_DEFAULT_OPEN_ID_CREDENTIALS=\"true\""
-    echo -e "${GREEN}Adding ${YELLOW}${env_var_line}" \
-      "${GREEN}to ${BLUE}${env_file}${NC}"
+    echo -e "${RED}********************************************************************************${NC}"
+    echo -e "${RED}Adding ${YELLOW}${env_var_line}" \
+      "${RED}to ${BLUE}${env_file}${RED} to allow the stack to be tested in Travis${NC}"
+    echo -e "${RED}********************************************************************************${NC}"
     echo "${env_var_line}" >> "${env_file}"
   fi
 
