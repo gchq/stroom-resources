@@ -155,18 +155,9 @@ release_to_docker_hub() {
     --build-arg GIT_TAG="${TRAVIS_TAG:-${SNAPSHOT_FLOATING_TAG}}" \
     "${contextRoot}"
 
-  # The username and password are configured in the travis gui
-  echo -e "Logging in to DockerHub"
-  echo "$DOCKER_PASSWORD" | docker login \
-    -u "$DOCKER_USERNAME" \
-    --password-stdin
-
   echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC}" \
     "with tags: ${GREEN}${allTagArgs[*]}${NC}"
   docker push "${dockerRepo}" >/dev/null 2>&1
-
-  echo -e "Logging out of Docker"
-  docker logout >/dev/null 2>&1
 }
 
 derive_docker_tags() {
@@ -484,6 +475,12 @@ main() {
 
   dump_build_vars
 
+  # The username and password are configured in the travis gui
+  echo -e "Logging in to DockerHub"
+  echo "$DOCKER_PASSWORD" | docker login \
+    -u "$DOCKER_USERNAME" \
+    --password-stdin
+
   # If we are releasing a new docker image then that version will not be available
   # on Dockerhub to be able to test the stack against it 
   if [ -n "${TRAVIS_TAG}" ] && \
@@ -506,6 +503,9 @@ main() {
     echo -e "${GREEN}Not a tagged commit (or a tag we recognise), nothing to" \
       "release.${NC}"
   fi
+
+  echo -e "Logging out of Docker"
+  docker logout >/dev/null 2>&1
 }
 
 # Start of script
