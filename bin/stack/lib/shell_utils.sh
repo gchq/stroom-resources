@@ -48,7 +48,7 @@ err() {
   echo -e "$@" >&2
 }
 
-die () {
+die() {
   echo -e "$@" >&2
   exit 1
 }
@@ -87,7 +87,7 @@ check_binary_is_available() {
   fi
 }
 
-dump_call_stack () {
+dump_call_stack() {
   local stack_length=${#FUNCNAME[@]}
   local last_idx=$(( stack_length - 1 ))
   local i=0
@@ -141,7 +141,7 @@ check_arg_count_at_least() {
 # e.g. 
 # arr=( "one" "two" "three" )
 # element_in "two" "${arr[@]}" # returns 0
-element_in () {
+element_in() {
   local element 
   local match="$1"
   shift
