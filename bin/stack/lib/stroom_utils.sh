@@ -70,7 +70,7 @@ get_active_images_in_stack() {
     #echo "checking image $image $non_namespaced_tag"
     # Make sure the non namespaced part, e.g.stroom-proxy:v6.0.18 
     # is in the list of active services
-    if grep -qF "${non_namespaced_tag}" "${STACK_SERVICES_FILENAME}"; then
+    if grep -qF "${non_namespaced_tag}" "${DIR}/${STACK_SERVICES_FILENAME}"; then
       echo "${image}"
     fi
   done <<< "$( get_all_images_in_stack )"
@@ -476,9 +476,9 @@ display_banner() {
   fi
 
   if [[ "${STACK_NAME}" = "stroom_proxy" ]]; then
-    cat "${DIR}"/lib/banner_proxy.txt
+    cat "${DIR}/lib/banner_proxy.txt"
   else
-    cat "${DIR}"/lib/banner.txt
+    cat "${DIR}/lib/banner.txt"
   fi
 
   echo -en "${NC}"
@@ -553,7 +553,7 @@ display_stack_info() {
       echo_info_line "${padding}" "Swagger UI" \
         "https://${DOCKER_HOST_IP}/stroom/noauth/swagger-ui"
       echo_info_line "${padding}" "Swagger spec." \
-        "https://${DOCKER_HOST_IP}/stroom/noauth/swagger/swagger.json\n"
+        "https://${DOCKER_HOST_IP}/stroom/noauth/swagger/stroom.json\n"
     fi
   fi
 }
@@ -605,11 +605,13 @@ start_stack() {
   run_docker_compose_cmd \
     up \
     "${extra_args[@]}" \
-    -d \
+    --detach \
     "${services_to_start[@]}"
 }
 
 migrate_stack() {
+  local is_background_job="$1"; shift
+  
   echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}\n"
 
   determing_docker_host_details
@@ -634,24 +636,38 @@ migrate_stack() {
   mkdir -p "${DIR}/${LOGS_DIR_NAME}"
   migrate_log_file="${DIR}/${LOGS_DIR_NAME}/migrate.sh.$(date +%Y%m%d).log"
 
-  # shellcheck disable=SC2094
-  # Start up stroom with the migrate command so it runs the migration as a
-  # foreground process and then exits.
-  # We want all containers to stop when stroom exits
-  # Tee stdout/stderr to a log file for posterity
-  # no-color as we don't want ascii colour codes in the logs
-  run_docker_compose_cmd \
-    up \
-    --abort-on-container-exit \
-    --no-color \
-    "${services_to_start[@]}" \
-    2>&1 \
-    | tee -a \
-      "${migrate_log_file}"
+  echo -e "${GREEN}Starting the database migration${NC}"
 
-  echo -e "${GREEN}Process complete, check the logs for errors." \
-    "\nThis log was also written to" \
-    "${BLUE}${migrate_log_file}${NC}"
+  if [ "${is_background_job}" = true ]; then
+    run_docker_compose_cmd \
+      up \
+      --detach \
+      --no-color \
+      "${services_to_start[@]}"
+
+    echo -e "${GREEN}Migration running in the background." \
+      "\nThe database will be left running on completion." \
+      "\nTo see the logs run ${BLUE}docker logs stroom${NC}"
+  else
+    # shellcheck disable=SC2094
+    # Start up stroom with the migrate command so it runs the migration as a
+    # foreground process and then exits.
+    # We want all containers to stop when stroom exits
+    # Tee stdout/stderr to a log file for posterity
+    # no-color as we don't want ascii colour codes in the logs
+    run_docker_compose_cmd \
+      up \
+      --abort-on-container-exit \
+      --no-color \
+      "${services_to_start[@]}" \
+      2>&1 \
+      | tee -a \
+        "${migrate_log_file}"
+
+    echo -e "${GREEN}Process complete, check the logs for errors." \
+      "\nThis log was also written to" \
+      "${BLUE}${migrate_log_file}${NC}"
+  fi
 }
 
 stop_services_if_in_stack() {
