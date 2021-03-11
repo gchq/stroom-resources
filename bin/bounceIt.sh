@@ -74,7 +74,7 @@ run_docker_compose_cmd() {
     docker-compose \
         --project-name "${COMPOSE_PROJECT_NAME}" \
         "${compose_file_args[@]}" \
-        "${@}"
+        ${@}
 }
 
 printValidServiceNames() {
