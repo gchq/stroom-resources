@@ -11,7 +11,7 @@
 # On linux the default is 0
 # lower_case_table_names=1
 
-#max_connections=300
+max_connections=1000
 
 # Buffer pool sizes
 #   https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html#sysvar_innodb_buffer_pool_size

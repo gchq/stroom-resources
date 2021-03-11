@@ -46,6 +46,16 @@ services:
       - STROOM_STATS_DB_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
       - STROOM_DB_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
 
+
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE added to get rid of `mbind: Operation not permitted` messages.
+
+    # We need to increase default ulimits to allow a maximum of 1000 concurrent connections.
+    ulimits:
+      nofile:
+        soft: 20000
+        hard: 40000
+
     volumes:
       - ${MYSQL_VOLUME_CONF_FILE:-../../volumes/stroom-all-dbs/conf/stroom-all-dbs.cnf}:/etc/mysql/conf.d/stroom-all-dbs.cnf:ro
       - ${MYSQL_VOLUME_INIT:-../../volumes/stroom-all-dbs/init}:/docker-entrypoint-initdb.d:ro
