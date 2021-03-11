@@ -23,7 +23,7 @@ docker rm -f stroom-migration-test-db
 echo "Starting a Docker MySQL instance to test migration of ${DATABASE_NAME} with ${SQL_DUMP_FILE}."
 
 echo "Starting a new MySQL container for testing migration"
-docker run -p 5506:3306 --name stroom-migration-test-db --health-cmd='mysqladmin ping --silent' --health-interval=10s -e MYSQL_ROOT_PASSWORD=${TEMP_DB_ROOT_PW} -d mysql:5.6
+docker run -p 5506:3306 --name stroom-migration-test-db --health-cmd='mysqladmin ping --silent' --health-interval=10s -e MYSQL_ROOT_PASSWORD=${TEMP_DB_ROOT_PW} -d mysql:8.0.23
 
 waitContainer stroom-migration-test-db
 echo "Database ready"

@@ -14,7 +14,7 @@
 #max_connections=300
 
 # Buffer pool sizes
-#   https://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_buffer_pool_size
-#   https://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_buffer_pool_instances
+#   https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html#sysvar_innodb_buffer_pool_size
+#   https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html#sysvar_innodb_buffer_pool_instances
 #innodb_buffer_pool_size=2147483648
 #innodb_buffer_pool_instances=8
