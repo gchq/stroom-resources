@@ -70,11 +70,23 @@ open_db_shell() {
   local db_port="$1"; shift
   local db_username="$1"; shift
   local db_password="$1"; shift
+
+  local extra_docker_args=()
+  # Check for terminal on stdin, which will be false when sql is piped
+  # to this script, e.g. 'show tables;' | ./database_shell.sh
+  if [ -t 0 ]; then
+    # stdin is a terminal so tell docker that
+    extra_docker_args=( 
+      "--tty"
+    )
+  fi
   
   docker exec \
-    -it \
+    "${extra_docker_args[@]}" \
+    --interactive \
     stroom-all-dbs \
     mysql \
+    --table \
     -h"localhost" \
     -P"${db_port}" \
     -u"${db_username}" \
