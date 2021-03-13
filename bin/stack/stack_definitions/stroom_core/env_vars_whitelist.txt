@@ -44,6 +44,8 @@ STROOM_PROXY_LOCAL_STORING_ENABLED
 #STROOM_PROXY_LOCAL_SYNC_API_KEY - commented out as rulesets are not ready for use
 #STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL - commented out as rulesets are not ready for use
 #STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL - commented out as rulesets are not ready for use
+STROOM_STATS_DB_HOST
+STROOM_STATS_DB_PASSWORD
 
 
 # vim: set filetype=conf:
