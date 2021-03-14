@@ -44,7 +44,6 @@ STACK_NAME="<STACK_NAME>"
 
 # The list of databases to backup
 readonly DATABASES=( \
-  "${STROOM_AUTH_DB_NAME:-auth}"
   "${STROOM_DB_NAME:-stroom}"
   "${STROOM_STATS_DB_NAME:-stats}"
 )
@@ -65,6 +64,8 @@ check_installed_binaries() {
 display_usage_and_exit() {
   echo -e "Usage: $(basename "$0") output_dir" >&2
   echo -e "output_dir - the directory to write backup files to" >&2
+  echo -e "database - the name(s) of the database(s) to backup or 'stroom' &" \
+    "'stats' if not supplied" >&2
   exit 1
 }
 
@@ -90,13 +91,23 @@ get_lock() {
 }
 
 run_backups() {
+  echo "$@"
   local output_dir="$1"
+  local databases=()
+
+  if [ $# -eq 1 ]; then
+    databases=( "${DATABASES[@]}" )
+  else
+    databases=( "${@:2}" )
+  fi
+
+  echo "${databases[@]}"
 
   # Use a consistent backup time for all db backups
   local backup_time
   backup_time="$(date +%Y%m%d%H%M%S)"
 
-  for db_name in "${DATABASES[@]}"; do
+  for db_name in "${databases[@]}"; do
     verify_db "${db_name}"
     backup_db "${db_name}" "${output_dir}" "${backup_time}"
   done
@@ -217,7 +228,7 @@ main() {
   check_container_is_running
   get_lock
 
-  run_backups "${output_dir}"
+  run_backups "$@"
 
   echo -e "Deleting lock file for process ${BLUE}${THIS_PID}${NC}"
   rm "${LOCK_FILE}" \
