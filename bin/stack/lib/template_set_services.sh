@@ -20,7 +20,8 @@
 
 set -e
 
-CMD_HELP_MSG="Sets the list of services that will be used on this node."
+CMD_HELP_MSG="Sets the list of services that will be used on this node.
+If no services are supplied then all services will be made active."
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
@@ -110,30 +111,30 @@ main() {
   # Setup colours now we know monochrome state
   setup_echo_colours
 
+
   if [ "$#" -eq 0 ]; then
-    err "${RED}Error${NC}: Must supply at least one service"
-    show_all_services_usage "${CMD_HELP_MSG}"
-    exit 1
+    # Add all services to the active file
+    cat "${ALL_SERVICES_FILE}" > "${STACK_SERVICES_FILE}"
+  else
+    # clear the list of active services
+    > "${STACK_SERVICES_FILE}"
+
+    for requested_service in "${@}"; do
+      if ! is_service_in_all_services "${requested_service}"; then
+        err "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not" \
+          "in the list of all services for this stack."
+        show_all_services_usage "${CMD_HELP_MSG}"
+        exit 1
+      fi
+    done
+
+    for requested_service in "${@}"; do
+      # Add the line from all services for this service to the stack services list
+      grep "^${requested_service}|" \
+        < "${ALL_SERVICES_FILE}" \
+        >> "${STACK_SERVICES_FILE}"
+    done
   fi
-
-  for requested_service in "${@}"; do
-    if ! is_service_in_all_services "${requested_service}"; then
-      err "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not" \
-        "in the list of all services for this stack."
-      show_all_services_usage "${CMD_HELP_MSG}"
-      exit 1
-    fi
-  done
-
-  # clear the list of active services
-  > "${STACK_SERVICES_FILE}"
-
-  for requested_service in "${@}"; do
-    # Add the line from all services for this service to the stack services list
-    grep "^${requested_service}|" \
-      < "${ALL_SERVICES_FILE}" \
-      >> "${STACK_SERVICES_FILE}"
-  done
 
   echo -e "${GREEN}Setting active services for the stack${NC}"
 
