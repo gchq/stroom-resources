@@ -63,7 +63,10 @@ check_installed_binaries() {
 }
 
 display_usage_and_exit() {
-  echo -e "Usage: $(basename "$0") db_name db_dump_file" >&2
+  echo -e "Usage: $(basename "$0") [OPTIONS] db_name db_dump_file" >&2
+  echo -e "-f           - Force the import if the destination DB is not empty" >&2
+  echo -e "-h           - Show this help" >&2
+  echo -e "-m           - Monochrome output" >&2
   echo -e "db_name      - the database to import db_dump_file into" >&2
   echo -e "db_dump_file - the dump file to import, e.g. stats_20210217134922.sql.gz" >&2
   exit 1
@@ -116,7 +119,7 @@ verify_db() {
     echo -e "${GREEN}Verified connection to database ${BLUE}${db_name}${NC}." \
       "Table count: ${BLUE}${output}${NC}"
 
-    if [ "${output}" -gt 0 ]; then
+    if [[ "${output}" -gt 0  && "${force_import}" = false ]]; then
       echo
       echo -e "${RED}WARNING:${NC} ${GREEN}This database is not empty do you wish to continue?${NC}"
       echo
@@ -184,9 +187,13 @@ check_container_is_running() {
 main() {
   # assume not monchrome until we know otherwise
   setup_echo_colours
-  while getopts ":mh" arg; do
+  local force_import=false
+  while getopts ":fmh" arg; do
     # shellcheck disable=SC2034
     case $arg in
+      f )  
+        force_import=true 
+        ;;
       h ) 
         display_usage_and_exit
         ;;
