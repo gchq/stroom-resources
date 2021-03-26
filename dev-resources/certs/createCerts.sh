@@ -79,6 +79,13 @@ create_ca_certs() {
 
 }
 
+copy_ca_certs() {
+    cp certificate-authority/ca.pem.crt server/ca.pem.crt
+    cp certificate-authority/ca.jks server/ca.jks
+    cp certificate-authority/ca.pem.crt client/ca.pem.crt
+    cp certificate-authority/ca.jks client/ca.jks
+}
+
 create_server_certs() {
     # Creating the certificate for our server
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -238,9 +245,9 @@ create_client_certs() {
 delete_existing_certs() {
     echo
     echo -e "${GREEN}Deleting existing files${NC}"
-    rm -f "${SCRIPT_DIR}"/certificate-authority/ca.*
-    rm -f "${SCRIPT_DIR}"/client/client.*
-    rm -f "${SCRIPT_DIR}"/server/server.*
+    rm -f "${SCRIPT_DIR}"/certificate-authority/*.*
+    rm -f "${SCRIPT_DIR}"/client/*.*
+    rm -f "${SCRIPT_DIR}"/server/*.*
 }
 
 main() {
@@ -253,6 +260,8 @@ main() {
     delete_existing_certs
 
     create_ca_certs
+
+    copy_ca_certs
 
     create_server_certs
 
