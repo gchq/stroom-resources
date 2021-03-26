@@ -1,6 +1,17 @@
+# These need to be set to prevent startup warnings.
+proxy_headers_hash_max_size 512;
+proxy_headers_hash_bucket_size 128;
+
 proxy_pass_header          Set-Cookie;
 proxy_ssl_server_name      on;
 proxy_set_header           X-Forwarded-For   $proxy_add_x_forwarded_for;
+
+# Since header folding has been deprecated for HTTP, Jetty will no longer accept the raw cert being passed as a header
+# as it is multi line. To fix this an escaped version of the certificate must be added to the header instead.
+# proxy_set_header           X-SSL-CERT           $ssl_client_cert; # The raw cert
+# proxy_set_header           X-SSL-CERT           $ssl_client_escaped_cert; # The escaped cert
+
+# Pass the certificate DN in the standard header.
 proxy_set_header           X-SSL-CLIENT-S-DN $ssl_client_s_dn;
 proxy_pass_request_body    on;
 proxy_pass_request_headers on;

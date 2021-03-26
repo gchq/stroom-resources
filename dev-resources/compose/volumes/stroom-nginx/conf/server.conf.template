@@ -17,6 +17,7 @@ ssl_client_certificate      /stroom-nginx/certs/<<<NGINX_SSL_CA_CERTIFICATE>>>;
 # a cert and use it if it does. Nginx doedsn't currently (without using multiple server 
 # blocks) have a way to set ssl_client_verify at the 'location' level which would 
 # allow us to selectively turn it on.
+# ssl_verify_client           on;
 ssl_verify_client           <<<NGINX_SSL_VERIFY_CLIENT>>>;
 ssl_verify_depth            10;
 
