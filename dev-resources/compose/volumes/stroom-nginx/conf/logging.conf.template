@@ -16,16 +16,23 @@
 #LogFormat "%h %l \"%u\" %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
 
 # A-Z index of nginx variables - http://nginx.org/en/docs/varindex.html
-log_format stroom_combined_format 
+log_format stroom_combined_format
+    '[$time_local] '
+    '[$msec] '
     '$remote_addr '
     '- '
     '"$ssl_client_s_dn" '
-    '[$time_local] '
+    '- '
+    '$server_name '
+    '> '
+    '$upstream_addr '
     '"$request" '
     '$status '
     '$body_bytes_sent '
     '"$http_referer" '
-    '"$http_user_agent" ';
+    '"$http_user_agent" '
+    '$upstream_response_time '
+    '$request_time';
 
 # stdout/stderr logging for use with 'docker logs'
 access_log /var/log/nginx/access.log stroom_combined_format;
