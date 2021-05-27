@@ -167,8 +167,8 @@ main() {
   local -r SRC_STROOM_LOG_SENDER_CONF_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-log-sender/conf"
   local -r SRC_STROOM_ALL_DBS_CONF_FILE="${SRC_VOLUMES_DIRECTORY}/stroom-all-dbs/conf/stroom-all-dbs.cnf"
   local -r SRC_STROOM_ALL_DBS_INIT_DIRECTORY="${SRC_VOLUMES_DIRECTORY}/stroom-all-dbs/init"
-  local -r SEND_TO_STROOM_VERSION="send-to-stroom-v3.0"
-  local -r SEND_TO_STROOM_URL_BASE="https://raw.githubusercontent.com/gchq/stroom-clients/${SEND_TO_STROOM_VERSION}/bash"
+  local -r SEND_TO_STROOM_VERSION="send-to-stroom-v3.1.0"
+  local -r SEND_TO_STROOM_URL_BASE="https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}"
 
   local -r STROOM_RELEASES_BASE="https://github.com/gchq/stroom/releases/download/${STROOM_TAG}"
   local -r STROOM_CONFIG_YAML_URL_FILENAME="stroom-app-config-${STROOM_TAG}.yml"
