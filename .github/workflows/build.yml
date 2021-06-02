@@ -9,7 +9,7 @@ on:
 jobs:
   build-project:
     runs-on: ubuntu-20.04
-    env:
+    #env:
       # Static env vars
 
     steps:
