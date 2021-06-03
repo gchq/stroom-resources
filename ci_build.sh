@@ -26,13 +26,18 @@ VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 PREFIX_PART_REGEX="^[\\w-]+(?=-${VERSION_PART_REGEX})"
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
+LATEST_MAJOR_VERSION_REGEX="^v7"
 
 # The stack used for the get_stroom.sh script that we publish on gh-pages
 GET_STROOM_STACK_NAME="stroom_core_test"
 
 # The dir used to hold content for deploying to github pages, i.e.
 # https://gchq.github.io/stroom-resources
-GH_PAGES_DIR="${TRAVIS_BUILD_DIR}/gh-pages"
+GH_PAGES_DIR="${BUILD_DIR}/gh-pages"
+RELEASE_ARTEFACTS_DIR="${BUILD_DIR}/release_artefacts"
+SCRIPT_BUILD_DIR="${BUILD_DIR}/build"
+STACK_DIR="${BUILD_DIR}/bin/stack"
+STACK_BUILD_DIR="${STACK_DIR}/build"
 
 setup_colours() {
   # Shell Colour constants for use in 'echo -e'
@@ -120,6 +125,37 @@ assert_running_containers_count() {
   fi
 }
 
+docker_login() {
+  # The username and password are configured in the travis gui
+  if [[ ! -n "${LOCAL_BUILD}" ]]; then
+    # Docker login stores the creds in a file so check it to
+    # see if we are already logged in
+    #local dockerConfigFile="${HOME}/.docker/config.json"
+    #if [[ -f "${dockerConfigFile}" ]] \
+      #&& grep -q "index.docker.io" "${dockerConfigFile}"; then
+
+      #echo -e "Already logged into docker"
+    #else
+      echo -e "Logging in to Docker (if this fails, have you provided the docker creds)"
+      echo "$DOCKER_PASSWORD" \
+        | docker login -u "$DOCKER_USERNAME" --password-stdin >/dev/null 2>&1
+      echo -e "Successfully logged in to docker"
+    #fi
+  else
+    echo -e "${YELLOW}LOCAL_BUILD set so skipping docker login${NC}"
+  fi
+}
+
+docker_logout() {
+  # The username and password are configured in the travis gui
+  if [[ ! -n "${LOCAL_BUILD}" ]]; then
+    echo -e "Logging out of Docker"
+    docker logout >/dev/null 2>&1
+  else
+    echo -e "${YELLOW}LOCAL_BUILD set so skipping docker logout${NC}"
+  fi
+}
+
 # args: dockerRepo contextRoot tag1VersionPart tag2VersionPart ... tagNVersionPart
 release_to_docker_hub() {
   # echo "releaseToDockerHub called with args [$@]"
@@ -148,25 +184,20 @@ release_to_docker_hub() {
   echo -e "contextRoot:                   [${GREEN}${contextRoot}${NC}]"
   echo -e "allTags:                       [${GREEN}${allTagArgs[*]}${NC}]"
 
-  # If we have a TRAVIS_TAG (git tag) then use that, else use the floating tag
+  docker_login
+
+  # If we have a BUILD_TAG (git tag) then use that, else use the floating tag
   docker build \
     "${allTagArgs[@]}" \
-    --build-arg GIT_COMMIT="${TRAVIS_COMMIT}" \
-    --build-arg GIT_TAG="${TRAVIS_TAG:-${SNAPSHOT_FLOATING_TAG}}" \
+    --build-arg GIT_COMMIT="${BUILD_COMMIT}" \
+    --build-arg GIT_TAG="${BUILD_TAG:-${SNAPSHOT_FLOATING_TAG}}" \
     "${contextRoot}"
-
-  # The username and password are configured in the travis gui
-  echo -e "Logging in to DockerHub"
-  echo "$DOCKER_PASSWORD" | docker login \
-    -u "$DOCKER_USERNAME" \
-    --password-stdin
 
   echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC}" \
     "with tags: ${GREEN}${allTagArgs[*]}${NC}"
-  docker push "${dockerRepo}" >/dev/null 2>&1
+  docker push --all-tags "${dockerRepo}"
 
-  echo -e "Logging out of Docker"
-  docker logout >/dev/null 2>&1
+  docker_logout
 }
 
 derive_docker_tags() {
@@ -205,25 +236,23 @@ derive_docker_tags() {
 do_stack_build_and_test() {
   #local -r stack_name="$1"
   local -r scriptName="build_ALL.sh"
-  local -r scriptDir=${TRAVIS_BUILD_DIR}/bin/stack/
-  local -r buildDir=${scriptDir}/build/
 
   echo -e "Building and testing stack variants"
 
-  pushd "${scriptDir}" > /dev/null
+  pushd "${STACK_DIR}" > /dev/null
 
   # Ensure there is no buildDir from a previous build
-  rm -rf "${buildDir}"
+  rm -rf "${STACK_BUILD_DIR}"
 
-  echo -e "Running ${GREEN}${scriptName}${NC} in ${GREEN}${scriptDir}${NC}"
+  echo -e "Running ${GREEN}${scriptName}${NC} in ${GREEN}${STACK_DIR}${NC}"
 
   # strip the "stroom-stacks-" part of the tag if it is there
   ./"${scriptName}" "${VERSION_NO}"
 
-  pushd "${buildDir}" > /dev/null
+  pushd "${STACK_BUILD_DIR}" > /dev/null
 
-  echo -e "Dumping build artifacts in ${GREEN}${buildDir}${NC}"
-  ls -1 "${buildDir}"
+  echo -e "Dumping build artifacts in ${GREEN}${STACK_BUILD_DIR}${NC}"
+  ls -1 "${STACK_BUILD_DIR}"
 
   for archive_filename in *.tar.gz; do
     # Now spin up the stack to make sure it all works
@@ -239,6 +268,7 @@ do_stack_build_and_test() {
     fi
   done
 
+  # popd intentionally twice
   popd > /dev/null
   popd > /dev/null
 }
@@ -300,7 +330,7 @@ test_stack() {
 
   # Clear out all docker images/volumes/containers
   echo -e "${GREEN}Clearing out all docker images/containers/volumes${NC}"
-  "${TRAVIS_BUILD_DIR}"/bin/clean.sh
+  "${BUILD_DIR}"/bin/clean.sh
 
   popd > /dev/null
 }
@@ -345,14 +375,17 @@ substitute_tag() {
 }
 
 create_get_stroom_script() {
-  local -r get_stroom_filename="get_stroom.sh"
-  local -r script_build_dir="${TRAVIS_BUILD_DIR}/build"
-  local -r stack_build_dir="${TRAVIS_BUILD_DIR}/bin/stack/build"
-  local -r get_stroom_source_file="${TRAVIS_BUILD_DIR}/bin/stack/lib/${get_stroom_filename}"
-  local -r get_stroom_dest_file="${script_build_dir}/${get_stroom_filename}"
-  local -r hash_file="${stack_build_dir}/${GET_STROOM_STACK_NAME}-${VERSION_NO}.tar.gz.sha256"
+  local -r get_stroom_filename_prefix="get_stroom"
+  local -r get_stroom_source_file="${BUILD_DIR}/bin/stack/lib/${get_stroom_filename_prefix}.sh"
+  local -r hash_file="${STACK_BUILD_DIR}/${GET_STROOM_STACK_NAME}-${VERSION_NO}.tar.gz.sha256"
 
-  mkdir -p "${script_build_dir}"
+  local major_version
+  major_version=$(echo "${VERSION_NO}" | grep -oP "^v[0-9]+")
+
+  local -r get_stroom_dest_file="${SCRIPT_BUILD_DIR}/${get_stroom_filename_prefix}_${major_version}.sh"
+  local -r get_stroom_dest_file_latest="${SCRIPT_BUILD_DIR}/${get_stroom_filename_prefix}.sh"
+
+  mkdir -p "${SCRIPT_BUILD_DIR}"
 
   if [ ! -f "${hash_file}" ]; then
     echo -e "${RED}ERROR${NC}: Can't find hash file ${GREEN}${hash_file}${NC}"
@@ -368,10 +401,9 @@ create_get_stroom_script() {
   cp "${get_stroom_source_file}" "${get_stroom_dest_file}"
 
   substitute_tag "<STACK_NAME>" "${GET_STROOM_STACK_NAME}" "${get_stroom_dest_file}"
-  substitute_tag "<STACK_TAG>" "${TRAVIS_TAG}" "${get_stroom_dest_file}"
+  substitute_tag "<STACK_TAG>" "${BUILD_TAG}" "${get_stroom_dest_file}"
   substitute_tag "<STACK_VERSION>" "${VERSION_NO}" "${get_stroom_dest_file}"
   substitute_tag "<HASH_FILE_CONTENTS>" "${hash_file_contents}" "${get_stroom_dest_file}"
-
 
   # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
   # It will only be released to github pages if the condition in .travis.yml
@@ -379,18 +411,31 @@ create_get_stroom_script() {
   echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
     "${BLUE}${GH_PAGES_DIR}/${NC}"
   mkdir -p "${GH_PAGES_DIR}"
-  cp "${get_stroom_dest_file}" "${GH_PAGES_DIR}"/
+  cp \
+    "${get_stroom_dest_file}" \
+    "${GH_PAGES_DIR}"/
+
+  if [[ "${VERSION_NO}" =~ ${LATEST_MAJOR_VERSION_REGEX} ]]; then
+    # This release is for our latest major version so cp the file
+    # without the version number in it, e.g. we get
+    # get_stroom_v7.sh and get_stroom.sh
+    # which both get the same version
+    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file_latest}${GREEN} to" \
+      "${BLUE}${GH_PAGES_DIR}/${NC}"
+    mkdir -p "${GH_PAGES_DIR}"
+    cp \
+      "${get_stroom_dest_file_latest}" \
+      "${GH_PAGES_DIR}"/
+  fi
 }
 
 dump_travis_env_vars() {
   # Dump all the travis env vars to the console for debugging, aligned with
   # the ones above
-  echo -e "TRAVIS_BUILD_NUMBER:       [${GREEN}${TRAVIS_BUILD_NUMBER}${NC}]"
-  echo -e "TRAVIS_COMMIT:             [${GREEN}${TRAVIS_COMMIT}${NC}]"
-  echo -e "TRAVIS_BRANCH:             [${GREEN}${TRAVIS_BRANCH}${NC}]"
-  echo -e "TRAVIS_TAG:                [${GREEN}${TRAVIS_TAG}${NC}]"
-  echo -e "TRAVIS_PULL_REQUEST:       [${GREEN}${TRAVIS_PULL_REQUEST}${NC}]"
-  echo -e "TRAVIS_EVENT_TYPE:         [${GREEN}${TRAVIS_EVENT_TYPE}${NC}]"
+  echo -e "BUILD_COMMIT:             [${GREEN}${BUILD_COMMIT}${NC}]"
+  echo -e "BUILD_BRANCH:             [${GREEN}${BUILD_BRANCH}${NC}]"
+  echo -e "BUILD_TAG:                [${GREEN}${BUILD_TAG}${NC}]"
+  echo -e "BUILD_IS_PULL_REQUEST:    [${GREEN}${BUILD_IS_PULL_REQUEST}${NC}]"
 }
 
 dump_build_vars() {
@@ -398,19 +443,18 @@ dump_build_vars() {
   echo -e "STACK_NAME:                [${GREEN}${STACK_NAME}${NC}]"
   echo -e "BUILD_VERSION:             [${GREEN}${BUILD_VERSION}${NC}]"
   echo -e "VERSION_NO:                [${GREEN}${VERSION_NO}${NC}]"
-
 }
 
 do_release() {
 
   # Tagged commit so use that as our build version, e.g. v6.0.0
   # shellcheck disable=SC2034
-  local -r tag_prefix="$(echo "${TRAVIS_TAG}" | grep -oP "${PREFIX_PART_REGEX}")"
+  local -r tag_prefix="$(echo "${BUILD_TAG}" | grep -oP "${PREFIX_PART_REGEX}")"
 
   dump_build_vars
   echo -e "tag_prefix:                [${GREEN}${tag_prefix}${NC}]"
 
-  if [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
+  if [[ ${BUILD_TAG} =~ ${TAG_PREFIX_STROOM_NGINX} ]]; then
     # This is a stroom-nginx release, so do a docker build/push
     echo -e "${GREEN}Performing a ${BLUE}stroom-nginx${GREEN} release" \
       "to dockerhub${NC}"
@@ -424,7 +468,7 @@ do_release() {
       "${DOCKER_CONTEXT_ROOT_STROOM_NGINX}" \
       "${allDockerTags[@]}"
 
-  elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_LOG_SENDER} ]]; then
+  elif [[ ${BUILD_TAG} =~ ${TAG_PREFIX_STROOM_LOG_SENDER} ]]; then
     # This is a stroom-log-sender release, so do a docker build/push
     echo -e "${GREEN}Performing a ${BLUE}stroom-log-sender${GREEN} release" \
       "to dockerhub${NC}"
@@ -437,7 +481,7 @@ do_release() {
       "${DOCKER_CONTEXT_ROOT_STROOM_LOG_SENDER}" \
       "${allDockerTags[@]}"
 
-  elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
+  elif [[ ${BUILD_TAG} =~ ${TAG_PREFIX_STROOM_ZOOKEEPER} ]]; then
     # This is a stroom-zookeeper release, so do a docker build/push
     echo -e "${GREEN}Performing a ${BLUE}stroom-zookeeper${GREEN} release" \
       "to dockerhub${NC}"
@@ -450,12 +494,36 @@ do_release() {
       "${DOCKER_CONTEXT_ROOT_STROOM_ZOOKEEPER}" \
       "${allDockerTags[@]}"
 
-  elif [[ ${TRAVIS_TAG} =~ ${TAG_PREFIX_STROOM_STACKS} ]]; then
+  elif [[ ${BUILD_TAG} =~ ${TAG_PREFIX_STROOM_STACKS} ]]; then
     echo -e "${GREEN}Performing a ${BLUE}${tag_prefix}${GREEN} stack" \
       "release to github${NC}"
 
     create_get_stroom_script
+
+    gather_release_artefacts
   fi
+}
+
+# Put all release artefacts in a dir to make it easier to upload them to
+# Github releases.
+gather_release_artefacts() {
+  mkdir -p "${RELEASE_ARTEFACTS_DIR}"
+
+  echo "Copying release artefacts to ${RELEASE_ARTEFACTS_DIR}"
+
+  # The zip dist config is inside the zip dist. We need the docker dist
+  # config so stroom-resources can use it.
+
+  # Copy the stack archives and their hashes
+  echo "Copy stack archives"
+  cp \
+    "${STACK_BUILD_DIR}/"*"-.tar.gz*" \
+    "${RELEASE_ARTEFACTS_DIR}/"
+
+  echo "Copy get_stroom script"
+  cp \
+    "${SCRIPT_BUILD_DIR}/get_stroom.sh" \
+    "${RELEASE_ARTEFACTS_DIR}/"
 }
 
 main() {
@@ -463,7 +531,7 @@ main() {
   dump_travis_env_vars
 
   # shellcheck disable=SC2034
-  BUILD_VERSION="${TRAVIS_TAG:-SNAPSHOT}"
+  BUILD_VERSION="${BUILD_TAG:-SNAPSHOT}"
   # VERSION_NO is just the number part of the tag without the prefix
   # e.g. v6.0-beta.52
   VERSION_NO="$( \
@@ -475,9 +543,9 @@ main() {
 
   # If we are releasing a new docker image then that version will not be available
   # on Dockerhub to be able to test the stack against it 
-  if [ -n "${TRAVIS_TAG}" ] && \
+  if [ -n "${BUILD_TAG}" ] && \
      is_prefixed_by \
-      "${TRAVIS_TAG}" \
+      "${BUILD_TAG}" \
       "${TAG_PREFIX_STROOM_NGINX}" \
       "${TAG_PREFIX_STROOM_ZOOKEEPER}" \
       "${TAG_PREFIX_STROOM_LOG_SENDER}"; then
@@ -489,7 +557,7 @@ main() {
   fi
 
   # Perform a release to github/dockerhub if required
-  if [ -n "$TRAVIS_TAG" ] && [[ "$TRAVIS_TAG" =~ ${RELEASE_VERSION_REGEX} ]] ; then
+  if [ -n "$BUILD_TAG" ] && [[ "$BUILD_TAG" =~ ${RELEASE_VERSION_REGEX} ]] ; then
     do_release
   else
     echo -e "${GREEN}Not a tagged commit (or a tag we recognise), nothing to" \
