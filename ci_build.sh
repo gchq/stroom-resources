@@ -416,7 +416,7 @@ create_get_stroom_script() {
     "${GH_PAGES_DIR}"/
 
   if [[ "${VERSION_NO}" =~ ${LATEST_MAJOR_VERSION_REGEX} ]]; then
-    # This release is for our latest major version so cp the file
+    # This release is for our latest stable major version so cp the file
     # without the version number in it, e.g. we get
     # get_stroom_v7.sh and get_stroom.sh
     # which both get the same version
