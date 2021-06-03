@@ -525,7 +525,7 @@ gather_release_artefacts() {
   # Copy the stack archives and their hashes
   echo "Copy stack archives"
   cp \
-    "${STACK_BUILD_DIR}/"*-.tar.gz* \
+    "${STACK_BUILD_DIR}/"*.tar.gz* \
     "${RELEASE_ARTEFACTS_DIR}/"
 
   echo "Copy get_stroom script"
