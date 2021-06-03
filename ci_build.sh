@@ -418,7 +418,9 @@ create_get_stroom_script() {
   # is true
   echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
     "${BLUE}${GH_PAGES_DIR}/${NC}"
+
   mkdir -p "${GH_PAGES_DIR}"
+
   cp \
     "${get_stroom_dest_file}" \
     "${GH_PAGES_DIR}"/
@@ -428,12 +430,12 @@ create_get_stroom_script() {
     # without the version number in it, e.g. we get
     # get_stroom_v7.sh and get_stroom.sh
     # which both get the same version
-    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file_latest}${GREEN} to" \
-      "${BLUE}${GH_PAGES_DIR}/${NC}"
-    mkdir -p "${GH_PAGES_DIR}"
+    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
+      "${BLUE}${GH_PAGES_DIR}/${get_stroom_dest_file_latest}${NC}"
+
     cp \
-      "${get_stroom_dest_file_latest}" \
-      "${GH_PAGES_DIR}"/
+      "${get_stroom_dest_file}" \
+      "${GH_PAGES_DIR}/${get_stroom_dest_file_latest}"
   fi
 }
 
