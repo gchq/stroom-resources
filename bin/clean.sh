@@ -23,12 +23,20 @@ fi
 
 # remove exited containers:
 echo -e "${GREEN}Removing exited containers and their volumes${NC}"
-docker ps --filter status=dead --filter status=exited -aq | xargs -r docker rm -v
+docker ps --filter status=dead --filter status=exited -aq \
+  | xargs -r docker rm -v
 
 # remove unused images:
 echo -e "${GREEN}Removing unused images${NC}"
-docker images --no-trunc | grep '<none>' | awk '{ print $3 }' | xargs -r docker rmi
+docker images --no-trunc \
+  | grep '<none>' \
+  | awk '{ print $3 }' \
+  | xargs -r docker rmi
 
 # remove unused volumes:
-echo -e "${GREEN}Removing unused volumes${NC}"
-docker volume ls -qf dangling=true | xargs -r docker volume rm
+# We want to keep builder-home-dir-vol as that contains all the mvn/node/gradle
+# stuff that makes the dockerised build quicker
+echo -e "${GREEN}Removing unused volumes apart from ${BLUE}builder-home-dir-vol${NC}"
+docker volume ls -qf dangling=true \
+  | grep -v builder-home-dir-vol \
+  | xargs -r docker volume rm
