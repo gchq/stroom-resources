@@ -69,7 +69,7 @@ main() {
   # Dir where our new gh-pages content is to be found
   local gh_pages_source_dir="${GITHUB_WORKSPACE}/gh-pages"
   local minor_version
-  minor_version=$(echo "${BUILD_TAG}" | grep -oP "^v[0-9]+\.[0-9]+")
+  minor_version=$(echo "${BUILD_TAG}" | grep -oP "v[0-9]+\.[0-9]+")
   local gh_pages_versioned_dir="${gh_pages_clone_dir}/${minor_version}"
   local version_file="${gh_pages_versioned_dir}/version.txt"
 
