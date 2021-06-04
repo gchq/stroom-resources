@@ -7,10 +7,6 @@
 # - creates a build dir in /tmp
 # - clones the stroom repo on your current branch into the build dir
 # - runs the ci_build.sh script
-#
-# This script and the ci_build script run on this host but all parts
-# of the build that need anything more than bash and standard shell tools
-# are executed in docker containers.
 
 set -eo pipefail
 
