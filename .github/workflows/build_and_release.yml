@@ -19,6 +19,11 @@ jobs:
       - name: Checkout code
         id: checkout_code
         uses: actions/checkout@v2
+        with:
+          # Set this so it gets the annotated commit, not the commit being tagged.
+          # Which means we can get the release msg
+          # See https://github.com/actions/runner/issues/712
+          ref: ${{ github.ref }} 
 
         # Set variables in github's special env file which are then automatically 
         # read into env vars in each subsequent step
@@ -48,6 +53,16 @@ jobs:
             else
               echo "BUILD_IS_PULL_REQUEST=false"
             fi
+
+            # This repo releases multiple thins, e.g.
+            # stroom-stacks-v9.9.9
+            # stroom-log-sender-v9.9.9
+            # stroom-nginx-v9.9.9
+            if [[ ${GITHUB_REF} =~ ^refs/tags/[a-z-]+v ]]; then
+              echo "BUILD_IS_RELEASE=true"
+            else
+              echo "BUILD_IS_RELEASE=false"
+            fi
           } >> $GITHUB_ENV
 
         # Separate step to show what is visible across steps
@@ -66,6 +81,7 @@ jobs:
             "BUILD_BRANCH" "$BUILD_BRANCH" \
             "BUILD_COMMIT" "$BUILD_COMMIT" \
             "BUILD_IS_PULL_REQUEST" "$BUILD_IS_PULL_REQUEST" \
+            "BUILD_IS_RELEASE" "$BUILD_IS_RELEASE" \
             "ACTIONS_SCRIPTS_DIR" "$ACTIONS_SCRIPTS_DIR" \
             "PWD" "$PWD" \
             "HOME" "$HOME"
@@ -86,7 +102,7 @@ jobs:
 
       - name: Release to GitHub
         id: create_release
-        if: ${{ startsWith(env.BUILD_TAG, 'v') }}
+        if: ${{ env.BUILD_IS_RELEASE == 'true' }}
         env:
           # Github provided secret
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,7 +110,7 @@ jobs:
 
       - name: Update gh-pages
         id: update_gh-pages
-        if: ${{ startsWith(env.BUILD_TAG, 'v') }}
+        if: ${{ env.BUILD_IS_RELEASE == 'true' }}
         env:
           # ssh private key (corresponding to the public key in github deploy keys
           # for the stroom repo), manually added to secrets
