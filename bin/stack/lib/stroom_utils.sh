@@ -463,7 +463,8 @@ display_active_stack_services() {
 
 display_banner() {
   # see if the terminal supports colors...
-  no_of_colours=$(tput colors)
+  # hadle case where TERM is not set so tput errors
+  no_of_colours=$(tput colors 2>/dev/null || echo "0")
 
   if [ "${MONOCHROME}" = false ]; then
     if test -n "$no_of_colours" && test "${no_of_colours}" -eq 256; then
