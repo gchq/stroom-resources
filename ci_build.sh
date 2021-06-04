@@ -31,6 +31,9 @@ LATEST_MAJOR_VERSION_REGEX="^v7"
 # The stack used for the get_stroom.sh script that we publish on gh-pages
 GET_STROOM_STACK_NAME="stroom_core_test"
 
+GET_STROOM_FILENAME_PREFIX="get_stroom"
+GET_STROOM_LATEST_FILENAME="${GET_STROOM_FILENAME_PREFIX}.sh"
+
 # The dir used to hold content for deploying to github pages, i.e.
 # https://gchq.github.io/stroom-resources
 GH_PAGES_DIR="${BUILD_DIR}/gh-pages"
@@ -383,15 +386,15 @@ substitute_tag() {
 }
 
 create_get_stroom_script() {
-  local -r get_stroom_filename_prefix="get_stroom"
-  local -r get_stroom_source_file="${BUILD_DIR}/bin/stack/lib/${get_stroom_filename_prefix}.sh"
+
+  local -r get_stroom_source_file="${BUILD_DIR}/bin/stack/lib/${GET_STROOM_LATEST_FILENAME}"
   local -r hash_file="${STACK_BUILD_DIR}/${GET_STROOM_STACK_NAME}-${VERSION_NO}.tar.gz.sha256"
 
   local major_version
   major_version=$(echo "${VERSION_NO}" | grep -oP "^v[0-9]+")
 
-  local -r get_stroom_dest_file="${SCRIPT_BUILD_DIR}/${get_stroom_filename_prefix}_${major_version}.sh"
-  local -r get_stroom_dest_file_latest="${SCRIPT_BUILD_DIR}/${get_stroom_filename_prefix}.sh"
+  local -r get_stroom_dest_file="${SCRIPT_BUILD_DIR}/${GET_STROOM_FILENAME_PREFIX}_${major_version}.sh"
+  local -r get_stroom_dest_file_latest="${SCRIPT_BUILD_DIR}/${GET_STROOM_LATEST_FILENAME}"
 
   mkdir -p "${SCRIPT_BUILD_DIR}"
 
@@ -431,11 +434,18 @@ create_get_stroom_script() {
     # get_stroom_v7.sh and get_stroom.sh
     # which both get the same version
     echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
-      "${BLUE}${GH_PAGES_DIR}/${get_stroom_dest_file_latest}${NC}"
+      "${BLUE}${get_stroom_dest_file_latest}${NC}"
 
     cp \
       "${get_stroom_dest_file}" \
-      "${GH_PAGES_DIR}/${get_stroom_dest_file_latest}"
+      "${get_stroom_dest_file_latest}"
+
+    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file_latest}${GREEN} to" \
+      "${BLUE}${GH_PAGES_DIR}/${NC}"
+
+    cp \
+      "${get_stroom_dest_file_latest}" \
+      "${GH_PAGES_DIR}/"
   fi
 }
 
@@ -532,7 +542,7 @@ gather_release_artefacts() {
 
   echo "Copy get_stroom script"
   cp \
-    "${SCRIPT_BUILD_DIR}/get_stroom.sh" \
+    "${SCRIPT_BUILD_DIR}/${GET_STROOM_LATEST_FILENAME}" \
     "${RELEASE_ARTEFACTS_DIR}/"
 }
 
