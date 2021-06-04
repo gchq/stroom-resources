@@ -26,13 +26,12 @@ VERSION_PART_REGEX='v[0-9]+\.[0-9]+.*$'
 PREFIX_PART_REGEX="^[\\w-]+(?=-${VERSION_PART_REGEX})"
 RELEASE_VERSION_REGEX="^.*-${VERSION_PART_REGEX}"
 LATEST_SUFFIX="-LATEST"
-LATEST_MAJOR_VERSION_REGEX="^v7"
 
 # The stack used for the get_stroom.sh script that we publish on gh-pages
 GET_STROOM_STACK_NAME="stroom_core_test"
 
 GET_STROOM_FILENAME_PREFIX="get_stroom"
-GET_STROOM_LATEST_FILENAME="${GET_STROOM_FILENAME_PREFIX}.sh"
+GET_STROOM_FILENAME="${GET_STROOM_FILENAME_PREFIX}.sh"
 
 # The dir used to hold content for deploying to github pages, i.e.
 # https://gchq.github.io/stroom-resources
@@ -204,9 +203,15 @@ release_to_docker_hub() {
     --build-arg GIT_TAG="${BUILD_TAG:-${SNAPSHOT_FLOATING_TAG}}" \
     "${contextRoot}"
 
-  echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC}" \
-    "with tags: ${GREEN}${allTagArgs[*]}${NC}"
-  docker push --all-tags "${dockerRepo}"
+  if [[ ! -n "${LOCAL_BUILD}" ]]; then
+    echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC}" \
+      "with tags: ${GREEN}${allTagArgs[*]}${NC}"
+    docker push \
+      --all-tags \
+      "${dockerRepo}"
+  else
+    echo -e "${YELLOW}LOCAL_BUILD set so skipping push to dockerhub${NC}"
+  fi
 
   docker_logout
 }
@@ -385,16 +390,14 @@ substitute_tag() {
   sed -i "s/${tag}/${replacement}/" "${get_stroom_dest_file}"
 }
 
+# Creates a script (from a template) that can be used to download a specific
+# stack variant and version, check it against a hash and then explode it.
 create_get_stroom_script() {
 
-  local -r get_stroom_source_file="${BUILD_DIR}/bin/stack/lib/${GET_STROOM_LATEST_FILENAME}"
+  local -r get_stroom_source_file="${BUILD_DIR}/bin/stack/lib/${GET_STROOM_FILENAME}"
   local -r hash_file="${STACK_BUILD_DIR}/${GET_STROOM_STACK_NAME}-${VERSION_NO}.tar.gz.sha256"
 
-  local major_version
-  major_version=$(echo "${VERSION_NO}" | grep -oP "^v[0-9]+")
-
-  local -r get_stroom_dest_file="${SCRIPT_BUILD_DIR}/${GET_STROOM_FILENAME_PREFIX}_${major_version}.sh"
-  local -r get_stroom_dest_file_latest="${SCRIPT_BUILD_DIR}/${GET_STROOM_LATEST_FILENAME}"
+  local -r get_stroom_dest_file="${SCRIPT_BUILD_DIR}/${GET_STROOM_FILENAME}"
 
   mkdir -p "${SCRIPT_BUILD_DIR}"
 
@@ -417,8 +420,7 @@ create_get_stroom_script() {
   substitute_tag "<HASH_FILE_CONTENTS>" "${hash_file_contents}" "${get_stroom_dest_file}"
 
   # Make a copy of this script in the gh-pages dir so we can deploy it to gh-pages
-  # It will only be released to github pages if the condition in .travis.yml
-  # is true
+  # Github actions will update the gh-pages branch
   echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
     "${BLUE}${GH_PAGES_DIR}/${NC}"
 
@@ -428,25 +430,14 @@ create_get_stroom_script() {
     "${get_stroom_dest_file}" \
     "${GH_PAGES_DIR}"/
 
-  if [[ "${VERSION_NO}" =~ ${LATEST_MAJOR_VERSION_REGEX} ]]; then
-    # This release is for our latest stable major version so cp the file
-    # without the version number in it, e.g. we get
-    # get_stroom_v7.sh and get_stroom.sh
-    # which both get the same version
-    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
-      "${BLUE}${get_stroom_dest_file_latest}${NC}"
-
-    cp \
-      "${get_stroom_dest_file}" \
-      "${get_stroom_dest_file_latest}"
-
-    echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file_latest}${GREEN} to" \
-      "${BLUE}${GH_PAGES_DIR}/${NC}"
-
-    cp \
-      "${get_stroom_dest_file_latest}" \
-      "${GH_PAGES_DIR}/"
-  fi
+  # Now copy the file to the release artefacts dir so it is added as a release
+  # asset in github
+  echo -e "${GREEN}Copying file ${BLUE}${get_stroom_dest_file}${GREEN} to" \
+    "${BLUE}${RELEASE_ARTEFACTS_DIR}/${NC}"
+  mkdir -p "${RELEASE_ARTEFACTS_DIR}"
+  cp \
+    "${get_stroom_dest_file}" \
+    "${RELEASE_ARTEFACTS_DIR}/${GET_STROOM_FILENAME}"
 }
 
 dump_travis_env_vars() {
@@ -531,19 +522,13 @@ gather_release_artefacts() {
 
   echo "Copying release artefacts to ${RELEASE_ARTEFACTS_DIR}"
 
-  # The zip dist config is inside the zip dist. We need the docker dist
-  # config so stroom-resources can use it.
-
   # Copy the stack archives and their hashes
   echo "Copy stack archives"
   cp \
     "${STACK_BUILD_DIR}/"*.tar.gz* \
     "${RELEASE_ARTEFACTS_DIR}/"
 
-  echo "Copy get_stroom script"
-  cp \
-    "${SCRIPT_BUILD_DIR}/${GET_STROOM_LATEST_FILENAME}" \
-    "${RELEASE_ARTEFACTS_DIR}/"
+  # The copy of get_stroom.sh is done in create_get_stroom_script()
 }
 
 main() {
@@ -580,8 +565,8 @@ main() {
   if [ -n "$BUILD_TAG" ] && [[ "$BUILD_TAG" =~ ${RELEASE_VERSION_REGEX} ]] ; then
     do_release
   else
-    echo -e "${GREEN}Not a tagged commit (or a tag we recognise), nothing to" \
-      "release.${NC}"
+    echo -e "${GREEN}${BUILD_TAG} is not a tagged commit (or a tag we" \
+      "recognise), nothing to release.${NC}"
   fi
 }
 
