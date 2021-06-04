@@ -54,11 +54,12 @@ jobs:
               echo "BUILD_IS_PULL_REQUEST=false"
             fi
 
-            # This repo releases multiple thins, e.g.
+            # This repo releases multiple things, e.g.
             # stroom-stacks-v9.9.9
             # stroom-log-sender-v9.9.9
             # stroom-nginx-v9.9.9
-            if [[ ${GITHUB_REF} =~ ^refs/tags/[a-z-]+v ]]; then
+            # But we onlt want to release to github or update gh-pages for stack releases
+            if [[ ${GITHUB_REF} =~ ^refs/tags/stroom-stacks-v ]]; then
               echo "BUILD_IS_RELEASE=true"
             else
               echo "BUILD_IS_RELEASE=false"
