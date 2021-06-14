@@ -30,10 +30,12 @@ readonly THIS_PID=$$
 readonly DB_CONTAINER_ID="stroom-all-dbs"
 
 # The list of databases to backup
-readonly DATABASES=( \
-  "${STROOM_AUTH_DB_NAME:-auth}"
-  "${STROOM_DB_NAME:-stroom}"
-  "${STROOM_STATS_DB_NAME:-stats}"
+readonly STROOM_DB="${STROOM_DB_NAME:-stroom}"
+readonly STATS_DB="${STROOM_STATS_DB_NAME:-stats}"
+readonly DEFAULT_DB="${STROOM_DB}"
+readonly DATABASES=(
+  "${STROOM_DB}"
+  "${STATS_DB}"
 )
 
 source "${DIR}"/lib/shell_utils.sh
@@ -59,9 +61,9 @@ check_installed_binaries() {
 }
 
 display_usage_and_exit() {
-  show_default_usage
-  #echo -e "Usage: $(basename "$0") [database_name]" >&2
-  #echo -e "output_dir - the directory to write backup files to" >&2
+  cmd_help_args="[DATABASE]"
+  cmd_help_msg="Opens a MySQL command line interface to DATABASE or '${STROOM_DB}' if not supplied."
+  show_default_usage "${cmd_help_args}" "${cmd_help_msg}"
   exit 1
 }
 
@@ -96,11 +98,33 @@ open_db_shell() {
 
 check_container_is_running() {
   local is_running
-  is_running=$(docker inspect -f "{{.State.Running}}" "${DB_CONTAINER_ID}" 2>/dev/null || echo "false")
+  is_running=$( \
+    docker inspect \
+      -f "{{.State.Running}}" \
+      "${DB_CONTAINER_ID}" \
+    2>/dev/null \
+    || echo "false")
 
   if [ "${is_running}" != "true" ]; then
       die "${RED}Error${NC}:" \
         "Docker container ${BLUE}${DB_CONTAINER_ID}${NC} is not running."
+  fi
+}
+
+validate_db_name() {
+  local db_name="$1"; shift
+  local is_valid=false
+  for valid_name in "${DATABASES[@]}"; do
+    if [[ "${valid_name}" = "${db_name}" ]]; then
+      is_valid=true   
+      break
+    fi
+  done
+
+  if [[ "${is_valid}" = "false" ]]; then
+    die "${RED}Error${NC}:" \
+      "Database ${BLUE}${db_name}${NC} is not valid." \
+          "Valid names are [${BLUE}${DATABASES[*]}${NC}]."
   fi
 }
 
@@ -124,23 +148,37 @@ main() {
   done
   shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
+  local db_name
+  if [[ $# -eq 1 ]]; then
+    db_name="${1}"
+    validate_db_name "${db_name}"
+  else
+    db_name="${DEFAULT_DB}"
+  fi
+
   setup_echo_colours
 
   local password
   local username
   local port
-  password="$(get_config_env_var "STROOM_DB_PASSWORD")"
-  username="$(get_config_env_var "STROOM_DB_USERNAME")"
-  port="$(get_config_env_var "STROOM_DB_PORT")"
+  if [[ "${db_name}" = "${STROOM_DB}" ]]; then
+    password="$(get_config_env_var "STROOM_DB_PASSWORD")"
+    username="$(get_config_env_var "STROOM_DB_USERNAME")"
+    port="$(get_config_env_var "STROOM_DB_PORT")"
+  elif [[ "${db_name}" = "${STATS_DB}" ]]; then
+    password="$(get_config_env_var "STROOM_STATS_DB_PASSWORD")"
+    username="$(get_config_env_var "STROOM_STATS_DB_USERNAME")"
+    port="$(get_config_env_var "STROOM_STATS_DB_PORT")"
+  fi
 
   check_installed_binaries
 
   check_container_is_running
 
-  echo -e "Connecting to database ${BLUE}stroom${NC} with" \
+  echo -e "Connecting to database ${BLUE}${db_name}${NC} with" \
     "username ${BLUE}${username}${NC}"
 
-  open_db_shell "stroom" "${port}" "${username}" "${password}"
+  open_db_shell "${db_name}" "${port}" "${username}" "${password}"
 }
 
 main "$@"
