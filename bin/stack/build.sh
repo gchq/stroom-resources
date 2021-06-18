@@ -92,7 +92,7 @@ main() {
 
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${ARCHIVE_NAME}${NC}"
   #pushd "${BUILD_DIRECTORY}" > /dev/null
-  pushd "${BUILD_DIRECTORY}"
+  pushd build
   tar -zcf "${ARCHIVE_NAME}" "./${STACK_DIR_NAME}"
 
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${HASH_FILE_NAME}${NC}"
