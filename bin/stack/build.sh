@@ -93,7 +93,11 @@ main() {
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${ARCHIVE_NAME}${NC}"
   #pushd "${BUILD_DIRECTORY}" > /dev/null
   pushd build
-  tar -zcf "${ARCHIVE_NAME}" "./${STACK_DIR_NAME}"
+
+  tar \
+    -zcf \
+    "${ARCHIVE_NAME}" \
+    "./${BUILD_STACK_NAME}/${STACK_DIR_NAME}"
 
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${HASH_FILE_NAME}${NC}"
   shasum -a 256 "${ARCHIVE_NAME}" > "${HASH_FILE_NAME}"
