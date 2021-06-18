@@ -100,7 +100,7 @@ main() {
   tar \
     -zcf \
     "../${ARCHIVE_NAME}" \
-    "./${BUILD_STACK_NAME}/${STACK_DIR_NAME}"
+    "./${STACK_DIR_NAME}"
 
   echo -e "${GREEN}Creating ${BLUE}build/${HASH_FILE_NAME}${NC}"
   shasum \
