@@ -1,14 +1,22 @@
 user  nginx;
 
+# If you have a dedicated nginx host, consider setting this to 'auto' so 
+# that nginx will try to use one worker per core. Alternatively set it to
+# an explicit value that doesn't exceed one worker per core.
 worker_processes  1;
 
 events {
+    # The maximum number of simultaneous connections that can be opened by a 
+    # worker process
     worker_connections  1024;
 }
 
 http {
     # Include generic logging configuration
     include logging.conf;
+
+    # Create a cache for caching responses from upstream
+    proxy_cache_path /var/nginx/cache/stroom_cache keys_zone=stroom_cache:10m levels=1:2 inactive=600s max_size=100m use_temp_path=off;
 
     upstream stroom_upstream_sticky { 
         ip_hash;

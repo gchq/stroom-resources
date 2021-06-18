@@ -1,8 +1,13 @@
 user  nginx;
 
+# If you have a dedicated nginx host, consider setting this to 'auto' so 
+# that nginx will try to use one worker per core. Alternatively set it to
+# an explicit value that doesn't exceed one worker per core.
 worker_processes  1;
 
 events {
+    # The maximum number of simultaneous connections that can be opened by a 
+    # worker process
     worker_connections  1024;
 }
 
@@ -42,3 +47,5 @@ http {
         }
     }
 }
+
+# vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:

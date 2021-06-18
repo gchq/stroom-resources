@@ -33,6 +33,9 @@ services:
       - ${NGINX_VOLUME_CONF:-../../volumes/nginx/conf}:/stroom-nginx/config:ro
       - ${NGINX_VOLUME_HTML:-../../volumes/nginx/html}:${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}:ro
       - type: volume
+        source: nginx_cache
+        target: /var/nginx/cache
+      - type: volume
         source: nginx_logs
         target: /stroom-nginx/logs
       - type: volume
@@ -48,6 +51,7 @@ services:
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
 volumes:
+  nginx_cache:
   nginx_logrotate:
   nginx_logs:
   # Other volumes defined in shared_volumes dir
