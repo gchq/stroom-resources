@@ -64,9 +64,10 @@ main() {
   local -r VERSION=$2
   local -r SERVICES=("${@:3}")
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
-  local -r ARCHIVE_NAME="${BUILD_STACK_NAME}-${VERSION}.tar.gz"
+  local -r STACK_DIR_NAME="${BUILD_STACK_NAME}-${VERSION}"
+  local -r ARCHIVE_NAME="${STACK_DIR_NAME}.tar.gz"
   local -r HASH_FILE_NAME="${ARCHIVE_NAME}.sha256"
-  local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}"
+  local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${STACK_DIR_NAME}"
   local -r SERVICES_FILE="${WORKING_DIRECTORY}/SERVICES.txt"
 
   if [ -d "${BUILD_DIRECTORY}" ];then
@@ -90,8 +91,9 @@ main() {
   ./create_stack_assets.sh "${BUILD_STACK_NAME}" "${VERSION}" "${SERVICES[@]}"
 
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${ARCHIVE_NAME}${NC}"
-  pushd build > /dev/null
-  tar -zcf "${ARCHIVE_NAME}" "./${BUILD_STACK_NAME}"
+  #pushd "${BUILD_DIRECTORY}" > /dev/null
+  pushd "${BUILD_DIRECTORY}"
+  tar -zcf "${ARCHIVE_NAME}" "./${STACK_DIR_NAME}"
 
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${HASH_FILE_NAME}${NC}"
   shasum -a 256 "${ARCHIVE_NAME}" > "${HASH_FILE_NAME}"

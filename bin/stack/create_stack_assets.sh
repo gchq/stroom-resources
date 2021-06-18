@@ -156,7 +156,7 @@ main() {
   local -r services=( "${@:3}" )
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}"
-  local -r VOLUMES_DIRECTORY="${BUILD_DIRECTORY}/volumes"
+  local -r VOLUMES_DIRECTORY="${WORKING_DIRECTORY}/volumes"
 
   local -r SRC_CERTS_DIRECTORY="../../dev-resources/certs"
   local -r SRC_VOLUMES_DIRECTORY="../../dev-resources/compose/volumes"
