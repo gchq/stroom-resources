@@ -291,14 +291,12 @@ do_stack_build_and_test() {
 
 test_stack() {
   stack_name="$1"
-  echo -e "Testing stack ${GREEN}${stack_name}${NC}  - ${GREEN}${VERSION_NO}${NC}"
+  echo -e "Testing stack ${GREEN}${stack_name}${NC} - ${GREEN}${VERSION_NO}${NC}"
 
   # Bit nasty but there should only be one match in there in both cases
-  pushd "./${stack_name}/${stack_name}-${VERSION_NO}" > /dev/null
+  pushd "./${stack_name}-${VERSION_NO}" > /dev/null
 
   echo -e "In directory ${GREEN}$(pwd)${NC}"
-
-  # jq is installed by default on travis so no need to install it
 
   # Get the expected count of services
   local services_count
