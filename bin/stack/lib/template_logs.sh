@@ -23,7 +23,7 @@
 
 cmd_help_msg="Tails the logs for the specified services or all services if none are supplied."
 cmd_help_options="  -n N Set the number of previous lines to display per service (or 'all'), default is 5."
-line_count_per_service="5"
+line_count_per_service="20"
 extra_compose_args=()
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
@@ -99,9 +99,11 @@ main() {
   setup_echo_colours
 
   if [ "${line_count_per_service}" == "all" ]; then
-    echo -e "${GREEN}Tailing the logs from the first entry onwards${NC}"
+    echo -e "${GREEN}Tailing the logs from the first entry onwards" \
+      "(ctlr-c to exit)${NC}"
   else
-    echo -e "${GREEN}Tailing the logs from the last ${line_count_per_service} entries onwards${NC}"
+    echo -e "${GREEN}Tailing the logs from the last ${line_count_per_service}" \
+      "entries onwards (ctlr-c to exit)${NC}"
   fi
 
   run_docker_compose_cmd \
