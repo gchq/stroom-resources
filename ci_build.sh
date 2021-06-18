@@ -559,11 +559,8 @@ main() {
 
   dump_build_vars
 
-  # The username and password are configured in the travis gui
   echo -e "Logging in to DockerHub"
-  echo "$DOCKER_PASSWORD" | docker login \
-    -u "$DOCKER_USERNAME" \
-    --password-stdin
+  docker_login
 
   # If we are releasing a new docker image then that version will not be available
   # on Dockerhub to be able to test the stack against it 
@@ -588,8 +585,7 @@ main() {
       "recognise), nothing to release.${NC}"
   fi
 
-  echo -e "Logging out of Docker"
-  docker logout >/dev/null 2>&1
+  docker_logout
 }
 
 # Start of script
