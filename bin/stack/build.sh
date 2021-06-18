@@ -91,12 +91,12 @@ main() {
   ./create_stack_assets.sh "${BUILD_STACK_NAME}" "${VERSION}" "${SERVICES[@]}"
 
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${ARCHIVE_NAME}${NC}"
-  #pushd "${BUILD_DIRECTORY}" > /dev/null
-  pushd build
+  pushd "${BUILD_DIRECTORY}" > /dev/null
+  #pushd "build/${ARCHIVE_NAME}" /dev/null
 
   tar \
     -zcf \
-    "${ARCHIVE_NAME}" \
+    "../${ARCHIVE_NAME}" \
     "./${BUILD_STACK_NAME}/${STACK_DIR_NAME}"
 
   echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${HASH_FILE_NAME}${NC}"
