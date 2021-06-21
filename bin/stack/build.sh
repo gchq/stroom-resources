@@ -51,7 +51,8 @@ validate_requested_services() {
 
 
 main() {
-  [ "$#" -ge 3 ] || die "${RED}Error${NC}: Invalid arguments, usage: ${BLUE}build.sh stackName version serviceX serviceY etc.${NC}"
+  [ "$#" -ge 3 ] || die "${RED}Error${NC}: Invalid arguments, usage:" \
+    "${BLUE}build.sh stackName version serviceX serviceY etc.${NC}"
 
   # Some of the scripts use associataive arrays which are bash 4 only.
   test_for_bash_version_4
@@ -64,20 +65,23 @@ main() {
   local -r VERSION=$2
   local -r SERVICES=("${@:3}")
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
-  local -r ARCHIVE_NAME="${BUILD_STACK_NAME}-${VERSION}.tar.gz"
+  local -r STACK_DIR_NAME="${BUILD_STACK_NAME}-${VERSION}"
+  local -r ARCHIVE_NAME="${STACK_DIR_NAME}.tar.gz"
   local -r HASH_FILE_NAME="${ARCHIVE_NAME}.sha256"
-  local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}"
+  local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${STACK_DIR_NAME}"
   local -r SERVICES_FILE="${WORKING_DIRECTORY}/SERVICES.txt"
 
   if [ -d "${BUILD_DIRECTORY}" ];then
-    die "${RED}Error${NC}: Build directory ${BLUE}${BUILD_DIRECTORY}${NC} already exists, please delete it first.${NC}"
+    die "${RED}Error${NC}: Build directory ${BLUE}${BUILD_DIRECTORY}${NC}" \
+      "already exists, please delete it first.${NC}"
   fi
 
   mkdir -p "$WORKING_DIRECTORY"
 
   validate_requested_services "${SERVICES[@]}"
 
-  echo -e "${GREEN}Creating a stack called ${YELLOW}${BUILD_STACK_NAME}${GREEN} with version ${YELLOW}${VERSION}${GREEN} and the following services:${NC}"
+  echo -e "${GREEN}Creating a stack called ${YELLOW}${BUILD_STACK_NAME}${GREEN}" \
+    "with version ${YELLOW}${VERSION}${GREEN} and the following services:${NC}"
   for service in "${SERVICES[@]}"; do
     echo -e "  ${BLUE}${service}${NC}"
   done
@@ -89,12 +93,20 @@ main() {
   ./create_stack_scripts.sh "${BUILD_STACK_NAME}" "${VERSION}" "${SERVICES[@]}"
   ./create_stack_assets.sh "${BUILD_STACK_NAME}" "${VERSION}" "${SERVICES[@]}"
 
-  echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${ARCHIVE_NAME}${NC}"
-  pushd build > /dev/null
-  tar -zcf "${ARCHIVE_NAME}" "./${BUILD_STACK_NAME}"
+  pushd "${BUILD_DIRECTORY}" > /dev/null
+  #pushd "build/${ARCHIVE_NAME}" /dev/null
 
-  echo -e "${GREEN}Creating ${BLUE}${BUILD_DIRECTORY}/${HASH_FILE_NAME}${NC}"
-  shasum -a 256 "${ARCHIVE_NAME}" > "${HASH_FILE_NAME}"
+  echo -e "${GREEN}Creating ${BLUE}build/${ARCHIVE_NAME}${NC}"
+  tar \
+    -zcf \
+    "../${ARCHIVE_NAME}" \
+    "./${STACK_DIR_NAME}"
+
+  echo -e "${GREEN}Creating ${BLUE}build/${HASH_FILE_NAME}${NC}"
+  shasum \
+    -a 256 \
+    "../${ARCHIVE_NAME}" \
+    > "../${HASH_FILE_NAME}"
 
   popd > /dev/null
 

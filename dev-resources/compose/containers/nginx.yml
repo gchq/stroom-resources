@@ -31,10 +31,10 @@ services:
       - STROOM_PROXY_HOST=${STROOM_PROXY_HOST:-$HOST_IP}
       - STROOM_PROXY_PORT=${STROOM_PROXY_APP_PORT:-8090}
     volumes:
-      - ${NGINX_VOLUME_CERTS:-../../volumes/nginx/certs}:/stroom-nginx/certs:ro
+      - ${NGINX_VOLUME_CERTS:-../volumes/nginx/certs}:/stroom-nginx/certs:ro
       # nginx.conf.template - used to create the actual config when the container starts
-      - ${NGINX_VOLUME_CONF:-../../volumes/nginx/conf}:/stroom-nginx/config:ro
-      - ${NGINX_VOLUME_HTML:-../../volumes/nginx/html}:${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}:ro
+      - ${NGINX_VOLUME_CONF:-../volumes/nginx/conf}:/stroom-nginx/config:ro
+      - ${NGINX_VOLUME_HTML:-../volumes/nginx/html}:${NGINX_HTML_ROOT_PATH:-/stroom-nginx/html}:ro
       - type: volume
         source: nginx_logs
         target: /stroom-nginx/logs

@@ -291,14 +291,12 @@ do_stack_build_and_test() {
 
 test_stack() {
   stack_name="$1"
-  echo -e "Testing stack ${GREEN}${stack_name}${NC}  - ${GREEN}${VERSION_NO}${NC}"
+  echo -e "Testing stack ${GREEN}${stack_name}${NC} - ${GREEN}${VERSION_NO}${NC}"
 
   # Bit nasty but there should only be one match in there in both cases
-  pushd "./${stack_name}/${stack_name}-${VERSION_NO}" > /dev/null
+  pushd "./${stack_name}-${VERSION_NO}" > /dev/null
 
   echo -e "In directory ${GREEN}$(pwd)${NC}"
-
-  # jq is installed by default on travis so no need to install it
 
   # Get the expected count of services
   local services_count
@@ -559,11 +557,8 @@ main() {
 
   dump_build_vars
 
-  # The username and password are configured in the travis gui
   echo -e "Logging in to DockerHub"
-  echo "$DOCKER_PASSWORD" | docker login \
-    -u "$DOCKER_USERNAME" \
-    --password-stdin
+  docker_login
 
   # If we are releasing a new docker image then that version will not be available
   # on Dockerhub to be able to test the stack against it 
@@ -588,8 +583,7 @@ main() {
       "recognise), nothing to release.${NC}"
   fi
 
-  echo -e "Logging out of Docker"
-  docker logout >/dev/null 2>&1
+  docker_logout
 }
 
 # Start of script

@@ -38,8 +38,8 @@ services:
         hard: 40000
 
     volumes:
-      - ${MYSQL_VOLUME_CONF_FILE:-../../volumes/stroom-all-dbs/conf/stroom-all-dbs.cnf}:/etc/mysql/conf.d/stroom-all-dbs.cnf:ro
-      - ${MYSQL_VOLUME_INIT:-../../volumes/stroom-all-dbs/init}:/docker-entrypoint-initdb.d:ro
+      - ${MYSQL_VOLUME_CONF_FILE:-../volumes/stroom-all-dbs/conf/stroom-all-dbs.cnf}:/etc/mysql/conf.d/stroom-all-dbs.cnf:ro
+      - ${MYSQL_VOLUME_INIT:-../volumes/stroom-all-dbs/init}:/docker-entrypoint-initdb.d:ro
       - type: volume
         source: stroom-all-dbs_data
         target: /var/lib/mysql
