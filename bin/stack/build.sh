@@ -103,10 +103,13 @@ main() {
     "./${STACK_DIR_NAME}"
 
   echo -e "${GREEN}Creating ${BLUE}build/${HASH_FILE_NAME}${NC}"
+
+  pushd .. > /dev/null
   shasum \
     -a 256 \
-    "../${ARCHIVE_NAME}" \
-    > "../${HASH_FILE_NAME}"
+    "${ARCHIVE_NAME}" \
+    > "${HASH_FILE_NAME}"
+  popd > /dev/null
 
   popd > /dev/null
 
