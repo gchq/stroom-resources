@@ -62,7 +62,7 @@ check_installed_binaries() {
 }
 
 display_usage_and_exit() {
-  echo -e "Usage: $(basename "$0") output_dir" >&2
+  echo -e "Usage: $(basename "$0") output_dir [database...]" >&2
   echo -e "output_dir - the directory to write backup files to" >&2
   echo -e "database - the name(s) of the database(s) to backup or 'stroom' &" \
     "'stats' if not supplied" >&2
