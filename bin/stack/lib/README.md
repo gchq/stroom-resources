@@ -58,11 +58,15 @@ sudo firewall-cmd --reload
 The following scripts are available to control the docker containers:
 
 * `backup_databases.sh` - A script to backup the databases in the stack.
+* `database_shell.sh` - A opens a MySQL command line interface against a named database.
 * `health.sh` - Checks the health of the applications in the stack.
 * `info.sh` - Displays information about the various URLs to use for accessing Stroom.
 * `logs.sh` - Starts tailing the logs of all containers from the last 5 entries of each.
+* `migrate.sh` - Runs any database migrations required then exits.
+* `pull_images.sh` - Pulls docker images from the remote repository. Does not create or start containers.
 * `remove.sh` - Removes all the containers in the stack, destroying any state.
 * `restart.sh` - Restarts all the containers in the stack.
+* `restore_database.sh` - A script to restore a database dump file into a named database.
 * `send-data.sh` - A script for sending data into Stroom or Stroom Proxy
 * `set_services.sh` - Sets the sub-set of services that will be used on this node.
 * `show_config.sh` - Displays the effective configuration that docker-compose will use.
@@ -70,7 +74,6 @@ The following scripts are available to control the docker containers:
 * `start.sh` - Starts all the containers for the stack.
 * `status.sh` - Displays the status of all the docker containers in the stack.
 * `stop.sh` - Stops all the containers in the stack.
-* `pull_images.sh` - Pulls docker images from the remote repository. Does not create or start containers.
 
 For details of any arguments required for the scripts, run them with the `-h` flag to see the help text.
 

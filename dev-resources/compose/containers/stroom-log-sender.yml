@@ -41,9 +41,9 @@ services:
       - CA_CERT_FILE=${STROOM_LOG_SENDER_CA_CERT_FILE:-/stroom-log-sender/certs/ca.pem.crt}
     volumes:
       # Volume for the crontab configuration
-      - ${STROOM_LOG_SENDER_VOLUME_CONF:-../../volumes/stroom-log-sender/conf}:/stroom-log-sender/config/:ro
+      - ${STROOM_LOG_SENDER_VOLUME_CONF:-../volumes/stroom-log-sender/conf}:/stroom-log-sender/config/:ro
       # Volume for the certs/keys
-      - ${STROOM_LOG_SENDER_VOLUME_CERTS:-../../volumes/stroom-log-sender/certs}:/stroom-log-sender/certs/:ro
+      - ${STROOM_LOG_SENDER_VOLUME_CERTS:-../volumes/stroom-log-sender/certs}:/stroom-log-sender/certs/:ro
 
       # This is the base compose file for stroom-log-sender. To ship logs it needs access to shared
       # docker volumes that contain the logs to ship. To allow us to run stroom-log sender in different

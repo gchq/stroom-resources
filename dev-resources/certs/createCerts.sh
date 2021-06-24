@@ -25,7 +25,8 @@ error_exit() {
 
 check_for_installed_binary() {
     local -r binary_name=$1
-    command -v "${binary_name}" 1>/dev/null || error_exit "${GREEN}${binary_name}${RED} is not installed"
+    command -v "${binary_name}" 1>/dev/null \
+      || error_exit "${GREEN}${binary_name}${RED} is not installed${NC}"
 }
 
 check_for_installed_binaries() {
@@ -44,7 +45,9 @@ create_ca_certs() {
         -out certificate-authority/ca.unencrypted.key \
         2048
 
-    # We can then use this key to create a certificate. This asks for information about your organisation, which you can make up or just accept the defaults:
+    # We can then use this key to create a certificate. This asks for
+    # information about your organisation, which you can make up or just accept
+    # the defaults:
     echo
     echo -e "${GREEN}Creating certificate authority certificate${NC}"
     openssl req \
@@ -65,7 +68,8 @@ create_ca_certs() {
         -text \
         -noout
 
-    # We can then optionally create a Java truststore (for use with DropWizard) from the PEM format CA certificate:
+    # We can then optionally create a Java truststore (for use with DropWizard)
+    # from the PEM format CA certificate:
     echo
     echo -e "${GREEN}Creating certificate authority Java keystore (truststore)${NC}"
     keytool \
@@ -97,7 +101,8 @@ create_server_certs() {
         -out server/server.unencrypted.key \
         2048
 
-    # Then we create a signing request. This asks for information about your organisation, which you can make up or just accept the defaults:
+    # Then we create a signing request. This asks for information about your
+    # organisation, which you can make up or just accept the defaults:
     echo
     echo -e "${GREEN}Creating server certificate signing request${NC}"
     openssl req \
@@ -130,9 +135,11 @@ create_server_certs() {
         -text \
         -noout
 
-    # The server then needs the CA's cert (`ca.pem.crt`), it's own cert (`server.pem.crt`) and it's own private key (`server.unencrypted.key`).
+    # The server then needs the CA's cert (`ca.pem.crt`), it's own cert
+    # (`server.pem.crt`) and it's own private key (`server.unencrypted.key`).
 
-    # We can optionally create a Java keystore (for use with DropWizard) from the PEM format certificate and private key (going via a PKCS12 file):
+    # We can optionally create a Java keystore (for use with DropWizard) from
+    # the PEM format certificate and private key (going via a PKCS12 file):
     echo
     echo -e "${GREEN}Creating server PKCS12 store${NC}"
     openssl pkcs12 \
@@ -180,7 +187,8 @@ create_client_certs() {
         -out client/client.unencrypted.key \
         2048
 
-    # Then we create a signing request. This asks for information about your organisation, which you can make up or just accept the defaults:
+    # Then we create a signing request. This asks for information about your
+    # organisation, which you can make up or just accept the defaults:
     echo
     echo -e "${GREEN}Creating client certificate signing request${NC}"
     openssl req \
@@ -212,9 +220,11 @@ create_client_certs() {
         -text \
         -noout
 
-    # The client then needs the CA's cert (`ca.pem.crt`), it's own cert (`client.pem.crt`) and it's own private key (`client.unencrypted.key`).
+    # The client then needs the CA's cert (`ca.pem.crt`), it's own cert
+    # (`client.pem.crt`) and it's own private key (`client.unencrypted.key`).
 
-    # We can optionally create a Java keystore (for use with DropWizard) from the PEM format certificate and private key (going via a PKCS12 file):
+    # We can optionally create a Java keystore (for use with DropWizard) from
+    # the PEM format certificate and private key (going via a PKCS12 file):
     echo
     echo -e "${GREEN}Creating client PKCS12 store${NC}"
     openssl pkcs12 \
