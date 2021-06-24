@@ -12,7 +12,7 @@ services:
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
       - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-}
-      - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10766,suspend=n }
+      - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:- -Xms50m -Xmx2048m}
       # Ruleset functionality not ready for use in v6
       #- RECEIPT_POLICY_UUID=${STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID:-}
       - STORING_ENABLED=${STROOM_PROXY_LOCAL_STORING_ENABLED:-true}
