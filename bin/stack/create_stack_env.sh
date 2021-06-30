@@ -271,8 +271,9 @@ add_env_vars() {
   # Loop over all env vars found in the yaml
   while read -r env_var_name_value; do
     local var_name="${env_var_name_value%%=*}"
-    local var_value="${env_var_name_value#*=}"
-    #echo "${var_name}: [${var_value}]"
+    local yaml_var_value="${env_var_name_value#*=}"
+    local var_value="${yaml_var_value}"
+    #echo "${var_name}: [${yaml_var_value}]"
 
     # this bit of code keeps a count of the times we have seen each env
     # var, so we can warn about ones seen multiple times but not whitelisted
@@ -293,10 +294,10 @@ add_env_vars() {
     #echo "${last_var_name}: ${last_var_value}"
     if [ "${var_name}" == "${last_var_name}" ]; then
       # Seen it already
-      if [ "${var_value}" != "${last_var_value}" ]; then
+      if [ "${yaml_var_value}" != "${last_var_value}" ]; then
 				die "${RED}  Error${NC}:" \
           "Environment variable ${YELLOW}${var_name}${NC} has multiple values," \
-          "${BLUE}${last_var_value}${NC} and ${BLUE}${var_value}${NC}"
+          "${BLUE}${last_var_value}${NC} and ${BLUE}${yaml_var_value}${NC}"
       fi
     else
       # Not seen this var before.
@@ -320,7 +321,7 @@ add_env_vars() {
       all_output_env_vars["${var_name}"]="${var_value}"
     fi
     last_var_name="${var_name}"
-    last_var_value="${var_value}"
+    last_var_value="${yaml_var_value}"
 
     # You may have bits in the yaml like:
     # STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}
