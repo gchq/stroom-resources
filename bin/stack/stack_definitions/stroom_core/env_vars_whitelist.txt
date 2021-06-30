@@ -43,5 +43,9 @@ STROOM_STATS_DB_PASSWORD
 # Relax security for when the stack is running with the default certs
 STROOM_PROXY_LOCAL_JERSEY_VERIFY_HOSTNAME=false
 
+# Allow proxy to authenticate with no token for testing
+# This entry in the env file will be edited by the CI build
+USE_DEFAULT_OPEN_ID_CREDENTIALS
+
 
 # vim: set filetype=sh:
