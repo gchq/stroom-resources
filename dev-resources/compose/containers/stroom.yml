@@ -5,37 +5,29 @@ services:
     container_name: stroom
     image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v7.0-LATEST}"
     environment:
-      - ADMIN_CONTEXT_PATH=${ADMIN_CONTEXT_PATH:-/stroomAdmin}
       - API_GATEWAY_HOST=${NGINX_ADVERTISED_HOST:-$HOST_IP}
       - API_GATEWAY_PORT=${API_GATEWAY_PORT:-443}
-      - APPLICATION_CONTEXT_PATH=${APPLICATION_CONTEXT_PATH:-/}
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
       - JAVA_OPTS=${STROOM_JAVA_OPTS:- -Xms50m -Xmx2g}
-      - STROOM_ADMIN_PORT=8081
-      - STROOM_APP_PORT=8080
       - STROOM_CONTENT_PACK_IMPORT_ENABLED=${STROOM_CONTENT_PACK_IMPORT_ENABLED:-false}
-      - STROOM_DEBUG_PORT=10765
       - STROOM_HOST=${STROOM_HOST:-$HOST_IP}
-      - STROOM_JDBC_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
       - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroompassword1}
       - STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$DB_HOST_IP}:${STROOM_DB_PORT:-3307}/${STROOM_DB_NAME:-stroom}?useUnicode=yes&characterEncoding=UTF-8
       - STROOM_JDBC_DRIVER_USERNAME=${STROOM_DB_USERNAME:-stroomuser}
-      - STROOM_LOGGING_LEVEL=${STROOM_LOGGING_LEVEL:-INFO}
-      - STROOM_NODE=${STROOM_NODE:-node1a}
       - STROOM_SERVICE_DISCOVERY_ENABLED=${STROOM_SERVICE_DISCOVERY_ENABLED:-true}
       - STROOM_SERVICE_DISCOVERY_ZOOKEEPER_URL=${ZOOKEEPER_QUORUM:-zookeeper:2181}
-      - STROOM_STATISTICS_JDBC_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
       - STROOM_STATISTICS_JDBC_DRIVER_PASSWORD=${STROOM_STATS_DB_PASSWORD:-stroompassword1}
       - STROOM_STATISTICS_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_STATS_DB_HOST:-$DB_HOST_IP}:${STROOM_STATS_DB_PORT:-3307}/${STROOM_STATS_DB_NAME:-stats}?useUnicode=yes&characterEncoding=UTF-8
       - STROOM_STATISTICS_JDBC_DRIVER_USERNAME=${STROOM_STATS_DB_USERNAME:-statsuser}
       - USE_DEFAULT_OPEN_ID_CREDENTIALS=${USE_DEFAULT_OPEN_ID_CREDENTIALS:-false}
     ports:
+      # Allow the port on the docker host to be changed, internal are fixed
       - "${STROOM_APP_PORT:-8080}:8080"
       - "${STROOM_ADMIN_PORT:-8081}:8081"
-      - "${STROOM_DEBUG_PORT:-10765}:10765"
+      #- "${STROOM_DEBUG_PORT:-10765}:10765"
     healthcheck:
-      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:${STROOM_ADMIN_PORT:-8081}/stroomAdmin/healthcheck || exit 1
+      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:8081/stroomAdmin/healthcheck || exit 1
       start_period: 1m30s
       interval: 1m
       timeout: 5s

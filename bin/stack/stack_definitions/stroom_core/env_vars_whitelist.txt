@@ -5,6 +5,7 @@
 # In this example if you wanted the environment variable and its default to
 # be included in the stack env file then you would add 'YY_YY' to this
 # whitelist
+# If you provide a value then the value will be used in the env file.
 # NOTE: Env vars listed here cannot also be in the overrides.env file
 
 MYSQL_DOCKER_REPO
@@ -12,8 +13,6 @@ NGINX_ADVERTISED_HOST
 NGINX_SSL_CERTIFICATE
 NGINX_SSL_CERTIFICATE_KEY
 NGINX_SSL_CA_CERTIFICATE
-STROOM_CREATE_DEFAULT_INDEX_VOLUMES
-STROOM_CREATE_DEFAULT_STREAM_VOLUMES
 #STROOM_DEFAULT_INDEX_VOLUME_NODES - commented out as env vars can't support list types
 #STROOM_DEFAULT_INDEX_VOLUME_PATHS - commented out as env vars can't support list types
 #STROOM_DEFAULT_STREAM_VOLUME_PATHS - commented out as env vars can't support list types
@@ -31,21 +30,18 @@ STROOM_LOG_SENDER_DEFAULT_ENVIRONMENT
 STROOM_LOG_SENDER_DOCKER_REPO
 STROOM_LOG_SENDER_PRIVATE_KEY_FILE
 STROOM_NGINX_DOCKER_REPO
-STROOM_NODE
 STROOM_PROXY_DOCKER_REPO
 STROOM_PROXY_HOST
 #STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED - commented out as rulesets are not ready for use
-STROOM_PROXY_LOCAL_FEED_STATUS_API_KEY
-STROOM_PROXY_LOCAL_FEED_STATUS_URL
-STROOM_PROXY_LOCAL_FORWARDING_ENABLED
-STROOM_PROXY_LOCAL_JERSEY_VERIFY_HOSTNAME
 #STROOM_PROXY_LOCAL_RECEIPT_POLICY_UUID - commented out as rulesets are not ready for use
-STROOM_PROXY_LOCAL_STORING_ENABLED
 #STROOM_PROXY_LOCAL_SYNC_API_KEY - commented out as rulesets are not ready for use
 #STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL - commented out as rulesets are not ready for use
 #STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL - commented out as rulesets are not ready for use
 STROOM_STATS_DB_HOST
 STROOM_STATS_DB_PASSWORD
 
+# Relax security for when the stack is running with the default certs
+STROOM_PROXY_LOCAL_JERSEY_VERIFY_HOSTNAME=false
 
-# vim: set filetype=conf:
+
+# vim: set filetype=sh:
