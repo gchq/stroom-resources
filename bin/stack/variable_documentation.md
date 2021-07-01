@@ -187,7 +187,7 @@ True if stroom-proxy should forward data on to a downstream stroom or
 stroom-proxy instance. Typically this will be false for a local proxy, i.e. one
 that is co-located with stroom.
 
-## STROOM_PROXY_LOCAL_JERSEY_VERIFY_HOSTNAME
+## STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME
 
 True if stroom-proxy should verify the hostname against the server certificate
 when making API call, e.g. when checking the feed receipt status.

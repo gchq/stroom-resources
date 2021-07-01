@@ -41,7 +41,7 @@ STROOM_STATS_DB_HOST
 STROOM_STATS_DB_PASSWORD
 
 # Relax security for when the stack is running with the default certs
-STROOM_PROXY_LOCAL_JERSEY_VERIFY_HOSTNAME=false
+STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME=false
 
 # Allow proxy to authenticate with no token for testing
 # This entry in the env file will be edited by the CI build
