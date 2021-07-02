@@ -16,4 +16,4 @@ STROOM_STATS_ADVERTISED_HOST_OR_IP
 STROOM_STATS_DOCKER_REPO
 ZOOKEEPER_QUORUM
 
-# vim: set filetype=conf:
+# vim: set filetype=sh:

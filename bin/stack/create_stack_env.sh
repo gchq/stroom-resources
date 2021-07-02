@@ -4,6 +4,26 @@
 # including the default values. This can be used to make sure the 
 # configuration is always complete.
 
+# The YAML may contain something like 
+# - ENV_VAR_X=${ENV_VAR_Y:-some_default_value}
+
+# If overrides.env contains
+# ENV_VAR_Y=value_a
+# Then the YAML will ve modified to
+# - ENV_VAR_X=${ENV_VAR_Y:-value_a}
+
+# If env_vars_whitelist.txt contains
+# ENV_VAR_Y
+# Then the YAML is not changed but the following is added to
+# the stack env file (using the YAML default value)
+# ENV_VAR_Y=some_default_value
+
+# If env_vars_whitelist.txt contains
+# ENV_VAR_Y=value_b
+# Then the YAML is not changed but the following is added to
+# the stack env file (using the provided value)
+# ENV_VAR_Y=value_b
+
 set -e
 
 # shellcheck disable=SC1091
@@ -123,7 +143,6 @@ replace_in_yaml() {
 
   #echo "${regex}"
 
-  # TODO look in each file for the regex
   for yaml_file in "${WORKING_DIRECTORY}"/*.yml; do
     if grep -E --silent "${regex}" "${yaml_file}"; then
       echo -e "  Overriding the value of ${YELLOW}${var_name}${NC} to" \
@@ -157,7 +176,7 @@ apply_overrides_to_yaml() {
       # Check this override variable is not in the whitelist as if we are
       # overriding then having the env var in the env file will have no
       # effect.
-      if element_in "${var_name}" "${env_vars_whitelist[@]}"; then
+      if element_in "${var_name}" "${!env_vars_whitelist[@]}"; then
         die "${RED}ERROR${NC}: Variable ${YELLOW}${var_name}${NC} cannot" \
           "be both white-listed and overridden"
       fi
@@ -191,16 +210,29 @@ add_env_vars() {
   # Associative array to hold all env vars:  var_name => var_value
   declare -A all_output_env_vars
 
-  # Read the volume whitelist into an array
-  local env_vars_whitelist=()
+  # Associative array to hold whitelisted keys and values if they have them
+  declare -A  env_vars_whitelist
+
   if [ -f "${WHITELIST_FILE}" ]; then
-    while read -r env_var_name; do
-      if [[ ! "${env_var_name}" =~ ^[[:space:]]*(#.*)?$ ]]; then
-        env_vars_whitelist+=("${env_var_name}")
-        #echo "[${env_var_name}]"
+    while read -r whitelist_line; do
+      if [[ ! "${whitelist_line}" =~ ^[[:space:]]*(#.*)?$ ]]; then
+        local var_name
+        local var_value
+        if [[ "${whitelist_line}" =~ ^[A-Z0-9_]+=.*$ ]]; then
+          # e.g. SOME_VAR=some_value
+          var_name="${whitelist_line%%=*}"
+          var_value="${whitelist_line#*=}"
+        else
+          # e.g. SOME_VAR
+          var_name="${whitelist_line}"
+          var_value=""
+        fi
+        #echo "${var_name}: [${var_value}]"
+        env_vars_whitelist["${var_name}"]="${var_value}"
+        #echo "[${whitelist_line}]"
         # Initialise the couter at zero for each whitelisted env var name
         # so we can track if any are not used
-        whitelisted_use_counters[${env_var_name}]=0
+        whitelisted_use_counters[${var_name}]=0
       fi
     done < "${WHITELIST_FILE}"
 
@@ -219,7 +251,7 @@ add_env_vars() {
   # and from lines like those we want to extract/transform to
   # STROOM_DB_HOST="$HOST_IP"
   # STROOM_DB_PORT="3307"
-  all_env_vars=$( \
+  all_yaml_env_vars=$( \
     # ignore commented lines
     grep --no-filename -v '^\s*#' "${WORKING_DIRECTORY}"/*.yml |
       # Extracts the params
@@ -239,7 +271,9 @@ add_env_vars() {
   # Loop over all env vars found in the yaml
   while read -r env_var_name_value; do
     local var_name="${env_var_name_value%%=*}"
-    local var_value="${env_var_name_value#*=}"
+    local yaml_var_value="${env_var_name_value#*=}"
+    local var_value="${yaml_var_value}"
+    #echo "${var_name}: [${yaml_var_value}]"
 
     # this bit of code keeps a count of the times we have seen each env
     # var, so we can warn about ones seen multiple times but not whitelisted
@@ -260,28 +294,34 @@ add_env_vars() {
     #echo "${last_var_name}: ${last_var_value}"
     if [ "${var_name}" == "${last_var_name}" ]; then
       # Seen it already
-      if [ "${var_value}" != "${last_var_value}" ]; then
+      if [ "${yaml_var_value}" != "${last_var_value}" ]; then
 				die "${RED}  Error${NC}:" \
           "Environment variable ${YELLOW}${var_name}${NC} has multiple values," \
-          "${BLUE}${last_var_value}${NC} and ${BLUE}${var_value}${NC}"
+          "${BLUE}${last_var_value}${NC} and ${BLUE}${yaml_var_value}${NC}"
       fi
     else
       # Not seen this var before.
       # Now add the env var to the env file if we don't have a whitelist file
       # or it is white-listed
       if [ "${use_whitelist}" = "false" ] \
-        || element_in "${var_name}" "${env_vars_whitelist[@]}"; then
+        || element_in "${var_name}" "${!env_vars_whitelist[@]}"; then
+
+        local whitelist_val="${env_vars_whitelist["${var_name}"]}"
+
+        if [[ -n "${whitelist_val}" ]]; then
+          var_value="${whitelist_val}"
+        fi
 
         echo -e "  ${YELLOW}${var_name}${NC}=${BLUE}${var_value}${NC}"
 
-        # Add the env var to our assoc. array
+        # Add the env var to our associative array
         whitelisted_output_env_vars["${var_name}"]="${var_value}"
       fi
       # Add all env vars to the 'all' array
       all_output_env_vars["${var_name}"]="${var_value}"
     fi
     last_var_name="${var_name}"
-    last_var_value="${var_value}"
+    last_var_value="${yaml_var_value}"
 
     # You may have bits in the yaml like:
     # STROOM_JDBC_DRIVER_URL=jdbc:mysql://${STROOM_DB_HOST:-$HOST_IP}
@@ -296,7 +336,7 @@ add_env_vars() {
           "a substitution variable but isn't white-listed."
 			fi
     fi
-  done <<< "${all_env_vars}"
+  done <<< "${all_yaml_env_vars}"
 
   # Read the varaible docs file into an assoc. array keyed on the env var
   # name.  Each line of the docs is prefixed with a comment char.

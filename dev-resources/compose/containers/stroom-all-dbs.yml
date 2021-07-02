@@ -3,10 +3,6 @@ version: '2.4'
 services: 
 
   stroom-all-dbs:
-    # NB: stroom-auth uses a MySQL testcontainer (https://www.testcontainers.org/). This allows the 
-    # integration tests to run without an external database, i.e. without stroom-resources. 
-    # But this does mean that if you change the MySQL version _here_ you should also change it _there_:
-    # https://github.com/gchq/stroom-auth/blob/master/stroom-auth-svc/src/integration-test/java/stroom/auth/service/resources/support/Database_IT.java#L35
     image: "${MYSQL_DOCKER_REPO:-mysql}:${MYSQL_TAG:-8.0.23}"
     container_name: stroom-all-dbs
     ports:
@@ -38,6 +34,7 @@ services:
         hard: 40000
 
     volumes:
+        # Note this is a bind mount on a file so will bind to the inode of the file, not the name
       - ${MYSQL_VOLUME_CONF_FILE:-../volumes/stroom-all-dbs/conf/stroom-all-dbs.cnf}:/etc/mysql/conf.d/stroom-all-dbs.cnf:ro
       - ${MYSQL_VOLUME_INIT:-../volumes/stroom-all-dbs/init}:/docker-entrypoint-initdb.d:ro
       - type: volume

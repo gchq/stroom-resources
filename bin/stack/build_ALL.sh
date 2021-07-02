@@ -51,6 +51,7 @@ main() {
   for stack_name in ${stack_names}; do
     build_stack "${stack_name}" "$@"
   done
+  echo -e "${GREEN}Complete${NC}"
 }
 
 main "$@"

@@ -305,7 +305,7 @@ test_stack() {
   echo -e "services_count:            [${GREEN}${services_count}${NC}]"
 
   local env_file="config/${stack_name}.env"
-  if ! grep -q "USE_DEFAULT_OPEN_ID_CREDENTIALS" "${env_file}"; then
+  if ! grep -q -E "USE_DEFAULT_OPEN_ID_CREDENTIALS=\"?true\"?" "${env_file}"; then
     # In order for the stack to start up cleanly and for the health
     # check not fail we need to run with hard coded insecure open id creds.
     # Some stacks already have this set, i.e. the -test stacks.
