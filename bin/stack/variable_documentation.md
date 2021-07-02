@@ -265,7 +265,7 @@ format.
 
 The URL that data should be forwarded to, e.g. a downstream stroom or stroom-proxy.
 
-## STROOM_PROXY_REMOTE_JERSEY_VERIFY_HOSTNAME
+## STROOM_PROXY_REMOTE_REST_CLIENT_VERIFY_HOSTNAME
 
 True if stroom-proxy should verify the hostname against the server certificate
 when making API call, e.g. when checking the feed receipt status.
