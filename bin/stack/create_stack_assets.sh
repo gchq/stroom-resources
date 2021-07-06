@@ -65,6 +65,36 @@ download_file() {
   fi
 }
 
+download_stroom_docs() {
+
+  local docs_version
+  # get the highest version number of the stroom-docs releases
+  docs_version="$( \
+    http https://api.github.com/repos/gchq/stroom-docs/releases \
+    | jq -r '[.[]][].tag_name | split("v")[1]' \
+    | sort \
+    | tail -1)"
+
+  local stroom_docs_releases_base="https://github.com/gchq/stroom-docs/releases/download"
+  stroom_docs_releases_base="${stroom_docs_releases_base}/stroom-docs-v${docs_version}"
+
+  local dest_dir="${VOLUMES_DIRECTORY}/nginx/html/docs"
+
+  mkdir -p "${dest_dir}"
+
+  local zip_filename="stroom-docs-v${docs_version}.zip"
+  local zip_file="${dest_dir}/${zip_filename}"
+
+  download_file \
+    "${dest_dir}" \
+    "${stroom_docs_releases_base}" \
+    "${zip_filename}"
+
+  unzip -qq -d "${dest_dir}" "${zip_file}"
+
+  rm "${zip_file}"
+}
+
 copy_file_to_dir() {
   local -r src=$1
   local -r dest_dir=$2
@@ -319,6 +349,9 @@ main() {
     copy_file_to_dir \
       "${SRC_NGINX_HTML_DIRECTORY}/index.html" \
       "${DEST_NGINX_HTML_DIRECTORY}"
+
+    # Donload the latest stroom-docs zip and unpack it in volumes/nginx/html
+    download_stroom_docs
   fi
 
   #############################
