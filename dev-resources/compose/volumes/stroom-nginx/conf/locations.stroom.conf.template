@@ -4,12 +4,6 @@
 # ROUTING FOR SERVICES #
 ########################
 
-# Routing for the stroom-docs content (if available)
-location /docs/ {
-    include location_defaults.conf;
-    include mime.types;
-}
-
 # datafeed direct into stroom with no prxoy aggregation
 location /stroom/datafeeddirect/ {
     proxy_pass http://stroom_upstream/stroom/noauth/datafeed/;
