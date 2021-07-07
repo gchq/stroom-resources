@@ -70,10 +70,13 @@ download_stroom_docs() {
 
   # DO NOT echo this variable
   if [[ -n "${GH_PERSONAL_ACCESS_TOKEN}" ]]; then
-    echo -e "${GREEN}Making authenticated Github API request${NC}"
+    echo -e "    Making authenticated Github API request"
     extra_curl_args=( \
       "-u" \
       "username:${GH_PERSONAL_ACCESS_TOKEN}" )
+  else
+    echo -e "    GH_PERSONAL_ACCESS_TOKEN not set, making un-authenticated" \
+      "Github API request (will be subject to rate limiting)"
   fi
 
   local docs_version
