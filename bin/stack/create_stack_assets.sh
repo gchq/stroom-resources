@@ -66,11 +66,21 @@ download_file() {
 }
 
 download_stroom_docs() {
+  local extra_curl_args=()
+
+  # DO NOT echo this variable
+  if [[ -n "${GH_PERSONAL_ACCESS_TOKEN}" ]]; then
+    echo -e "${GREEN}Making authenticated Github API request${NC}"
+    extra_curl_args=( \
+      "-u" \
+      "username:${GH_PERSONAL_ACCESS_TOKEN}" )
+  fi
 
   local docs_version
   # get the highest version number of the stroom-docs releases
   docs_version="$( \
     curl \
+      "${extra_curl_args[@]}" \
       --silent \
       --location \
       https://api.github.com/repos/gchq/stroom-docs/releases \
