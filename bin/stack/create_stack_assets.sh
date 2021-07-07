@@ -70,7 +70,10 @@ download_stroom_docs() {
   local docs_version
   # get the highest version number of the stroom-docs releases
   docs_version="$( \
-    http https://api.github.com/repos/gchq/stroom-docs/releases \
+    curl \
+      --silent \
+      --location \
+      https://api.github.com/repos/gchq/stroom-docs/releases \
     | jq -r '[.[]][].tag_name | split("v")[1]' \
     | sort \
     | tail -1)"
@@ -90,7 +93,10 @@ download_stroom_docs() {
     "${stroom_docs_releases_base}" \
     "${zip_filename}"
 
-  unzip -qq -d "${dest_dir}" "${zip_file}"
+  unzip \
+    -qq \
+    -d "${dest_dir}" \
+    "${zip_file}"
 
   rm "${zip_file}"
 }
