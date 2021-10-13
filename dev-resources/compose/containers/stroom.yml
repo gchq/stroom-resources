@@ -57,6 +57,9 @@ services:
         source: stroom_search_results
         target: /stroom/search_results
       - type: volume
+        source: stroom_lmdb_library
+        target: /stroom/lmdb_library
+      - type: volume
         source: stroom_volumes
         target: /stroom/volumes
     logging:
@@ -70,6 +73,7 @@ services:
     command: ./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}
 volumes:
   stroom_content_pack_import:
+  stroom_lmdb_library:
   stroom_logs:
   stroom_output:
   stroom_reference_data:
