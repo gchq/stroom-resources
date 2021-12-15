@@ -211,6 +211,7 @@ determineHostAddress() {
 
     # This is used by the docker-compose YML files, so they can tell a browser where to go
     export STROOM_RESOURCES_ADVERTISED_HOST="${ip}"
+    export HOST_IP="${ip}"
     echo
 }
 
