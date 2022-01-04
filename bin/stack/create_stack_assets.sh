@@ -220,6 +220,7 @@ main() {
   local -r SEND_TO_STROOM_URL_BASE="https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}"
 
   local -r STROOM_RELEASES_BASE="https://github.com/gchq/stroom/releases/download/${STROOM_TAG}"
+  local -r STROOM_RAW_CONTENT_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_TAG}"
   local -r STROOM_CONFIG_YAML_URL_FILENAME="stroom-app-config-${STROOM_TAG}.yml"
   local -r STROOM_CONFIG_DEFAULTS_YAML_URL_FILENAME="stroom-app-config-defaults-${STROOM_TAG}.yml"
   local -r STROOM_CONFIG_SCHEMA_YAML_URL_FILENAME="stroom-app-config-schema-${STROOM_TAG}.yml"
@@ -453,6 +454,7 @@ main() {
   if element_in "stroom-all-dbs" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} config file"
     local -r DEST_STROOM_ALL_DBS_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-all-dbs/conf"
+    local -r DEST_SCRIPTS_DIRECTORY="${WORKING_DIRECTORY}/scripts"
     copy_file_to_dir "${SRC_STROOM_ALL_DBS_CONF_FILE}" "${DEST_STROOM_ALL_DBS_CONF_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} init files"
@@ -463,6 +465,20 @@ main() {
     copy_file_to_dir \
       "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom/001_create_databases.sql.template" \
       "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom"
+
+    local -r SCRIPTS_BASE_URL="${STROOM_RAW_CONTENT_BASE}/scripts"
+    download_file \
+      "${DEST_SCRIPTS_DIRECTORY}" \
+      "${SCRIPTS_BASE_URL}" \
+      "v7_auth_db_table_rename.sql"
+    download_file \
+      "${DEST_SCRIPTS_DIRECTORY}" \
+      "${SCRIPTS_BASE_URL}" \
+      "v7_db_pre_migration_checks.sql"
+    download_file \
+      "${DEST_SCRIPTS_DIRECTORY}" \
+      "${SCRIPTS_BASE_URL}" \
+      "v7_drop_unused_databases.sql"
   fi
 
   ############
