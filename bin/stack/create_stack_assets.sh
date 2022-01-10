@@ -466,19 +466,24 @@ main() {
       "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom/001_create_databases.sql.template" \
       "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom"
 
-    local -r SCRIPTS_BASE_URL="${STROOM_RAW_CONTENT_BASE}/scripts"
-    download_file \
-      "${DEST_SCRIPTS_DIRECTORY}" \
-      "${SCRIPTS_BASE_URL}" \
-      "v7_auth_db_table_rename.sql"
-    download_file \
-      "${DEST_SCRIPTS_DIRECTORY}" \
-      "${SCRIPTS_BASE_URL}" \
-      "v7_db_pre_migration_checks.sql"
-    download_file \
-      "${DEST_SCRIPTS_DIRECTORY}" \
-      "${SCRIPTS_BASE_URL}" \
-      "v7_drop_unused_databases.sql"
+
+    if [[ ! "${STROOM_TAG}" =~ local-SNAPSHOT ]]; then
+      local -r SCRIPTS_BASE_URL="${STROOM_RAW_CONTENT_BASE}/scripts"
+      download_file \
+        "${DEST_SCRIPTS_DIRECTORY}" \
+        "${SCRIPTS_BASE_URL}" \
+        "v7_auth_db_table_rename.sql"
+      download_file \
+        "${DEST_SCRIPTS_DIRECTORY}" \
+        "${SCRIPTS_BASE_URL}" \
+        "v7_db_pre_migration_checks.sql"
+      download_file \
+        "${DEST_SCRIPTS_DIRECTORY}" \
+        "${SCRIPTS_BASE_URL}" \
+        "v7_drop_unused_databases.sql"
+    else
+      echo -e "  ${RED}WARNING${NC}: Skipping download of DB migration scripts as this is a SNAPSHOT version"
+    fi
   fi
 
   ############
