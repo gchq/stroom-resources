@@ -19,7 +19,7 @@ services:
       - FORWARDING_TRUSTSTORE_TYPE=${STROOM_PROXY_REMOTE_FORWARDING_TRUSTSTORE_TYPE:-JKS}
       - FORWARDING_HOST_VERIFICATION_ENABLED=${STROOM_PROXY_REMOTE_FORWARDING_HOST_VERIFICATION_ENABLED:-true}
       - FORWARD_URL=${STROOM_PROXY_REMOTE_FORWARD_URL:-https://nginx/stroom/datafeed}
-      - JAVA_OPTS=${STROOM_PROXY_REMOTE_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10767,suspend=n }
+      - JAVA_OPTS=${STROOM_PROXY_REMOTE_JAVA_OPTS:- -Xms50m -Xmx1024m --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10767,suspend=n }
       # Ruleset functionality not ready for use in v6
       #- RECEIPT_POLICY_UUID=${STROOM_PROXY_REMOTE_RECEIPT_POLICY_UUID:-}
       - STORING_ENABLED=${STROOM_PROXY_REMOTE_STORING_ENABLED:-true}

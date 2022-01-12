@@ -7,7 +7,7 @@ services:
     environment:
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
-      - JAVA_OPTS=${STROOM_STATS_JAVA_OPTS:- -Xms50m -Xmx1024m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10768,suspend=n }
+      - JAVA_OPTS=${STROOM_STATS_JAVA_OPTS:- -Xms50m -Xmx1024m --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=10768,suspend=n }
       # At the moment, stroom-stats gets it document entities from the stroom DB, not the 'stats' DB.
       # The 'stats' DB contains legacy SQL stats tables only
       - STATS_DB_USER=${STROOM_DB_USERNAME:-stroomuser}
