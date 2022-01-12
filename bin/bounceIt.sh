@@ -71,6 +71,13 @@ run_docker_compose_cmd() {
         compose_file_args+=( "-f" "${yaml_file}" )
     done
 
+    if [[ "${isDebugModeEnabled}" = true ]]; then
+        echo -e "${DGREY}docker-compose" \
+            "--project-name ${COMPOSE_PROJECT_NAME}" \
+            "${compose_file_args[*]}" \
+            "${*}${NC}"
+    fi
+
     docker-compose \
         --project-name "${COMPOSE_PROJECT_NAME}" \
         "${compose_file_args[@]}" \

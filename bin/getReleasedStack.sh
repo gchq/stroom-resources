@@ -72,9 +72,12 @@ main(){
 
     # Use FZF to select the file to download
     local file
+    local tag_url="https://api.github.com/repos/gchq/stroom-resources/releases/tags/${tag}"
+
+    #echo "${tag_url}"
     file=$( \
-        http https://api.github.com/repos/gchq/stroom-resources/releases/tags/"${tag}" | 
-        jq -r '.assets[] | select(.content_type == "application/gzip") | .name' |
+        http "${tag_url}" | 
+        jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .name' |
         sort |
         fzf --border --header="Select the stack variant to download" --height=15)
 

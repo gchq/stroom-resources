@@ -47,6 +47,9 @@ http {
         # Include location configuration specific to proxy
         include locations.proxy.conf;
 
+        # Include location configuration specific to the stroom-docs documentation
+        include locations.docs.conf;
+
         # ########### IF_development-only_IN_STACK ###########
         # This conditional block will be removed in a stack release
         # as development-only is not a valid service

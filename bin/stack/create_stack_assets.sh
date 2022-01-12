@@ -65,6 +65,55 @@ download_file() {
   fi
 }
 
+download_stroom_docs() {
+  local extra_curl_args=()
+
+  # DO NOT echo this variable
+  if [[ -n "${GH_PERSONAL_ACCESS_TOKEN}" ]]; then
+    echo -e "    Making authenticated Github API request"
+    extra_curl_args=( \
+      "-u" \
+      "username:${GH_PERSONAL_ACCESS_TOKEN}" )
+  else
+    echo -e "    GH_PERSONAL_ACCESS_TOKEN not set, making un-authenticated" \
+      "Github API request (will be subject to rate limiting)"
+  fi
+
+  local docs_version
+  # get the highest version number of the stroom-docs releases
+  docs_version="$( \
+    curl \
+      "${extra_curl_args[@]}" \
+      --silent \
+      --location \
+      https://api.github.com/repos/gchq/stroom-docs/releases \
+    | jq -r '[.[]][].tag_name | split("v")[1]' \
+    | sort \
+    | tail -1)"
+
+  local stroom_docs_releases_base="https://github.com/gchq/stroom-docs/releases/download"
+  stroom_docs_releases_base="${stroom_docs_releases_base}/stroom-docs-v${docs_version}"
+
+  local dest_dir="${VOLUMES_DIRECTORY}/nginx/html/docs"
+
+  mkdir -p "${dest_dir}"
+
+  local zip_filename="stroom-docs-v${docs_version}.zip"
+  local zip_file="${dest_dir}/${zip_filename}"
+
+  download_file \
+    "${dest_dir}" \
+    "${stroom_docs_releases_base}" \
+    "${zip_filename}"
+
+  unzip \
+    -qq \
+    -d "${dest_dir}" \
+    "${zip_file}"
+
+  rm "${zip_file}"
+}
+
 copy_file_to_dir() {
   local -r src=$1
   local -r dest_dir=$2
@@ -171,6 +220,7 @@ main() {
   local -r SEND_TO_STROOM_URL_BASE="https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}"
 
   local -r STROOM_RELEASES_BASE="https://github.com/gchq/stroom/releases/download/${STROOM_TAG}"
+  local -r STROOM_RAW_CONTENT_BASE="https://raw.githubusercontent.com/gchq/stroom/${STROOM_TAG}"
   local -r STROOM_CONFIG_YAML_URL_FILENAME="stroom-app-config-${STROOM_TAG}.yml"
   local -r STROOM_CONFIG_DEFAULTS_YAML_URL_FILENAME="stroom-app-config-defaults-${STROOM_TAG}.yml"
   local -r STROOM_CONFIG_SCHEMA_YAML_URL_FILENAME="stroom-app-config-schema-${STROOM_TAG}.yml"
@@ -319,6 +369,9 @@ main() {
     copy_file_to_dir \
       "${SRC_NGINX_HTML_DIRECTORY}/index.html" \
       "${DEST_NGINX_HTML_DIRECTORY}"
+
+    # Donload the latest stroom-docs zip and unpack it in volumes/nginx/html
+    download_stroom_docs
   fi
 
   #############################
@@ -401,6 +454,7 @@ main() {
   if element_in "stroom-all-dbs" "${services[@]}"; then
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} config file"
     local -r DEST_STROOM_ALL_DBS_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-all-dbs/conf"
+    local -r DEST_SCRIPTS_DIRECTORY="${WORKING_DIRECTORY}/scripts"
     copy_file_to_dir "${SRC_STROOM_ALL_DBS_CONF_FILE}" "${DEST_STROOM_ALL_DBS_CONF_DIRECTORY}"
 
     echo -e "  Copying ${YELLOW}stroom-all-dbs${NC} init files"
@@ -411,6 +465,25 @@ main() {
     copy_file_to_dir \
       "${SRC_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom/001_create_databases.sql.template" \
       "${DEST_STROOM_ALL_DBS_INIT_DIRECTORY}/stroom"
+
+
+    if [[ ! "${STROOM_TAG}" =~ local-SNAPSHOT ]]; then
+      local -r SCRIPTS_BASE_URL="${STROOM_RAW_CONTENT_BASE}/scripts"
+      download_file \
+        "${DEST_SCRIPTS_DIRECTORY}" \
+        "${SCRIPTS_BASE_URL}" \
+        "v7_auth_db_table_rename.sql"
+      download_file \
+        "${DEST_SCRIPTS_DIRECTORY}" \
+        "${SCRIPTS_BASE_URL}" \
+        "v7_db_pre_migration_checks.sql"
+      download_file \
+        "${DEST_SCRIPTS_DIRECTORY}" \
+        "${SCRIPTS_BASE_URL}" \
+        "v7_drop_unused_databases.sql"
+    else
+      echo -e "  ${RED}WARNING${NC}: Skipping download of DB migration scripts as this is a SNAPSHOT version"
+    fi
   fi
 
   ############
