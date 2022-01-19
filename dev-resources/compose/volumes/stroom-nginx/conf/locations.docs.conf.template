@@ -1,0 +1,17 @@
+# Configuration for static documentation served by nginx
+
+# Routing for the stroom-docs content (if available)
+
+# Prefix match
+location /docs/ {
+    include location_defaults.conf;
+    include mime.types;
+}
+
+# Exact match
+location = /docs {
+    include location_defaults.conf;
+    include mime.types;
+}
+
+# vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:

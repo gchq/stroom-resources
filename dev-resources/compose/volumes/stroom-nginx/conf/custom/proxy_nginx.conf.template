@@ -31,6 +31,9 @@ http {
 
         # Include location configuration specific to proxy
         include locations.proxy.conf;
+
+        # Include location configuration specific to the stroom-docs documentation
+        include locations.docs.conf;
     }
 }
 
