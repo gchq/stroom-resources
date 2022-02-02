@@ -95,7 +95,7 @@ download_stroom_docs() {
   local zip_filename="${tag}_stroom-${STROOM_DOCS_STROOM_VERSION}.zip"
   local stroom_docs_releases_base="https://github.com/gchq/stroom-docs/releases/download"
   stroom_docs_releases_base+="/${tag}"
-  local dest_dir="${VOLUMES_DIRECTORY}/nginx/html/docs"
+  local dest_dir="${VOLUMES_DIRECTORY}/nginx/html/stroom-docs"
   local zip_file="${dest_dir}/${zip_filename}"
 
   mkdir -p "${dest_dir}"
