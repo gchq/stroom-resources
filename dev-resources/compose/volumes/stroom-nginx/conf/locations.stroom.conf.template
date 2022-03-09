@@ -1,8 +1,10 @@
 # Server configuration for stroom
 
+
 ########################
 # ROUTING FOR SERVICES #
 ########################
+
 
 # datafeed direct into stroom with no prxoy aggregation
 location /stroom/datafeeddirect/ {
@@ -21,10 +23,21 @@ location ~ .*/clustercall.rpc$ {
     deny all;
 }
 
+# Web socket path for dashboard queries
+location /active-queries-ws {
+    proxy_set_header    Upgrade $http_upgrade;
+    proxy_set_header    Connection "upgrade";
+    proxy_http_version  1.1;
+
+    proxy_pass http://stroom_upstream_sticky/active-queries-ws;
+    include location_defaults.conf;
+}
+
 # By default everything gets reverse-proxied to stroom.
 location / {
     proxy_pass http://stroom_upstream_sticky/;
     include location_defaults.conf;
 }
+
 
 # vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:
