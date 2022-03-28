@@ -24,12 +24,12 @@ location ~ .*/clustercall.rpc$ {
 }
 
 # Web socket path for dashboard queries
-location /active-queries-ws {
+location /web-socket/ {
     proxy_set_header    Upgrade $http_upgrade;
     proxy_set_header    Connection "upgrade";
     proxy_http_version  1.1;
 
-    proxy_pass http://stroom_upstream_sticky/active-queries-ws;
+    proxy_pass http://stroom_upstream_sticky/web-socket/;
     include location_defaults.conf;
 }
 
