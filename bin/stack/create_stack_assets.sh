@@ -79,31 +79,27 @@ download_stroom_docs() {
       "Github API request (will be subject to rate limiting)"
   fi
 
-  local docs_version
+  local zip_url
   # get the highest version number of the stroom-docs releases
-  docs_version="$( \
+  zip_url="$( \
     curl \
       "${extra_curl_args[@]}" \
       --silent \
       --location \
-      https://api.github.com/repos/gchq/stroom-docs/releases \
-    | jq -r '[.[]][].tag_name | split("v")[1]' \
-    | sort \
+      https://api.github.com/repos/gchq/stroom-docs/releases/latest \
+      | jq -r ".assets[] | select(.name | test(\"^stroom-docs-.*_stroom-.*${STROOM_DOCS_STROOM_VERSION}\\\\.zip$\")) .browser_download_url" \
     | tail -1)"
 
-  local stroom_docs_releases_base="https://github.com/gchq/stroom-docs/releases/download"
-  stroom_docs_releases_base="${stroom_docs_releases_base}/stroom-docs-v${docs_version}"
-
-  local dest_dir="${VOLUMES_DIRECTORY}/nginx/html/docs"
+  local zip_url_base="${zip_url%/*}" # remove last / and onwards
+  local zip_filename="${zip_url##*/}" # remove up to and including last /
+  local dest_dir="${VOLUMES_DIRECTORY}/nginx/html/stroom-docs"
+  local zip_file="${dest_dir}/${zip_filename}"
 
   mkdir -p "${dest_dir}"
 
-  local zip_filename="stroom-docs-v${docs_version}.zip"
-  local zip_file="${dest_dir}/${zip_filename}"
-
   download_file \
     "${dest_dir}" \
-    "${stroom_docs_releases_base}" \
+    "${zip_url_base}" \
     "${zip_filename}"
 
   unzip \
@@ -203,6 +199,7 @@ main() {
   local -r BUILD_STACK_NAME=$1
   local -r VERSION=$2
   local -r services=( "${@:3}" )
+  local -r STROOM_DOCS_STROOM_VERSION="7.0"
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}"
   local -r VOLUMES_DIRECTORY="${WORKING_DIRECTORY}/volumes"

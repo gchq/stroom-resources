@@ -484,7 +484,12 @@ if $requireLatestImageCheck && [[ "${composeCmd}" =~ ${CMDS_FOR_IMAGE_CHECK} ]] 
                 #if a user wants refreshed images from dockerhub then they should delete their containers first
                 #using the dockerTidyUp script or similar
                 existingContainerId="$( \
-                    run_docker_compose_cmd ps -q "${serviceName}"
+                    run_docker_compose_cmd \
+                        ps \
+                        -q \
+                        "${serviceName}" \
+                        2>/dev/null \
+                    || echo ""
                 )"
                 if [ "x" = "${existingContainerId}x" ]; then
                     #no existing container so do a pull to check for updates

@@ -3,13 +3,13 @@
 # Routing for the stroom-docs content (if available)
 
 # Prefix match
-location /docs/ {
+location /stroom-docs/ {
     include location_defaults.conf;
     include mime.types;
 }
 
 # Exact match
-location = /docs {
+location = /stroom-docs {
     include location_defaults.conf;
     include mime.types;
 }
