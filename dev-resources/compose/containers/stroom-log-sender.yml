@@ -23,14 +23,16 @@ services:
         # The base path for all stroom stats logs
       - STROOM_STATS_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_STATS_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom-stats}
         # The default regex used to identify log files ready to send
-        # Supposedly any '$' symbols must be escaped to '$$' however, it seems to work with one.
-        # See https://docs.docker.com/compose/compose-file/#variable-substitution
         # It really doesn't like braces so have just had to do [0-9]+ rather than [0-9]{4}
         # Check what gets written to container.env inside the container to be sure
-      - DEFAULT_FILE_REGEX=${STROOM_LOG_SENDER_DEFAULT_FILE_REGEX:-.*/[a-z]+-[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+\.log(\.gz)?$}
+        # Ideally the regex should have a '$' at the end of it but that would need to be escaped as '$$'
+        # however in some dev environments that carries through to bash as '$$' which bash resolves
+        # as the pid, making the regex match nothing.
+        # See https://docs.docker.com/compose/compose-file/#variable-substitution
+      - DEFAULT_FILE_REGEX=${STROOM_LOG_SENDER_DEFAULT_FILE_REGEX:-.*/[a-z]+-[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+\.log(\.gz)?}
         # Regex for logrotate dated files, e.g. access.log-20181130-1543576470.gz
-        # See above about escaping
-      - LOGROTATE_DATED_REGEX=${STROOM_LOG_SENDER_LOGROTATE_DATED_REGEX:-.*/[a-z]+\.log-[0-9]+-[0-9]+(\.gz)?$}
+        # See above about escaping $
+      - LOGROTATE_DATED_REGEX=${STROOM_LOG_SENDER_LOGROTATE_DATED_REGEX:-.*/[a-z]+\.log-[0-9]+-[0-9]+(\.gz)?}
         # The environment, e.g. DEV/REF/OPS
       - DEFAULT_ENVIRONMENT=${STROOM_LOG_SENDER_DEFAULT_ENVIRONMENT:-DEV}
         # The maximum random delay in secs to wait to balance network load
