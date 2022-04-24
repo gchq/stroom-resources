@@ -25,7 +25,8 @@ log_format stroom_combined_format
     '$status '
     '$body_bytes_sent '
     '"$http_referer" '
-    '"$http_user_agent" ';
+    '"$http_user_agent" '
+    '"$upstream_cache_status" ';
 
 # stdout/stderr logging for use with 'docker logs'
 access_log /var/log/nginx/access.log stroom_combined_format;

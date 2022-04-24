@@ -394,6 +394,9 @@ main() {
     copy_file_to_dir \
       "${SRC_NGINX_HTML_DIRECTORY}/index.html" \
       "${DEST_NGINX_HTML_DIRECTORY}"
+    copy_file_to_dir \
+      "${SRC_NGINX_HTML_DIRECTORY}/favicon.ico" \
+      "${DEST_NGINX_HTML_DIRECTORY}"
   fi
 
   #############################

@@ -35,6 +35,9 @@ VOLUME [ "/stroom-nginx/logs" ]
 # Volume to hold any state/config for logrotate
 VOLUME [ "/stroom-nginx/logrotate" ]
 
+# Volume to hold any cache data
+VOLUME [ "/var/nginx/cache" ]
+
 # run entrypoint script inside tini for better unix process handling, 
 # see https://github.com/krallin/tini/issues/8
 ENTRYPOINT ["/sbin/tini", "--", "/stroom-nginx/docker-entrypoint.sh"]

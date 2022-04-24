@@ -17,27 +17,51 @@ location /api/auth/ {
 # Some of them are mapped to more helpful locations, as above, but really 
 # should be non-root. E.g. passwordReset is root, so we need this location.
 location /authui {
+    #add_header                  location-debug authui;
     proxy_pass https://auth_ui_upstream;
+
+    # Enable caching for the static ui content, caching requires buffering
+    include cache_defaults.conf;
 }
 
 # The following routes mount stroom-ui onto this server. These paths catch
 # everything that should go to the UI.
 
-# This allows stroom-ui to get its conf# This allows stroom-ui to get its config.ig.
-location /config.json {
-    proxy_pass https://auth_ui_upstream/config.json;
+# This allows stroom-ui to get its config.
+location ~* ^/(:?config|manifest).json$ {
+    #add_header                  location-debug auth_config-manifest;
+    proxy_pass https://auth_ui_upstream/$1.json;
+
+    # Enable caching for the static ui content, caching requires buffering
+    include cache_defaults.conf;
 }
 
 # This allows stroom-ui to get its assets, e.g. css and images.
 location /static {
+    #add_header                  location-debug auth_static;
     proxy_pass https://auth_ui_upstream/static;
+
+    # Enable caching for the static ui content, caching requires buffering
+    include cache_defaults.conf;
 }
 
 # This is the path where all non-chrome pages are hosted,
 # i.e. all the normal functionality but without the chrome (navigation, footer).
 location /s {
+    #add_header                  location-debug auth_s;
     include location_defaults.conf;
     proxy_pass https://auth_ui_upstream/s;
+
+    # Use response buffering and caching
+    include cache_defaults.conf;
+
+    # Don't cache unless we match on the file type
+    set $no_cache "1";
+    if ($request_uri ~* \.(:?ico|css|js|gif|jpe?g|png|woff|woff2|eot|svg|ttf|webp)$) {
+      set $no_cache "0";
+    }
+    # Don't cache proxy response if $no_cache is non-zero
+    proxy_no_cache $no_cache;
 }
 
 # vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:

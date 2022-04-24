@@ -27,22 +27,42 @@ location /api/ {
 ##################
 
 location = / {
+    #add_header                  location-debug stroom_root;
     return 302 https://<<<NGINX_ADVERTISED_HOST>>>/stroom/ui;
 }
 
 # This is an exact match that directs '/stroom' to the Stroom UI...
-location ~ /stroom$ {
+location ~ ^/stroom$ {
+    #add_header                  location-debug stroom_stroom-exact;
     return 302 https://<<<NGINX_ADVERTISED_HOST>>>/stroom/ui;
 }
 
-location ~ .*/clustercall.rpc$ {
+location ~ ^.*/clustercall.rpc$ {
+    #add_header                  location-debug stroom_clustercall;
     deny all;
 }
 
 # ... and everything else gets reverse-proxied to stroom.
 location /stroom {
+    #add_header                  location-debug stroom_stroom-prefix;
     proxy_pass http://stroom_upstream_sticky/stroom;
     include location_defaults.conf;
+
+    # Enable caching for the static ui content, caching requires buffering
+    include cache_defaults.conf;
+
+    # Now use conditional caching based on file type and uri
+    # WARNING use if blocks with great care,
+    # see https://www.nginx.com/resources/wiki/start/topics/depth/ifisevil/
+    set $no_cache "1"; # don't cache
+    # Cache static files and versioned script entities
+    # except some GWT files (i.e. *.nocache.js)
+    if ($request_uri ~* ^(?:\/stroom\/script\?.*|.*\.(?:ico|css|gif|jpe?g|png|woff|woff2|eot|svg|ttf|webp)|.*(?<!\.nocache)\.js)$) {
+      set $no_cache "0"; # do cache
+    }
+
+    # Don't cache proxy response if $no_cache is non-zero
+    proxy_no_cache $no_cache;
 }
 
 # vim: set filetype=text shiftwidth=4 tabstop=4 expandtab:
