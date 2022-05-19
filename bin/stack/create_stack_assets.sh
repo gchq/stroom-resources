@@ -126,6 +126,23 @@ download_stroom_docs() {
     -d "${dest_dir}" \
     "${zip_file}"
 
+  # As the schema docs are now local to us we need to change any links to
+  # the schema docs on github to our local path
+  echo -e "    Replacing ${BLUE}${SCHEMA_DOCS_URL_BASE}${NC} with" \
+    "${BLUE}${LOCAL_SCHEMA_DOCS_URL_BASE}${NC} in all HTML files in" \
+    "${BLUE}${dest_dir}${NC}"
+
+  find \
+      "${dest_dir}" \
+      -type f \
+      -name "*.html" \
+      -print0 \
+    | xargs \
+      -0 \
+      sed \
+        -i'' \
+        "s#<a href=\"${SCHEMA_DOCS_URL_BASE}#<a href=\"${LOCAL_SCHEMA_DOCS_URL_BASE}#g"
+
   rm "${zip_file}"
 }
 
@@ -327,6 +344,8 @@ main() {
   local -r CONFIG_YAML_FILENAME="config.yml"
   local -r CONFIG_DEFAULTS_YAML_FILENAME="config-defaults.yml"
   local -r CONFIG_SCHEMA_YAML_FILENAME="config-schema.yml"
+  local -r SCHEMA_DOCS_URL_BASE="https://gchq.github.io/event-logging-schema"
+  local -r LOCAL_SCHEMA_DOCS_URL_BASE="/event-logging-schema-docs/"
 
   ############
   #  stroom  #
