@@ -27,6 +27,23 @@ source lib/shell_utils.sh
 
 DOWNLOAD_DIR="/tmp/stroom_stack_build_downloads"
 
+debug_value() {
+  local name="$1"; shift
+  local value="$1"; shift
+  
+  if [ "${IS_DEBUG}" = true ]; then
+    echo -e "${DGREY}DEBUG ${name}: ${value}${NC}"
+  fi
+}
+
+debug() {
+  local str="$1"; shift
+  
+  if [ "${IS_DEBUG}" = true ]; then
+    echo -e "${DGREY}DEBUG ${str}${NC}"
+  fi
+}
+
 # Downloads the file to a temporary directory then copies it from their
 # to speed up repeated runs
 # NOTE: This assumes the file being downloaded is immutable
@@ -87,8 +104,10 @@ download_stroom_docs() {
       --silent \
       --location \
       https://api.github.com/repos/gchq/stroom-docs/releases/latest \
-      | jq -r ".assets[] | select(.name | test(\"^stroom-docs-.*_stroom-.*${STROOM_DOCS_STROOM_VERSION}\\\\.zip$\")) .browser_download_url" \
+    | jq -r ".assets[] | select(.name | test(\"^stroom-docs-.*_stroom-.*${STROOM_DOCS_STROOM_VERSION}\\\\.zip$\")) .browser_download_url" \
     | tail -1)"
+
+  debug_value "zip_url" "${zip_url}"
 
   local zip_url_base="${zip_url%/*}" # remove last / and onwards
   local zip_filename="${zip_url##*/}" # remove up to and including last /
@@ -107,7 +126,98 @@ download_stroom_docs() {
     -d "${dest_dir}" \
     "${zip_file}"
 
+  # As the schema docs are now local to us we need to change any links to
+  # the schema docs on github to our local path
+  echo -e "    Replacing ${BLUE}${SCHEMA_DOCS_URL_BASE}${NC} with" \
+    "${BLUE}${LOCAL_SCHEMA_DOCS_URL_BASE}${NC} in all HTML files in" \
+    "${BLUE}${dest_dir}${NC}"
+
+  find \
+      "${dest_dir}" \
+      -type f \
+      -name "*.html" \
+      -print0 \
+    | xargs \
+      -0 \
+      sed \
+        -i'' \
+        "s#<a href=\"${SCHEMA_DOCS_URL_BASE}#<a href=\"${LOCAL_SCHEMA_DOCS_URL_BASE}#g"
+
   rm "${zip_file}"
+}
+
+download_schema_docs() {
+  local extra_curl_args=()
+
+  # DO NOT echo this variable
+  if [[ -n "${GH_PERSONAL_ACCESS_TOKEN}" ]]; then
+    echo -e "    Making authenticated Github API request"
+    extra_curl_args=( \
+      "-u" \
+      "username:${GH_PERSONAL_ACCESS_TOKEN}" )
+  else
+    echo -e "    GH_PERSONAL_ACCESS_TOKEN not set, making un-authenticated" \
+      "Github API request (will be subject to rate limiting)"
+  fi
+
+  local latest_docs_build_number
+  # get the highest version number of the stroom-docs releases
+  latest_docs_build_number="$( \
+    curl \
+      "${extra_curl_args[@]}" \
+      --silent \
+      --location \
+      http https://api.github.com/repos/gchq/event-logging-schema/releases \
+      | jq -r '.[].tag_name | select(. | test("^docs-v"))' \
+      | sed 's/^docs-v//' \
+      | sort -n \
+      | tail -n1)"
+
+  if [[ -z "${latest_docs_build_number}" ]]; then
+    echo -e "    ${RED}ERROR${NC}: Can't establish latest_docs_build_number${NC}"
+    exit 1
+  fi
+
+  debug_value "latest_docs_build_number" "${latest_docs_build_number}"
+
+  local releases_by_tag_url="https://api.github.com/repos/gchq/event-logging-schema/releases/tags/docs-v${latest_docs_build_number}"
+  debug_value "releases_by_tag_url" "${releases_by_tag_url}"
+
+  local zip_url
+  # get the highest version number of the stroom-docs releases
+  zip_url="$( \
+    curl \
+      "${extra_curl_args[@]}" \
+      --silent \
+      --location \
+      "${releases_by_tag_url}" \
+    | jq -r ".assets[] | select(.name | test(\"^event-logging-schema-docs-v${latest_docs_build_number}\\\\.zip$\")) .browser_download_url" \
+    | tail -1)"
+
+  debug_value "zip_url" "${zip_url}"
+
+  local zip_url_base="${zip_url%/*}" # remove last / and onwards
+  local zip_filename="${zip_url##*/}" # remove up to and including last /
+  local dest_dir="${VOLUMES_DIRECTORY}/nginx/html/event-logging-schema-docs"
+  local zip_file="${dest_dir}/${zip_filename}"
+
+  mkdir -p "${dest_dir}"
+
+  download_file \
+    "${dest_dir}" \
+    "${zip_url_base}" \
+    "${zip_filename}"
+
+  unzip \
+    -qq \
+    -d "${dest_dir}" \
+    "${zip_file}"
+
+  rm "${zip_file}"
+
+  # index.html was there to do a noddy re-direct for github pages
+  # but we can use nginx rewrites to point us to /latest/
+  rm "${dest_dir}/index.html"
 }
 
 copy_file_to_dir() {
@@ -234,6 +344,8 @@ main() {
   local -r CONFIG_YAML_FILENAME="config.yml"
   local -r CONFIG_DEFAULTS_YAML_FILENAME="config-defaults.yml"
   local -r CONFIG_SCHEMA_YAML_FILENAME="config-schema.yml"
+  local -r SCHEMA_DOCS_URL_BASE="https://gchq.github.io/event-logging-schema"
+  local -r LOCAL_SCHEMA_DOCS_URL_BASE="/event-logging-schema-docs/"
 
   ############
   #  stroom  #
@@ -245,12 +357,12 @@ main() {
     if [[ "${STROOM_TAG}" =~ local-SNAPSHOT ]]; then
       echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file" \
         "because ${YELLOW}STROOM_TAG${NC}=${BLUE}${STROOM_TAG}${NC}"
-      if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
+      if [ -z "${LOCAL_STROOM_REPO_DIR}" ]; then
         echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC} to your local stroom repo"
         echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
         exit 1
       fi
-      if [ ! -d "${STROOM_SNAPSHOT_DOCKER_DIR}" ]; then
+      if [ -d "${STROOM_SNAPSHOT_DOCKER_DIR}" ]; then
         echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_SNAPSHOT_DOCKER_DIR}${NC}, has the stroom build been run?"
         exit 1
       fi
@@ -369,6 +481,7 @@ main() {
 
     # Donload the latest stroom-docs zip and unpack it in volumes/nginx/html
     download_stroom_docs
+    download_schema_docs
   fi
 
   #############################
@@ -505,7 +618,7 @@ copy_proxy_config() {
   if [[ "${STROOM_PROXY_TAG}" =~ local-SNAPSHOT ]]; then
     echo -e "    ${RED}WARNING${NC}: Copying a non-versioned local file" \
       "because ${YELLOW}STROOM_PROXY_TAG${NC}=${BLUE}${STROOM_PROXY_TAG}${NC}"
-    if [ ! -n "${LOCAL_STROOM_REPO_DIR}" ]; then
+    if [ -z "${LOCAL_STROOM_REPO_DIR}" ]; then
       echo -e "    ${RED}${NC}         Set ${YELLOW}LOCAL_STROOM_REPO_DIR${NC}" \
         "to your local stroom repo"
       echo -e "    ${RED}${NC}         E.g. '${BLUE}export" \

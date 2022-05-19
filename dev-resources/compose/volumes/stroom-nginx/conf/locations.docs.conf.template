@@ -1,15 +1,19 @@
 # Configuration for static documentation served by nginx
 
-# Routing for the stroom-docs content (if available)
+# Routing for the documentation content (if available)
 
-# Prefix match
-location /stroom-docs/ {
+# Add a rewrite to the latest schema version
+# Saves having to use the client side re-direct in index.html
+rewrite ^(/event-logging-schema-docs)/?$ $1/latest last;
+
+# event-logging Schema documentation
+location ~* ^/event-logging-schema-docs/.+ {
     include location_defaults.conf;
     include mime.types;
 }
 
-# Exact match
-location = /stroom-docs {
+# Stroom documentation
+location ~* ^/stroom-docs(/|/.+)?$ {
     include location_defaults.conf;
     include mime.types;
 }
