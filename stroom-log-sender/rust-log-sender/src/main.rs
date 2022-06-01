@@ -1,109 +1,120 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::future::Future;
+use std::io::Write;
 use std::path::Path;
-// use std::io::{stdout, Write};
 use std::process::Command;
 use std::string::String;
 use std::sync::Arc;
 
-use delay_timer::anyhow::Result;
-// use anyhow::Result;
-use delay_timer::error::TaskError;
-use delay_timer::prelude::*;
-// use crate::model::Source;
-// use serde::de::{Deserialize, Deserializer, Error};
-// use serde::ser::Serialize;
-// use serde::{Deserialize, Deserializer, Serialize};
-// use serde::de::Error;
-// use smol::Timer;
-use serde_yaml;
+use anyhow::{bail, Result};
+use chrono::Utc;
+use log::debug;
+use log::Level::Debug;
 
 use crate::model::{Config, Source};
 
 mod model;
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
+    configure_logging();
 
     let result = read_config_file();
     let config = result.expect("Can't read file");
-    // let config: Config = read_config_file();
-     // let s: &'static Config = &config;
 
-    // println!("{:?}", &config);
-    // println!("{:?}", &config.sources[0].feed_name);
+    debug!("{:?}", &config);
+    debug!("Starting timer");
+    let mut interval_timer = tokio::time::interval(
+        chrono::Duration::seconds(7)
+            .to_std()
+            .unwrap());
 
-    let delay_timer = DelayTimerBuilder::default().build();
+    let config = Arc::new(config);
+    loop {
+        // Wait for the next interval tick
+        interval_timer.tick().await;
+        debug!("tick");
 
-    // Develop a print job that runs in an asynchronous cycle.
-    // A chain of task instances.
-    let _task_instance_chain = delay_timer.insert_task(
-        build_serial_async_send_task(&config)?)?;
+        if config.parallel {
+            let config_clone = Arc::clone(&config);
+            tokio::spawn(async move {
+                process_all_sources(config_clone).await;
+            }); // For async task
+        } else {
+            for (i, _source) in config.sources.iter().enumerate() {
+                let config_clone = Arc::clone(&config);
 
-    // Park the main thread as the scheduled jobs run in the background
-    std::thread::park();
-
-    println!("{:?}", &config);
-    Ok(())
+                tokio::spawn(async move {
+                    process_source(config_clone, i).await;
+                });
+            }
+        }
+        // tokio::task::spawn_blocking(|| do_my_task()); // For blocking task
+    }
 }
 
-// fn constrain_closure<F: Fn() -> dyn Future + 'static>(f: F) -> F {
-//     f
-// }
+fn configure_logging() {
+    let pid = std::process::id();
+    env_logger::builder()
+        .format(move |buf, record| {
+            writeln!(buf,
+                     "{: <6} [{}] [] [{}] {}",
+                     record.level(),
+                     Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ"),
+                     pid,
+                     record.args()
+            )
+        })
+        .init();
+}
 
-fn build_serial_async_send_task(config: &Config) -> Result<Task, TaskError> {
-    let mut task_builder = TaskBuilder::default();
+async fn process_all_sources(config: Arc<Config>) {
+    debug!("process_all_sources() called");
+    for source in &config.sources {
+        let command: anyhow::Result<Command> = build_command(&config, &source);
+        run_command(&mut command.unwrap());
+    }
+}
 
-    // let my_config = config.clone();
-    let config_arc = Arc::new(config.clone());
-    let local_config_arc = config_arc.clone();
-
-    let body = move || async {
-        // println!("Do stuff");
-
-        // Timer::after(Duration::from_secs(3)).await;
-
-        // for source in &local_config_arc.sources {
-        //     let mut command = build_command(&local_config_arc, &source);
-        //     run_command(&mut command);
-        // }
-        println!("{:?}", &local_config_arc);
-
-        println!("{:?}", chrono::Local::now());
-
-        // println!("create_async_fn_body:i'success");
-    };
-    // println!("{:?}", &local_config_arc);
-
-    // constrain_closure(body);
-
-    task_builder
-        .set_task_id(1)
-        .set_frequency_repeated_by_seconds(5)
-        .set_maximum_parallel_runnable_num(1)
-        .spawn_async_routine(body)
+async fn process_source(config: Arc<Config>, source_idx: usize) {
+    debug!("process_source() called");
+    let command: anyhow::Result<Command> = build_command(
+        &config,
+        &config.sources.get(source_idx).unwrap());
+    run_command(&mut command.unwrap());
 }
 
 fn run_command(command: &mut Command) {
+    // TODO Not sure if we want to use output() or spawn()
     let output = command.output()
-        .expect(format!("Error running script {}",
-                        command.get_program().to_str().unwrap()).as_str());
+        .unwrap_or_else(|_| panic!("Error running script {}",
+                                   command.get_program().to_str().unwrap()));
 
     let status = output.status;
-    println!("status: {}", &status.code().unwrap());
+    debug!("status: {}", &status.code().unwrap());
 
-    let stdout_str = String::from_utf8_lossy(&output.stdout);
-    println!("stdout:\n{}", stdout_str);
-    let stderr_str = String::from_utf8_lossy(&output.stderr);
-    println!("stderr:\n{}", stderr_str);
+    if !&output.stdout.is_empty() {
+        let stdout_str = String::from_utf8_lossy(&output.stdout);
+        print!("{}", stdout_str);
+    }
+
+    if !&output.stderr.is_empty() {
+        let stderr_str = String::from_utf8_lossy(&output.stderr);
+        eprint!("{}", stderr_str);
+    }
 }
 
-fn build_command(config: &Config, source: &Source) -> Command {
+fn build_command(config: &Config, source: &Source) -> Result<Command> {
     check_file_exists(&config.script_location);
 
-    let script = &config.script_location;
-    let mut command = Command::new(script);
-    command.current_dir(script);
+    let script_location = &config.script_location;
+    let script_path = Path::new(script_location).join("send_to_stroom.sh");
+    if !script_path.exists() {
+        bail!(format!("Script {} does not exist", script_path.to_str().unwrap()))
+    }
+
+    let mut command = Command::new(&script_path);
+    command.current_dir(&script_location);
 
     // TODO Prob ought to assemble a list of common args once
     //  then pass them to .args()
@@ -134,7 +145,16 @@ fn build_command(config: &Config, source: &Source) -> Command {
         .arg(&source.feed_name)
         .arg(&config.destination_url);
 
-    command
+    if log::log_enabled!(Debug) {
+        debug!("Command {}", command.get_program().to_str().unwrap().to_string());
+        let mut args_str = String::new();
+        for arg in command.get_args() {
+            args_str.push_str(arg.to_str().unwrap());
+        }
+        debug!("args: [{}]", args_str);
+    }
+
+    Ok(command)
 }
 
 fn add_extra_headers(command: &mut Command, headers: &HashMap<String, String>) {
@@ -146,18 +166,27 @@ fn add_extra_headers(command: &mut Command, headers: &HashMap<String, String>) {
 }
 
 fn add_arg_from_bool(command: &mut Command, arg: &str, val: &bool) {
+    // --xxx or --no-xxx
+    let arg_string: String;
+    let arg_modified = match val {
+        true => &arg,
+        false => {
+            arg_string = String::from(arg).replace("--", "--no-");
+            arg_string.as_str()
+        }
+    };
+
     command
-        .arg(arg)
-        .arg(val.to_string());
+        .arg(arg_modified);
 }
 
-fn add_arg_from_string(command: &mut Command, arg: &str, val: String) {
-    if !val.is_empty() {
-        command
-            .arg(arg)
-            .arg(val);
-    }
-}
+// fn add_arg_from_string(command: &mut Command, arg: &str, val: String) {
+//     if !val.is_empty() {
+//         command
+//             .arg(arg)
+//             .arg(val);
+//     }
+// }
 
 fn add_arg_from_option<T>(command: &mut Command, arg: &str, opt_val: &Option<T>)
     where T: std::fmt::Display {
@@ -215,6 +244,8 @@ fn check_file_exists(path: &String) {
 }
 
 fn read_config_file() -> Result<Config> {
+    // TODO Consider using https://docs.rs/crate/subst so we can do env var subst
+    //  on the config values to allow some to be set in compose env vars.
     let file = File::open("config.yml").unwrap();
     let config: Config = serde_yaml::from_reader(file).unwrap();
     validate_config(&config);
