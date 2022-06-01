@@ -1,0 +1,24 @@
+---
+colourOutput: true
+destinationUrl: "http://localhost:8080/stroom/datafeed"
+parallel: false
+scriptLocation: "/home/dev/git_work/gchq/stroom-clients/bash"
+secure: false
+sendInterval: "PT5S"
+sshCaCertificate:
+sshCertificate:
+sshKey:
+sources:
+  - deleteAfterSending: true
+    compress: true
+    environment: "DEV"
+    extraHeaders:
+      header1: "value1"
+      header2: "value2"
+    feedName: "STROOM-APP-EVENTS"
+    fileRegex:
+    sourceDirectory: "/home/dev/.stroom/v7/node1a/logs/app"
+    systemName: "STROOM"
+
+
+
