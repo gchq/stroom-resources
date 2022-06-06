@@ -105,8 +105,6 @@ fn run_command(command: &mut Command) {
 }
 
 fn build_command(config: &Config, source: &Source) -> Result<Command> {
-    check_file_exists(&config.script_location);
-
     let script_location = &config.script_location;
     let script_path = Path::new(script_location).join("send_to_stroom.sh");
     if !script_path.exists() {
@@ -146,15 +144,24 @@ fn build_command(config: &Config, source: &Source) -> Result<Command> {
         .arg(&config.destination_url);
 
     if log::log_enabled!(Debug) {
-        debug!("Command {}", command.get_program().to_str().unwrap().to_string());
-        let mut args_str = String::new();
-        for arg in command.get_args() {
-            args_str.push_str(arg.to_str().unwrap());
-        }
-        debug!("args: [{}]", args_str);
+        debug_command(&mut command);
     }
 
     Ok(command)
+}
+
+fn debug_command(command: &mut Command) {
+    debug!("Command {}", command.get_program().to_str().unwrap().to_string());
+    let mut args_str = String::new();
+    for arg in command.get_args() {
+        if !args_str.is_empty() {
+            args_str.push(' ')
+        }
+        args_str.push('\'');
+        args_str.push_str(arg.to_str().unwrap());
+        args_str.push('\'');
+    }
+    debug!("args: [{}]", args_str);
 }
 
 fn add_extra_headers(command: &mut Command, headers: &HashMap<String, String>) {
@@ -180,14 +187,6 @@ fn add_arg_from_bool(command: &mut Command, arg: &str, val: &bool) {
         .arg(arg_modified);
 }
 
-// fn add_arg_from_string(command: &mut Command, arg: &str, val: String) {
-//     if !val.is_empty() {
-//         command
-//             .arg(arg)
-//             .arg(val);
-//     }
-// }
-
 fn add_arg_from_option<T>(command: &mut Command, arg: &str, opt_val: &Option<T>)
     where T: std::fmt::Display {
     if opt_val.is_some() {
@@ -203,8 +202,12 @@ fn validate_config(config: &Config) {
     let mut errors: Vec<String> = Vec::new();
 
     check_not_empty(&mut errors, &config.script_location, "scriptLocation");
+    check_file_exists(&mut errors, &config.script_location, "scriptLocation");
+    check_opt_file_exists(&mut errors, &config.ssh_ca_certificate, "sshCaCertificate");
+    check_opt_file_exists(&mut errors, &config.ssh_certificate, "sshCertificate");
+    check_opt_file_exists(&mut errors, &config.ssh_key, "sshKey");
     check_not_empty(&mut errors, &config.destination_url, "destinationUrl");
-    check_not_empty(&mut errors, &config.send_interval, "sendInterval");
+    check_greater_than_zero(&mut errors, config.send_interval_secs, "sendIntervalSecs");
 
     if config.sources.is_empty() {
         errors.push(String::from("Missing sources value"));
@@ -237,9 +240,24 @@ fn check_not_empty(errors: &mut Vec<String>, val: &String, name: &str) {
     }
 }
 
-fn check_file_exists(path: &String) {
-    if !Path::new(path).exists() {
-        eprintln!("ERROR: Script {} does not exist", path);
+fn check_greater_than_zero(errors: &mut Vec<String>, val: i64, name: &str) {
+    if val <= 0 {
+        errors.push(format!("{} should be greater than zero.", name));
+    }
+}
+
+fn check_opt_file_exists(errors: &mut Vec<String>, path: &Option<String>, name: &str) {
+    if path.is_some() {
+        let path = path.as_ref().unwrap();
+        if !path.is_empty() && !Path::new(&path).exists() {
+            errors.push(format!("The path specified for {} ({}) does not exist", name, path));
+        }
+    }
+}
+
+fn check_file_exists(errors: &mut Vec<String>, path: &String, name: &str) {
+    if !path.is_empty() && !Path::new(path).exists() {
+        errors.push(format!("The path specified for {} ({}) does not exist", name, path));
     }
 }
 

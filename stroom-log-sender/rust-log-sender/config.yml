@@ -1,13 +1,14 @@
 ---
 colourOutput: true
-destinationUrl: "http://localhost:8080/stroom/noauth/datafeed"
+#destinationUrl: "http://localhost:8080/stroom/noauth/datafeed"
+destinationUrl: "https://localhost/stroom/datafeeddirect"
 parallel: false
 scriptLocation: "/home/dev/git_work/gchq/stroom-clients/bash"
-secure: false
-sendInterval: "PT5S"
-sshCaCertificate:
-sshCertificate:
-sshKey:
+secure: true
+sendIntervalSecs: 5
+sshCaCertificate: "/home/dev/git_work/gchq/stroom-resources/dev-resources/certs/client/ca.pem.crt"
+sshCertificate: "/home/dev/git_work/gchq/stroom-resources/dev-resources/certs/client/client.pem.crt"
+sshKey: "/home/dev/git_work/gchq/stroom-resources/dev-resources/certs/client/client.unencrypted.key"
 sources:
   - deleteAfterSending: true
     compress: true

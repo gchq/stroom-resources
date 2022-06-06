@@ -26,7 +26,7 @@ pub struct Config {
     // #[serde(default = "bool::from(true)")]
     pub(crate) secure: bool,
     // ISO8601 duration
-    pub(crate) send_interval: String,
+    pub(crate) send_interval_secs: i64,
     pub(crate) sources: Vec<Source>,
 }
 
