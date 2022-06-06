@@ -2,7 +2,7 @@
 colourOutput: true
 #destinationUrl: "http://localhost:8080/stroom/noauth/datafeed"
 destinationUrl: "https://localhost/stroom/datafeeddirect"
-parallel: false
+parallel: true
 scriptLocation: "/home/dev/git_work/gchq/stroom-clients/bash"
 secure: true
 sendIntervalSecs: 5
@@ -10,6 +10,7 @@ sshCaCertificate: "/home/dev/git_work/gchq/stroom-resources/dev-resources/certs/
 sshCertificate: "/home/dev/git_work/gchq/stroom-resources/dev-resources/certs/client/client.pem.crt"
 sshKey: "/home/dev/git_work/gchq/stroom-resources/dev-resources/certs/client/client.unencrypted.key"
 sources:
+
   - deleteAfterSending: true
     compress: true
     environment: "DEV"
@@ -19,6 +20,17 @@ sources:
     feedName: "STROOM-APP-EVENTS"
     fileRegex: "app-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\\.log"
     sourceDirectory: "/home/dev/.stroom/v7/node1a/logs/app"
+    systemName: "STROOM"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "DEV"
+    extraHeaders:
+      header1: "value1"
+      header2: "value2"
+    feedName: "STROOM-USER-EVENTS"
+    fileRegex: "user-[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}\\.log"
+    sourceDirectory: "/home/dev/.stroom/v7/node1a/logs/user"
     systemName: "STROOM"
 
 

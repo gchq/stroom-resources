@@ -36,11 +36,6 @@ async fn main() -> Result<()> {
         debug!("tick");
 
         if config.parallel {
-            let config_clone = Arc::clone(&config);
-            tokio::spawn(async move {
-                process_all_sources(config_clone).await;
-            }); // For async task
-        } else {
             for (i, _source) in config.sources.iter().enumerate() {
                 let config_clone = Arc::clone(&config);
 
@@ -48,6 +43,11 @@ async fn main() -> Result<()> {
                     process_source(config_clone, i).await;
                 });
             }
+        } else {
+            let config_clone = Arc::clone(&config);
+            tokio::spawn(async move {
+                process_all_sources(config_clone).await;
+            }); // For async task
         }
         // tokio::task::spawn_blocking(|| do_my_task()); // For blocking task
     }
@@ -113,6 +113,7 @@ fn build_command(config: &Config, source: &Source) -> Result<Command> {
 
     let mut command = Command::new(&script_path);
     command.current_dir(&script_location);
+    debug!("current_dir {}", &script_location);
 
     // TODO Prob ought to assemble a list of common args once
     //  then pass them to .args()
