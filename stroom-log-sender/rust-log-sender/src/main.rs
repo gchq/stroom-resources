@@ -15,11 +15,14 @@ use crate::model::{Config, Source};
 
 mod model;
 
+//
+
 #[tokio::main]
 async fn main() -> Result<()> {
     configure_logging();
+    let args: Vec<String> = std::env::args().collect();
 
-    let result = read_config_file();
+    let result = read_config_file(&args);
     let config = result.expect("Can't read file");
 
     debug!("{:?}", &config);
@@ -262,9 +265,17 @@ fn check_file_exists(errors: &mut Vec<String>, path: &String, name: &str) {
     }
 }
 
-fn read_config_file() -> Result<Config> {
+fn read_config_file(args: &Vec<String>) -> Result<Config> {
     // TODO Consider using https://docs.rs/crate/subst so we can do env var subst
     //  on the config values to allow some to be set in compose env vars.
+
+    let config_path = args.get(0)
+        .unwrap_or_else(|| { &String::from("config.yml")});
+
+    if !config_path.is_empty() && !Path::new(config_path).exists() {
+        panic!("The config file path specified {} does not exist", config_path);
+    }
+
     let file = File::open("config.yml").unwrap();
     let config: Config = serde_yaml::from_reader(file).unwrap();
     validate_config(&config);
