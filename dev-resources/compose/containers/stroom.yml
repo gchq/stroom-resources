@@ -70,7 +70,9 @@ services:
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
     # Allows us to pass other commands to the app, e.g. migrate
-    command: ./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}
+    # This is to allow us to run migrate.
+    # For other commands that have args see command.sh in the stack which overrides the docker command
+    command: "./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}"
 volumes:
   stroom_content_pack_import:
   stroom_lmdb_library:

@@ -78,6 +78,7 @@ main() {
   # It is possible the DB is running elsewhere
   if element_in "stroom" "${SERVICES[@]}"; then
     create_script migrate
+    create_script command
   fi
 
   create_script show_config
