@@ -75,6 +75,7 @@ ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD [ "/stroom-log-sender/rust-log-sender", "/stroom-log-sender/config/config.yml"]
 
 # curl required for sending logs
+# procps for ps command used by send_to_stroom.sh
 # tini required for process control in the entrypoint
 # Create a user with no home and no shell
 # The log-volumes dir is where we expect volumes to be mounted 
@@ -82,6 +83,7 @@ RUN echo "http_proxy: $http_proxy" && \
     echo "https_proxy: $https_proxy" && \
     apt-get update && apt-get install -y \
       curl \
+      procps \
       tini && \
     rm -rf /var/lib/apt/lists/* && \
     adduser --uid 1000 --system --shell /bin/false --disabled-password --group --gecos 'log-sender user' sender && \
