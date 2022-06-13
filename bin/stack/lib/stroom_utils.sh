@@ -293,11 +293,11 @@ check_service_health() {
   #echo "http_status_code: $http_status_code"
 
   # First hit the url to see if it is there
-  if [ "x501" = "x${http_status_code}" ]; then
+  if [ "501" = "${http_status_code}" ]; then
     # Server is up but no healthchecks are implmented, so assume healthy
     echo_healthy
-  elif [ "x200" = "x${http_status_code}" ] \
-    || [ "x500" = "x${http_status_code}" ]; then
+  elif [ "200" = "${http_status_code}" ] \
+    || [ "500" = "${http_status_code}" ]; then
 
     # 500 code indicates at least one health check is unhealthy but jq will fish that out
 
@@ -323,9 +323,9 @@ check_service_health() {
       fi
     else
       # non-jq approach
-      if [ "x200" = "x${http_status_code}" ]; then
+      if [ "200" = "${http_status_code}" ]; then
         echo_healthy
-      elif [ "x500" = "x${http_status_code}" ]; then
+      elif [ "500" = "${http_status_code}" ]; then
         echo_unhealthy
       do_echo "See ${BLUE}${health_check_pretty_url}${NC} for details"
         # Don't know how many are unhealthy but it is at least one
@@ -608,6 +608,30 @@ start_stack() {
     "${extra_args[@]}" \
     --detach \
     "${services_to_start[@]}"
+}
+
+run_dropwiz_command() {
+  local dropwiz_command_and_args=( "$@" )
+
+  if ! is_container_running "stroom-all-dbs"; then
+    # Ensure the db is running/started
+    start_stack "stroom-all-dbs"
+  else
+    determing_docker_host_details
+  fi
+
+  # Make the container run the migration on boot instead of starting the app
+  # This env var will be substituted in the stroom docker-compose yml
+  #export STROOM_DROPWIZARD_COMMAND="$*"
+  echo -e "${GREEN}Starting stroom with command" \
+    "[${BLUE}${dropwiz_command_and_args[*]}${GREEN}]${NC}"
+
+  # Delete the container after use
+  run_docker_compose_cmd \
+    run \
+    --rm \
+    "stroom" \
+    "./start.sh" "${dropwiz_command_and_args[@]}"
 }
 
 migrate_stack() {

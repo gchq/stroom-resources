@@ -362,7 +362,7 @@ main() {
         echo -e "    ${RED}${NC}         E.g. '${BLUE}export LOCAL_STROOM_REPO_DIR=/home/dev/git_work/stroom${NC}'"
         exit 1
       fi
-      if [ -d "${STROOM_SNAPSHOT_DOCKER_DIR}" ]; then
+      if [ ! -d "${STROOM_SNAPSHOT_DOCKER_DIR}" ]; then
         echo -e "    ${RED}${NC}         Can't find ${BLUE}${STROOM_SNAPSHOT_DOCKER_DIR}${NC}, has the stroom build been run?"
         exit 1
       fi
