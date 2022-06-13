@@ -39,7 +39,7 @@ pub struct Source {
     // #[serde(default = "false")]
     pub(crate) compress: bool,
     pub(crate) environment: Option<String>,
-    pub(crate) extra_headers: HashMap<String, String>,
+    pub(crate) extra_headers: Option<HashMap<String, String>>,
     pub(crate) headers_file: Option<String>,
     pub(crate) feed_name: String,
     pub(crate) file_regex: Option<String>,

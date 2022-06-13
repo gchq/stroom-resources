@@ -552,9 +552,9 @@ main() {
     echo -e "  Copying ${YELLOW}stroom-log-sender${NC} config files"
     local -r DEST_STROOM_LOG_SENDER_CONF_DIRECTORY="${VOLUMES_DIRECTORY}/stroom-log-sender/conf"
     copy_file_to_dir \
-      "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt" \
+      "${SRC_STROOM_LOG_SENDER_CONF_DIRECTORY}/config.yml" \
       "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}"
-    remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/crontab.txt"
+    remove_conditional_content "${DEST_STROOM_LOG_SENDER_CONF_DIRECTORY}/config.yml"
   fi
 
   ####################

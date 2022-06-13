@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
 use std::process::Command;
+use std::str;
 use std::string::String;
 use std::sync::Arc;
 
@@ -10,8 +11,6 @@ use anyhow::{bail, Result};
 use chrono::Utc;
 use log::debug;
 use log::Level::Debug;
-use subst;
-use std::str;
 
 use crate::model::{Config, Source};
 
@@ -177,11 +176,14 @@ fn debug_command(command: &mut Command) {
     debug!("args: [{}]", args_str);
 }
 
-fn add_extra_headers(command: &mut Command, headers: &HashMap<String, String>) {
-    for (key, value) in headers {
-        command
-            .arg("--header")
-            .arg(format!("{}:{}", key, value));
+fn add_extra_headers(command: &mut Command, opt_headers: &Option<HashMap<String, String>>) {
+    if opt_headers.is_some() {
+        let headers = opt_headers.clone().unwrap();
+        for (key, value) in headers {
+            command
+                .arg("--header")
+                .arg(format!("{}:{}", key, value));
+        }
     }
 }
 
@@ -280,12 +282,19 @@ fn read_config_file(args: &Vec<String>) -> Result<Config> {
     debug!("Args: {:?}", args);
 
     // Optional config file path argument, else assume it is in the current dir
-    let config_path = if !args.len() > 1 {
+    let config_path = if args.len() > 1 {
         debug!("Using config file from args");
         args.get(1).unwrap().to_owned()
     } else {
-        debug!("Using executable path for config file");
-        std::env::current_exe()?
+        let current_exe_path = std::env::current_exe();
+        let current_exe_path = match current_exe_path {
+            Ok(current_exe_path) => current_exe_path,
+            Err(error) => panic!("Unable to establish current executable{:?}", error),
+        };
+
+        debug!("Using executable path for config file {}", current_exe_path.display());
+
+        current_exe_path
             .parent()
             .unwrap().join("config.yml")
             .to_str()
@@ -313,7 +322,6 @@ fn read_config_file(args: &Vec<String>) -> Result<Config> {
 
     debug!("substituted_result:\n{}", substituted_result);
 
-    // let file = File::open("config.yml").unwrap();
     let config: Config = serde_yaml::from_str(&substituted_result).unwrap();
     validate_config(&config);
     Ok(config)

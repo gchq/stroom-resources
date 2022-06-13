@@ -1,0 +1,41 @@
+---
+colourOutput: true
+defaultFileRegex: '.*/[a-z]+-[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+\\.log(\\.gz)?'
+destinationUrl: "https://nginx/stroom/datafeeddirect"
+parallel: true
+scriptLocation: "/stroom-log-sender/"
+secure: true
+sendIntervalSecs: 10
+sshCaCertificate: "/stroom-log-sender/certs/ca.pem.crt"
+sshCertificate: "/stroom-log-sender/certs/client.pem.crt"
+sshKey: "/stroom-log-sender/certs/client.unencrypted.key"
+maxSleepSecs: 2
+sources:
+
+# IF_stroom_IN_STACK
+# stroom logs
+  - deleteAfterSending: true
+    compress: true
+    environment: "DEV"
+    headersFile: "${STROOM_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM-ACCESS-EVENTS"
+    sourceDirectory: "${STROOM_BASE_LOGS_DIR}/access"
+    systemName: "STROOM"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "DEV"
+    headersFile: "${STROOM_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM-APP-EVENTS"
+    sourceDirectory: "${STROOM_BASE_LOGS_DIR}/app"
+    systemName: "STROOM"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "DEV"
+    headersFile: "${STROOM_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM-USER-EVENTS"
+    sourceDirectory: "${STROOM_BASE_LOGS_DIR}/user"
+    systemName: "STROOM"
+# FI_stroom_IN_STACK
+

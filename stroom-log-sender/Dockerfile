@@ -17,9 +17,8 @@
 
 # ~~~ send logs scripts stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Intermediate build stage to grab all the send logs scripts
+# Intermediate build stage to grab all the send logs scripts then
 # later copy them all in one go to reduce the number of layers
-# Have to use alpine rather than scratch so we can chmod
 FROM rust:1.61-slim-bullseye as send-logs-scripts-stage
 WORKDIR /scripts
 
@@ -32,44 +31,33 @@ RUN chmod u+x ./*.sh
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-# ~~~ rust build stagte ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~ rust build stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#FROM rust:1.61-alpine3.15 as rust-builder-stage
 FROM rust:1.61-slim-bullseye as rust-builder-stage
 WORKDIR /usr/src/rust-log-sender
 
-COPY ./rust-log-sender/Cargo.toml .
-COPY ./rust-log-sender/Cargo.lock .
+COPY ./rust-log-sender/Cargo.* ./
+
+# Build a dummy project using the cargo.toml to pull in all the deps then
+# if cargo.toml doesn't change docker can cache this layer to avoid compiling all
+# the deps again.
 RUN \
   mkdir ./src && \
   echo 'fn main() { println!("Dummy!"); }' > ./src/main.rs && \
   cargo build --release && \
   rm -rf ./src
 
-COPY ./rust-log-sender/Cargo.* ./
 COPY ./rust-log-sender/src ./src
+
+# Now build the actual project
 RUN \
   touch -a -m ./src/main.rs && \
   cargo build --release
-
-RUN pwd
-RUN find .
-RUN ls -l /usr/src/rust-log-sender/target/release/
-
-#RUN cargo \
-  #install \
-  #--path . \
-  #--root .
-
-#RUN ls -l .
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Final build stage
+# ~~~ Final build stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#FROM alpine:3.8
 FROM debian:11.3-slim
 
 #This is the root dir for all our files/scripts
@@ -83,20 +71,17 @@ VOLUME /stroom-log-sender/certs/
 
 # run entrypoint script inside tini for better unix process handling, 
 # see https://github.com/krallin/tini/issues/8
-ENTRYPOINT ["/usr/bin/tini", "--", "/stroom-log-sender/rust-log-sender"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD [ "/stroom-log-sender/rust-log-sender", "/stroom-log-sender/config/config.yml"]
 
-# bash required for send_to_stroom.sh
-# coreutils required for 'date' command to output millis
 # curl required for sending logs
-# gettext needed for 'envsubst' using in the entrypoint script
-# procps needed for a richer 'ps' command as used in send_to_stroom.sh
 # tini required for process control in the entrypoint
 # Create a user with no home and no shell
 # The log-volumes dir is where we expect volumes to be mounted 
-    #groupadd --gid 1000 --system sender && \
 RUN echo "http_proxy: $http_proxy" && \
     echo "https_proxy: $https_proxy" && \
     apt-get update && apt-get install -y \
+      curl \
       tini && \
     rm -rf /var/lib/apt/lists/* && \
     adduser --uid 1000 --system --shell /bin/false --disabled-password --group --gecos 'log-sender user' sender && \
@@ -118,12 +103,6 @@ COPY \
   --from=send-logs-scripts-stage \
   /scripts \
   /stroom-log-sender
-
-# Copy in the scripts for running the container
-#COPY \
-  #--chown=sender:sender \
-  #docker-entrypoint.sh \
-  #/stroom-log-sender/
 
 # Label the image so we can see what commit/tag it came from
 ARG GIT_COMMIT=unspecified
