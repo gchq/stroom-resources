@@ -1,22 +1,42 @@
 ---
+# This file supports the use of environment variable substitution, i.e. values
+# such as \${MY_ENV_VAR} or \${MY_ENV_VAR:default_value} will be substituted
+# using environment variables.
+
+# NOTE: Any changes to this or to the containers environment
+# variables will require the container to be restarted, as this config
+# is only read on boot.
+
+# IF_this-is-an-example_IN_STACK 
+# Blocks like this are conditional and will only be included in this file if
+# the named service('this-is-an-example' in this case) is in the stack. This
+# conditional logic is applied during the stack build, see
+# remove_conditional_content() in create_stack_assets.sh
+# FI_this-is-an-example_IN_STACK 
+
 colourOutput: true
 defaultFileRegex: '.*/[a-z]+-[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+\\.log(\\.gz)?'
+# The URL to send all logs to
 destinationUrl: "https://nginx/stroom/datafeeddirect"
 parallel: true
+# The directory containing send_to_stroom.sh
 scriptLocation: "/stroom-log-sender/"
+# Whether to use curl in secure mode or not
 secure: true
 sendIntervalSecs: 10
 sshCaCertificate: "/stroom-log-sender/certs/ca.pem.crt"
 sshCertificate: "/stroom-log-sender/certs/client.pem.crt"
 sshKey: "/stroom-log-sender/certs/client.unencrypted.key"
+# The max time in seconds for the script to sleep for to smooth network traffic
 maxSleepSecs: 2
+# The log file sources
 sources:
 
 # IF_stroom_IN_STACK
-# stroom logs
+  # stroom logs
   - deleteAfterSending: true
     compress: true
-    environment: "DEV"
+    environment: "${DEFAULT_ENVIRONMENT}"
     headersFile: "${STROOM_BASE_LOGS_DIR}/extra_headers.txt"
     feedName: "STROOM-ACCESS-EVENTS"
     sourceDirectory: "${STROOM_BASE_LOGS_DIR}/access"
@@ -24,7 +44,7 @@ sources:
 
   - deleteAfterSending: true
     compress: true
-    environment: "DEV"
+    environment: "${DEFAULT_ENVIRONMENT}"
     headersFile: "${STROOM_BASE_LOGS_DIR}/extra_headers.txt"
     feedName: "STROOM-APP-EVENTS"
     sourceDirectory: "${STROOM_BASE_LOGS_DIR}/app"
@@ -32,10 +52,129 @@ sources:
 
   - deleteAfterSending: true
     compress: true
-    environment: "DEV"
+    environment: "${DEFAULT_ENVIRONMENT}"
     headersFile: "${STROOM_BASE_LOGS_DIR}/extra_headers.txt"
     feedName: "STROOM-USER-EVENTS"
     sourceDirectory: "${STROOM_BASE_LOGS_DIR}/user"
     systemName: "STROOM"
 # FI_stroom_IN_STACK
 
+
+# IF_stroom-proxy-local_IN_STACK
+  # stroom-proxy logs
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_PROXY_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_PROXY-ACCESS-EVENTS"
+    sourceDirectory: "${STROOM_PROXY_BASE_LOGS_DIR}/access"
+    systemName: "STROOM-PROXY"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_PROXY_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_PROXY-APP-EVENTS"
+    sourceDirectory: "${STROOM_PROXY_BASE_LOGS_DIR}/app"
+    systemName: "STROOM-PROXY"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_PROXY_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_PROXY-SEND-EVENTS"
+    sourceDirectory: "${STROOM_PROXY_BASE_LOGS_DIR}/send"
+    systemName: "STROOM-PROXY"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_PROXY_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_PROXY-RECEIVE-EVENTS"
+    sourceDirectory: "${STROOM_PROXY_BASE_LOGS_DIR}/receive"
+    systemName: "STROOM-PROXY"
+# FI_stroom-proxy-local_IN_STACK
+
+
+# IF_stroom-proxy-remote_IN_STACK
+  # stroom-proxy-remote logs
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_PROXY_REMOTE_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_PROXY-ACCESS-EVENTS"
+    sourceDirectory: "${STROOM_PROXY_REMOTE_BASE_LOGS_DIR}/access"
+    systemName: "STROOM-PROXY-REMOTE"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_PROXY_REMOTE_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_PROXY-APP-EVENTS"
+    sourceDirectory: "${STROOM_PROXY_REMOTE_BASE_LOGS_DIR}/app"
+    systemName: "STROOM-PROXY-REMOTE"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_PROXY_REMOTE_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_PROXY-SEND-EVENTS"
+    sourceDirectory: "${STROOM_PROXY_REMOTE_BASE_LOGS_DIR}/send"
+    systemName: "STROOM-PROXY-REMOTE"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_PROXY_REMOTE_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_PROXY-RECEIVE-EVENTS"
+    sourceDirectory: "${STROOM_PROXY_REMOTE_BASE_LOGS_DIR}/receive"
+    systemName: "STROOM-PROXY-REMOTE"
+# FI_stroom-proxy-remote_IN_STACK
+
+
+# IF_nginx_IN_STACK
+  # stroom-nginx logs
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_NGINX_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_NGINX-ACCESS-EVENTS"
+    sourceDirectory: "${STROOM_NGINX_BASE_LOGS_DIR}/access"
+    systemName: "STROOM-NGINX"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_NGINX_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_NGINX-APP-EVENTS"
+    sourceDirectory: "${STROOM_NGINX_BASE_LOGS_DIR}/app"
+    systemName: "STROOM-NGINX"
+# FI_nginx_IN_STACK
+
+
+# IF_stroom-stats_IN_STACK
+  # stroom-stats logs
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_STATS_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_STATS-ACCESS-EVENTS"
+    sourceDirectory: "${STROOM_STATS_BASE_LOGS_DIR}/access"
+    systemName: "STROOM-STATS"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_STATS_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_STATS-APP-EVENTS"
+    sourceDirectory: "${STROOM_STATS_BASE_LOGS_DIR}/app"
+    systemName: "STROOM-STATS"
+
+  - deleteAfterSending: true
+    compress: true
+    environment: "${DEFAULT_ENVIRONMENT}"
+    headersFile: "${STROOM_STATS_BASE_LOGS_DIR}/extra_headers.txt"
+    feedName: "STROOM_STATS-USER-EVENTS"
+    sourceDirectory: "${STROOM_STATS_BASE_LOGS_DIR}/user"
+    systemName: "STROOM-STATS"
+# FI_stroom-stats_IN_STACK
