@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Read, Write};
@@ -16,8 +32,14 @@ use crate::model::{Config, Source};
 
 mod model;
 
-//
-
+/// An application to control the scheduled running of send_to_stroom.sh
+/// (https://github.com/gchq/stroom-clients/tree/master/bash).
+/// A YAML config file is used to configure the time interval for calling
+/// send_to_stroom.sh for each of the log sources configured in the config
+/// file.
+/// While it would be possible to make this application do everything itself,
+/// e.g. finding log files, sending them and deleting them, the script is already
+/// in existence so a rust app calling a bash script works fine for now.
 #[tokio::main]
 async fn main() -> Result<()> {
     configure_logging();
@@ -277,8 +299,6 @@ fn check_file_exists(errors: &mut Vec<String>, path: &String, name: &str) {
 }
 
 fn read_config_file(args: &Vec<String>) -> Result<Config> {
-    // TODO Consider using https://docs.rs/crate/subst so we can do env var subst
-    //  on the config values to allow some to be set in compose env vars.
     debug!("Args: {:?}", args);
 
     // Optional config file path argument, else assume it is in the current dir
