@@ -276,6 +276,7 @@ dependencies = [
  "log",
  "serde",
  "serde_yaml",
+ "subst",
  "tokio",
 ]
 
@@ -349,6 +350,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "subst"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aae621f3222a86d92067d1711b0a22786b98abf754b482555f663b143ea6b4f9"
+dependencies = [
+ "memchr",
+ "unicode-width",
+]
+
+[[package]]
 name = "syn"
 version = "1.0.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -414,6 +425,12 @@ name = "unicode-ident"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d22af068fba1eb5edcb4aea19d382b2a3deb4c8f9d475c589b6ada9e0fd493ee"
+
+[[package]]
+name = "unicode-width"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ed742d4ea2bd1176e236172c8429aaf54486e7ac098db29ffe6529e0ce50973"
 
 [[package]]
 name = "wasi"

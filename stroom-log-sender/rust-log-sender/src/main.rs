@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::Path;
 use std::process::Command;
 use std::string::String;
@@ -10,6 +10,8 @@ use anyhow::{bail, Result};
 use chrono::Utc;
 use log::debug;
 use log::Level::Debug;
+use subst;
+use std::str;
 
 use crate::model::{Config, Source};
 
@@ -121,7 +123,6 @@ fn build_command(config: &Config, source: &Source) -> Result<Command> {
     // TODO Prob ought to assemble a list of common args once
     //  then pass them to .args()
     // All the optional args common to all sources
-    add_extra_headers(&mut command, &source.extra_headers);
     add_arg_from_bool(&mut command, "--secure", &config.secure);
     add_arg_from_bool(&mut command, "--pretty", &config.colour_output);
     add_arg_from_option(&mut command, "--max-sleep", &config.max_sleep_secs);
@@ -132,14 +133,22 @@ fn build_command(config: &Config, source: &Source) -> Result<Command> {
     add_arg_from_option(&mut command, "--cacert", &config.ssh_ca_certificate);
 
     // All the optional args for this source
-    add_arg_from_option(&mut command, "--system", &source.system_name);
+    add_extra_headers(&mut command, &source.extra_headers);
     add_arg_from_option(&mut command, "--environment", &source.environment);
-    add_arg_from_option(&mut command, "--file-regex", &source.file_regex);
+    add_arg_from_option(&mut command, "--headers", &source.headers_file);
+    add_arg_from_option(&mut command, "--system", &source.system_name);
     add_arg_from_bool(&mut command, "--compress", &source.compress);
     add_arg_from_bool(
         &mut command,
         "--delete-after-sending",
         &source.delete_after_sending);
+
+    // Use a fallback default regex for all sources
+    if (&source.file_regex).is_some() {
+        add_arg_from_option(&mut command, "--file-regex", &source.file_regex);
+    } else {
+        add_arg_from_option(&mut command, "--file-regex", &config.default_file_regex);
+    }
 
     // Finally the mandatory positional args
     command
@@ -268,16 +277,44 @@ fn check_file_exists(errors: &mut Vec<String>, path: &String, name: &str) {
 fn read_config_file(args: &Vec<String>) -> Result<Config> {
     // TODO Consider using https://docs.rs/crate/subst so we can do env var subst
     //  on the config values to allow some to be set in compose env vars.
+    debug!("Args: {:?}", args);
 
-    let config_path = args.get(0)
-        .unwrap_or_else(|| { &String::from("config.yml")});
+    // Optional config file path argument, else assume it is in the current dir
+    let config_path = if !args.len() > 1 {
+        debug!("Using config file from args");
+        args.get(1).unwrap().to_owned()
+    } else {
+        debug!("Using executable path for config file");
+        std::env::current_exe()?
+            .parent()
+            .unwrap().join("config.yml")
+            .to_str()
+            .unwrap().to_owned()
+    };
 
-    if !config_path.is_empty() && !Path::new(config_path).exists() {
-        panic!("The config file path specified {} does not exist", config_path);
+    let config_path= Path::new(&config_path);
+
+    if !&config_path.exists() {
+        panic!("The config file path specified {} does not exist", config_path.display());
     }
 
-    let file = File::open("config.yml").unwrap();
-    let config: Config = serde_yaml::from_reader(file).unwrap();
+    debug!("config_path: {}", &config_path.display());
+
+    let mut file = File::open(&config_path)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+
+    debug!("contents:\n{}", contents);
+
+    let substituted_result = subst::substitute(
+        contents.as_str(),
+        &subst::Env)
+        .unwrap();
+
+    debug!("substituted_result:\n{}", substituted_result);
+
+    // let file = File::open("config.yml").unwrap();
+    let config: Config = serde_yaml::from_str(&substituted_result).unwrap();
     validate_config(&config);
     Ok(config)
 }
