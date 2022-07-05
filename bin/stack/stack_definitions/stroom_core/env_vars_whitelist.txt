@@ -42,10 +42,14 @@ STROOM_STATS_DB_PASSWORD
 
 # Relax security for when the stack is running with the default certs
 STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME=false
+STROOM_PROXY_LOCAL_FORWARDING_HOST_VERIFICATION_ENABLED=false
 
 # Allow proxy to authenticate with no token for testing
-# This entry in the env file will be edited by the CI build
+# stroom_core stack should not have default creds enabled by default
+# to stop people installin an instance and not realising insecure creds
+# are being used.
+# With this set to false the stack will be unhealthy so it is edited in
+# the env file during the CI build to test this stack variant.
 USE_DEFAULT_OPEN_ID_CREDENTIALS
-
 
 # vim: set filetype=sh:
