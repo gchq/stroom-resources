@@ -69,7 +69,7 @@ The following scripts are available to control the docker containers:
 * `restore_database.sh` - A script to restore a database dump file into a named database.
 * `send-data.sh` - A script for sending data into Stroom or Stroom Proxy
 * `set_services.sh` - Sets the sub-set of services that will be used on this node.
-* `show_config.sh` - Displays the effective configuration that docker-compose will use.
+* `show_config.sh` - Displays the effective configuration that docker compose will use.
 * `stack.sh` - A single script for controlling the stack, e.g. `./stack.sh start`
 * `start.sh` - Starts all the containers for the stack.
 * `status.sh` - Displays the status of all the docker containers in the stack.

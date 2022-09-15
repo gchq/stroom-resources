@@ -49,6 +49,19 @@ validate_requested_services() {
   #done
 #}
 
+check_docker_compose_available() {
+  if docker compose version 2>/dev/null || true \
+      | grep -E -q "^Docker Compose version [0-9.]+"; then
+    # Docker with the compose plugin is available
+    :;
+  else
+    if ! command -v docker-compose 1>/dev/null; then 
+      echo -e "${RED}Error${NC}:  ${BLUE}${binaries[*]}${NC} is not installed." \
+        "Please install it and try again" >&2
+      exit 1
+    fi
+  fi
+}
 
 main() {
   [ "$#" -ge 3 ] || die "${RED}Error${NC}: Invalid arguments, usage:" \
@@ -59,7 +72,8 @@ main() {
 
   check_binary_is_available "jq"
   check_binary_is_available "ruby"
-  check_binary_is_available "docker-compose"
+  check_binary_is_available "docker"
+  check_docker_compose_available
 
   local -r BUILD_STACK_NAME=$1
   local -r VERSION=$2

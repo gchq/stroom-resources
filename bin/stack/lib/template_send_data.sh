@@ -31,7 +31,7 @@ source "${DIR:-.}"/lib/stroom_utils.sh
 source "${DIR:-.}"/lib/constants.sh
 
 # Read the file containing all the env var exports to make them
-# available to docker-compose
+# available to docker compose
 source "$DIR"/config/<STACK_NAME>.env
 
 readonly VALID_DESTINATIONS="stroom|stroom-proxy"
