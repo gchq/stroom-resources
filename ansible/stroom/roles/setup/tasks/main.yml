@@ -7,10 +7,12 @@
   yum:
     name: yum-utils
     state: latest
+
 - name: Install docker -> install dependencies -> device-mapper-persistent-data
   yum:
     name: device-mapper-persistent-data 
     state: latest
+
 - name: Install docker -> install dependencies -> lvm2
   yum:
     name: lvm2
@@ -27,6 +29,7 @@
   yum:
     name: containerd.io
     state: latest
+
 - name: Install docker -> install docker-ce-cli 
   yum:
     name:  docker-ce-cli

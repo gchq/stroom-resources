@@ -30,6 +30,7 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   source "${DIR}"/lib/network_utils.sh
   source "${DIR}"/lib/shell_utils.sh
   source "${DIR}"/lib/stroom_utils.sh
+  # This will check for presence of docker (compose)
   source "${DIR}"/lib/constants.sh
 }
 
@@ -39,34 +40,12 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 HOST_IP=$(determine_host_address)
 
 # Read the file containing all the env var exports to make them
-# available to docker-compose
+# available to docker compose
 # shellcheck disable=SC1090
 source "$DIR"/config/<STACK_NAME>.env
 
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>" 
-
-check_installed_binaries() {
-  # The version numbers mentioned here are mostly governed by the docker
-  # compose syntax version that we use in the yml files, currently 2.4, see
-  # https://docs.docker.com/compose/compose-file/compose-versioning/
-
-  if ! command -v docker 1>/dev/null; then 
-    echo -e "${RED}ERROR${NC}: Docker CE is not installed!"
-    echo -e "See ${BLUE}https://docs.docker.com/install/#supported-platforms${NC}" \
-      "for details on how to install it"
-    echo -e "Version ${BLUE}17.12.0${NC} or higher is required"
-    exit 1
-  fi
-
-  if ! command -v docker-compose 1>/dev/null; then 
-    echo -e "${RED}ERROR${NC}: Docker Compose is not installed!"
-    echo -e "See ${BLUE}https://docs.docker.com/compose/install/${NC} for" \
-      "details on how to install it"
-    echo -e "Version ${BLUE}1.23.1${NC} or higher is required"
-    exit 1
-  fi
-}
 
 main() {
   local wait_for_health_checks=true
@@ -96,8 +75,6 @@ main() {
         "in the stack."
     fi
   done
-
-  check_installed_binaries
 
   start_stack "$@"
 

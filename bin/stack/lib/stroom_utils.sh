@@ -84,7 +84,8 @@ run_docker_compose_cmd() {
     compose_file_args+=( "-f" "${yaml_file}" )
   done
 
-  docker-compose \
+  # DOCKER_COMPOSE_CMDS set in constants.sh
+  "${DOCKER_COMPOSE_CMDS[@]:?}" \
     --project-name "${STACK_NAME}" \
     "${compose_file_args[@]}" \
     "${extra_args[@]}"
@@ -93,7 +94,7 @@ run_docker_compose_cmd() {
 get_all_images_in_stack() {
   # Grepping yaml is far from ideal, we could do with something like yq or
   # ruby + jq to parse it properly, but that means more prereqs.
-  # However the yaml is output from docker-compose so is in a fairly
+  # However the yaml is output from docker compose so is in a fairly
   # consistent format.
   run_docker_compose_cmd \
     config \
@@ -564,7 +565,7 @@ determing_docker_host_details() {
   # of the host running the containers so they can make it available to
   # stroom-log-sender. This is typically done by the file
   # add_container_identity_headers.sh in the container. They have to be
-  # exported so docker-compose can use them.
+  # exported so docker compose can use them.
   # shellcheck disable=SC2034
   export DOCKER_HOST_HOSTNAME="${DOCKER_HOST_HOSTNAME:-$(hostname --fqdn)}"
   # shellcheck disable=SC2034
@@ -577,7 +578,7 @@ determing_docker_host_details() {
 start_stack() {
   # These lines may help in debugging the config that is passed to the containers
   #env
-  #docker-compose -f "$DIR"/config/"${STACK_NAME}".yml config
+  #"${DOCKER_COMPOSE_CMDS[@]:?}" -f "$DIR"/config/"${STACK_NAME}".yml config
 
   echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}\n"
 
@@ -621,7 +622,7 @@ run_dropwiz_command() {
   fi
 
   # Make the container run the migration on boot instead of starting the app
-  # This env var will be substituted in the stroom docker-compose yml
+  # This env var will be substituted in the stroom docker compose yml
   #export STROOM_DROPWIZARD_COMMAND="$*"
   echo -e "${GREEN}Starting stroom with command" \
     "[${BLUE}${dropwiz_command_and_args[*]}${GREEN}]${NC}"
@@ -655,7 +656,7 @@ migrate_stack() {
   fi
 
   # Make the container run the migration on boot instead of starting the app
-  # This env var will be substituted in the stroom docker-compose yml
+  # This env var will be substituted in the stroom docker compose yml
   export STROOM_DROPWIZARD_COMMAND="migrate"
 
   mkdir -p "${DIR}/${LOGS_DIR_NAME}"

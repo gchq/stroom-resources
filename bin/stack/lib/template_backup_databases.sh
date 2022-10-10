@@ -37,7 +37,7 @@ source "${DIR}"/lib/stroom_utils.sh
 source "${DIR}"/lib/constants.sh
 
 # Read the file containing all the env var exports to make them
-# available to docker-compose
+# available to docker compose
 source "$DIR"/config/<STACK_NAME>.env
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>" 
@@ -47,19 +47,6 @@ readonly DATABASES=( \
   "${STROOM_DB_NAME:-stroom}"
   "${STROOM_STATS_DB_NAME:-stats}"
 )
-
-check_installed_binaries() {
-  # The version numbers mentioned here are mostly governed by the docker compose syntax version that 
-  # we use in the yml files, currently 2.4, see https://docs.docker.com/compose/compose-file/compose-versioning/
-
-  if ! command -v docker 1>/dev/null; then 
-    echo -e "${RED}Error${NC}: Docker CE is not installed!"
-    echo -e "See ${BLUE}https://docs.docker.com/install/#supported-platforms${NC}" \
-      "for details on how to install it"
-    echo -e "Version ${BLUE}17.12.0${NC} or higher is required"
-    exit 1
-  fi
-}
 
 display_usage_and_exit() {
   echo -e "Usage: $(basename "$0") output_dir [database...]" >&2
@@ -214,7 +201,6 @@ main() {
   root_password="$(get_config_env_var "STROOM_DB_ROOT_PASSWORD")"
 
   local -r output_dir=$1
-  check_installed_binaries
 
   if [ "${output_dir}x" = "x" ]; then
     err "${RED}Error${NC}: Invalid arguments, missing output_dir"

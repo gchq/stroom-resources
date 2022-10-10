@@ -49,7 +49,7 @@ main() {
   setup_echo_colours
 
   # Read the file containing all the env var exports to make them
-  # available to docker-compose
+  # available to docker compose
   source "${DIR}"/config/<STACK_NAME>.env
 
   # shellcheck disable=SC2034

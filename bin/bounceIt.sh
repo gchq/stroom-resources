@@ -72,13 +72,13 @@ run_docker_compose_cmd() {
     done
 
     if [[ "${isDebugModeEnabled}" = true ]]; then
-        echo -e "${DGREY}docker-compose" \
+        echo -e "${DGREY}docker compose" \
             "--project-name ${COMPOSE_PROJECT_NAME}" \
             "${compose_file_args[*]}" \
             "${*}${NC}"
     fi
 
-    docker-compose \
+    docker compose \
         --project-name "${COMPOSE_PROJECT_NAME}" \
         "${compose_file_args[@]}" \
         ${@}
@@ -95,7 +95,7 @@ printValidServiceNames() {
 showUsage() {
     echo -e "Usage: ${BLUE}$0 [COMPOSE_COMMAND] [OPTION]... [EXTRA_COMPOSE_ARG]... [SERVICE_NAME]...${NC}"
     echo -e "COMPOSE_COMMAND - One of ${SUPPORTED_COMPOSE_CMDS_REGEX}, if not supplied a \"stop\" and then \"${DEFAULT_COMPOSE_CMD}\" will be performed"
-    echo -e "                  If you want to pass extra arguments to the docker-compose command then add them onto the end of the command"
+    echo -e "                  If you want to pass extra arguments to the docker compose command then add them onto the end of the command"
     echo -e "                  separated by a '${COMPOSE_CMD_DELIMITER}' (e.g. up:-d:--build) or "
     echo -e "                  surround it all in quotes (e.g. 'up -d --build')"
     echo -e "OPTIONs:"
@@ -209,7 +209,7 @@ determineHostAddress() {
         fi
     fi
 
-    # This is used by the docker-compose YML files, so they can tell a browser where to go
+    # This is used by the docker compose YML files, so they can tell a browser where to go
     export STROOM_RESOURCES_ADVERTISED_HOST="${ip}"
     export HOST_IP="${ip}"
     echo
@@ -411,7 +411,7 @@ if $requireHostFileCheck && [[ "$REQUIRE_HOSTS_FILE_CHECK" != "false" ]]; then
     fi
 fi
 
-#'docker-compose config' will perform any tag substitution so the tags here will have come from the TAGS_FILE or env vars or defaults
+#'docker compose config' will perform any tag substitution so the tags here will have come from the TAGS_FILE or env vars or defaults
 # This first line is a dry run so that we can see any errors
 if ${isDebugModeEnabled}; then
     run_docker_compose_cmd config
@@ -444,7 +444,7 @@ for serviceName in "${serviceNames[@]}"; do
             | sed 's/.*image: //'  \
             | uniq \
         )
-        #image=$(docker-compose -f ${ymlFile} config | grep -Pzo "${serviceName}:\s*\n(.|\n)*?\s*image:\s*.*\n" | grep -zo "image.*" | sed 's/image: //')
+        #image=$(docker compose -f ${ymlFile} config | grep -Pzo "${serviceName}:\s*\n(.|\n)*?\s*image:\s*.*\n" | grep -zo "image.*" | sed 's/image: //')
         #if [ "${image}x" != "x" ]; then
         #echo
         #echo -e "${RED}ERROR - Unable to establish image name for service ${GREEN}${serviceName}${NC}"
@@ -478,8 +478,8 @@ if $requireLatestImageCheck && [[ "${composeCmd}" =~ ${CMDS_FOR_IMAGE_CHECK} ]] 
                     "not be checked for a new version"
 
             elif [[ "${image}" =~ .*(SNAPSHOT|LATEST|latest).* ]]; then
-                #use 'docker-compose ps' to establish if we already have a container for this service
-                #if we do then we won't do a docker-compose pull as that would trash any local state
+                #use 'docker compose ps' to establish if we already have a container for this service
+                #if we do then we won't do a docker compose pull as that would trash any local state
                 #if a user wants refreshed images from dockerhub then they should delete their containers first
                 #using the dockerTidyUp script or similar
                 existingContainerId="$( \
@@ -518,7 +518,7 @@ fi
 
 #echo "Using the following docker images:"
 #echo
-#for image in $(docker-compose -f $ymlFile config | grep "image:" | sed 's/.*image: //'); do
+#for image in $(docker compose -f $ymlFile config | grep "image:" | sed 's/.*image: //'); do
 #echo -e "  ${GREEN}${image}${NC}"
 #done
 #echo
@@ -573,7 +573,7 @@ if $runStopCmdFirst; then
     run_docker_compose_cmd stop 
 fi
 
-#pass any additional arguments after the yml filename direct to docker-compose
+#pass any additional arguments after the yml filename direct to docker compose
 #This will create containers as required and then start up the new or existing containers
 run_docker_compose_cmd \
     "${composeCmd}" \
