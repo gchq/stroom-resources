@@ -10,4 +10,4 @@ projectName=`basename $ymlFile | sed 's/\.yml$//'`
 
 echo "Running project $projectName with using $ymlFile"
 
-docker-compose -f $ymlFile -p $projectName up 
+docker compose -f $ymlFile -p $projectName up 

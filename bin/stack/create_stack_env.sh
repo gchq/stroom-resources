@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Takes docker-compose yaml and extracts the possible configurations, 
+# Takes docker compose yaml and extracts the possible configurations, 
 # including the default values. This can be used to make sure the 
 # configuration is always complete.
 
@@ -49,7 +49,7 @@ add_common_env_file_header() {
   # shellcheck disable=SC2016
   {
     echo '# This file contains overrides to values used in the <stack name>.yml file'
-    echo '# used by docker-compose.'
+    echo '# used by docker compose.'
     echo '# For example, the .yml file may contain a line like:'
     echo '#   - STROOM_JDBC_DRIVER_PASSWORD=${STROOM_DB_PASSWORD:-stroomuser}'
     echo '# This means docker will pass the environment variable STROOM_JDBC_DRIVER_PASSWORD'
@@ -434,7 +434,7 @@ write_env_file() {
             echo -e "${var_docs}"
           fi
           # They must be exported as they need to be available to child processes,
-          # i.e. docker-compose.
+          # i.e. docker compose.
           echo "export ${var_name}=\"${var_value}\"" 
         } >> "${OUTPUT_ENV_FILE}"
       else
@@ -480,7 +480,7 @@ write_templated_env_file() {
             echo -e "${var_docs}"
           fi
           # They must be exported as they need to be available to child processes,
-          # i.e. docker-compose.
+          # i.e. docker compose.
           # ${var_name,,} converts var_name to lower case in bash 4+, obviously.
           # Construct a line like
           #   export MY_ENV_VAR="{{ stack_env_my_env_var | default('my default value') }}"
@@ -509,7 +509,7 @@ create_versions_file() {
       compose_file_args+=( "-f" "${yaml_file}" )
     done
 
-    docker-compose "${compose_file_args[@]}" config \
+    "${DOCKER_COMPOSE_CMDS[@]}" "${compose_file_args[@]}" config \
       | ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))' \
       | jq -r '.services[] | .container_name + "|" + .image' > "${STACK_SERVICES_FILE}"
   )

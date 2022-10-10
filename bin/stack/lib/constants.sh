@@ -22,19 +22,22 @@
 # being a sub-comand to the docker command. Thus we need to work out what
 # is installed and use the appropriate command by setting a constant.
 set_docker_compose_cmd() {
-  if [[ -z "${DOCKER_COMPOSE_CMD}" ]]; then
-    DOCKER_COMPOSE_CMD=
-    if command -v docker; then
-      if docker compose version 2>/dev/null || true \
-          | grep -E -q "^Docker Compose version [0-9.]+"; then
+  if [[ -z "${DOCKER_COMPOSE_CMDS[*]}" ]]; then
+    DOCKER_COMPOSE_CMDS=()
+    if command -v docker 1>/dev/null; then
+      local docker_compose_plugin_ver
+      docker_compose_plugin_ver="$(docker compose version 2>/dev/null || true)"
+
+      if grep -E -q "^Docker Compose version [0-9.]+" \
+          <<< "${docker_compose_plugin_ver}"; then
         # Docker with the compose plugin is available
         # Use --compatibility due to the way compose names its services
-        DOCKER_COMPOSE_CMD="docker compose --compatibility"
+        DOCKER_COMPOSE_CMDS=( "docker" "compose" "--compatibility" )
         # '-' vs '_'
       else
         if command -v docker-compose 1>/dev/null; then 
           # Legacy docker-compose command is available so use that
-          DOCKER_COMPOSE_CMD="docker-compose"
+          DOCKER_COMPOSE_CMDS=( "docker-compose" )
         else
           echo -e "${RED}ERROR${NC}: Docker Compose is not installed!"
           echo -e "See ${BLUE}https://docs.docker.com/compose/install/${NC} for" \

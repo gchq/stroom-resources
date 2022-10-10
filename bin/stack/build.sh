@@ -6,6 +6,8 @@ set -e
 
 # shellcheck disable=SC1091
 source lib/shell_utils.sh
+# shellcheck disable=SC1091
+source lib/constants.sh
 setup_echo_colours
 
 validate_requested_services() {
@@ -53,10 +55,12 @@ check_docker_compose_available() {
   if docker compose version 2>/dev/null || true \
       | grep -E -q "^Docker Compose version [0-9.]+"; then
     # Docker with the compose plugin is available
+    # colon semi-colon means noop
     :;
   else
+    # Check for legacy docker-compose binary
     if ! command -v docker-compose 1>/dev/null; then 
-      echo -e "${RED}Error${NC}:  ${BLUE}${binaries[*]}${NC} is not installed." \
+      echo -e "${RED}Error${NC}:  ${BLUE}Docker Compose${NC} is not installed." \
         "Please install it and try again" >&2
       exit 1
     fi
@@ -72,8 +76,7 @@ main() {
 
   check_binary_is_available "jq"
   check_binary_is_available "ruby"
-  check_binary_is_available "docker"
-  check_docker_compose_available
+  # constants.sh checks for presence of docker and compose
 
   local -r BUILD_STACK_NAME=$1
   local -r VERSION=$2
