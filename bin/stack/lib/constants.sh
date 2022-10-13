@@ -25,11 +25,7 @@ set_docker_compose_cmd() {
   if [[ -z "${DOCKER_COMPOSE_CMDS[*]}" ]]; then
     DOCKER_COMPOSE_CMDS=()
     if command -v docker 1>/dev/null; then
-      local docker_compose_plugin_ver
-      docker_compose_plugin_ver="$(docker compose version 2>/dev/null || true)"
-
-      if grep -E -q "^Docker Compose version [0-9.]+" \
-          <<< "${docker_compose_plugin_ver}"; then
+      if docker compose version >/dev/null 2>&1; then 
         # Docker with the compose plugin is available
         # Use --compatibility due to the way compose names its services
         DOCKER_COMPOSE_CMDS=( "docker" "compose" "--compatibility" )
