@@ -39,7 +39,7 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 HOST_IP=$(determine_host_address)
 
 # Read the file containing all the env var exports to make them
-# available to docker-compose
+# available to docker compose
 # shellcheck disable=SC1090
 source "$DIR"/config/<STACK_NAME>.env
 

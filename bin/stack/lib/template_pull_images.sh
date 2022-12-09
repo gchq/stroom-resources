@@ -34,7 +34,7 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 }
 
 # Read the file containing all the env var exports to make them
-# available to docker-compose
+# available to docker compose
 # shellcheck disable=SC1090
 source "$DIR"/config/<STACK_NAME>.env
 
@@ -58,7 +58,7 @@ main() {
   setup_echo_colours
 
   # Read the file containing all the env var exports to make them
-  # available to docker-compose
+  # available to docker compose
   # shellcheck disable=SC1090
   source "$DIR"/config/<STACK_NAME>.env
 

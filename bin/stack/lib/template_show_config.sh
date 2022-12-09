@@ -59,7 +59,7 @@ main() {
   echo -e "${GREEN}Using host IP: ${BLUE}${HOST_IP}${NC}"
 
   # Read the file containing all the env var exports to make them
-  # available to docker-compose
+  # available to docker compose
   # shellcheck disable=SC1090
   source "$DIR"/config/<STACK_NAME>.env
 

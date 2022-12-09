@@ -18,19 +18,19 @@
 # 
 ############################################################################
 
-CMD_HELP_MSG="Starts the specified services or the whole stack if no service name is supplied."
-Q_OPTION_TEXT="  -q   Quiet start. Don't wait for health checks and don't display info."
+cmd_help_args="COMMAND [COMMAND ARGS...]"
+cmd_help_msg="Runs a command a stroom command. See https://gchq.github.io/stroom-docs/latest/docs/user-guide/tools/command-line/."
 
 # We shouldn't use a lib function (e.g. in shell_utils.sh) because it will
 # give the directory relative to the lib script, not this script.
-readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR=
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 {
   source "${DIR}"/lib/network_utils.sh
   source "${DIR}"/lib/shell_utils.sh
   source "${DIR}"/lib/stroom_utils.sh
-  # This will check for presence of docker (compose)
   source "${DIR}"/lib/constants.sh
 }
 
@@ -41,52 +41,48 @@ HOST_IP=$(determine_host_address)
 
 # Read the file containing all the env var exports to make them
 # available to docker compose
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 source "$DIR"/config/<STACK_NAME>.env
 
 # shellcheck disable=SC2034
 STACK_NAME="<STACK_NAME>" 
 
 main() {
-  local wait_for_health_checks=true
   # leading colon means silent error reporting by getopts
-  while getopts ":hmq" arg; do
+  while getopts "hm" arg; do
+    # shellcheck disable=SC2220
     case $arg in
       h )  
-        show_default_services_usage "${CMD_HELP_MSG}" "${Q_OPTION_TEXT}"
+        show_default_usage "${cmd_help_args}" "${cmd_help_msg}"
         exit 0
         ;;
       m )  
         # shellcheck disable=SC2034
         MONOCHROME=true 
         ;;
-      q )  
-        wait_for_health_checks=false
-        ;;
     esac
   done
   shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
+  # Remaining args are our command and its args
+  local dropwiz_command_and_args=( "$@" )
+
+  if [[ $# -lt 1 ]]; then
+    echo -e "${RED}Error${NC}: No command provided"
+    show_default_usage "${cmd_help_args}" "${cmd_help_msg}"
+    exit 1
+  fi
+
   setup_echo_colours
 
-  for requested_service in "${@}"; do
-    if ! is_service_in_stack "${requested_service}"; then
-      die "${RED}Error${NC}: Service ${BLUE}${requested_service}${NC} is not" \
-        "in the stack."
-    fi
-  done
-
-  start_stack "$@"
-
-  if [ "${wait_for_health_checks}" = true ]; then
-    wait_for_services_to_start
-
-    # Stroom is now up or we have given up waiting so check the health
-    check_overall_health
-
-    # Display the banner, URLs and login details
-    display_stack_info
+  if ! is_service_in_stack "stroom"; then
+    die "${RED}Error${NC}: Service ${BLUE}stroom${NC} is not in the stack."
   fi
+
+  run_dropwiz_command "${dropwiz_command_and_args[@]}"
+
+  echo -e "${GREEN}Execution of command" \
+    "[${BLUE}${dropwiz_command_and_args[*]}${GREEN}] complete${NC}"
 }
 
 main "$@"

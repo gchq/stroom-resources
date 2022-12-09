@@ -84,7 +84,8 @@ run_docker_compose_cmd() {
     compose_file_args+=( "-f" "${yaml_file}" )
   done
 
-  docker-compose \
+  # DOCKER_COMPOSE_CMDS set in constants.sh
+  "${DOCKER_COMPOSE_CMDS[@]:?}" \
     --project-name "${STACK_NAME}" \
     "${compose_file_args[@]}" \
     "${extra_args[@]}"
@@ -93,7 +94,7 @@ run_docker_compose_cmd() {
 get_all_images_in_stack() {
   # Grepping yaml is far from ideal, we could do with something like yq or
   # ruby + jq to parse it properly, but that means more prereqs.
-  # However the yaml is output from docker-compose so is in a fairly
+  # However the yaml is output from docker compose so is in a fairly
   # consistent format.
   run_docker_compose_cmd \
     config \
@@ -293,11 +294,11 @@ check_service_health() {
   #echo "http_status_code: $http_status_code"
 
   # First hit the url to see if it is there
-  if [ "x501" = "x${http_status_code}" ]; then
+  if [ "501" = "${http_status_code}" ]; then
     # Server is up but no healthchecks are implmented, so assume healthy
     echo_healthy
-  elif [ "x200" = "x${http_status_code}" ] \
-    || [ "x500" = "x${http_status_code}" ]; then
+  elif [ "200" = "${http_status_code}" ] \
+    || [ "500" = "${http_status_code}" ]; then
 
     # 500 code indicates at least one health check is unhealthy but jq will fish that out
 
@@ -323,9 +324,9 @@ check_service_health() {
       fi
     else
       # non-jq approach
-      if [ "x200" = "x${http_status_code}" ]; then
+      if [ "200" = "${http_status_code}" ]; then
         echo_healthy
-      elif [ "x500" = "x${http_status_code}" ]; then
+      elif [ "500" = "${http_status_code}" ]; then
         echo_unhealthy
       do_echo "See ${BLUE}${health_check_pretty_url}${NC} for details"
         # Don't know how many are unhealthy but it is at least one
@@ -564,7 +565,7 @@ determing_docker_host_details() {
   # of the host running the containers so they can make it available to
   # stroom-log-sender. This is typically done by the file
   # add_container_identity_headers.sh in the container. They have to be
-  # exported so docker-compose can use them.
+  # exported so docker compose can use them.
   # shellcheck disable=SC2034
   export DOCKER_HOST_HOSTNAME="${DOCKER_HOST_HOSTNAME:-$(hostname --fqdn)}"
   # shellcheck disable=SC2034
@@ -577,7 +578,7 @@ determing_docker_host_details() {
 start_stack() {
   # These lines may help in debugging the config that is passed to the containers
   #env
-  #docker-compose -f "$DIR"/config/"${STACK_NAME}".yml config
+  #"${DOCKER_COMPOSE_CMDS[@]:?}" -f "$DIR"/config/"${STACK_NAME}".yml config
 
   echo -e "${GREEN}Creating and starting the docker containers and volumes${NC}\n"
 
@@ -610,6 +611,30 @@ start_stack() {
     "${services_to_start[@]}"
 }
 
+run_dropwiz_command() {
+  local dropwiz_command_and_args=( "$@" )
+
+  if ! is_container_running "stroom-all-dbs"; then
+    # Ensure the db is running/started
+    start_stack "stroom-all-dbs"
+  else
+    determing_docker_host_details
+  fi
+
+  # Make the container run the migration on boot instead of starting the app
+  # This env var will be substituted in the stroom docker compose yml
+  #export STROOM_DROPWIZARD_COMMAND="$*"
+  echo -e "${GREEN}Starting stroom with command" \
+    "[${BLUE}${dropwiz_command_and_args[*]}${GREEN}]${NC}"
+
+  # Delete the container after use
+  run_docker_compose_cmd \
+    run \
+    --rm \
+    "stroom" \
+    "./start.sh" "${dropwiz_command_and_args[@]}"
+}
+
 migrate_stack() {
   local is_background_job="$1"; shift
   
@@ -631,7 +656,7 @@ migrate_stack() {
   fi
 
   # Make the container run the migration on boot instead of starting the app
-  # This env var will be substituted in the stroom docker-compose yml
+  # This env var will be substituted in the stroom docker compose yml
   export STROOM_DROPWIZARD_COMMAND="migrate"
 
   mkdir -p "${DIR}/${LOGS_DIR_NAME}"
