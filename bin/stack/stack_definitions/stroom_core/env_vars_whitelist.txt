@@ -50,6 +50,7 @@ STROOM_PROXY_LOCAL_FORWARDING_HOST_VERIFICATION_ENABLED=false
 # are being used.
 # With this set to false the stack will be unhealthy so it is edited in
 # the env file during the CI build to test this stack variant.
-USE_DEFAULT_OPEN_ID_CREDENTIALS
+STROOM_IDENTITY_PROVIDER_TYPE
+STROOM_PROXY_LOCAL_IDENTITY_PROVIDER_TYPE
 
 # vim: set filetype=sh:

@@ -85,15 +85,15 @@ is_prefixed_by() {
 # e.g. 
 # arr=( "one" "two" "three" )
 # element_in "two" "${arr[@]}" # returns 0
-element_in () {
-  local element 
-  local match="$1"
-  shift
-  for element; do 
-    [[ "${element}" == "${match}" ]] && return 0
-  done
-  return 1
-}
+#element_in () {
+  #local element 
+  #local match="$1"
+  #shift
+  #for element; do 
+    #[[ "${element}" == "${match}" ]] && return 0
+  #done
+  #return 1
+#}
 
 assert_all_containers_count() {
   local expected_count="$1"
@@ -203,7 +203,7 @@ release_to_docker_hub() {
     --build-arg GIT_TAG="${BUILD_TAG:-${SNAPSHOT_FLOATING_TAG}}" \
     "${contextRoot}"
 
-  if [[ ! -n "${LOCAL_BUILD}" ]]; then
+  if [[ -z "${LOCAL_BUILD}" ]]; then
     echo -e "Pushing the docker image to ${GREEN}${dockerRepo}${NC}" \
       "with tags: ${GREEN}${allTagArgs[*]}${NC}"
     docker push \
@@ -289,6 +289,16 @@ do_stack_build_and_test() {
   popd > /dev/null
 }
 
+add_env_file_line() {
+  local env_file="$1"; shift
+  local env_var_line="$1"; shift
+  
+  echo -e "${RED}Adding ${YELLOW}${env_var_line}" \
+    "${RED}to ${BLUE}${env_file}${RED} to allow the stack to be tested by the CI build${NC}"
+
+  echo "${env_var_line}" >> "${env_file}"
+}
+
 test_stack() {
   stack_name="$1"
   echo -e "Testing stack ${GREEN}${stack_name}${NC} - ${GREEN}${VERSION_NO}${NC}"
@@ -305,17 +315,14 @@ test_stack() {
   echo -e "services_count:            [${GREEN}${services_count}${NC}]"
 
   local env_file="config/${stack_name}.env"
-  if ! grep -q -E "USE_DEFAULT_OPEN_ID_CREDENTIALS=\"?true\"?" "${env_file}"; then
-    # In order for the stack to start up cleanly and for the health
-    # check not fail we need to run with hard coded insecure open id creds.
-    # Some stacks already have this set, i.e. the -test stacks.
-    local env_var_line="export USE_DEFAULT_OPEN_ID_CREDENTIALS=\"true\""
-    echo -e "${RED}********************************************************************************${NC}"
-    echo -e "${RED}Adding ${YELLOW}${env_var_line}" \
-      "${RED}to ${BLUE}${env_file}${RED} to allow the stack to be tested in Travis${NC}"
-    echo -e "${RED}********************************************************************************${NC}"
-    echo "${env_var_line}" >> "${env_file}"
-  fi
+  # In order for the stack to start up cleanly and for the health
+  # check not fail we need to run with hard coded insecure open id creds.
+  # Some stacks already have this set, i.e. the -test stacks.
+  echo -e "${RED}********************************************************************************${NC}"
+  add_env_file_line "${env_file}" "export STROOM_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
+  add_env_file_line "${env_file}" "export STROOM_PROXY_LOCAL_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
+  add_env_file_line "${env_file}" "export STROOM_PROXY_REMOTE_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
+  echo -e "${RED}********************************************************************************${NC}"
 
   ./info.sh
 

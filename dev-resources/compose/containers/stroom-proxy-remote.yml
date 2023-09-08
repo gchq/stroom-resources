@@ -14,7 +14,7 @@ services:
       - JAVA_OPTS=${STROOM_PROXY_REMOTE_JAVA_OPTS:- -Xms50m -Xmx2g --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED}
       - STORING_ENABLED=${STROOM_PROXY_REMOTE_STORING_ENABLED:-true}
       - FEED_STATUS_URL=${STROOM_PROXY_REMOTE_FEED_STATUS_URL:-https://nginx/api/proxy/feedStatus/v1}
-      - USE_DEFAULT_OPEN_ID_CREDENTIALS=${USE_DEFAULT_OPEN_ID_CREDENTIALS:-false}
+      - IDENTITY_PROVIDER_TYPE=${STROOM_PROXY_REMOTE_IDENTITY_PROVIDER_TYPE:-NO_IDP}
       - REST_CLIENT_VERIFY_HOSTNAME=${STROOM_PROXY_REMOTE_REST_CLIENT_VERIFY_HOSTNAME:-true}
     ports:
       # Allow the port on the docker host to be changed, internal are fixed
