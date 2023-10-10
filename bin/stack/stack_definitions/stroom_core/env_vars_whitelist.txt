@@ -37,8 +37,10 @@ STROOM_PROXY_HOST
 #STROOM_PROXY_LOCAL_SYNC_API_KEY - commented out as rulesets are not ready for use
 #STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL - commented out as rulesets are not ready for use
 #STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL - commented out as rulesets are not ready for use
+STROOM_PROXY_LOCAL_TEMP_MOUNT_SIZE
 STROOM_STATS_DB_HOST
 STROOM_STATS_DB_PASSWORD
+STROOM_TEMP_MOUNT_SIZE
 
 # Relax security for when the stack is running with the default certs
 STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME=false

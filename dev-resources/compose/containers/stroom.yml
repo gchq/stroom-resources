@@ -57,11 +57,12 @@ services:
         source: stroom_search_results
         target: /stroom/search_results
       - type: volume
-        source: stroom_lmdb_library
-        target: /stroom/lmdb_library
-      - type: volume
         source: stroom_volumes
         target: /stroom/volumes
+    tmpfs:
+      - "/tmp:size=${STROOM_TEMP_MOUNT_SIZE:-8g}"
+        # lmdb-java places a transient library file here on boot and needs exec perms on
+      - "/stroom/lmdb_library:exec"
     logging:
       driver: "json-file"
       options:
@@ -75,7 +76,6 @@ services:
     command: "./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}"
 volumes:
   stroom_content_pack_import:
-  stroom_lmdb_library:
   stroom_logs:
   stroom_output:
   stroom_reference_data:
