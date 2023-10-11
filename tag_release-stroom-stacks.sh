@@ -43,8 +43,8 @@ main() {
 
   if [ $# -ne 1 ]; then
     echo -e "${RED}ERROR${GREEN}: Missing version argument${NC}"
-    echo -e "${GREEN}Usage: ${BLUE}./tag_release.sh version${NC}"
-    echo -e "${GREEN}e.g:   ${BLUE}./tag_release.sh stroom-stacks-v6.0-beta.20${NC}"
+    echo -e "${GREEN}Usage: ${BLUE}./tag_release-stroom-stacks.sh version${NC}"
+    echo -e "${GREEN}e.g:   ${BLUE}./tag_release-stroom-stacks.sh stroom-stacks-v6.0-beta.20${NC}"
     echo
     echo -e "${GREEN}This script will build all the stack variants and create an annotated git commit using the${NC}"
     echo -e "${GREEN}version information for each stack. The tag commit will be pushed to the origin.${NC}"
