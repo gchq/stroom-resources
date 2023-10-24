@@ -81,7 +81,7 @@ run_docker_compose_cmd() {
     docker compose \
         --project-name "${COMPOSE_PROJECT_NAME}" \
         "${compose_file_args[@]}" \
-        ${@}
+        "${@}"
 }
 
 printValidServiceNames() {
@@ -141,7 +141,7 @@ createOrUpdateLocalTagsFile() {
         #File exists, make sure all required tags are defined
         #Loop round all entries in defaultTags, ignoring the top comment line
         #assumes no spaces in 'tag_name=version'
-        for entry in $(echo -e "${defaultTags}" | egrep -v "^#.*\n") ; do
+        for entry in $(echo -e "${defaultTags}" | grep -E -v "^#.*\n") ; do
             #echo "entry is [$entry]"
             if [[ "${entry}" =~ _TAG= ]]; then
                 #extract the tag name from the default tags entry e.g. "    STROOM_TAG=master-SNAPSHOT   " => "STROOM_TAG"
@@ -174,7 +174,7 @@ exportFileContents() {
         #These lines can be used for debugging what env vars are being exported
         echo -e "${LGREY}Using the following environment variables${NC}"
         echo -e "${LGREY}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${NC}"
-        while read line; do
+        while read -r line; do
             if [[ "${line}" =~ ^[:space:]*[A-Z_]+= ]]; then
                 echo -e "${DGREY}${line}${NC}"
             fi
@@ -183,7 +183,9 @@ exportFileContents() {
     fi
 
     #Source the file, exporting all our env vars
-    set -o allexport; source "${file}"; set +o allexport
+    set -o allexport;
+    # shellcheck disable=SC1090
+    source "${file}"; set +o allexport
 }
 
 determineHostAddress() {
@@ -222,7 +224,6 @@ determineHostAddress() {
 echo
 isHostMissing=false
 hasEchoedMissingHostsMsg=false
-extraComposeArguments=""
 requireConfirmation=true
 requireHostFileCheck=true
 requireLatestImageCheck=true
@@ -247,7 +248,6 @@ else
     composeCmd="$DEFAULT_COMPOSE_CMD"
 fi
 
-extraComposeArguments=""
 
 optspec=":def:hiyx"
 while getopts "$optspec" optchar; do
@@ -314,6 +314,7 @@ if [ ! -f ${CREDENTIALS_FILE} ]; then
 
     echo -e "Created default credentials in ${GREEN}${CREDENTIALS_FILE}${NC}, if you wish to customise the values, ensure they are edited before any containers are created"
 fi
+# shellcheck disable=SC1090
 source ${CREDENTIALS_FILE}
 
 determineHostAddress
@@ -421,7 +422,7 @@ fi
 # Now capture the images by running the command again
 allImages="$( \
     run_docker_compose_cmd config 2>/dev/null \
-    | egrep "image: " \
+    | grep "image: " \
 )"
 
 echo
@@ -431,7 +432,7 @@ echo
 #print out all the services/images we are trying to use (i.e. potentially a subset of all those in the yml file
 for serviceName in "${serviceNames[@]}"; do
 
-    if ! egrep -q "^\s*${serviceName}:\s*$" "${YAML_FILES_DIR}"/**/*.yml; then
+    if ! grep -Eq "^\s*${serviceName}:\s*$" "${YAML_FILES_DIR}"/**/*.yml; then
         echo
         echo -e "${RED}ERROR${NC} - Service ${GREEN}${serviceName}${NC} does" \
             "not exist in the yaml files in ${BLUE}${YAML_FILES_DIR}${NC}"
@@ -578,7 +579,6 @@ fi
 #This will create containers as required and then start up the new or existing containers
 run_docker_compose_cmd \
     "${composeCmd}" \
-    ${extraComposeArguments} \
     "${serviceNames[@]}"
 
 exit 0
