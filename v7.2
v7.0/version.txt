@@ -1,1 +1,1 @@
-stroom-stacks-v7.2.13-proxy-v7.0.32
+stroom-stacks-v7.2.14-proxy-v7.0.32
