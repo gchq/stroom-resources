@@ -575,10 +575,14 @@ if $runStopCmdFirst; then
     run_docker_compose_cmd stop 
 fi
 
+# composeCmd could be 'up -d --build' (which is one arg) so word split into
+# an array ready to pass as individual args to docker compose
+read -ra composeArgs <<< "${composeCmd}"
+
 #pass any additional arguments after the yml filename direct to docker compose
 #This will create containers as required and then start up the new or existing containers
 run_docker_compose_cmd \
-    "${composeCmd}" \
+    "${composeArgs[@]}" \
     "${serviceNames[@]}"
 
 exit 0
