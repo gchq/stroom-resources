@@ -36,11 +36,11 @@ services:
     volumes:
       - ${STROOM_VOLUME_CONFIG:-../volumes/stroom/config}:/stroom/config:ro
       - type: volume
-        source: stroom_analytic_store
-        target: /stroom/analytic_store
-      - type: volume
         source: stroom_content_pack_import
         target: /stroom/content_pack_import
+      - type: volume
+        source: stroom_lmdb
+        target: /stroom/lmdb
       - type: volume
         source: stroom_logs
         target: /stroom/logs
@@ -77,8 +77,8 @@ services:
     # For other commands that have args see command.sh in the stack which overrides the docker command
     command: "./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}"
 volumes:
-  stroom_analytic_store:
   stroom_content_pack_import:
+  stroom_lmdb:
   stroom_lmdb_library:
   stroom_logs:
   stroom_output:
