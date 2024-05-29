@@ -77,7 +77,7 @@ Whether Stroom should create default stream volumes
 Comma delimited list of nodes to associate with the volumes of the default index group
 to be created on start-up if STROOM_CREATE_DEFAULT_INDEX_VOLUMES_ON_BOOTSTRAP is true,
 the nodes in the list correspond to the paths defined in STROOM_DEFAULT_INDEX_VOLUME_PATHS.
-      
+
 ##  STROOM_DEFAULT_INDEX_VOLUME_PATHS
 
 Comma delimited list of paths of the volumes of the default index group 
@@ -198,6 +198,11 @@ True if stroom-proxy should store the received data in its local repository.
 Typically this will be true for a local proxy as stroom will read from this
 repository.
 
+## STROOM_PROXY_LOCAL_TEMP_MOUNT_SIZE
+
+The maximum size of the /tmp moount, e.g. '1g'.
+Valid units are 'b', 'k', 'm', 'g'.
+
 ## STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_PASSWORD
 
 The password of the java keystore file that will be used when making API
@@ -276,6 +281,11 @@ True if stroom-proxy should store the received data in its local repository.
 Typically this will be true for a local proxy as stroom will read from this
 repository.
 
+## STROOM_PROXY_REMOTE_TEMP_MOUNT_SIZE
+
+The maximum size of the /tmp moount, e.g. '1G'.
+Valid units are 'b', 'k', 'm', 'g'.
+
 ## STROOM_RACK
 
 DEPRECATED The name/id of the rack in which this stroom instance sits.
@@ -293,6 +303,11 @@ The host/DNS name for the SQL Statistics _stats_ database.
 ## STROOM_STATS_DB_PASSWORD
 
 The password for the SQL Statistics _stats_ database.
+
+## STROOM_TEMP_MOUNT_SIZE
+
+The maximum size of the /tmp moount, e.g. '1G'.
+Valid units are 'b', 'k', 'm', 'g'.
 
 ## STROOM_UI_HOST
 

@@ -39,6 +39,15 @@ services:
       - type: volume
         source: stroom-proxy-remote_repo
         target: /stroom-proxy/repo
+      - type: volume
+        source: stroom-proxy-remote_db
+        target: /stroom-proxy/db
+      - type: volume
+        source: stroom-proxy-remote_failures
+        target: /stroom-proxy/failures
+    tmpfs:
+      - "/tmp:size=${STROOM_PROXY_REMOTE_TEMP_MOUNT_SIZE:-8g}"
+      - "/stroom-proxy/sqlite_library:exec"
     logging:
       driver: "json-file"
       options:
@@ -50,3 +59,5 @@ volumes:
   stroom-proxy-remote_content:
   stroom-proxy-remote_logs:
   stroom-proxy-remote_repo:
+  stroom-proxy-remote_db:
+  stroom-proxy-remote_failures:
