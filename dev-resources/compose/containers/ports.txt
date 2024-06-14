@@ -1,4 +1,4 @@
-#A list of ports externally exposed by docker containers
+# A list of ports externally exposed by docker containers
    80 - nginx (http)
   443 - nginx (https)
  2181 - zookeeper
@@ -22,6 +22,7 @@
  8543 - stroom-proxy-local (app https)
  8983 - solr (http)
  9000 - HDFS
+ 9042 - ScyllaDB
  9090 - stroom-proxy-remote (app http)
  9091 - stroom-proxy-remote (admin)
  9092 - kakfa

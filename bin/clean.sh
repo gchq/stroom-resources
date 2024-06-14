@@ -26,14 +26,15 @@ setup_echo_colours() {
 
 # These are the names of the only containers that will get deleted
 STROOM_CONTAINER_NAMES=( \
+  "elasticsearch" \
+  "kafka" \
   "nginx" \
+  "scylladb" \
   "stroom" \
   "stroom-proxy" \
   "stroom-all-dbs" \
   "stroom-log-sender" \
-  "zookeeper" \
-  "kafka" \
-  "elasticsearch")
+  "zookeeper")
 
 main() {
   setup_echo_colours

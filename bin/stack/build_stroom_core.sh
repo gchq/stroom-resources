@@ -11,7 +11,7 @@ main() {
   local SERVICES=()
 
   # Define all the services that make up the stack
-  # Array created like this to allow lines to commneted out
+  # Array created like this to allow lines to commented out
   SERVICES+=("nginx")
   SERVICES+=("stroom")
   SERVICES+=("stroom-all-dbs")

@@ -19,6 +19,7 @@ validate_requested_services() {
     "kafka" \
     "kibana" \
     "nginx" \
+    "scylladb" \
     "stroom" \
     "stroom-all-dbs" \
     "stroom-log-sender" \
