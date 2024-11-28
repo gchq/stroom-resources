@@ -3,7 +3,7 @@ version: '2.4'
 services: 
 
   stroom-all-dbs:
-    image: "${MYSQL_DOCKER_REPO:-mysql}:${MYSQL_TAG:-8.0.36}"
+    image: "${MYSQL_DOCKER_REPO:-mysql}:${MYSQL_TAG:-8.0.40}"
     container_name: stroom-all-dbs
     ports:
       - "3307:3306"
