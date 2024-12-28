@@ -1,1 +1,1 @@
-stroom-stacks-v7.8-reporting.3-proxy-v7.0.37
+stroom-stacks-v7.8-reporting.5-proxy-v7.0.37
