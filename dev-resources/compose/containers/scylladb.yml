@@ -1,8 +1,5 @@
 # Runs a ScyllaDB instance
-version: '2.4'
-
 services:
-
   scylladb:
     image: "${SCYLLA_DB_DOCKER_REPO:-scylladb/scylla}:${SCYLLA_DB_TAG:-5.4.7}"
     container_name: scylladb

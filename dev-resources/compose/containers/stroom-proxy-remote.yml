@@ -1,7 +1,4 @@
-version: '2.4'
-
 services:
-
   stroom-proxy-remote:
     container_name: stroom-proxy-remote
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v7-LATEST}"

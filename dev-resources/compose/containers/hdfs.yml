@@ -1,7 +1,5 @@
 #Runs an HDFS instance
-version: '2.4'
-
-services: 
+services:
   hdfs:
     image: "${HADOOP_DOCKER_REPO:-sequenceiq/hadoop-docker}:${HDFS_TAG:-2.7.1}"
     container_name: hdfs
