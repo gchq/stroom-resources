@@ -36,8 +36,8 @@ services:
         source: stroom-proxy-local_logs
         target: /stroom-proxy/logs
       - type: volume
-        source: stroom-proxy-local_repo
-        target: /stroom-proxy/repo
+        source: stroom-proxy-local_data
+        target: /stroom-proxy/data
     logging:
       driver: "json-file"
       options:
@@ -48,4 +48,4 @@ services:
 volumes:
   stroom-proxy-local_content:
   stroom-proxy-local_logs:
-  stroom-proxy-local_repo:
+  stroom-proxy-local_data:
