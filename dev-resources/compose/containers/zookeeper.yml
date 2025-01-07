@@ -1,7 +1,4 @@
-version: '2.4'
-
-services: 
-
+services:
   zookeeper:
     container_name: zookeeper
     image: "${STROOM_ZOOKEEPER_DOCKER_REPO:-gchq/stroom-zookeeper}:${STROOM_ZOOKEEPER_TAG:-v1.0.0_zk-v3.4.5}"

@@ -1,7 +1,4 @@
-version: '2.4'
-
 services:
-
   stroom-query-elastic-ui:
     container_name: stroom-query-elastic-ui
     image: "${STROOM_ELASTIC_UI_DOCKER_REPO:-gchq/stroom-query-elastic-ui}:${STROOM_ELASTIC_UI_TAG:-v0.0.4-alpha.1}"

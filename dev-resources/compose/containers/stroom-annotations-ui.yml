@@ -1,7 +1,4 @@
-version: '2.4'
-
 services:
-
   stroom-annotations-ui:
     container_name: stroom-annotations-ui
     image: "${STROOM_ANNOTATIONS_UI_DOCKER_REPO:-gchq/stroom-annotations-ui}:${STROOM_ANNOTATIONS_UI_TAG:-v0.2.1-alpha.1}"

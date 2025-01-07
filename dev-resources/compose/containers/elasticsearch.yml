@@ -1,7 +1,4 @@
-version: '2.4'
-
 services:
-
   elasticsearch:
     image: "${ELASTIC_DOCKER_REPO:-docker.elastic.co/elasticsearch/elasticsearch}:${ELASTIC_SEARCH_TAG:-5.6.3}"
     container_name: elasticsearch

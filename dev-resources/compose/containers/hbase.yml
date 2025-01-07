@@ -1,8 +1,5 @@
 #Runs an HBase instance with its required zookeeper
-version: '2.4'
-
-services: 
-
+services:
   hbase:
     container_name: hbase
     image: "${STROOM_STATS_HBASE_DOCKER_REPO:-gchq/stroom-stats-hbase}:${STROOM_STATS_TAG:-v0.6-LATEST}_hbase-v2.1"

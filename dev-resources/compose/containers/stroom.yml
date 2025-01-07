@@ -1,5 +1,3 @@
-version: "2.4"
-
 services:
   stroom:
     container_name: stroom
@@ -39,6 +37,9 @@ services:
         source: stroom_content_pack_import
         target: /stroom/content_pack_import
       - type: volume
+        source: stroom_lmdb
+        target: /stroom/lmdb
+      - type: volume
         source: stroom_logs
         target: /stroom/logs
       - type: volume
@@ -75,6 +76,7 @@ services:
     command: "./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}"
 volumes:
   stroom_content_pack_import:
+  stroom_lmdb:
   stroom_lmdb_library:
   stroom_logs:
   stroom_output:

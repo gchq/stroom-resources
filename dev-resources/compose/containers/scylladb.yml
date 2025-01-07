@@ -1,0 +1,24 @@
+# Runs a ScyllaDB instance
+services:
+  scylladb:
+    image: "${SCYLLA_DB_DOCKER_REPO:-scylladb/scylla}:${SCYLLA_DB_TAG:-5.4.7}"
+    container_name: scylladb
+    ports:
+      - 9042:9042
+    volumes:
+      - type: volume
+        source: scylladb_data
+        target: /var/lib/scylla/data
+      - type: volume
+        source: scylladb_commitlog
+        target: /var/lib/scylla/commitlog
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${SCYLLADB_STD_OUT_LOGS_MAX_SIZE:-10m}"
+        max-file: "${SCYLLADB_STD_OUT_LOGS_MAX_FILES:-2}"
+    labels:
+      - "stack_name=${STACK_NAME:-<STACK_NAME>}"
+volumes:
+  scylladb_data:
+  scylladb_commitlog:
