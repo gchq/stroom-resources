@@ -321,8 +321,8 @@ test_stack() {
   echo -e "${RED}********************************************************************************${NC}"
   # This one is for stroom v7.2
   add_env_file_line "${env_file}" "export STROOM_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
-  # This one is for stroom-proxy v7.0
-  add_env_file_line "${env_file}" "export USE_DEFAULT_OPEN_ID_CREDENTIALS=\"true\""
+  add_env_file_line "${env_file}" "export STROOM_PROXY_LOCAL_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
+  add_env_file_line "${env_file}" "export STROOM_PROXY_REMOTE_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
   echo -e "${RED}********************************************************************************${NC}"
 
   ./info.sh
