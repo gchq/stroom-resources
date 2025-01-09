@@ -192,12 +192,6 @@ that is co-located with stroom.
 True if stroom-proxy should verify the hostname against the server certificate
 when making API call, e.g. when checking the feed receipt status.
 
-## STROOM_PROXY_LOCAL_STORING_ENABLED
-
-True if stroom-proxy should store the received data in its local repository.
-Typically this will be true for a local proxy as stroom will read from this
-repository.
-
 ## STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_PASSWORD
 
 The password of the java keystore file that will be used when making API
@@ -269,12 +263,6 @@ The URL that data should be forwarded to, e.g. a downstream stroom or stroom-pro
 
 True if stroom-proxy should verify the hostname against the server certificate
 when making API call, e.g. when checking the feed receipt status.
-
-## STROOM_PROXY_REMOTE_STORING_ENABLED
-
-True if stroom-proxy should store the received data in its local repository.
-Typically this will be true for a local proxy as stroom will read from this
-repository.
 
 ## STROOM_RACK
 
