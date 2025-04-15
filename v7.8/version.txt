@@ -1,1 +1,1 @@
-stroom-stacks-v7.8-beta.19
+stroom-stacks-v7.8.0
