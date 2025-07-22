@@ -9,10 +9,9 @@ services:
       - FORWARDING_HOST_VERIFICATION_ENABLED=${STROOM_PROXY_REMOTE_FORWARDING_HOST_VERIFICATION_ENABLED:-true}
       - FORWARD_URL=${STROOM_PROXY_REMOTE_FORWARD_URL:-https://nginx/stroom/datafeed}
       - JAVA_OPTS=${STROOM_PROXY_REMOTE_JAVA_OPTS:- -Xms50m -Xmx2g}
-      - STORING_ENABLED=${STROOM_PROXY_REMOTE_STORING_ENABLED:-true}
-      - FEED_STATUS_URL=${STROOM_PROXY_REMOTE_FEED_STATUS_URL:-https://nginx/api/proxy/feedStatus/v1}
-      - USE_DEFAULT_OPEN_ID_CREDENTIALS=${USE_DEFAULT_OPEN_ID_CREDENTIALS:-false}
+      - FEED_STATUS_URL=${STROOM_PROXY_REMOTE_FEED_STATUS_URL:-https://nginx/api/proxy/feedStatus/v2}
       - REST_CLIENT_VERIFY_HOSTNAME=${STROOM_PROXY_REMOTE_REST_CLIENT_VERIFY_HOSTNAME:-true}
+      - IDENTITY_PROVIDER_TYPE=${STROOM_PROXY_REMOTE_IDENTITY_PROVIDER_TYPE:-NO_IDP}
     ports:
       # Allow the port on the docker host to be changed, internal are fixed
       - "${STROOM_PROXY_REMOTE_APP_PORT:-9090}:8090"
@@ -34,8 +33,8 @@ services:
         source: stroom-proxy-remote_logs
         target: /stroom-proxy/logs
       - type: volume
-        source: stroom-proxy-remote_repo
-        target: /stroom-proxy/repo
+        source: stroom-proxy-remote_data
+        target: /stroom-proxy/data
     logging:
       driver: "json-file"
       options:
@@ -46,4 +45,4 @@ services:
 volumes:
   stroom-proxy-remote_content:
   stroom-proxy-remote_logs:
-  stroom-proxy-remote_repo:
+  stroom-proxy-remote_data:

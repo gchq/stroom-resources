@@ -5,13 +5,12 @@ services:
     environment:
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
       - DOCKER_HOST_IP=${DOCKER_HOST_IP:-UNKNOWN}
-      - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-false}
+      - FORWARDING_ENABLED=${STROOM_PROXY_LOCAL_FORWARDING_ENABLED:-true}
       - FORWARD_URL=${STROOM_PROXY_LOCAL_FORWARD_URL:-}
       - JAVA_OPTS=${STROOM_PROXY_LOCAL_JAVA_OPTS:- -Xms50m -Xmx2g}
-      - STORING_ENABLED=${STROOM_PROXY_LOCAL_STORING_ENABLED:-true}
-      - FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-https://nginx/api/feedStatus/v1}
-      - USE_DEFAULT_OPEN_ID_CREDENTIALS=${USE_DEFAULT_OPEN_ID_CREDENTIALS:-false}
+      - FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-https://nginx/api/feedStatus/v2}
       - REST_CLIENT_VERIFY_HOSTNAME=${STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME:-true}
+      - IDENTITY_PROVIDER_TYPE=${STROOM_PROXY_LOCAL_IDENTITY_PROVIDER_TYPE:-NO_IDP}
     ports:
       # Allow the ports on the docker host to be chaned, internally they are fixed
       - "${STROOM_PROXY_LOCAL_APP_PORT:-8090}:8090"
@@ -36,8 +35,8 @@ services:
         source: stroom-proxy-local_logs
         target: /stroom-proxy/logs
       - type: volume
-        source: stroom-proxy-local_repo
-        target: /stroom-proxy/repo
+        source: stroom-proxy-local_data
+        target: /stroom-proxy/data
     logging:
       driver: "json-file"
       options:
@@ -48,4 +47,4 @@ services:
 volumes:
   stroom-proxy-local_content:
   stroom-proxy-local_logs:
-  stroom-proxy-local_repo:
+  stroom-proxy-local_data:

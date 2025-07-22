@@ -49,8 +49,8 @@ services:
         # a local proxy then we need to move this out into in override yml as is done with
         # stroom-log-sender
       - type: volume
-        source: stroom-proxy-local_repo
-        target: /stroom/proxy_repo
+        source: stroom-proxy-local_data
+        target: /stroom/proxy_data
       - type: volume
         source: stroom_reference_data
         target: /stroom/reference_data

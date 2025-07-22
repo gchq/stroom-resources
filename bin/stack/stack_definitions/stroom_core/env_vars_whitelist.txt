@@ -44,9 +44,6 @@ STROOM_STATS_DB_PASSWORD
 STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME=false
 
 # Allow proxy to authenticate with no token for testing
-# This entry in the env file will be edited by the CI build
-USE_DEFAULT_OPEN_ID_CREDENTIALS
-# Allow proxy to authenticate with no token for testing
 # stroom_core stack should not have default creds enabled by default
 # to stop people installin an instance and not realising insecure creds
 # are being used.

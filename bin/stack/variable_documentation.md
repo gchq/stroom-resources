@@ -116,6 +116,16 @@ server.
 The host/DNS name used to access stroom. Typically this will be the same as
 NGINX_ADVERTISED_HOST when nginx is used as the gateway for all requests.
 
+## STROOM_IDENTITY_PROVIDER_TYPE
+
+Defines the type of identity provider in use for authentication.
+One of (EXTERNAL_IDP|INTERNAL_IDP|TEST_CREDENTIALS).
+INTERNAL_IDP - Use Stroom's internal IDP for authentication. No support for token
+authentication on data receipt.
+EXTERNAL_IDP - An external IDP such as KeyCloak/Cognito is used for all authentication,
+including data receipt.
+TEST_CREDENTIALS - Use insecure hard-coded authentication credentials for test/demo only.
+
 ## STROOM_JAVA_OPTS
 
 Any additional java command line options, e.g. `-Xms50m -Xmx1024m`, that will
@@ -187,16 +197,19 @@ True if stroom-proxy should forward data on to a downstream stroom or
 stroom-proxy instance. Typically this will be false for a local proxy, i.e. one
 that is co-located with stroom.
 
+## STROOM_PROXY_LOCAL_IDENTITY_PROVIDER_TYPE
+
+Defines the type of identity provider in use for authentication.
+One of (NO_IDP|EXTERNAL_IDP|TEST_CREDENTIALS).
+NO_IDP - No IDP is used. API keys are set in config for feed status checks.
+EXTERNAL_IDP - An external IDP such as KeyCloak/Cognito is used for token authentication
+on receipt and for feed status checks.
+TEST_CREDENTIALS - Use insecure hard-coded authentication credentials for test/demo only.
+
 ## STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME
 
 True if stroom-proxy should verify the hostname against the server certificate
 when making API call, e.g. when checking the feed receipt status.
-
-## STROOM_PROXY_LOCAL_STORING_ENABLED
-
-True if stroom-proxy should store the received data in its local repository.
-Typically this will be true for a local proxy as stroom will read from this
-repository.
 
 ## STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_PASSWORD
 
@@ -265,16 +278,19 @@ format.
 
 The URL that data should be forwarded to, e.g. a downstream stroom or stroom-proxy.
 
+## STROOM_PROXY_REMOTE_IDENTITY_PROVIDER_TYPE
+
+Defines the type of identity provider in use for authentication.
+One of (NO_IDP|EXTERNAL_IDP|TEST_CREDENTIALS).
+NO_IDP - No IDP is used. API keys are set in config for feed status checks.
+EXTERNAL_IDP - An external IDP such as KeyCloak/Cognito is used for token authentication
+on receipt and for feed status checks.
+TEST_CREDENTIALS - Use insecure hard-coded authentication credentials for test/demo only.
+
 ## STROOM_PROXY_REMOTE_REST_CLIENT_VERIFY_HOSTNAME
 
 True if stroom-proxy should verify the hostname against the server certificate
 when making API call, e.g. when checking the feed receipt status.
-
-## STROOM_PROXY_REMOTE_STORING_ENABLED
-
-True if stroom-proxy should store the received data in its local repository.
-Typically this will be true for a local proxy as stroom will read from this
-repository.
 
 ## STROOM_RACK
 
