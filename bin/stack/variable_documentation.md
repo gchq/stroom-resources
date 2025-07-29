@@ -11,6 +11,31 @@ will be included as documentation for that environment variable.
 Variables should be listed in A-Z order. Text should have hard breaks before 80
 chars.
 
+## DOWNSTREAM_API_KEY
+
+The API key or token to use when calling the downstream host. The downstream
+host will either be a stroom instance or another stroom-proxy instance or
+something like a load balancer in front of one of those two.
+
+## DOWNSTREAM_HOST_SCHEME
+
+The HTTP URL scheme, i.e. `http` or `https` to use when calling the downstream
+host. The downstream host will either be a stroom instance or another
+stroom-proxy instance or something like a load balancer in front of one of
+those two.
+
+## DOWNSTREAM_HOST_HOSTNAME
+
+The FQDN or IP address of the host when calling the downstream host.  The
+downstream host will either be a stroom instance or another stroom-proxy
+instance or something like a load balancer in front of one of those two.
+
+## DOWNSTREAM_HOST_PORT
+
+The HTTP port (e.g. 8080, 443, etc) to use when calling the downstream host.
+Not required if the port is implied from the scheme. The downstream host will
+either be a stroom instance or another stroom-proxy instance or something like
+a load balancer in front of one of those two.
 
 ## MYSQL_DOCKER_REPO
 

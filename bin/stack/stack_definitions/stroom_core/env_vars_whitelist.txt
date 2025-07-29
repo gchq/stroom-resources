@@ -8,6 +8,10 @@
 # If you provide a value then the value will be used in the env file.
 # NOTE: Env vars listed here cannot also be in the overrides.env file
 
+DOWNSTREAM_API_KEY
+DOWNSTREAM_HOST_SCHEME
+DOWNSTREAM_HOST_HOSTNAME
+DOWNSTREAM_HOST_PORT
 MYSQL_DOCKER_REPO
 NGINX_ADVERTISED_HOST
 NGINX_SSL_CERTIFICATE

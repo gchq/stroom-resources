@@ -7,6 +7,10 @@
 # whitelist
 # NOTE: Env vars listed here cannot also be in the overrides.env file
 
+DOWNSTREAM_API_KEY
+DOWNSTREAM_HOST_SCHEME
+DOWNSTREAM_HOST_HOSTNAME
+DOWNSTREAM_HOST_PORT
 #STROOM_PROXY_LOCAL_CONTENT_SYNC_ENABLED - commented out as rulesets are not ready for use
 #STROOM_PROXY_LOCAL_UPSTREAM_DICTIONARY_URL - commented out as rulesets are not ready for use
 #STROOM_PROXY_LOCAL_UPSTREAM_RULE_URL - commented out as rulesets are not ready for use
