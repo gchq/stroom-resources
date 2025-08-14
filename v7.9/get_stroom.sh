@@ -22,7 +22,7 @@
 
 # This script is templated and will be substituted during the build process
 # To test the templated version you can do something like this:
-# bash <(cat ~/git_work/stroom-resources/bin/stack/lib/get_stroom.sh | sed 's/stroom_core_test/stroom_core_test/; s/stroom-stacks-v7.9.0/stroom-stacks-v6.0-beta.28-9/; s/v7.9.0/v6.0-beta.28-9/; s/3df0146c100fd8e992a173f65f12dfeb37616391cff98baf1595eb4528d53517  stroom_core_test-v7.9.0.tar.gz/fc593474e2ee6b9a7f507303fc38522c6a4d1abf62e2ddc7af0f20d15b6baeb0  stroom_core_test-v6.0-beta.28-9.tar.gz/' )
+# bash <(cat ~/git_work/stroom-resources/bin/stack/lib/get_stroom.sh | sed 's/stroom_core_test/stroom_core_test/; s/stroom-stacks-v7.9.2/stroom-stacks-v6.0-beta.28-9/; s/v7.9.2/v6.0-beta.28-9/; s/20e39f75caf01955970e615285e9721913a3084a4ee3c79fc20e17be0d3253ff  stroom_core_test-v7.9.2.tar.gz/fc593474e2ee6b9a7f507303fc38522c6a4d1abf62e2ddc7af0f20d15b6baeb0  stroom_core_test-v6.0-beta.28-9.tar.gz/' )
 # replacing the sed replacements
 
 # Exit the script on any error
@@ -40,9 +40,9 @@ NC='\033[0m' # No Colour
 main() {
   # stack_version will be hard coded by TravisCI at build time
   local -r stack_name="stroom_core_test"
-  local -r stack_tag="stroom-stacks-v7.9.0"
-  local -r stack_version="v7.9.0"
-  local -r hash_file_contents="3df0146c100fd8e992a173f65f12dfeb37616391cff98baf1595eb4528d53517  stroom_core_test-v7.9.0.tar.gz"
+  local -r stack_tag="stroom-stacks-v7.9.2"
+  local -r stack_version="v7.9.2"
+  local -r hash_file_contents="20e39f75caf01955970e615285e9721913a3084a4ee3c79fc20e17be0d3253ff  stroom_core_test-v7.9.2.tar.gz"
 
   local -r install_dir="./${stack_name}/${stack_tag}"
   local -r archive_filename="${stack_name}-${stack_version}.tar.gz"
