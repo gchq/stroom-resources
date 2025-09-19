@@ -1,0 +1,2 @@
+V	390513161823Z		01	unknown	/C=UK/O=Test Organization/CN=Test Client 2 (testuser2)
+R	390513161823Z	250903161823Z	02	unknown	/C=UK/O=Test Organization/CN=Revoked Client (revokedclient)
