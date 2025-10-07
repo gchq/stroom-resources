@@ -1,6 +1,6 @@
 services:
   stroom-proxy-5:
-    container_name: stroom-proxy-5
+    container_name: "${CONTAINER_NAME_PREFIX}stroom-proxy-5"
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v5.1-LATEST}"
     ports:
       - 8090:8080

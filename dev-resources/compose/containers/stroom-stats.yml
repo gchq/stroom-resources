@@ -1,6 +1,6 @@
 services:
   stroom-stats:
-    container_name: stroom-stats
+    container_name: "${CONTAINER_NAME_PREFIX}stroom-stats"
     image: "${STROOM_STATS_DOCKER_REPO:-gchq/stroom-stats}:${STROOM_STATS_TAG:-v0.6-LATEST}"
     environment:
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}

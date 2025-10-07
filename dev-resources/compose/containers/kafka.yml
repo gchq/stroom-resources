@@ -8,7 +8,7 @@
 
 services:
   kafka:
-    container_name: kafka
+    container_name: "${CONTAINER_NAME_PREFIX}kafka"
     #build: ./kafka
     image: "${KAFKA_DOKER_REPO:-wurstmeister/kafka}:${KAFKA_TAG:-2.12-2.2.1}"
     #hostname: stroom.kafka

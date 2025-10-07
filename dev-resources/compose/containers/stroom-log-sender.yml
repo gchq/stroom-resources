@@ -1,6 +1,6 @@
 services:
   stroom-log-sender:
-    container_name: stroom-log-sender
+    container_name: "${CONTAINER_NAME_PREFIX}stroom-log-sender"
     image: "${STROOM_LOG_SENDER_DOCKER_REPO:-gchq/stroom-log-sender}:${STROOM_LOG_SENDER_TAG:-local-SNAPSHOT}"
     environment:
       # The script that sends the logs

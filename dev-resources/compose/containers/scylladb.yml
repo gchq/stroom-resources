@@ -2,7 +2,7 @@
 services:
   scylladb:
     image: "${SCYLLA_DB_DOCKER_REPO:-scylladb/scylla}:${SCYLLA_DB_TAG:-5.4.7}"
-    container_name: scylladb
+    container_name: "${CONTAINER_NAME_PREFIX}scylladb"
     ports:
       - 9042:9042
     volumes:
