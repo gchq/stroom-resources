@@ -1,6 +1,6 @@
 services:
   stroom-query-elastic-service:
-    container_name: stroom-query-elastic-service
+    container_name: "${CONTAINER_NAME_PREFIX}stroom-query-elastic-service"
     image: "${STROOM_QUERY_ELASTIC_SERVICE_DOCKER_REPO:-gchq/stroom-query-elastic-service}:${STROOM_ELASTIC_SERVICE_TAG:-v0.0.4-alpha.1}"
     environment:
       - ELASTIC_CLUSTER_NAME=${ELASTIC_CLUSTER_NAME:-docker-cluster}

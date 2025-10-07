@@ -2,7 +2,7 @@
 services:
   hdfs:
     image: "${HADOOP_DOCKER_REPO:-sequenceiq/hadoop-docker}:${HDFS_TAG:-2.7.1}"
-    container_name: hdfs
+    container_name: "${CONTAINER_NAME_PREFIX}hdfs"
     hostname: hdfs
     command: ["/etc/bootstrap.sh", "-d"]
     ports:

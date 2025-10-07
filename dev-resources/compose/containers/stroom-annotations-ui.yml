@@ -1,6 +1,6 @@
 services:
   stroom-annotations-ui:
-    container_name: stroom-annotations-ui
+    container_name: "${CONTAINER_NAME_PREFIX}stroom-annotations-ui"
     image: "${STROOM_ANNOTATIONS_UI_DOCKER_REPO:-gchq/stroom-annotations-ui}:${STROOM_ANNOTATIONS_UI_TAG:-v0.2.1-alpha.1}"
     environment:
       - ANNOTATIONS_UI_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1

@@ -1,6 +1,6 @@
 services:
   stroom-query-elastic-ui:
-    container_name: stroom-query-elastic-ui
+    container_name: "${CONTAINER_NAME_PREFIX}stroom-query-elastic-ui"
     image: "${STROOM_ELASTIC_UI_DOCKER_REPO:-gchq/stroom-query-elastic-ui}:${STROOM_ELASTIC_UI_TAG:-v0.0.4-alpha.1}"
     environment:
       - QUERY_ELASTIC_UI_AUTHENTICATION_SERVICE_URL=https://${NGINX_ADVERTISED_HOST:-$HOST_IP}/authenticationService/v1

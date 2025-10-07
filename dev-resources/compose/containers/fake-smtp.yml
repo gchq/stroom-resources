@@ -1,6 +1,6 @@
 services:
   fake-smtp:
-    container_name: fake-smtp
+    container_name: "${CONTAINER_NAME_PREFIX}fake-smtp"
     image: "${FAKE_SMTP_DOCKER_REPO:-munkyboy/fakesmtp}"
     ports:
       - "2525:25"

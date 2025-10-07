@@ -1,6 +1,6 @@
 services:
   stroom-proxy-local:
-    container_name: stroom-proxy-local
+    container_name: "${CONTAINER_NAME_PREFIX}stroom-proxy-local"
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v7-LATEST}"
     environment:
       - DOWNSTREAM_HOST_SCHEME=${STROOM_PROXY_LOCAL_DOWNSTREAM_HOST_SCHEME:-http}

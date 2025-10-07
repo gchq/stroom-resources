@@ -58,6 +58,12 @@ DEFAULT_COMPOSE_CMD="up"
 COMPOSE_CMD_DELIMITER=":"
 COMPOSE_PROJECT_NAME="bounceit"
 
+# For some reason we set container_name in all the yaml files so the
+# containers don't get the project name prefixed on to them which makes running
+# a dev env and a stack at the same time impossible due to container name
+# clashes.
+export CONTAINER_NAME_PREFIX="${COMPOSE_PROJECT_NAME}_"
+
 run_docker_compose_cmd() {
     # We now have multiple yaml files that make up the project so we need
     # to add them all as -f args
@@ -190,7 +196,7 @@ exportFileContents() {
 
 determineHostAddress() {
     # We need the IP to transpose into our config
-    if [ "x${STROOM_RESOURCES_ADVERTISED_HOST}" != "x" ]; then
+    if [[ -n "${STROOM_RESOURCES_ADVERTISED_HOST}" ]]; then
         ip="${STROOM_RESOURCES_ADVERTISED_HOST}"
         echo
         echo -e "Using IP ${GREEN}${ip}${NC} as the advertised host, as obtained from ${BLUE}STROOM_RESOURCES_ADVERTISED_HOST${NC}"

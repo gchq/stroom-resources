@@ -1,7 +1,7 @@
 services:
   kibana:
     image: "${KIBANA_DOCKER_REPO:-docker.elastic.co/kibana/kibana}:${KIBANA_TAG:-5.6.3}"
-    container_name: kibana
+    container_name: "${CONTAINER_NAME_PREFIX}kibana"
     volumes:
       - ${KIBANA_VOLUME_CONF_FILE:-../volumes/kibana/conf/kibana.yml}:/usr/share/kibana/config/kibana.yml:ro
     ports:

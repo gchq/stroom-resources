@@ -1,6 +1,6 @@
 services:
   nginx:
-    container_name: nginx
+    container_name: "${CONTAINER_NAME_PREFIX}nginx"
     image: "${STROOM_NGINX_DOCKER_REPO:-gchq/stroom-nginx}:${STROOM_NGINX_TAG:-v7.0-LATEST}"
     environment:
       - DOCKER_HOST_HOSTNAME=${DOCKER_HOST_HOSTNAME:-UNKNOWN}
