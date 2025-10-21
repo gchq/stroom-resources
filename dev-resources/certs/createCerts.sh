@@ -56,7 +56,7 @@ create_ca_certs() {
         -nodes \
         -key certificate-authority/ca.unencrypted.key \
         -sha512 \
-        -days 825 \
+        -days 3650 \
         -out certificate-authority/ca.pem.crt \
         -batch \
         -config ca.ssl.conf
@@ -125,7 +125,7 @@ create_server_certs() {
         -CAkey certificate-authority/ca.unencrypted.key \
         -CAcreateserial \
         -out server/server.pem.crt \
-        -days 825 \
+        -days 3650 \
         -sha512
 
     echo
@@ -210,7 +210,7 @@ create_client_certs() {
         -CAkey certificate-authority/ca.unencrypted.key \
         -CAcreateserial \
         -out client/client.pem.crt \
-        -days 825 \
+        -days 3650 \
         -sha512
 
     echo
