@@ -11,6 +11,7 @@ services:
       - FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-https://nginx/api/feedStatus/v2}
       - REST_CLIENT_VERIFY_HOSTNAME=${STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME:-true}
       - IDENTITY_PROVIDER_TYPE=${STROOM_PROXY_LOCAL_IDENTITY_PROVIDER_TYPE:-NO_IDP}
+      - RECEIVE_AUTH_REQUIRED=${STROOM_PROXY_LOCAL_RECEIVE_AUTH_REQUIRED:-true}
     ports:
       # Allow the ports on the docker host to be chaned, internally they are fixed
       - "${STROOM_PROXY_LOCAL_APP_PORT:-8090}:8090"

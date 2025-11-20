@@ -77,7 +77,7 @@ Whether Stroom should create default stream volumes
 Comma delimited list of nodes to associate with the volumes of the default index group
 to be created on start-up if STROOM_CREATE_DEFAULT_INDEX_VOLUMES_ON_BOOTSTRAP is true,
 the nodes in the list correspond to the paths defined in STROOM_DEFAULT_INDEX_VOLUME_PATHS.
-      
+
 ##  STROOM_DEFAULT_INDEX_VOLUME_PATHS
 
 Comma delimited list of paths of the volumes of the default index group 
@@ -206,6 +206,12 @@ EXTERNAL_IDP - An external IDP such as KeyCloak/Cognito is used for token authen
 on receipt and for feed status checks.
 TEST_CREDENTIALS - Use insecure hard-coded authentication credentials for test/demo only.
 
+## STROOM_PROXY_LOCAL_RECEIVE_AUTH_REQUIRED
+
+If true, /datafeed on Stroom Proxy (local) will reject any requests that cannot
+be authenticated by the configured authentication methods, e.g. certificate,
+API Key, OAuth token, Datafeed Key.
+
 ## STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME
 
 True if stroom-proxy should verify the hostname against the server certificate
@@ -287,6 +293,12 @@ EXTERNAL_IDP - An external IDP such as KeyCloak/Cognito is used for token authen
 on receipt and for feed status checks.
 TEST_CREDENTIALS - Use insecure hard-coded authentication credentials for test/demo only.
 
+## STROOM_PROXY_REMOTE_RECEIVE_AUTH_REQUIRED
+
+If true, /datafeed on Stroom Proxy (remote) will reject any requests that
+cannot be authenticated by the configured authentication methods, e.g.
+certificate, API Key, OAuth token, Datafeed Key.
+
 ## STROOM_PROXY_REMOTE_REST_CLIENT_VERIFY_HOSTNAME
 
 True if stroom-proxy should verify the hostname against the server certificate
@@ -295,6 +307,12 @@ when making API call, e.g. when checking the feed receipt status.
 ## STROOM_RACK
 
 DEPRECATED The name/id of the rack in which this stroom instance sits.
+
+## STROOM_RECEIVE_AUTH_REQUIRED
+
+If true, /datafeed on Stroom will reject any requests that cannot be
+authenticated by the configured authentication methods, e.g. certificate, API
+Key, OAuth token, Datafeed Key.
 
 ## STROOM_SECURITY_API_TOKEN
 
