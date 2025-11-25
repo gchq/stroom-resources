@@ -1,1 +1,1 @@
-stroom-stacks-v7.10.11
+stroom-stacks-v7.10.12
