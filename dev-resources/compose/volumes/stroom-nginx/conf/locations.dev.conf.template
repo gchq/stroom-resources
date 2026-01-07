@@ -27,4 +27,16 @@ location /main. {
     proxy_pass https://stroom_upstream/main.;
 }
 
+location /vllm_embed {
+    proxy_pass https://vllm_embed_upstream;
+}
+
+location /vllm_reranker {
+    proxy_pass https://vllm_reranker_upstream;
+}
+
+location /vllm_chat {
+    proxy_pass https://vllm_chat_upstream;
+}
+
 # vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:

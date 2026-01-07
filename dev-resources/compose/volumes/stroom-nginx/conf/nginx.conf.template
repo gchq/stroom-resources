@@ -23,6 +23,18 @@ http {
         include upstreams.proxy.conf;
     }
 
+    upstream vllm_embed_upstream {
+        include upstreams.vllm.embed.conf;
+    }
+
+    upstream vllm_reranker_upstream {
+        include upstreams.vllm.reranker.conf;
+    }
+
+    upstream vllm_chat_upstream {
+        include upstreams.vllm.chat.conf;
+    }
+
     # Define valid index page filenames
     index index.html index.htm;
 

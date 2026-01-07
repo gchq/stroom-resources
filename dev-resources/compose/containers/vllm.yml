@@ -1,0 +1,105 @@
+services:
+  # Vector embeddings
+  vllm-embed:
+    image: vllm/vllm-openai:v0.13.0
+    container_name: "${CONTAINER_NAME_PREFIX}vllm-embed"
+    ports:
+      - "9511:8000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+    ipc: host
+    #    command: --model intfloat/e5-mistral-7b-instruct --gpu-memory-utilization=1
+#    command: >
+#      --model intfloat/e5-mistral-7b-instruct
+#      --task embedding
+#      --quantization awq
+#      --dtype auto
+#      --max-model-len 4096
+#      --gpu-memory-utilization 0.5
+
+
+
+#    command: >
+#      --model nvidia/Llama-3.1-Nemotron-Embedding-8B
+#      --task embed
+#      --kv-cache-dtype fp8
+#      --quantization fp8
+#      --max-model-len 4096
+#      --gpu-memory-utilization 0.5
+
+    command: >
+      dunzhang/stella_en_1.5B_v5
+      --served-model-name stella-embed
+      --gpu-memory-utilization 0.5
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+
+  # Reranking
+  vllm-reranker:
+    image: vllm/vllm-openai:v0.13.0
+    container_name: "${CONTAINER_NAME_PREFIX}vllm-reranker"
+    ports:
+      - "9512:8000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+    ipc: host
+    command: >
+      BAAI/bge-reranker-v2-m3
+      --served-model-name bge-reranker
+      --gpu-memory-utilization 0.3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+
+  # Text generation (Ask Stroom AI chat)
+  vllm-chat:
+    image: vllm/vllm-openai:v0.13.0
+    container_name: "${CONTAINER_NAME_PREFIX}vllm-chat"
+    ports:
+      - "9513:8000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+    ipc: host
+#    command: >
+#      RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8
+#      --served-model-name bge-reranker
+#      --gpu-memory-utilization 0.3
+
+#    command: >
+#      meta-llama/Llama-3.2-1B-Instruct
+#      --served-model-name llama32-1b
+#      --max-model-len 4096
+#      --gpu-memory-utilization 0.3
+
+    command: >
+      Qwen/Qwen2.5-1.5B-Instruct
+      --served-model-name qwen-1.5b
+      --max-model-len 4096
+      --gpu-memory-utilization 0.3
+      
+      
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

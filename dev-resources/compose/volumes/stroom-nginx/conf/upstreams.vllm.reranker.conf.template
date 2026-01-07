@@ -1,0 +1,3 @@
+server <<<STROOM_HOST>>>:9512;
+
+# vim: set filetype=conf shiftwidth=4 tabstop=4 expandtab:
