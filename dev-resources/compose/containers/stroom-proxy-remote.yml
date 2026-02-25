@@ -36,6 +36,15 @@ services:
       - type: volume
         source: stroom-proxy-remote_data
         target: /stroom-proxy/data
+      - type: volume
+        source: stroom-proxy-remote_failures
+        target: /stroom-proxy/failures
+      - type: volume
+        source: stroom-proxy-remote_zip_file_ingest
+        target: /stroom-proxy/zip_file_ingest
+      - type: volume
+        source: stroom-proxy-remote_zip_file_ingest_failed
+        target: /stroom-proxy/zip_file_ingest_failed
     logging:
       driver: "json-file"
       options:
@@ -47,3 +56,6 @@ volumes:
   stroom-proxy-remote_content:
   stroom-proxy-remote_logs:
   stroom-proxy-remote_data:
+  stroom-proxy-remote_failures:
+  stroom-proxy-remote_zip_file_ingest:
+  stroom-proxy-remote_zip_file_ingest_failed:
