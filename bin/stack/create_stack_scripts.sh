@@ -114,9 +114,9 @@ main() {
   local -r DEST_LIB="${WORKING_DIRECTORY}/lib"
   mkdir -p "${DEST_LIB}"
 
-  if element_in "stroom" "${SERVICES[@]}"; then
-    copy_file lib/banner.txt "${DEST_LIB}"
-  elif element_in "stroom-proxy-local" "${SERVICES[@]}" \
+  copy_file lib/banner.txt "${DEST_LIB}"
+
+  if element_in "stroom-proxy-local" "${SERVICES[@]}" \
     || element_in "stroom-proxy-remote" "${SERVICES[@]}"; then
     copy_file lib/banner_proxy.txt "${DEST_LIB}"
   fi
