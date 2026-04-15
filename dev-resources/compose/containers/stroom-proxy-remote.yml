@@ -32,9 +32,16 @@ services:
     volumes:
       - ${STROOM_PROXY_REMOTE_VOLUME_CERTS:-../volumes/stroom-proxy-remote/certs}:/stroom-proxy/certs:ro
       - ${STROOM_PROXY_REMOTE_VOLUME_CONFIG:-../volumes/stroom-proxy-remote/config}:/stroom-proxy/config:ro
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          mode: 0o01777
       - type: volume
         source: stroom-proxy-remote_content
         target: /stroom-proxy/content
+      - type: volume
+        source: stroom-proxy-remote_data_feed_identities
+        target: /stroom-proxy/data_feed_identities
       - type: volume
         source: stroom-proxy-remote_logs
         target: /stroom-proxy/logs
@@ -58,6 +65,7 @@ services:
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
 volumes:
+  stroom-proxy-remote_data_feed_identities:
   stroom-proxy-remote_content:
   stroom-proxy-remote_logs:
   stroom-proxy-remote_data:
