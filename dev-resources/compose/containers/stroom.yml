@@ -37,10 +37,11 @@ services:
       retries: 3
     volumes:
       - ${STROOM_VOLUME_CONFIG:-../volumes/stroom/config}:/stroom/config:ro
-      - type: tmpfs
-        target: /tmp
-        tmpfs:
-          mode: 0o01777
+      #- type: tmpfs
+        #target: /tmp
+        #tmpfs:
+          ##size: "${STROOM_TEMP_MOUNT_SIZE:-8g}"
+          #mode: 0o01777
       - type: volume
         source: stroom_content_pack_import
         target: /stroom/content_pack_import
@@ -53,9 +54,12 @@ services:
       - type: volume
         source: stroom_lmdb
         target: /stroom/lmdb
-      - type: volume
-        source: stroom_lmdb_library
-        target: /stroom/lmdb_library
+        # The library file is transient and extracted from the jar on boot.
+      #- type: tmpfs
+        #target: /stroom/lmdb_library
+        #tmpfs:
+          ##size: "${STROOM_TEMP_MOUNT_SIZE:-8g}"
+          #mode: 0o01777
       - type: volume
         source: stroom_logs
         target: /stroom/logs
@@ -68,15 +72,25 @@ services:
       - type: volume
         source: stroom_reference_data
         target: /stroom/reference_data
-      - type: volume
-        source: stroom_reference_staging_data
-        target: /stroom/reference_staging_data
+        # The ref staging data only exists for the life of a ref load, so using tmpfs
+        # saves all the FS writes.
+      #- type: tmpfs
+        #target: /stroom/reference_staging_data
       - type: volume
         source: stroom_search_results
         target: /stroom/search_results
       - type: volume
         source: stroom_volumes
         target: /stroom/volumes
+    tmpfs:
+        # The jffi library will be extracted in here and noexec will prevent that working
+      - /tmp:exec,mode=1777
+        # The LMDB library file is transient and extracted from the jar on boot.
+        # LMDB requires exec to run
+      - /stroom/lmdb_library:exec,mode=1777
+        # The ref staging data only exists for the life of a ref load, so using tmpfs
+        # saves all the FS writes.
+      - /stroom/reference_staging_data:mode=1777
     logging:
       driver: "json-file"
       options:
@@ -93,11 +107,9 @@ volumes:
   stroom_data_feed_identities:
   stroom_git_repo:
   stroom_lmdb:
-  stroom_lmdb_library:
   stroom_logs:
   stroom_output:
   stroom_planb:
   stroom_reference_data:
-  stroom_reference_staging_data:
   stroom_search_results:
   stroom_volumes:

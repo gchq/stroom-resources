@@ -31,10 +31,11 @@ services:
     volumes:
       - ${STROOM_PROXY_LOCAL_VOLUME_CERTS:-../volumes/stroom-proxy-local/certs}:/stroom-proxy/certs:ro
       - ${STROOM_PROXY_LOCAL_VOLUME_CONFIG:-../volumes/stroom-proxy-local/config}:/stroom-proxy/config:ro
-      - type: tmpfs
-        target: /tmp
-        tmpfs:
-          mode: 0o01777
+      #- type: tmpfs
+        #target: /tmp
+        #tmpfs:
+          ##size: "${STROOM_PROXY_LOCAL_TEMP_MOUNT_SIZE:-g}"
+          #mode: 0o01777
       - type: volume
         source: stroom-proxy-local_content
         target: /stroom-proxy/content
@@ -56,6 +57,8 @@ services:
       - type: volume
         source: stroom-proxy-local_zip_file_ingest_failed
         target: /stroom-proxy/zip_file_ingest_failed
+    tmpfs:
+      - /tmp:mode=1777
     logging:
       driver: "json-file"
       options:
