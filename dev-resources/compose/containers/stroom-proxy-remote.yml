@@ -59,7 +59,7 @@ services:
         source: stroom-proxy-remote_zip_file_ingest_failed
         target: /stroom-proxy/zip_file_ingest_failed
     tmpfs:
-      - /tmp:mode=1777
+      - "/tmp:noatime,noexec,mode=1777,size=${STROOM_PROXY_REMOTE_TMP_VOL_MAX_SIZE:-64g}"
     logging:
       driver: "json-file"
       options:
