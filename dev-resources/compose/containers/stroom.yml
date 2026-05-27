@@ -41,6 +41,12 @@ services:
         source: stroom_content_pack_import
         target: /stroom/content_pack_import
       - type: volume
+        source: stroom_data_feed_identities
+        target: /stroom/data_feed_identities
+      - type: volume
+        source: stroom_git_repo
+        target: /stroom/git_repo
+      - type: volume
         source: stroom_lmdb
         target: /stroom/lmdb
       - type: volume
@@ -49,24 +55,29 @@ services:
       - type: volume
         source: stroom_output
         target: /stroom/output
-        # This volume is shared with stroom-proxy-local. If we ever want to run stroom without
-        # a local proxy then we need to move this out into in override yml as is done with
-        # stroom-log-sender
       - type: volume
-        source: stroom-proxy-local_data
-        target: /stroom/proxy_data
+        source: stroom_planb
+        target: /stroom/planb
       - type: volume
         source: stroom_reference_data
         target: /stroom/reference_data
+        # The ref staging data only exists for the life of a ref load but could
+        # be v big, so can't really risk using tmpfs
+      - type: volume
+        source: stroom_reference_staging_data
+        target: /stroom/reference_staging_data
       - type: volume
         source: stroom_search_results
         target: /stroom/search_results
       - type: volume
-        source: stroom_lmdb_library
-        target: /stroom/lmdb_library
-      - type: volume
         source: stroom_volumes
         target: /stroom/volumes
+    tmpfs:
+        # stroom-temp
+      - "/tmp:noatime,noexec,mode=1777,size=${STROOM_TMP_VOL_MAX_SIZE:-64g}"
+        # The LMDB and jffi native libraries are transient and will be extracted from the jar on boot.
+        # Both require exec to run. Likely <1m, but set to 50m to be safe.
+      - "/stroom/lmdb_library:noatime,exec,mode=1777,size=${STROOM_LMDB_LIB_VOL_MAX_SIZE:-50m}"
     logging:
       driver: "json-file"
       options:
@@ -80,10 +91,13 @@ services:
     command: "./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}"
 volumes:
   stroom_content_pack_import:
+  stroom_data_feed_identities:
+  stroom_git_repo:
   stroom_lmdb:
-  stroom_lmdb_library:
   stroom_logs:
   stroom_output:
+  stroom_planb:
   stroom_reference_data:
+  stroom_reference_staging_data:
   stroom_search_results:
   stroom_volumes:

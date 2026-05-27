@@ -31,15 +31,20 @@ services:
     volumes:
       - ${STROOM_PROXY_LOCAL_VOLUME_CERTS:-../volumes/stroom-proxy-local/certs}:/stroom-proxy/certs:ro
       - ${STROOM_PROXY_LOCAL_VOLUME_CONFIG:-../volumes/stroom-proxy-local/config}:/stroom-proxy/config:ro
+      #- type: tmpfs
+        #target: /tmp
+        #tmpfs:
+          ##size: "${STROOM_PROXY_LOCAL_TEMP_MOUNT_SIZE:-g}"
+          #mode: 0o01777
       - type: volume
         source: stroom-proxy-local_content
         target: /stroom-proxy/content
-        # This volume is shared with stroom. If we ever want to run stroom without
-        # a local proxy then we need to move this out into in override yml as is done with
-        # stroom-log-sender
       - type: volume
         source: stroom-proxy-local_logs
         target: /stroom-proxy/logs
+      - type: volume
+        source: stroom-proxy-local_data_feed_identities
+        target: /stroom-proxy/data_feed_identities
       - type: volume
         source: stroom-proxy-local_data
         target: /stroom-proxy/data
@@ -52,6 +57,8 @@ services:
       - type: volume
         source: stroom-proxy-local_zip_file_ingest_failed
         target: /stroom-proxy/zip_file_ingest_failed
+    tmpfs:
+      - "/tmp:noatime,noexec,mode=1777,size=${STROOM_PROXY_LOCAL_TMP_VOL_MAX_SIZE:-64g}"
     logging:
       driver: "json-file"
       options:
@@ -60,6 +67,7 @@ services:
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
 volumes:
+  stroom-proxy-local_data_feed_identities:
   stroom-proxy-local_content:
   stroom-proxy-local_logs:
   stroom-proxy-local_data:
