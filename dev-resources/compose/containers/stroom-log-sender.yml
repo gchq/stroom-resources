@@ -3,9 +3,9 @@ services:
     container_name: "${CONTAINER_NAME_PREFIX}stroom-log-sender"
     image: "${STROOM_LOG_SENDER_DOCKER_REPO:-gchq/stroom-log-sender}:${STROOM_LOG_SENDER_TAG:-local-SNAPSHOT}"
     environment:
-      # The script that sends the logs
+        # The script that sends the logs
       - LOG_SENDER_SCRIPT=/stroom-log-sender/send_to_stroom.sh
-      # The url the logs will be sent to
+        # The url the logs will be sent to
       - DATAFEED_URL=${STROOM_LOG_SENDER_DATAFEED_URL:-https://nginx/stroom/datafeeddirect}
         # The base path for all stroom logs
       - STROOM_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom}
