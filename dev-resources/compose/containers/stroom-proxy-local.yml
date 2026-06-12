@@ -58,7 +58,8 @@ services:
         source: stroom-proxy-local_zip_file_ingest_failed
         target: /stroom-proxy/zip_file_ingest_failed
     tmpfs:
-      - "/tmp:noatime,noexec,mode=1777,size=${STROOM_PROXY_LOCAL_TMP_VOL_MAX_SIZE:-64g}"
+        # uid=1000,gid=0 to match the uid:gid defaulted in the dockerfiles
+      - "/tmp:noatime,noexec,mode=1777,uid=1000,gid=0,size=${STROOM_PROXY_LOCAL_TMP_VOL_MAX_SIZE:-64g}"
     logging:
       driver: "json-file"
       options:

@@ -73,11 +73,12 @@ services:
         source: stroom_volumes
         target: /stroom/volumes
     tmpfs:
+        # uid=1000,gid=0 to match the uid:gid defaulted in the dockerfiles
         # stroom-temp
-      - "/tmp:noatime,noexec,mode=1777,size=${STROOM_TMP_VOL_MAX_SIZE:-64g}"
+      - "/tmp:noatime,noexec,mode=1777,uid=1000,gid=0,size=${STROOM_TMP_VOL_MAX_SIZE:-64g}"
         # The LMDB and jffi native libraries are transient and will be extracted from the jar on boot.
         # Both require exec to run. Likely <1m, but set to 50m to be safe.
-      - "/stroom/lmdb_library:noatime,exec,mode=1777,size=${STROOM_LMDB_LIB_VOL_MAX_SIZE:-50m}"
+      - "/stroom/lmdb_library:noatime,exec,mode=1777,uid=1000,gid=0,size=${STROOM_LMDB_LIB_VOL_MAX_SIZE:-50m}"
     logging:
       driver: "json-file"
       options:
