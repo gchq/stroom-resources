@@ -14,13 +14,16 @@
 # limitations under the License.
 #**********************************************************************
 
-ARG BASE_IMAGE="alpine:3.23"
-
-
+# Global args
+# 20260611 - 3.24.0 has multiple critical and high CVEs in openssl, which we are likely using
+# via curl, so use 3.27.1 until it is patched
+ARG \
+  BASE_IMAGE="alpine:3.21.7@sha256:48b0309ca019d89d40f670aa1bc06e426dc0931948452e8491e3d65087abc07d"
 
 
 # ~~~ Download supercronic stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 FROM ${BASE_IMAGE} AS download-supercronic-stage
+
 WORKDIR /supercronic
 
 ENV \
@@ -53,14 +56,20 @@ RUN \
 # later copy them all in one go to reduce the number of layers
 # Have to use alpine rather than scratch so we can chmod
 FROM ${BASE_IMAGE} AS send-logs-scripts-stage
+
 WORKDIR /scripts
 
-ARG SEND_TO_STROOM_VERSION=send-to-stroom-v3.4.0
+ARG \
+  SEND_TO_STROOM_VERSION=send-to-stroom-v3.4.0
 
-ADD https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}/send_to_stroom.sh .
-ADD https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}/send_to_stroom_args.sh .
-
-RUN chmod u+x ./*.sh
+ADD \
+  --chmod=ug+x \
+  https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}/send_to_stroom.sh \
+  ./
+ADD \
+  --chmod=ug+x \
+  https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}/send_to_stroom_args.sh \
+  ./
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -70,35 +79,35 @@ RUN chmod u+x ./*.sh
 
 FROM ${BASE_IMAGE} AS main-stage
 
+ARG USER_NAME=sender
+ARG USER_ID=1000
+# The root group which should be GID 0
+# This is to allow OKD/Openshift to run as any user it likes that is also a member of GID 0
+ARG GROUP_NAME=root
+ARG GROUP_ID=0
+
 # Set some useful defualts
-ENV \
-  # The log-sender script to run
-  LOG_SENDER_SCRIPT="/stroom-log-sender/send_to_stroom.sh" \
-  # The root path of all the logs, can be used in the crontab.txt file
-  LOGS_DIR="/stroom-log-sender/log-volumes" \
-  # The environment, e.g. DEV/REF/OPS/etc.
-  ENVIRONMENT="DEV" \
-  # The maximum random delay in secs to wait to balance network load
-  MAX_DELAY_SECS="15" \
-  USER_NAME=sender \
-  USER_ID=1000 \
-  # The root group which should be GID 0
-  # This is to allow OKD/Openshift to run as any user it likes that is also a member of GID 0
-  GROUP_NAME=root \
-  GROUP_ID=0
+# The log-sender script to run
+ENV LOG_SENDER_SCRIPT="/stroom-log-sender/send_to_stroom.sh"
+# The root path of all the logs, can be used in the crontab.txt file
+ENV LOGS_DIR="/stroom-log-sender/log-volumes"
+# The environment, e.g. DEV/REF/OPS/etc.
+ENV ENVIRONMENT="DEV"
+# The maximum random delay in secs to wait to balance network load
+ENV MAX_DELAY_SECS="15"
+# Set the user ID into env so entrypoint can see them
+ENV USER_ID=$USER_ID
+ENV GROUP_ID=$GROUP_ID
 
 #This is the root dir for all our files/scripts
 WORKDIR /stroom-log-sender
 
-# This is where the crontab file is placed to be loaded into cron on each boot
-VOLUME /stroom-log-sender/config/
-
-# This is where the various certificates and keys are placed
-VOLUME /stroom-log-sender/certs/
-
 # run entrypoint script inside tini for better unix process handling, 
 # see https://github.com/krallin/tini/issues/8
-ENTRYPOINT ["/sbin/tini", "--", "/stroom-log-sender/docker-entrypoint.sh"]
+ENTRYPOINT [ \
+  "/sbin/tini", \
+  "--", \
+  "/stroom-log-sender/docker-entrypoint.sh" ]
 
 # Start supercronic with our crontab file
 # -split-logs to route debug and info level logs to stdout.
@@ -114,6 +123,7 @@ CMD [ \
 # curl required for sending logs
 # gettext needed for 'envsubst' using in the entrypoint script
 # procps needed for a richer 'ps' command as used in send_to_stroom.sh
+# su-exec to drop down to a non-root user if the container is run as root
 # tini required for process control in the entrypoint
 # Create a user with no home and no shell
 # The log-volumes dir is where we expect volumes to be mounted 
@@ -125,6 +135,7 @@ RUN echo "http_proxy: $http_proxy" && \
         curl \
         gettext \
         procps \
+        su-exec \
         tini && \
     adduser \
       --system \
@@ -138,34 +149,47 @@ RUN echo "http_proxy: $http_proxy" && \
     mkdir -p /stroom-log-sender/config && \
     mkdir -p /stroom-log-sender/certs && \
     mkdir -p /stroom-log-sender/log-volumes && \
-    chown -R "$USER_ID:$GROUP_ID" /stroom-log-sender
+    chown -R "$USER_ID:$GROUP_ID" /stroom-log-sender && \
+    chmod -R 770 /stroom-log-sender
 
 # Copy in all the send logs scripts downloaded in the intermediate build stage
 COPY \
-  --chown=$USER_ID:$GROUP_ID \
   --from=send-logs-scripts-stage \
+  --chown=$USER_ID:$GROUP_ID \
+  --chmod=770 \
   /scripts \
   /stroom-log-sender
 
 # Copy in the supercronic binary downloaded in the intermediate build stage
-COPY --from=download-supercronic-stage /supercronic /usr/local/bin
+COPY \
+  --from=download-supercronic-stage \
+  --chmod=770 \
+  /supercronic \
+  /usr/local/bin/
 
 # Copy in the scripts for running the container
 COPY \
   --chown=$USER_ID:$GROUP_ID \
+  --chmod=770 \
   docker-entrypoint.sh \
   /stroom-log-sender/
 
-# Give the group the same perms as the user so any user with GID 0 can run proxy in
-# the same way as UID 1000
-RUN chmod -R g=u /stroom-log-sender
-
-# Label the image so we can see what commit/tag it came from
+# Intentiaonally done near the end because they will often change on each build
 ARG GIT_COMMIT=unspecified
 ARG GIT_TAG=unspecified
-LABEL \
-    git_commit="$GIT_COMMIT" \
-    git_tag="$GIT_TAG"
+
+# Pass the GIT_TAG through to the running container
+# This should not be set at container run time
+ENV GIT_TAG=$GIT_TAG
+
+# Label the image so we can see what commit/tag it came from
+LABEL git_commit="$GIT_COMMIT"
+LABEL git_tag="$GIT_TAG"
+
+# config is where the crontab file is placed to be loaded into cron on each boot
+VOLUME /stroom-log-sender/config/
+# certs is where the various certificates and keys are placed
+VOLUME /stroom-log-sender/certs/
 
 # Run as our non-root user
 USER "$USER_ID"
