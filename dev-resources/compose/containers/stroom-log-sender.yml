@@ -38,6 +38,9 @@ services:
       - CERT_FILE=${STROOM_LOG_SENDER_CERT_FILE:-/stroom-log-sender/certs/client.pem.crt}
         # The PEM format CA certificate
       - CA_CERT_FILE=${STROOM_LOG_SENDER_CA_CERT_FILE:-/stroom-log-sender/certs/ca.pem.crt}
+    # In the container, all the directories are 1000:0. We need to run as the current host user but GID 0.
+    # This means we can access container dirs via GID 0, but bind mounted host files using the host user's UID.
+    user: "${DOCKER_HOST_UID:-1000}:0"
     volumes:
       # Volume for the crontab configuration
       - ${STROOM_LOG_SENDER_VOLUME_CONF:-../volumes/stroom-log-sender/conf}:/stroom-log-sender/config/:ro

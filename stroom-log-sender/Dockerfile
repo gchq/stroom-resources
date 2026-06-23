@@ -110,7 +110,9 @@ ENTRYPOINT [ \
   "/stroom-log-sender/docker-entrypoint.sh" ]
 
 # Start supercronic with our crontab file
-# -split-logs to route debug and info level logs to stdout.
+# -quiet - Suppress informational log messages; only warnings and errors are logged. 
+# -passthrough - Pass job output through without wrapping it in supercronic log entries.
+# -split-logs - Route debug and info level logs to stdout.
 CMD [ \
   "/usr/local/bin/supercronic", \
   "-quiet", \

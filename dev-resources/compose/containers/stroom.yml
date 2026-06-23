@@ -24,6 +24,9 @@ services:
       - AUTO_CREATE_ADMIN_ACCOUNT=${STROOM_AUTO_CREATE_ADMIN_ACCOUNT:-false}
       - FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN=${STROOM_FORCE_PASSWORD_CHANGE_ON_FIRST_LOGIN:-true}
       - MIN_PASSWORD_LENGTH=${STROOM_MIN_PASSWORD_LENGTH:-8}
+    # In the container, all the directories are 1000:0. We need to run as the current host user but GID 0.
+    # This means we can access container dirs via GID 0, but bind mounted host files using the host user's UID.
+    user: "${DOCKER_HOST_UID:-1000}:0"
     ports:
       # Allow the port on the docker host to be changed, internal are fixed
       - "${STROOM_APP_PORT:-8080}:8080"
