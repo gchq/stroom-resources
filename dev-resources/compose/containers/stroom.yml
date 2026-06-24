@@ -41,6 +41,9 @@ services:
         source: stroom_content_pack_import
         target: /stroom/content_pack_import
       - type: volume
+        source: stroom_content_index
+        target: /stroom/content_index
+      - type: volume
         source: stroom_lmdb
         target: /stroom/lmdb
       - type: volume
@@ -80,6 +83,7 @@ services:
     command: "./start.sh ${STROOM_DROPWIZARD_COMMAND:-server}"
 volumes:
   stroom_content_pack_import:
+  stroom_content_index:
   stroom_lmdb:
   stroom_lmdb_library:
   stroom_logs:
