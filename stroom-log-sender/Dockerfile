@@ -63,11 +63,11 @@ ARG \
   SEND_TO_STROOM_VERSION=send-to-stroom-v3.4.0
 
 ADD \
-  --chmod=ug+x \
+  --chmod=770 \
   https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}/send_to_stroom.sh \
   ./
 ADD \
-  --chmod=ug+x \
+  --chmod=770 \
   https://github.com/gchq/stroom-clients/releases/download/${SEND_TO_STROOM_VERSION}/send_to_stroom_args.sh \
   ./
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
