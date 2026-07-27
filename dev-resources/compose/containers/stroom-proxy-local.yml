@@ -16,6 +16,10 @@ services:
       - FEED_STATUS_URL=${STROOM_PROXY_LOCAL_FEED_STATUS_URL:-}
       - REST_CLIENT_VERIFY_HOSTNAME=${STROOM_PROXY_LOCAL_REST_CLIENT_VERIFY_HOSTNAME:-true}
       - IDENTITY_PROVIDER_TYPE=${STROOM_PROXY_LOCAL_IDENTITY_PROVIDER_TYPE:-NO_IDP}
+      # Insecure test-only shared secret (inbound acceptance); the proxy presents it downstream via
+      # DOWNSTREAM_API_KEY. Off unless both are set. NEVER set these in production.
+      - STROOM_ALLOW_INSECURE_TEST_CREDENTIALS=${STROOM_ALLOW_INSECURE_TEST_CREDENTIALS:-false}
+      - STROOM_INSECURE_TEST_CREDENTIAL=${STROOM_INSECURE_TEST_CREDENTIAL:-}
       - RECEIVE_AUTH_REQUIRED=${STROOM_PROXY_LOCAL_RECEIVE_AUTH_REQUIRED:-true}
     ports:
       # Allow the ports on the docker host to be chaned, internally they are fixed
