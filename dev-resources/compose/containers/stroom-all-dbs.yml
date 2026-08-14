@@ -2,6 +2,7 @@ services:
   stroom-all-dbs:
     image: "${MYSQL_DOCKER_REPO:-mysql}:${MYSQL_TAG:-8.4.3}"
     container_name: "${CONTAINER_NAME_PREFIX}stroom-all-dbs"
+    stop_grace_period: "${MYSQL_STOP_GRACE_PERIOD:-5m}"
     ports:
       - "3307:3306"
     environment:

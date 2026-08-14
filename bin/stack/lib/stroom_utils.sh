@@ -735,6 +735,14 @@ stop_service_if_in_stack() {
   fi
 }
 
+kill_stack() {
+  echo -e "${GREEN}Killing all the docker containers${NC}\n"
+
+  run_docker_compose_cmd \
+    kill \
+    "$@"
+}
+
 stop_stack_quickly() {
   echo -e "${GREEN}Stopping all the docker containers at once${NC}\n"
 

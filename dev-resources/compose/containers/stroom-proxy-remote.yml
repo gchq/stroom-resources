@@ -2,6 +2,7 @@ services:
   stroom-proxy-remote:
     container_name: "${CONTAINER_NAME_PREFIX}stroom-proxy-remote"
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v7-LATEST}"
+    stop_grace_period: "${STROOM_PROXY_REMOTE_STOP_GRACE_PERIOD:-5m}"
     environment:
       - DOWNSTREAM_HOST_SCHEME=${STROOM_PROXY_REMOTE_DOWNSTREAM_HOST_SCHEME:-https}
       - DOWNSTREAM_HOST_PORT=${STROOM_PROXY_REMOTE_DOWNSTREAM_HOST_PORT:-}
