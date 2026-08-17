@@ -2,6 +2,7 @@ services:
   stroom:
     container_name: "${CONTAINER_NAME_PREFIX}stroom"
     image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v7.0-LATEST}"
+    stop_grace_period: "${STROOM_STOP_GRACE_PERIOD:-5m}"
     environment:
       - API_GATEWAY_HOST=${NGINX_ADVERTISED_HOST:-$HOST_IP}
       - API_GATEWAY_PORT=${API_GATEWAY_PORT:-443}
