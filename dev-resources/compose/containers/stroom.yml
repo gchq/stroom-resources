@@ -2,6 +2,7 @@ services:
   stroom:
     container_name: "${CONTAINER_NAME_PREFIX}stroom"
     image: "${STROOM_DOCKER_REPO:-gchq/stroom}:${STROOM_TAG:-v7.0-LATEST}"
+    stop_grace_period: "${STROOM_STOP_GRACE_PERIOD:-5m}"
     environment:
       - API_GATEWAY_HOST=${NGINX_ADVERTISED_HOST:-$HOST_IP}
       - API_GATEWAY_PORT=${API_GATEWAY_PORT:-443}
@@ -47,6 +48,11 @@ services:
       - type: volume
         source: stroom_content_index
         target: /stroom/content_index
+        source: stroom_data_feed_identities
+        target: /stroom/data_feed_identities
+      - type: volume
+        source: stroom_git_repo
+        target: /stroom/git_repo
       - type: volume
         source: stroom_lmdb
         target: /stroom/lmdb
@@ -56,24 +62,29 @@ services:
       - type: volume
         source: stroom_output
         target: /stroom/output
-        # This volume is shared with stroom-proxy-local. If we ever want to run stroom without
-        # a local proxy then we need to move this out into in override yml as is done with
-        # stroom-log-sender
       - type: volume
-        source: stroom-proxy-local_data
-        target: /stroom/proxy_data
+        source: stroom_planb
+        target: /stroom/planb
       - type: volume
         source: stroom_reference_data
         target: /stroom/reference_data
+        # The ref staging data only exists for the life of a ref load but could
+        # be v big, so can't really risk using tmpfs
+      - type: volume
+        source: stroom_reference_staging_data
+        target: /stroom/reference_staging_data
       - type: volume
         source: stroom_search_results
         target: /stroom/search_results
       - type: volume
-        source: stroom_lmdb_library
-        target: /stroom/lmdb_library
-      - type: volume
         source: stroom_volumes
         target: /stroom/volumes
+    tmpfs:
+        # stroom-temp
+      - "/tmp:noatime,noexec,mode=1777,size=${STROOM_TMP_VOL_MAX_SIZE:-64g}"
+        # The LMDB and jffi native libraries are transient and will be extracted from the jar on boot.
+        # Both require exec to run. Likely <1m, but set to 50m to be safe.
+      - "/stroom/lmdb_library:noatime,exec,mode=1777,size=${STROOM_LMDB_LIB_VOL_MAX_SIZE:-50m}"
     logging:
       driver: "json-file"
       options:
@@ -88,10 +99,13 @@ services:
 volumes:
   stroom_content_pack_import:
   stroom_content_index:
+  stroom_data_feed_identities:
+  stroom_git_repo:
   stroom_lmdb:
-  stroom_lmdb_library:
   stroom_logs:
   stroom_output:
+  stroom_planb:
   stroom_reference_data:
+  stroom_reference_staging_data:
   stroom_search_results:
   stroom_volumes:

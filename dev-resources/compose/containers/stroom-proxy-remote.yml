@@ -2,6 +2,7 @@ services:
   stroom-proxy-remote:
     container_name: "${CONTAINER_NAME_PREFIX}stroom-proxy-remote"
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v7-LATEST}"
+    stop_grace_period: "${STROOM_PROXY_REMOTE_STOP_GRACE_PERIOD:-5m}"
     environment:
       - DOWNSTREAM_HOST_SCHEME=${STROOM_PROXY_REMOTE_DOWNSTREAM_HOST_SCHEME:-https}
       - DOWNSTREAM_HOST_PORT=${STROOM_PROXY_REMOTE_DOWNSTREAM_HOST_PORT:-}
@@ -36,9 +37,17 @@ services:
     volumes:
       - ${STROOM_PROXY_REMOTE_VOLUME_CERTS:-../volumes/stroom-proxy-remote/certs}:/stroom-proxy/certs:ro
       - ${STROOM_PROXY_REMOTE_VOLUME_CONFIG:-../volumes/stroom-proxy-remote/config}:/stroom-proxy/config:ro
+      #- type: tmpfs
+        #target: /tmp
+        #tmpfs:
+          ##size: "${STROOM_PROXY_REMOTE_TEMP_MOUNT_SIZE:-8g}"
+          #mode: 0o01777
       - type: volume
         source: stroom-proxy-remote_content
         target: /stroom-proxy/content
+      - type: volume
+        source: stroom-proxy-remote_data_feed_identities
+        target: /stroom-proxy/data_feed_identities
       - type: volume
         source: stroom-proxy-remote_logs
         target: /stroom-proxy/logs
@@ -54,6 +63,8 @@ services:
       - type: volume
         source: stroom-proxy-remote_zip_file_ingest_failed
         target: /stroom-proxy/zip_file_ingest_failed
+    tmpfs:
+      - "/tmp:noatime,noexec,mode=1777,size=${STROOM_PROXY_REMOTE_TMP_VOL_MAX_SIZE:-64g}"
     logging:
       driver: "json-file"
       options:
@@ -62,6 +73,7 @@ services:
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
 volumes:
+  stroom-proxy-remote_data_feed_identities:
   stroom-proxy-remote_content:
   stroom-proxy-remote_logs:
   stroom-proxy-remote_data:
