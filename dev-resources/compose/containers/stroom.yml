@@ -48,6 +48,7 @@ services:
       - type: volume
         source: stroom_content_index
         target: /stroom/content_index
+      - type: volume
         source: stroom_data_feed_identities
         target: /stroom/data_feed_identities
       - type: volume
