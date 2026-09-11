@@ -315,14 +315,17 @@ test_stack() {
   echo -e "services_count:            [${GREEN}${services_count}${NC}]"
 
   local env_file="config/${stack_name}.env"
-  # In order for the stack to start up cleanly and for the health
-  # check not fail we need to run with hard coded insecure open id creds.
-  # Some stacks already have this set, i.e. the -test stacks.
+  # In order for the stack to start up cleanly and for the health check not to fail we need stroom and
+  # stroom-proxy to authenticate to each other without a real IDP. This is done with the insecure test-only
+  # shared-secret overlay: the app runs INTERNAL_IDP and the proxies NO_IDP, and a shared secret is accepted
+  # inbound and presented downstream. NEVER use these in production. Some stacks (the -test stacks) also set
+  # these in their env_vars_whitelist.txt.
   echo -e "${RED}********************************************************************************${NC}"
-  # This one is for stroom v7.2
-  add_env_file_line "${env_file}" "export STROOM_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
-  add_env_file_line "${env_file}" "export STROOM_PROXY_LOCAL_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
-  add_env_file_line "${env_file}" "export STROOM_PROXY_REMOTE_IDENTITY_PROVIDER_TYPE=\"TEST_CREDENTIALS\""
+  local -r insecure_test_credential="ci-insecure-test-credential-do-not-use-in-prod"
+  add_env_file_line "${env_file}" "export STROOM_ALLOW_INSECURE_TEST_CREDENTIALS=\"true\""
+  add_env_file_line "${env_file}" "export STROOM_INSECURE_TEST_CREDENTIAL=\"${insecure_test_credential}\""
+  add_env_file_line "${env_file}" "export STROOM_PROXY_LOCAL_DOWNSTREAM_API_KEY=\"${insecure_test_credential}\""
+  add_env_file_line "${env_file}" "export STROOM_PROXY_REMOTE_DOWNSTREAM_API_KEY=\"${insecure_test_credential}\""
   echo -e "${RED}********************************************************************************${NC}"
 
   ./info.sh

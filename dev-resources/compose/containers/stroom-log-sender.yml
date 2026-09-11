@@ -2,6 +2,7 @@ services:
   stroom-log-sender:
     container_name: "${CONTAINER_NAME_PREFIX}stroom-log-sender"
     image: "${STROOM_LOG_SENDER_DOCKER_REPO:-gchq/stroom-log-sender}:${STROOM_LOG_SENDER_TAG:-local-SNAPSHOT}"
+    stop_grace_period: "${STROOM_LOG_SENDER_STOP_GRACE_PERIOD:-1m}"
     environment:
       # The script that sends the logs
       - LOG_SENDER_SCRIPT=/stroom-log-sender/send_to_stroom.sh

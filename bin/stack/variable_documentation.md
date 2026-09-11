@@ -242,6 +242,10 @@ API Key, OAuth token, Datafeed Key.
 True if stroom-proxy should verify the hostname against the server certificate
 when making API call, e.g. when checking the feed receipt status.
 
+## STROOM_PROXY_LOCAL_TMP_VOL_MAX_SIZE
+
+The maximum size of the `/tmp` mount, e.g. 1g, 10m, etc.
+
 ## STROOM_PROXY_REMOTE_CLIENT_KEYSTORE_PASSWORD
 
 The password of the java keystore file that will be used when making API
@@ -329,6 +333,10 @@ certificate, API Key, OAuth token, Datafeed Key.
 True if stroom-proxy should verify the hostname against the server certificate
 when making API call, e.g. when checking the feed receipt status.
 
+## STROOM_PROXY_REMOTE_TMP_VOL_MAX_SIZE
+
+The maximum size of the `/tmp` mount, e.g. 1g, 10m, etc.
+
 ## STROOM_RACK
 
 DEPRECATED The name/id of the rack in which this stroom instance sits.
@@ -352,6 +360,10 @@ The host/DNS name for the SQL Statistics _stats_ database.
 ## STROOM_STATS_DB_PASSWORD
 
 The password for the SQL Statistics _stats_ database.
+
+## STROOM_TMP_VOL_MAX_SIZE
+
+The maximum size of the `/tmp` mount, e.g. 1g, 10m, etc.
 
 ## STROOM_UI_HOST
 
