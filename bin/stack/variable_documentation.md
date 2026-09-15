@@ -151,6 +151,11 @@ EXTERNAL_IDP - An external IDP such as KeyCloak/Cognito is used for all authenti
 including data receipt.
 TEST_CREDENTIALS - Use insecure hard-coded authentication credentials for test/demo only.
 
+## STROOM_HEALTHCHECK_TIMEOUT_SECS
+
+The timeout in seconds for Stroom's docker healthcheck. Default value is 10. Set to a higher
+value for slow networks.
+
 ## STROOM_JAVA_OPTS
 
 Any additional java command line options, e.g. `-Xms50m -Xmx1024m`, that will
@@ -230,6 +235,11 @@ NO_IDP - No IDP is used. API keys are set in config for feed status checks.
 EXTERNAL_IDP - An external IDP such as KeyCloak/Cognito is used for token authentication
 on receipt and for feed status checks.
 TEST_CREDENTIALS - Use insecure hard-coded authentication credentials for test/demo only.
+
+## STROOM_PROXY_LOCAL_HEALTHCHECK_TIMEOUT_SECS
+
+The timeout in seconds for Stroom Proxy (local)'s docker healthcheck. Default value is 10. Set to a higher
+value for slow networks.
 
 ## STROOM_PROXY_LOCAL_RECEIVE_AUTH_REQUIRED
 
@@ -322,11 +332,16 @@ EXTERNAL_IDP - An external IDP such as KeyCloak/Cognito is used for token authen
 on receipt and for feed status checks.
 TEST_CREDENTIALS - Use insecure hard-coded authentication credentials for test/demo only.
 
+## STROOM_PROXY_REMOTE_HEALTHCHECK_TIMEOUT_SECS
+
+The timeout in seconds for Stroom Proxy (remote)'s docker healthcheck. Default value is 10. Set to a higher
+value for slow networks.
+
 ## STROOM_PROXY_REMOTE_RECEIVE_AUTH_REQUIRED
 
 If true, /datafeed on Stroom Proxy (remote) will reject any requests that
 cannot be authenticated by the configured authentication methods, e.g.
-certificate, API Key, OAuth token, Datafeed Key.
+Certificate, API Key, OAuth token, Datafeed Key.
 
 ## STROOM_PROXY_REMOTE_REST_CLIENT_VERIFY_HOSTNAME
 

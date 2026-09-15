@@ -31,10 +31,11 @@ services:
       - "${STROOM_ADMIN_PORT:-8081}:8081"
       #- "${STROOM_DEBUG_PORT:-10765}:10765"
     healthcheck:
-      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:8081/stroomAdmin/healthcheck || exit 1
+      # This uses the internal 8081 port, not STROOM_ADMIN_PORT.
+      test: "curl --connect-timeout 5 --max-time ${STROOM_HEALTHCHECK_TIMEOUT_SECS:-10} --fail --silent --head --output /dev/null http://localhost:8081/stroomAdmin/healthcheck || exit 1"
       start_period: 1m30s
       interval: 1m
-      timeout: 5s
+      timeout: "${STROOM_HEALTHCHECK_TIMEOUT_SECS:-10}s"
       retries: 3
     volumes:
       - ${STROOM_VOLUME_CONFIG:-../volumes/stroom/config}:/stroom/config:ro
