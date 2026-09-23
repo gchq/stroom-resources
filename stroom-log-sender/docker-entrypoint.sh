@@ -22,6 +22,9 @@ env \
   | sort
 echo "----------------------------------------------------------"
 
+
+echo "Running entrypoint as $(id -u):$(id -g)"
+
 # In case anyone tries to run the container as root drop down
 if [ "$(id -u)" = '0' ]; then
   #su-exec is the alpine equivalent of gosu
@@ -30,6 +33,6 @@ if [ "$(id -u)" = '0' ]; then
   exec su-exec "${USER_ID}:${GROUP_ID}" "$@"
 else
   # Already non-root so just crack on and run the cmd as is
-  echo "Running supercronic as ${USER_ID}:${GROUP_ID}"
+  echo "Running supercronic as $(id -u):$(id -g)"
   exec "$@"
 fi

@@ -131,6 +131,8 @@ CMD [ \
 # The log-volumes dir is where we expect volumes to be mounted 
 RUN echo "http_proxy: $http_proxy" && \
     echo "https_proxy: $https_proxy" && \
+    echo "USER_ID: ${USER_ID}" && \
+    echo "GROUP_ID: ${GROUP_ID}" && \
     apk add --no-cache \
         bash \
         coreutils \
