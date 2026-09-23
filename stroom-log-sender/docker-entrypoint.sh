@@ -22,15 +22,14 @@ env \
   | sort
 echo "----------------------------------------------------------"
 
-
 # In case anyone tries to run the container as root drop down
 if [ "$(id -u)" = '0' ]; then
-    #su-exec is the alpine equivalent of gosu
-    #runs all args as user USER_ID:GROUP_ID, rather than as root
-    echo "Running supercronic via su-exec as $USER_ID:$GROUP_ID"
-    exec su-exec "$USER_ID:$GROUP_ID" "$@"
+  #su-exec is the alpine equivalent of gosu
+  #runs all args as user USER_ID:GROUP_ID, rather than as root
+  echo "Running supercronic via su-exec as ${USER_ID}:${GROUP_ID}"
+  exec su-exec "${USER_ID}:${GROUP_ID}" "$@"
 else
   # Already non-root so just crack on and run the cmd as is
-  echo "Running supercronic"
+  echo "Running supercronic as ${USER_ID}:${GROUP_ID}"
   exec "$@"
 fi
