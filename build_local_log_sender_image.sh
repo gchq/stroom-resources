@@ -14,4 +14,5 @@ docker build \
     --tag gchq/stroom-log-sender:local-SNAPSHOT \
     --build-arg GIT_COMMIT="${GIT_COMMIT}" \
     --build-arg GIT_TAG="${GIT_TAG}" \
+    "$@" \
     ./stroom-log-sender
