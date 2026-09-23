@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
 
+echo "Running entrypoint as $(id -u):$(id -g)"
 
 # These should be set in the dockerfile, but just in case
 USER_ID="${USER_ID:-1000}"
 GROUP_ID="${GROUP_ID:-0}"
 # This is the file in the bind mounted volume with the env vars in it
 CRONTAB_FILE=/stroom-log-sender/config/crontab.txt
-
 
 if [ ! -f "${CRONTAB_FILE}" ]; then
   echo "Error: source crontab file ${CRONTAB_FILE} not found."
@@ -21,9 +21,6 @@ env \
   | uniq \
   | sort
 echo "----------------------------------------------------------"
-
-
-echo "Running entrypoint as $(id -u):$(id -g)"
 
 # In case anyone tries to run the container as root drop down
 if [ "$(id -u)" = '0' ]; then
