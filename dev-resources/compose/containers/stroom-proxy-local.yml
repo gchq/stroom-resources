@@ -28,10 +28,11 @@ services:
       - "${STROOM_PROXY_LOCAL_ADMIN_PORT:-8091}:8091"
       #- "${STROOM_PROXY_LOCAL_DEBUG_PORT:-10766}:10766"
     healthcheck:
-      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:8091/proxyAdmin/healthcheck || exit 1
+      # This uses the internal 8091 port, not STROOM_PROXY_LOCAL_ADMIN_PORT.
+      test: "curl --connect-timeout 5 --max-time ${STROOM_PROXY_LOCAL_HEALTHCHECK_TIMEOUT_SECS:-10} --fail --silent --head --output /dev/null http://localhost:8091/proxyAdmin/healthcheck || exit 1"
       start_period: 30s
       interval: 1m
-      timeout: 5s
+      timeout: "${STROOM_PROXY_LOCAL_HEALTHCHECK_TIMEOUT_SECS:-10}s"
       retries: 3
     volumes:
       - ${STROOM_PROXY_LOCAL_VOLUME_CERTS:-../volumes/stroom-proxy-local/certs}:/stroom-proxy/certs:ro
