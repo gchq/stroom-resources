@@ -15,12 +15,20 @@
 #**********************************************************************
 
 
+# ~~~ Base alpine stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FROM alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS alpine-base-stage
+
+# ~~~ Base alpine stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
 # ~~~ send logs scripts stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Intermediate build stage to grab all the send logs scripts
 # later copy them all in one go to reduce the number of layers
 # Have to use alpine rather than scratch so we can chmod
-FROM alpine:3.8 as send-logs-scripts-stage
+FROM alpine-base-stage AS send-logs-scripts-stage
 WORKDIR /scripts
 
 ARG SEND_TO_STROOM_VERSION=send-to-stroom-v3.1.0
@@ -36,7 +44,7 @@ RUN chmod u+x ./*.sh
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Final build stage
 
-FROM alpine:3.8
+FROM alpine-base-stage
 
 #This is the root dir for all our files/scripts
 WORKDIR /stroom-log-sender
