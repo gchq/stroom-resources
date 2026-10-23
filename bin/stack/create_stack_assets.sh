@@ -309,7 +309,7 @@ main() {
   local -r BUILD_STACK_NAME=$1
   local -r VERSION=$2
   local -r services=( "${@:3}" )
-  local -r STROOM_DOCS_STROOM_VERSION="7.13"
+  local -r STROOM_DOCS_STROOM_VERSION="7.14"
   local -r BUILD_DIRECTORY="build/${BUILD_STACK_NAME}"
   local -r WORKING_DIRECTORY="${BUILD_DIRECTORY}/${BUILD_STACK_NAME}-${VERSION}"
   local -r VOLUMES_DIRECTORY="${WORKING_DIRECTORY}/volumes"
