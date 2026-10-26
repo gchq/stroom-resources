@@ -67,12 +67,13 @@ ENTRYPOINT ["/sbin/tini", "--", "/stroom-log-sender/docker-entrypoint.sh"]
 # tini required for process control in the entrypoint
 # Create a user with no home and no shell
 # The log-volumes dir is where we expect volumes to be mounted 
+# Semi-fixed curl version to fix CVE-2026-92392
 RUN echo "http_proxy: $http_proxy" && \
     echo "https_proxy: $https_proxy" && \
     apk add --no-cache \
         bash \
         coreutils \
-        curl \
+        'curl>=8.23.0-r0' \
         gettext \
         procps \
         tini && \
