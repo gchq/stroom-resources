@@ -45,8 +45,10 @@ CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 # logrotate for rotation of the file based access/app logs
 # tini required for process control in the entrypoint
 # remove the default nginx html path to avoid confusion
+# Semi-fixed brotli version is to fix CVE-2026-111497, can remove once the nginx img includes it.
 RUN \
     apk add --no-cache \
+        'brotli-libs>=1.2.1-r0' \
         bash \
         logrotate \
         tini && \
