@@ -46,8 +46,11 @@ CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 # tini required for process control in the entrypoint
 # remove the default nginx html path to avoid confusion
 # Semi-fixed brotli version is to fix CVE-2026-111497, can remove once the nginx img includes it.
+# Semi-fixed curl version is to fix CVE-2026-92392, can remove once the nginx img includes it.
+# We don't need curl, but the nginx img seems to bring it in.
 RUN \
     apk add --no-cache \
+        'curl>=8.23.0-r0' \
         'brotli-libs>=1.2.1-r0' \
         bash \
         logrotate \
