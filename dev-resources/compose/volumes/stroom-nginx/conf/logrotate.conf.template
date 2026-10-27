@@ -2,8 +2,8 @@
     # compress rotated log files with gzip
     compress
 
-    # write new files with RW to everybody
-    create 0666 root root
+    # write new files with RW to everybody, preserving the nginx owner/group
+    create 0666
 
     #copytruncate
     #daily

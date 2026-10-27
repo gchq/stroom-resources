@@ -17,10 +17,11 @@ setup_colours() {
 
 # Takes the path to the templates and generates templated conf files for each.
 create_confs() {
-  for source_path in ${1}/*.conf.template; do
-    local source=$(basename $source_path)
+  for source_path in "${1}"/*.conf.template; do
+    local source
+    source=$(basename "${source_path}")
     local destination=${source%.template}
-    create_conf ${source_path} "/etc/nginx/${destination}"
+    create_conf "${source_path}" "/etc/nginx/${destination}"
   done
 }
 
@@ -84,18 +85,11 @@ setup_crontab_and_run_cmd() {
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     cat "${crontab_file}"
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    # If we assign the crontab to the 'sender' user (crontab -u ...) it won't work, 
-    # as sender dosn't have perms on /dev/stdout
-    # Instead, consider using supercronic - https://github.com/aptible/supercronic/ so that
-    # we can run as non-root
-    /usr/bin/crontab "${crontab_file}"
+    echo -e "Starting supercronic in the background"
+    /usr/bin/supercronic "${crontab_file}" &
 
-    # start crond as root
-    echo -e "Starting crond in the background"
-
-    /usr/sbin/crond -l 8 && \
-      echo -e "Starting CMD: [" "$@" "]" && \
-      exec "$@"
+    echo -e "Starting CMD: [" "$@" "]"
+    exec "$@"
   else
     echo -e "${RED}WARN${NC}: crontab file ${BLUE}${crontab_file}${NC} not" \
       "found, can't start cron, nginx logs won't be rotated"
@@ -123,7 +117,7 @@ main() {
   mkdir -p "${logs_dir}/access"
   mkdir -p "${logs_dir}/app"
 
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1091
   . "${base_dir}/add_container_identity_headers.sh" "${log_sender_headers_file}"
 
   setup_logrotate
