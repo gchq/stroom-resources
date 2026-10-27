@@ -1,25 +1,25 @@
 ---
-## Default Elasticsearch configuration from elasticsearch-docker.
-## from https://github.com/elastic/elasticsearch-docker/blob/master/build/elasticsearch/elasticsearch.yml
+## Single node Elasticsearch configuration for local development and CI testing.
+## See https://www.elastic.co/docs/reference/elasticsearch/configuration-reference
 #
 cluster.name: "docker-cluster"
 network.host: 0.0.0.0
 
-# minimum_master_nodes need to be explicitly set when bound on a public IP
-# set to 1 to allow single node clusters
-# Details: https://github.com/elastic/elasticsearch/pull/17288
-discovery.zen.minimum_master_nodes: 1
-
 ## Use single node discovery in order to disable production mode and avoid bootstrap checks
-## see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+## see https://www.elastic.co/docs/deploy-manage/deploy/self-managed/bootstrap-checks
 #
 discovery.type: single-node
 
-## Disable X-Pack
-## see https://www.elastic.co/guide/en/x-pack/current/xpack-settings.html
-##     https://www.elastic.co/guide/en/x-pack/current/installing-xpack.html#xpack-enabling
+## Disable security so stroom can connect over plain HTTP without credentials.
+## NOT suitable for a production deployment.
 #
 xpack.security.enabled: false
-xpack.monitoring.enabled: false
+
+## Disable features stroom does not use, to reduce start-up time and memory use
+#
 xpack.ml.enabled: false
 xpack.watcher.enabled: false
+
+## Don't make indices read-only when the docker host's disk is nearly full
+#
+cluster.routing.allocation.disk.threshold_enabled: false
