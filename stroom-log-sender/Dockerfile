@@ -18,7 +18,7 @@
 # 20260611 - 3.24.0 has multiple critical and high CVEs in openssl, which we are likely using
 # via curl, so use 3.27.1 until it is patched
 ARG \
-  BASE_IMAGE="alpine:3.21.7@sha256:48b0309ca019d89d40f670aa1bc06e426dc0931948452e8491e3d65087abc07d"
+  BASE_IMAGE="alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a"
 
 
 # ~~~ Download supercronic stage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
