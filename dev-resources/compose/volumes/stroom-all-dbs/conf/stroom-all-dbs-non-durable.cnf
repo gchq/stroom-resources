@@ -36,3 +36,9 @@ innodb_buffer_pool_size=1G
 
 # Fewer checkpoints during heavy DDL, e.g. running all the Flyway migrations
 innodb_redo_log_capacity=1G
+
+# Put tables in the shared system tablespace (ibdata1) rather than a file each. Creating
+# and syncing a file for every table, including those rebuilt by ALTER TABLE, makes the
+# Flyway migrations about three times slower. ibdata1 never shrinks, but space freed by
+# dropping test databases is reused.
+innodb_file_per_table=OFF
