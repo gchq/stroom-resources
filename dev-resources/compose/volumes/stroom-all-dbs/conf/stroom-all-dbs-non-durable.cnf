@@ -1,0 +1,38 @@
+# Non-durable configuration for the stroom-all-dbs-non-durable service, for faster
+# test runs (e.g. CI) and local development.
+#
+# This file is NOT shipped in stacks. Stacks only use stroom-all-dbs.cnf.
+#
+# It trades all crash safety for speed. A MySQL crash can lose about the last second
+# of writes, and an OS/VM crash can also corrupt tables, so only use it for databases
+# that can be rebuilt.
+#
+# Keep the settings that are not about durability in step with stroom-all-dbs.cnf.
+
+# This file is bind-mounted in to the container using the inode of the file.
+# If the file is changed/replaced in a way that results in a new inode then the
+# container will see the old version.
+
+[mysqld]
+
+max_connections=1000
+
+# --- Durability (all relaxed) ---
+
+# Don't flush the redo log on commit, it is written and flushed about once a second
+innodb_flush_log_at_trx_commit=0
+
+# No binary log, as nothing here needs replication or point in time recovery
+disable_log_bin
+sync_binlog=0
+
+# No doublewrite buffer, so a page torn by an OS crash cannot be repaired
+innodb_doublewrite=OFF
+
+# --- Performance ---
+
+# The default of 128M is far too small for many test databases being used at once
+innodb_buffer_pool_size=1G
+
+# Fewer checkpoints during heavy DDL, e.g. running all the Flyway migrations
+innodb_redo_log_capacity=1G
