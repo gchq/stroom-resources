@@ -1,13 +1,22 @@
 services:
   elasticsearch:
-    image: "${ELASTIC_DOCKER_REPO:-docker.elastic.co/elasticsearch/elasticsearch}:${ELASTIC_SEARCH_TAG:-5.6.3}"
+    # The major version must match that of the Elasticsearch Java client used by stroom
+    image: "${ELASTIC_DOCKER_REPO:-docker.elastic.co/elasticsearch/elasticsearch}:${ELASTIC_SEARCH_TAG:-9.5.3}"
     container_name: "${CONTAINER_NAME_PREFIX}elasticsearch"
     volumes:
       - ${ELASTIC_VOLUME_CONF_FILE:-../volumes/elasticsearch/conf/elasticsearch.yml}:/usr/share/elasticsearch/config/elasticsearch.yml:ro
     ports:
+      # Allow the ports on the docker host to be changed, internally they are fixed
       - "${ELASTIC_HTTP_PORT:-9200}:9200"
       - "${ELASTIC_BINARY_PORT:-9300}:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ES_JAVA_OPTS: "${ELASTIC_JAVA_OPTS:--Xms512m -Xmx512m}"
+    healthcheck:
+      # This uses the internal 9200 port, not ELASTIC_HTTP_PORT.
+      test: "curl --connect-timeout 5 --max-time 10 --fail --silent --output /dev/null 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1"
+      start_period: 1m
+      interval: 10s
+      timeout: 15s
+      retries: 3
     labels:
       - "stack_name=${STACK_NAME:-<STACK_NAME>}"
