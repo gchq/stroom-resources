@@ -1,0 +1,16 @@
+services:
+  # The same database as stroom-all-dbs (same port and data volume) but with a
+  # non-durable MySQL config for faster tests. See stroom-all-dbs-non-durable.cnf.
+  #
+  # Run one or the other, never both. They share port 3307, so the second one to
+  # start will fail. Switching between them keeps your data.
+  stroom-all-dbs-non-durable:
+    extends:
+      file: stroom-all-dbs.yml
+      service: stroom-all-dbs
+    # Must differ from stroom-all-dbs, as compose rejects two services with the
+    # same container name.
+    container_name: "${CONTAINER_NAME_PREFIX}stroom-all-dbs-non-durable"
+    volumes:
+      # Replaces the stroom-all-dbs.cnf mount as it has the same target
+      - ${MYSQL_NON_DURABLE_VOLUME_CONF_FILE:-../volumes/stroom-all-dbs/conf/stroom-all-dbs-non-durable.cnf}:/etc/mysql/conf.d/stroom-all-dbs.cnf:ro
