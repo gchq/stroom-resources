@@ -35,14 +35,15 @@ VOLUME [ "/stroom-nginx/logs" ]
 # Volume to hold any state/config for logrotate
 VOLUME [ "/stroom-nginx/logrotate" ]
 
-# run entrypoint script inside tini for better unix process handling, 
-# see https://github.com/krallin/tini/issues/8
-ENTRYPOINT ["/sbin/tini", "--", "/stroom-nginx/docker-entrypoint.sh"]
+# Run the entrypoint inside tini and forward signals to its process group so both
+# nginx and the log rotation scheduler stop cleanly.
+ENTRYPOINT ["/sbin/tini", "-g", "--", "/stroom-nginx/docker-entrypoint.sh"]
 
 CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 
 # bash for the entrypoint script
-# logrotate for rotation of the file based access/app logs
+# logrotate and supercronic for rotation of the file based access/app logs
+# libcap allows nginx to bind ports 80/443 without running as root
 # tini required for process control in the entrypoint
 # remove the default nginx html path to avoid confusion
 # Semi-fixed brotli version is to fix CVE-2026-111497, can remove once the nginx img includes it.
@@ -54,7 +55,9 @@ RUN \
         'curl>=8.23.0-r0' \
         'brotli-libs>=1.2.1-r0' \
         bash \
+        libcap \
         logrotate \
+        supercronic \
         tini && \
     apk del --no-cache \
         nginx-module-xslt \
@@ -64,10 +67,19 @@ RUN \
     mkdir -p /stroom-nginx/certs && \
     mkdir -p /stroom-nginx/config && \
     mkdir -p /stroom-nginx/html && \
+    setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx && \
+    chown -R nginx:nginx \
+        /etc/nginx \
+        /run \
+        /stroom-nginx \
+        /var/cache/nginx \
+        /var/log/nginx && \
     rm -rf /usr/share/nginx/html
 
 # Copy entrypoint and related shell scripts
 COPY *.sh /stroom-nginx/
+
+USER nginx
 
 # Label the image so we can see what commit/tag it came from
 ARG GIT_COMMIT=unspecified
