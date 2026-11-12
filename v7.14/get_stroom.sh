@@ -22,7 +22,7 @@
 
 # This script is templated and will be substituted during the build process
 # To test the templated version you can do something like this:
-# bash <(cat ~/git_work/stroom-resources/bin/stack/lib/get_stroom.sh | sed 's/stroom_core_test/stroom_core_test/; s/stroom-stacks-v7.14-beta.16/stroom-stacks-v6.0-beta.28-9/; s/v7.14-beta.16/v6.0-beta.28-9/; s/e79b648f9aec9daabb7a9bd64c0776e213287eb7c55a12d568d5bc65ef9f80c3  stroom_core_test-v7.14-beta.16.tar.gz/fc593474e2ee6b9a7f507303fc38522c6a4d1abf62e2ddc7af0f20d15b6baeb0  stroom_core_test-v6.0-beta.28-9.tar.gz/' )
+# bash <(cat ~/git_work/stroom-resources/bin/stack/lib/get_stroom.sh | sed 's/stroom_core_test/stroom_core_test/; s/stroom-stacks-v7.14-beta.16-parallel-pathways/stroom-stacks-v6.0-beta.28-9/; s/v7.14-beta.16-parallel-pathways/v6.0-beta.28-9/; s/bf649b4e9e3d3030914c24d5b7ae3769eabf848d6f11bffcbf1ec5d9babcf490  stroom_core_test-v7.14-beta.16-parallel-pathways.tar.gz/fc593474e2ee6b9a7f507303fc38522c6a4d1abf62e2ddc7af0f20d15b6baeb0  stroom_core_test-v6.0-beta.28-9.tar.gz/' )
 # replacing the sed replacements
 
 # Exit the script on any error
@@ -40,9 +40,9 @@ NC='\033[0m' # No Colour
 main() {
   # stack_version will be hard coded by TravisCI at build time
   local -r stack_name="stroom_core_test"
-  local -r stack_tag="stroom-stacks-v7.14-beta.16"
-  local -r stack_version="v7.14-beta.16"
-  local -r hash_file_contents="e79b648f9aec9daabb7a9bd64c0776e213287eb7c55a12d568d5bc65ef9f80c3  stroom_core_test-v7.14-beta.16.tar.gz"
+  local -r stack_tag="stroom-stacks-v7.14-beta.16-parallel-pathways"
+  local -r stack_version="v7.14-beta.16-parallel-pathways"
+  local -r hash_file_contents="bf649b4e9e3d3030914c24d5b7ae3769eabf848d6f11bffcbf1ec5d9babcf490  stroom_core_test-v7.14-beta.16-parallel-pathways.tar.gz"
 
   local -r install_dir="./${stack_name}/${stack_tag}"
   local -r archive_filename="${stack_name}-${stack_version}.tar.gz"
