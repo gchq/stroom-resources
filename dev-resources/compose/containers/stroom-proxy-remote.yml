@@ -2,6 +2,7 @@ services:
   stroom-proxy-remote:
     container_name: "${CONTAINER_NAME_PREFIX:-}stroom-proxy-remote"
     image: "${STROOM_PROXY_DOCKER_REPO:-gchq/stroom-proxy}:${STROOM_PROXY_TAG:-v7-LATEST}"
+    stop_grace_period: "${STROOM_PROXY_REMOTE_STOP_GRACE_PERIOD:-5m}"
     environment:
       - DOWNSTREAM_HOST_SCHEME=${STROOM_PROXY_REMOTE_DOWNSTREAM_HOST_SCHEME:-https}
       - DOWNSTREAM_HOST_PORT=${STROOM_PROXY_REMOTE_DOWNSTREAM_HOST_PORT:-}
@@ -17,6 +18,10 @@ services:
       - FEED_STATUS_URL=${STROOM_PROXY_REMOTE_FEED_STATUS_URL:-}
       - REST_CLIENT_VERIFY_HOSTNAME=${STROOM_PROXY_REMOTE_REST_CLIENT_VERIFY_HOSTNAME:-true}
       - IDENTITY_PROVIDER_TYPE=${STROOM_PROXY_REMOTE_IDENTITY_PROVIDER_TYPE:-NO_IDP}
+      # Insecure test-only shared secret (inbound acceptance); the proxy presents it downstream via
+      # DOWNSTREAM_API_KEY. Off unless both are set. NEVER set these in production.
+      - STROOM_ALLOW_INSECURE_TEST_CREDENTIALS=${STROOM_ALLOW_INSECURE_TEST_CREDENTIALS:-false}
+      - STROOM_INSECURE_TEST_CREDENTIAL=${STROOM_INSECURE_TEST_CREDENTIAL:-}
       - RECEIVE_AUTH_REQUIRED=${STROOM_PROXY_REMOTE_RECEIVE_AUTH_REQUIRED:-true}
     # In the container, all the directories are 1000:0. We need to run as the current host user but GID 0.
     # This means we can access container dirs via GID 0, but bind mounted host files using the host user's UID.
@@ -27,10 +32,11 @@ services:
       - "${STROOM_PROXY_REMOTE_ADMIN_PORT:-9091}:8091"
       #- "${STROOM_PROXY_REMOTE_DEBUG_PORT:-10767}:10767"
     healthcheck:
-      test: curl --connect-timeout 5 --max-time 10 --fail --silent --head --output /dev/null http://localhost:8091/proxyAdmin/healthcheck || exit 1
+      # This uses the internal 8091 port, not STROOM_PROXY_REMOTE_ADMIN_PORT.
+      test: "curl --connect-timeout 5 --max-time ${STROOM_PROXY_REMOTE_HEALTHCHECK_TIMEOUT_SECS:-10} --fail --silent --head --output /dev/null http://localhost:8091/proxyAdmin/healthcheck || exit 1"
       start_period: 30s
       interval: 1m
-      timeout: 5s
+      timeout: "${STROOM_PROXY_REMOTE_HEALTHCHECK_TIMEOUT_SECS:-10}s"
       retries: 3
     volumes:
       - ${STROOM_PROXY_REMOTE_VOLUME_CERTS:-../volumes/stroom-proxy-remote/certs}:/stroom-proxy/certs:ro

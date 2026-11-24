@@ -108,6 +108,7 @@ main() {
   create_script start
   create_script status
   create_script stop
+  create_script kill
 
   echo -e "${GREEN}Copying stack management lib scripts${NC}"
   # Copy libs to build

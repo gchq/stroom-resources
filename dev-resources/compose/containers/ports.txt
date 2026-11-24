@@ -26,8 +26,8 @@
  9090 - stroom-proxy-remote (app http)
  9091 - stroom-proxy-remote (admin)
  9092 - kakfa
- 9200 - Elastic Search (TCP)
- 9300 - Elastic Search (HTTP)
+ 9200 - Elastic Search (HTTP)
+ 9300 - Elastic Search (transport)
  9443 - stroom-auth-ui (https)
  9444 - stroom-annotations-ui (https) # TODO port clash with stroom-ui
  9444 - stroom-ui (https)
