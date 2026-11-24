@@ -69,7 +69,7 @@ services:
         target: /stroom-proxy/zip_file_ingest_failed
     tmpfs:
         # uid=1000,gid=0 to match the uid:gid defaulted in the dockerfiles
-      - "/tmp:noatime,noexec,mode=1777,uid=1000,gid=0,size=${STROOM_PROXY_REMOTE_TMP_VOL_MAX_SIZE:-64g}"
+      - "/tmp:noatime,noexec,mode=1777,uid=${DOCKER_HOST_UID:-1000},gid=0,size=${STROOM_PROXY_REMOTE_TMP_VOL_MAX_SIZE:-64g}"
     logging:
       driver: "json-file"
       options:
