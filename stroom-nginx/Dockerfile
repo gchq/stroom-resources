@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM nginx:1.21.6-alpine
+FROM nginx:1.31.8-alpine3.24@sha256:1ef7ca94d7879df82421428ce13bd1eaa412404953859cf7a5b6512c25e67a60
 
 # This is the root dir for all our files/scripts
 WORKDIR /stroom-nginx
@@ -45,11 +45,20 @@ CMD ["sh", "-c", "nginx -g 'daemon off;'"]
 # logrotate for rotation of the file based access/app logs
 # tini required for process control in the entrypoint
 # remove the default nginx html path to avoid confusion
+# Semi-fixed brotli version is to fix CVE-2026-111497, can remove once the nginx img includes it.
+# Semi-fixed curl version is to fix CVE-2026-92392, can remove once the nginx img includes it.
+# We don't need curl, but the nginx img seems to bring it in.
+# Remove nginx-module-xslt/nginx-module-njs as these pull in libxml2 which has an unresolved CVE (plus we don't use them)
 RUN \
     apk add --no-cache \
+        'curl>=8.23.0-r0' \
+        'brotli-libs>=1.2.1-r0' \
         bash \
         logrotate \
         tini && \
+    apk del --no-cache \
+        nginx-module-xslt \
+        nginx-module-njs && \
     mkdir -p /stroom-nginx/logs && \
     mkdir -p /stroom-nginx/logrotate && \
     mkdir -p /stroom-nginx/certs && \
