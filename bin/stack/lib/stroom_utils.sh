@@ -340,7 +340,7 @@ check_service_health() {
     do_echo "${RED}${err_msg}${NC}"
     return_code=1
   fi
-  return ${return_code}
+  return "${return_code}"
 }
 
 check_service_health_if_in_stack() {
@@ -570,9 +570,13 @@ determing_docker_host_details() {
   export DOCKER_HOST_HOSTNAME="${DOCKER_HOST_HOSTNAME:-$(hostname --fqdn)}"
   # shellcheck disable=SC2034
   export DOCKER_HOST_IP="${DOCKER_HOST_IP:-$(determine_host_address)}"
+  DOCKER_HOST_UID=
+  DOCKER_HOST_UID="$(id -u)"
+  export DOCKER_HOST_UID
 
   echo -e "${GREEN}Using hostname ${BLUE}${DOCKER_HOST_HOSTNAME}${GREEN} and" \
     "IP address ${BLUE}${DOCKER_HOST_IP}${GREEN} for audit logging.${NC}"
+  echo -e "${GREEN}Running containers as user ID: ${BLUE}${DOCKER_HOST_UID}${GREEN}"
 }
 
 start_stack() {

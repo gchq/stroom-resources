@@ -1,12 +1,12 @@
 services:
   stroom-log-sender:
-    container_name: "${CONTAINER_NAME_PREFIX}stroom-log-sender"
+    container_name: "${CONTAINER_NAME_PREFIX:-}stroom-log-sender"
     image: "${STROOM_LOG_SENDER_DOCKER_REPO:-gchq/stroom-log-sender}:${STROOM_LOG_SENDER_TAG:-local-SNAPSHOT}"
     stop_grace_period: "${STROOM_LOG_SENDER_STOP_GRACE_PERIOD:-1m}"
     environment:
-      # The script that sends the logs
+        # The script that sends the logs
       - LOG_SENDER_SCRIPT=/stroom-log-sender/send_to_stroom.sh
-      # The url the logs will be sent to
+        # The url the logs will be sent to
       - DATAFEED_URL=${STROOM_LOG_SENDER_DATAFEED_URL:-https://nginx/stroom/datafeeddirect}
         # The base path for all stroom logs
       - STROOM_BASE_LOGS_DIR=${STROOM_LOG_SENDER_STROOM_BASE_LOGS_DIR:-/stroom-log-sender/log-volumes/stroom}
@@ -39,12 +39,17 @@ services:
       - CERT_FILE=${STROOM_LOG_SENDER_CERT_FILE:-/stroom-log-sender/certs/client.pem.crt}
         # The PEM format CA certificate
       - CA_CERT_FILE=${STROOM_LOG_SENDER_CA_CERT_FILE:-/stroom-log-sender/certs/ca.pem.crt}
+    # In the container, all the directories are 1000:0. We need to run as the current host user but GID 0.
+    # This means we can access container dirs via GID 0, but bind mounted host files using the host user's UID.
+    user: "${DOCKER_HOST_UID:-1000}:0"
     volumes:
       # Volume for the crontab configuration
       - ${STROOM_LOG_SENDER_VOLUME_CONF:-../volumes/stroom-log-sender/conf}:/stroom-log-sender/config/:ro
       # Volume for the certs/keys
       - ${STROOM_LOG_SENDER_VOLUME_CERTS:-../volumes/stroom-log-sender/certs}:/stroom-log-sender/certs/:ro
-
+    tmpfs:
+        # uid=1000,gid=0 to match the uid:gid defaulted in the dockerfiles
+      - "/tmp:noatime,noexec,mode=1777,uid=${DOCKER_HOST_UID:-1000},gid=0,size=${STROOM_LOG_SENDER_TMP_VOL_MAX_SIZE:-64g}"
       # This is the base compose file for stroom-log-sender. To ship logs it needs access to shared
       # docker volumes that contain the logs to ship. To allow us to run stroom-log sender in different
       # stacks with different service to ship logs for, we use an additional override file for each
