@@ -122,27 +122,30 @@ CMD [ \
   "/stroom-log-sender/config/crontab.txt" ]
 
 # bash required for send_to_stroom.sh
-# coreutils required for 'date' command to output millis
-# curl required for sending logs
+# curl is already in common_base_stage
 # gettext needed for 'envsubst' using in the entrypoint script
 # procps-ng needed for a richer 'ps' command as used in send_to_stroom.sh
 # util-linux provides setpriv to drop down to a non-root user if the container is run as root
 # gzip needed for compressing data sent over curl
 # Create a user with no home and no shell
 # The log-volumes dir is where we expect volumes to be mounted
-RUN echo "http_proxy: $http_proxy"; \
-    echo "https_proxy: $https_proxy"; \
-    echo "USER_ID: ${USER_ID}"; \
-    echo "GROUP_ID: ${GROUP_ID}"; \
+RUN \
+    set -eu; \
+    echo "http_proxy: ${http_proxy:-}"; \
+    echo "https_proxy: ${https_proxy:-}"; \
+    echo "USER_ID: ${USER_ID:-}"; \
+    echo "GROUP_ID: ${GROUP_ID:-}"; \
     microdnf install -y --nodocs \
         bash \
-        coreutils \
-        curl \
         gettext \
         gzip \
         procps-ng \
-        shadow-utils \
         util-linux; \
+    # Snapshot all current installed packages so we can remove any new ones later \
+    rpm -qa --queryformat "%{NAME}\n" | sort > /tmp/current_pkgs; \
+    # Needed for groupadd/useradd \
+    microdnf install -y --nodocs \
+        shadow-utils; \
     if ! getent group "${GROUP_NAME}" >/dev/null 2>&1; then \
         groupadd \
             --gid "${GROUP_ID}" \
@@ -154,9 +157,15 @@ RUN echo "http_proxy: $http_proxy"; \
         --gid ${GROUP_ID} \
         --shell /sbin/nologin \
         --no-create-home ${USER_NAME}; \
-    # was needed for groupadd/useradd, so now can be removed \
-    microdnf remove -y \
-        shadow-utils; \
+    # shadow-utils was only needed for groupadd/useradd, so now can be removed \
+    # along with any deps it pulled in \
+    rpm -qa --queryformat "%{NAME}\n" | sort > /tmp/new_pkgs; \
+    # Get a list of all added packages then remove them if there are any \
+    added_pkgs="$(comm -13 /tmp/current_pkgs /tmp/new_pkgs)"; \
+    rm /tmp/current_pkgs /tmp/new_pkgs; \
+    echo "[${added_pkgs}]"; \
+    [[ -n "${added_pkgs}" ]] \
+        && microdnf remove -y "${added_pkgs}" ; \
     microdnf clean all; \
     mkdir -p /stroom-log-sender \
       /stroom-log-sender/config \
