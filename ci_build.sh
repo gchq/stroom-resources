@@ -267,8 +267,9 @@ do_stack_build_and_test() {
 
   pushd "${STACK_BUILD_DIR}" > /dev/null
 
-  echo -e "Dumping build artifacts in ${GREEN}${STACK_BUILD_DIR}${NC}"
+  echo -e "${GRP_START}Dumping build artifacts in ${GREEN}${STACK_BUILD_DIR}${NC}"
   ls -1 "${STACK_BUILD_DIR}"
+  [[ -z "${GRP_END:-}" ]] || echo -e "${GRP_END}"
 
   for archive_filename in *.tar.gz; do
     # Now spin up the stack to make sure it all works
