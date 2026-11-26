@@ -12,8 +12,7 @@ build_stack() {
   local stack_name="$1"
   local version="$2"
 
-  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
-  echo -e "${GREEN}Building stack ${BLUE}${stack_name}${NC}"
+  echo -e "${GRP_START:-}${GREEN}-- Building stack ${BLUE}${stack_name} ${GREEN}--------------------------------${NC}"
 
   local build_script="build_${stack_name}.sh"
 
@@ -27,8 +26,7 @@ build_stack() {
   # shellcheck disable=SC1090
   . "${build_script}" "${version}"
 
-  echo -e "${GREEN}Finished building stack ${BLUE}${stack_name}${NC}"
-  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
+  echo -e "${GRP_END:-}${GREEN}-- Finished building stack ${BLUE}${stack_name} ${GREEN}--------------------------------${NC}"
 }
 
 main() {

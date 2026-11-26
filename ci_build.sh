@@ -183,7 +183,7 @@ release_to_docker_hub() {
   allTagArgs=()
 
   for tagVersionPart in "$@"; do
-    if [ "x${tagVersionPart}" != "x" ]; then
+    if [[ -n "${tagVersionPart}" ]]; then
       # echo -e "Adding docker tag [${GREEN}${tagVersionPart}${NC}]"
       allTagArgs+=( "--tag=${dockerRepo}:${tagVersionPart}" )
     fi
@@ -376,9 +376,7 @@ test_stack() {
 test_stack_archive() {
   local -r stack_archive_file=$1
 
-
-  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
-  echo -e "::group::Testing stack archive ${GREEN}${stack_archive_file}${NC}"
+  echo -e "${GRP_START:-}${GREEN}-- Testing stack archive ${stack_archive_file}------------------------------${NC}"
 
   if [ ! -f "${stack_archive_file}" ]; then
     echo -e "${RED}Can't find file ${BLUE}${stack_archive_file}${NC}"
@@ -401,8 +399,7 @@ test_stack_archive() {
   test_stack "${stack_name}"
 
   popd > /dev/null
-  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
-  echo "::endgroup::"
+  echo -e "${GRP_END:-}${GREEN}--------------------------------------------------------------------------------${NC}"
 }
 
 substitute_tag() {
@@ -475,9 +472,20 @@ dump_travis_env_vars() {
 
 dump_build_vars() {
   # shellcheck disable=SC2153
-  echo -e "STACK_NAME:                [${GREEN}${STACK_NAME}${NC}]"
-  echo -e "BUILD_VERSION:             [${GREEN}${BUILD_VERSION}${NC}]"
-  echo -e "VERSION_NO:                [${GREEN}${VERSION_NO}${NC}]"
+  echo -e "STACK_NAME:               [${GREEN}${STACK_NAME}${NC}]"
+  echo -e "BUILD_VERSION:            [${GREEN}${BUILD_VERSION}${NC}]"
+  echo -e "VERSION_NO:               [${GREEN}${VERSION_NO}${NC}]"
+}
+
+setup_log_grouping() {
+  # This is so scripts that run locally don't have to output '::group::' / '::endgroup::'
+  GRP_START=""
+  GRP_END=""
+  if [[ -n "${GITHUB_ACTION}" ]]; then
+    # Running in GH Action workflow so use log grouping
+    GRP_START="::group::"
+    GRP_END="::endgroup::"
+  fi
 }
 
 do_release() {
@@ -569,6 +577,7 @@ main() {
     )"
 
   dump_build_vars
+  setup_log_grouping
 
   echo -e "Logging in to DockerHub"
   docker_login
