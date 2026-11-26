@@ -400,7 +400,7 @@ test_stack_archive() {
 
   popd > /dev/null
   echo -e "${GREEN}-- Finished testing stack archive ${stack_archive_file} ---------------------${NC}"
-  [[ -n "${GRP_END}" ]] && echo -e "${GRP_END:-}"
+  [[ -z "${GRP_END:-}" ]] || echo -e "${GRP_END}"
 }
 
 substitute_tag() {
