@@ -50,7 +50,7 @@ setup_colours() {
     GREEN='\033[1;32m'
     YELLOW='\033[1;33m'
     BLUE='\033[1;34m'
-    NC='\033[0m' # No Colour 
+    NC='\033[0m' # No Colour
   }
 }
 
@@ -62,7 +62,7 @@ is_prefixed_by() {
     exit 1
   fi
   local str="$1"; shift
-  
+
   local regex="^("
   local is_first_prefix=true
   for prefix in "$@"; do
@@ -82,14 +82,14 @@ is_prefixed_by() {
 }
 
 # Returns 0 if $1 is in the array of elements passed as subsequent args
-# e.g. 
+# e.g.
 # arr=( "one" "two" "three" )
 # element_in "two" "${arr[@]}" # returns 0
 #element_in () {
-  #local element 
+  #local element
   #local match="$1"
   #shift
-  #for element; do 
+  #for element; do
     #[[ "${element}" == "${match}" ]] && return 0
   #done
   #return 1
@@ -183,7 +183,7 @@ release_to_docker_hub() {
   allTagArgs=()
 
   for tagVersionPart in "$@"; do
-    if [ "x${tagVersionPart}" != "x" ]; then
+    if [[ -n "${tagVersionPart}" ]]; then
       # echo -e "Adding docker tag [${GREEN}${tagVersionPart}${NC}]"
       allTagArgs+=( "--tag=${dockerRepo}:${tagVersionPart}" )
     fi
@@ -267,8 +267,9 @@ do_stack_build_and_test() {
 
   pushd "${STACK_BUILD_DIR}" > /dev/null
 
-  echo -e "Dumping build artifacts in ${GREEN}${STACK_BUILD_DIR}${NC}"
+  echo -e "${GRP_START}Dumping build artifacts in ${GREEN}${STACK_BUILD_DIR}${NC}"
   ls -1 "${STACK_BUILD_DIR}"
+  [[ -z "${GRP_END:-}" ]] || echo -e "${GRP_END}"
 
   for archive_filename in *.tar.gz; do
     # Now spin up the stack to make sure it all works
@@ -292,7 +293,7 @@ do_stack_build_and_test() {
 add_env_file_line() {
   local env_file="$1"; shift
   local env_var_line="$1"; shift
-  
+
   echo -e "${RED}Adding ${YELLOW}${env_var_line}" \
     "${RED}to ${BLUE}${env_file}${RED} to allow the stack to be tested by the CI build${NC}"
 
@@ -376,8 +377,7 @@ test_stack() {
 test_stack_archive() {
   local -r stack_archive_file=$1
 
-  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
-  echo -e "Testing stack archive ${GREEN}${stack_archive_file}${NC}"
+  echo -e "${GRP_START:-}${GREEN}-- Testing stack archive ${stack_archive_file} ------------------------------${NC}"
 
   if [ ! -f "${stack_archive_file}" ]; then
     echo -e "${RED}Can't find file ${BLUE}${stack_archive_file}${NC}"
@@ -393,14 +393,15 @@ test_stack_archive() {
   pushd "${exploded_dir}" > /dev/null
 
   echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
-  tar -xvf "../../${stack_archive_file}"
+  tar -xf "../../${stack_archive_file}"
 
   stack_name="${stack_archive_file%%-*}"
 
   test_stack "${stack_name}"
 
   popd > /dev/null
-  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
+  echo -e "${GREEN}-- Finished testing stack archive ${stack_archive_file} ---------------------${NC}"
+  [[ -z "${GRP_END:-}" ]] || echo -e "${GRP_END}"
 }
 
 substitute_tag() {
@@ -473,9 +474,19 @@ dump_travis_env_vars() {
 
 dump_build_vars() {
   # shellcheck disable=SC2153
-  echo -e "STACK_NAME:                [${GREEN}${STACK_NAME}${NC}]"
-  echo -e "BUILD_VERSION:             [${GREEN}${BUILD_VERSION}${NC}]"
-  echo -e "VERSION_NO:                [${GREEN}${VERSION_NO}${NC}]"
+  echo -e "STACK_NAME:               [${GREEN}${STACK_NAME}${NC}]"
+  echo -e "BUILD_VERSION:            [${GREEN}${BUILD_VERSION}${NC}]"
+  echo -e "VERSION_NO:               [${GREEN}${VERSION_NO}${NC}]"
+}
+
+setup_log_grouping() {
+  # This is so scripts that run locally don't have to output '::group::' / '::endgroup::'
+  if [[ -n "${GITHUB_ACTION}" ]]; then
+    # Running in GH Action workflow so use log grouping
+    export GRP_START="::group::"
+    export GRP_END="::endgroup::"
+  fi
+
 }
 
 do_release() {
@@ -567,12 +578,13 @@ main() {
     )"
 
   dump_build_vars
+  setup_log_grouping
 
   echo -e "Logging in to DockerHub"
   docker_login
 
   # If we are releasing a new docker image then that version will not be available
-  # on Dockerhub to be able to test the stack against it 
+  # on Dockerhub to be able to test the stack against it
   if [ -n "${BUILD_TAG}" ] && \
      is_prefixed_by \
       "${BUILD_TAG}" \

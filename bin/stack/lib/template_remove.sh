@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
 ############################################################################
-# 
+#
 #  Copyright 2019 Crown Copyright
-# 
+#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
-# 
+#
 #      http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-# 
+#
 ############################################################################
 
 #######################################################################
@@ -30,12 +30,27 @@ cmd_help_options="  -y   Do not prompt for confirmation, e.g. when run from a sc
 # give the directory relative to the lib script, not this script.
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "${DIR}"/lib/shell_utils.sh
-source "${DIR}"/lib/stroom_utils.sh
-source "${DIR}"/lib/constants.sh
+# shellcheck disable=SC1090
+{
+  source "${DIR}"/lib/network_utils.sh
+  source "${DIR}"/lib/shell_utils.sh
+  source "${DIR}"/lib/stroom_utils.sh
+  source "${DIR}"/lib/constants.sh
+}
+
+# This line MUST be before we source the env file, as HOST_IP may be set
+# in the env file and thus needs to override the HOST_IP determined here.
+# shellcheck disable=SC2034
+HOST_IP=$(determine_host_address)
+export HOST_IP
+
+# Read the file containing all the env var exports to make them
+# available to docker compose
+# shellcheck disable=SC1090
+source "$DIR"/config/<STACK_NAME>.env
 
 # shellcheck disable=SC2034
-STACK_NAME="<STACK_NAME>" 
+STACK_NAME="<STACK_NAME>"
 
 display_usage_and_exit() {
   echo -e "Usage: $(basename "$0")" >&2
@@ -48,13 +63,13 @@ main() {
   local optspec=":mhy"
   while getopts "$optspec" optchar; do
     case "${optchar}" in
-      h )  
+      h )
         show_default_usage "${cmd_help_args}" "${cmd_help_msg}" "${cmd_help_options}"
         exit 0
         ;;
-      m )  
+      m )
         # shellcheck disable=SC2034
-        MONOCHROME=true 
+        MONOCHROME=true
         ;;
       y)
         requireConfirmation=false

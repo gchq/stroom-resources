@@ -6,14 +6,16 @@ set -e
 
 # shellcheck disable=SC1091
 source lib/shell_utils.sh
+# shellcheck disable=SC1091
+source lib/network_utils.sh
+
 setup_echo_colours
 
 build_stack() {
   local stack_name="$1"
   local version="$2"
 
-  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
-  echo -e "${GREEN}Building stack ${BLUE}${stack_name}${NC}"
+  echo -e "${GRP_START:-}${GREEN}-- Building stack ${BLUE}${stack_name} ${GREEN}--------------------------------${NC}"
 
   local build_script="build_${stack_name}.sh"
 
@@ -27,8 +29,8 @@ build_stack() {
   # shellcheck disable=SC1090
   . "${build_script}" "${version}"
 
-  echo -e "${GREEN}Finished building stack ${BLUE}${stack_name}${NC}"
-  echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
+  echo -e "${GREEN}-- Finished building stack ${BLUE}${stack_name} ${GREEN}-----------------------${NC}"
+  [[ -z "${GRP_END:-}" ]] || echo -e "${GRP_END}"
 }
 
 main() {
@@ -37,6 +39,10 @@ main() {
   if [ ! -d "${STACK_DEFINITIONS_DIR}" ]; then
     die "${RED}Error${NC}: Can't find stack definitions directory ${BLUE}${STACK_DEFINITIONS_DIR}${NC}"
   fi
+
+  # Here to stop docker compose moaning about unset variables
+  HOST_IP=$(determine_host_address)
+  export HOST_IP
 
   local stack_names
   stack_names="$( \

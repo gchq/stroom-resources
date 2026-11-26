@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-project:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       # Static env vars
 
@@ -18,7 +18,7 @@ jobs:
 
       - name: Checkout code
         id: checkout_code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
         with:
           # Set this so it gets the annotated commit, not the commit being tagged.
           # Which means we can get the release msg
@@ -72,7 +72,7 @@ jobs:
         run: |
           "${ACTIONS_SCRIPTS_DIR}/echo_variables.sh" \
             "docker version" "$(docker --version)" \
-            "docker-compose version" "$(docker-compose --version)" \
+            "docker compose version" "$(docker compose version)" \
             "git version" "$(git --version)" \
             "GITHUB_WORKSPACE" "$GITHUB_WORKSPACE" \
             "GITHUB_REF" "$GITHUB_REF" \
