@@ -376,8 +376,9 @@ test_stack() {
 test_stack_archive() {
   local -r stack_archive_file=$1
 
+
   echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
-  echo -e "Testing stack archive ${GREEN}${stack_archive_file}${NC}"
+  echo -e "::group::Testing stack archive ${GREEN}${stack_archive_file}${NC}"
 
   if [ ! -f "${stack_archive_file}" ]; then
     echo -e "${RED}Can't find file ${BLUE}${stack_archive_file}${NC}"
@@ -401,6 +402,7 @@ test_stack_archive() {
 
   popd > /dev/null
   echo -e "${GREEN}--------------------------------------------------------------------------------${NC}"
+  echo "::endgroup::"
 }
 
 substitute_tag() {
