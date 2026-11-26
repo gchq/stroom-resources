@@ -50,7 +50,7 @@ setup_colours() {
     GREEN='\033[1;32m'
     YELLOW='\033[1;33m'
     BLUE='\033[1;34m'
-    NC='\033[0m' # No Colour 
+    NC='\033[0m' # No Colour
   }
 }
 
@@ -62,7 +62,7 @@ is_prefixed_by() {
     exit 1
   fi
   local str="$1"; shift
-  
+
   local regex="^("
   local is_first_prefix=true
   for prefix in "$@"; do
@@ -82,14 +82,14 @@ is_prefixed_by() {
 }
 
 # Returns 0 if $1 is in the array of elements passed as subsequent args
-# e.g. 
+# e.g.
 # arr=( "one" "two" "three" )
 # element_in "two" "${arr[@]}" # returns 0
 #element_in () {
-  #local element 
+  #local element
   #local match="$1"
   #shift
-  #for element; do 
+  #for element; do
     #[[ "${element}" == "${match}" ]] && return 0
   #done
   #return 1
@@ -292,7 +292,7 @@ do_stack_build_and_test() {
 add_env_file_line() {
   local env_file="$1"; shift
   local env_var_line="$1"; shift
-  
+
   echo -e "${RED}Adding ${YELLOW}${env_var_line}" \
     "${RED}to ${BLUE}${env_file}${RED} to allow the stack to be tested by the CI build${NC}"
 
@@ -393,7 +393,7 @@ test_stack_archive() {
   pushd "${exploded_dir}" > /dev/null
 
   echo -e "${GREEN}Exploding stack archive ${BLUE}${stack_archive_file}${NC}"
-  tar -xvf "../../${stack_archive_file}"
+  tar -xf "../../${stack_archive_file}"
 
   stack_name="${stack_archive_file%%-*}"
 
@@ -572,7 +572,7 @@ main() {
   docker_login
 
   # If we are releasing a new docker image then that version will not be available
-  # on Dockerhub to be able to test the stack against it 
+  # on Dockerhub to be able to test the stack against it
   if [ -n "${BUILD_TAG}" ] && \
      is_prefixed_by \
       "${BUILD_TAG}" \
