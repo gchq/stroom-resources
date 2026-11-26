@@ -26,7 +26,8 @@ build_stack() {
   # shellcheck disable=SC1090
   . "${build_script}" "${version}"
 
-  echo -e "${GRP_END:-}${GREEN}-- Finished building stack ${BLUE}${stack_name} ${GREEN}--------------------------------${NC}"
+  echo -e "${GREEN}-- Finished building stack ${BLUE}${stack_name} ${GREEN}-----------------------${NC}"
+  [[ -n "${GRP_END}" ]] && echo -e "${GRP_END:-}"
 }
 
 main() {
