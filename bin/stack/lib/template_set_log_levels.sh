@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
 ############################################################################
-# 
+#
 #  Copyright 2020 Crown Copyright
-# 
+#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
-# 
+#
 #      http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-# 
+#
 ############################################################################
 
 CMD_HELP_EXTRA_ARGS="package_or_class_1 new_log_level_1 [package_or_class_N new_log_level_2]..."
@@ -37,6 +37,7 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # in the env file and thus needs to override the HOST_IP determined here.
 # shellcheck disable=SC2034
 HOST_IP=$(determine_host_address)
+export HOST_IP
 
 # Read the file containing all the env var exports to make them
 # available to docker-compose
@@ -44,7 +45,7 @@ HOST_IP=$(determine_host_address)
 source "$DIR"/config/<STACK_NAME>.env
 
 # shellcheck disable=SC2034
-STACK_NAME="<STACK_NAME>" 
+STACK_NAME="<STACK_NAME>"
 
 #readonly URL="http://127.0.0.1:8081/stroomAdmin/tasks/log-level"
 readonly CURL="curl"
@@ -93,15 +94,15 @@ show_usage() {
 main() {
   while getopts ":hm" arg; do
     case $arg in
-      h )  
+      h )
         show_usage
         exit 0
         ;;
-      m )  
+      m )
         # shellcheck disable=SC2034
-        MONOCHROME=true 
+        MONOCHROME=true
         ;;
-      \? )  
+      \? )
         die_invalid_args
         ;;
     esac
@@ -143,13 +144,13 @@ main() {
   check_binary_is_available "${HTTPIE}" "${CURL}"
 
   # Check if Httpie is installed as it is preferable to curl
-  if command -v "${HTTPIE}" 1>/dev/null; then 
+  if command -v "${HTTPIE}" 1>/dev/null; then
     binary="${HTTPIE}"
   else
     binary="${CURL}"
   fi
 
-  # Build the url to send to 
+  # Build the url to send to
   local admin_port_env_var_name="${ADMIN_PORT_ENV_VAR_NAMES_MAP["${requested_service}"]}"
   local admin_path_name="${ADMIN_PATH_NAMES_MAP["${requested_service}"]}"
   local admin_port=
