@@ -6,6 +6,9 @@ set -e
 
 # shellcheck disable=SC1091
 source lib/shell_utils.sh
+# shellcheck disable=SC1091
+source lib/network_utils.sh
+
 setup_echo_colours
 
 build_stack() {
@@ -36,6 +39,10 @@ main() {
   if [ ! -d "${STACK_DEFINITIONS_DIR}" ]; then
     die "${RED}Error${NC}: Can't find stack definitions directory ${BLUE}${STACK_DEFINITIONS_DIR}${NC}"
   fi
+
+  # Here to stop docker compose moaning about unset variables
+  HOST_IP=$(determine_host_address)
+  export HOST_IP
 
   local stack_names
   stack_names="$( \
