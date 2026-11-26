@@ -480,13 +480,12 @@ dump_build_vars() {
 
 setup_log_grouping() {
   # This is so scripts that run locally don't have to output '::group::' / '::endgroup::'
-  GRP_START=""
-  GRP_END=""
   if [[ -n "${GITHUB_ACTION}" ]]; then
     # Running in GH Action workflow so use log grouping
-    GRP_START="::group::"
-    GRP_END="::endgroup::"
+    export GRP_START="::group::"
+    export GRP_END="::endgroup::"
   fi
+
 }
 
 do_release() {
